@@ -197,6 +197,15 @@
 
   .spacer { flex: 1 1 auto; }
 
+  .save-state {
+    flex: 1 0 100%;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--ink-faint);
+  }
+  .save-state.blocked { color: var(--warn); }
+
   /* ---------- meters ---------- */
 
   .tally {
@@ -567,6 +576,7 @@
       <span class="progress-track"><span class="progress-fill" id="fill"></span></span>
     </div>
     <button type="button" class="ghost" id="reset">Réinitialiser</button>
+    <span class="save-state" id="saveState"></span>
   </div>
 
   <dl class="tally" id="tally"></dl>
@@ -759,7 +769,7 @@
     [116,"↩", "Repère : Les Quatre Fantastiques — Premiers pas (n°9)", "Position officielle Disney+. Déjà vu au n°9.", 0, "RECENT", "F", "ref"],
     [117,"📺", "Wonder Man — saison 1", "8 épisodes", 240, "RECENT", "D"],
     [118,"📺", "Daredevil: Born Again — saison 2", "9 épisodes", 432, "RECENT", "D"],
-    [119,"🎞️", "The Punisher: One Last Kill", "Durée non confirmée : 1 h 30 estimée", 90, "RECENT", "D"]
+    [119,"🎞️", "The Punisher: One Last Kill", "Durée non confirmée : 1 h 30 estimée", 90, "RECENT", "F"]
   ];
 
   var DAYS = 14;
@@ -789,18 +799,58 @@
   };
 
   var STORE = "marvel-marathon-v1";
-  var seen = load();
-  var mode = "all";
+
+  // Certains navigateurs refusent le stockage (navigation privée, cookies tiers
+  // bloqués, page dans une iframe cloisonnée). On le teste une fois pour pouvoir
+  // le dire clairement plutôt que de perdre la progression en silence.
+  var canStore = (function () {
+    try {
+      window.localStorage.setItem(STORE + ":test", "1");
+      window.localStorage.removeItem(STORE + ":test");
+      return true;
+    } catch (e) { return false; }
+  })();
+
+  var saved = load();
+  var seen = saved.seen;
+  var mode = saved.mode;
 
   function load() {
+    var empty = { seen: {}, mode: "all" };
+    if (!canStore) return empty;
     try {
       var raw = window.localStorage.getItem(STORE);
-      return raw ? JSON.parse(raw) : {};
-    } catch (e) { return {}; }
+      if (!raw) return empty;
+      var data = JSON.parse(raw);
+      // format initial : l'objet entier était la liste des entrées vues
+      if (!data || typeof data !== "object") return empty;
+      if (!data.seen) return { seen: data, mode: "all" };
+      return { seen: data.seen, mode: MODES[data.mode] ? data.mode : "all" };
+    } catch (e) { return empty; }
   }
 
   function save() {
-    try { window.localStorage.setItem(STORE, JSON.stringify(seen)); } catch (e) {}
+    if (!canStore) return;
+    try {
+      window.localStorage.setItem(STORE, JSON.stringify({ seen: seen, mode: mode }));
+    } catch (e) { canStore = false; }
+    saveState();
+  }
+
+  function saveState() {
+    var el = document.getElementById("saveState");
+    var n = Object.keys(seen).length;
+    if (!canStore) {
+      el.className = "save-state blocked";
+      el.textContent = "⚠ Ce navigateur bloque le stockage local : les cases cochées seront " +
+        "perdues au rechargement.";
+      return;
+    }
+    el.className = "save-state";
+    el.textContent = n
+      ? "✓ " + n + (n > 1 ? " entrées cochées, enregistrées" : " entrée cochée, enregistrée") +
+        " sur cet appareil"
+      : "Coche une entrée pour la marquer comme vue : la progression est enregistrée sur cet appareil.";
   }
 
   function hm(min) {
@@ -944,6 +994,7 @@
     });
 
     progress();
+    saveState();
   }
 
   function cell(label, value, unit) {
@@ -1014,22 +1065,30 @@
     });
   }
 
+  function syncSeg() {
+    document.querySelectorAll(".seg button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
+    });
+  }
+
   document.querySelectorAll(".seg button").forEach(function (btn) {
     btn.addEventListener("click", function () {
       mode = btn.dataset.mode;
-      document.querySelectorAll(".seg button").forEach(function (b) {
-        b.setAttribute("aria-pressed", String(b === btn));
-      });
+      syncSeg();
+      save();
       render();
     });
   });
 
   document.getElementById("reset").addEventListener("click", function () {
+    if (Object.keys(seen).length &&
+        !window.confirm("Décocher toutes les entrées vues ? Cette action est définitive.")) return;
     seen = {};
     save();
     render();
   });
 
+  syncSeg();
   render();
 })();
 </script>
