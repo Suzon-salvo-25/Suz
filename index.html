@@ -242,6 +242,15 @@
     text-transform: uppercase;
   }
 
+  .mode-hint {
+    max-width: 78ch;
+    font-size: .86rem;
+    line-height: 1.5;
+    color: var(--ink-faint);
+    margin: 14px 0 24px;
+  }
+  .mode-hint b { color: var(--ink-soft); font-weight: 600; }
+
   .verdict {
     display: flex;
     gap: 10px;
@@ -549,8 +558,8 @@
   <div class="controls">
     <div class="seg" role="group" aria-label="Parcours">
       <button type="button" data-mode="all" aria-pressed="true">Intégrale</button>
-      <button type="button" data-mode="canon">Films + Disney+</button>
-      <button type="button" data-mode="films">Films seuls</button>
+      <button type="button" data-mode="studios">Marvel Studios</button>
+      <button type="button" data-mode="films">Films &amp; one-shots</button>
     </div>
     <div class="spacer"></div>
     <div class="progress-shell">
@@ -561,6 +570,7 @@
   </div>
 
   <dl class="tally" id="tally"></dl>
+  <p class="mode-hint" id="modeHint"></p>
   <p class="verdict" id="verdict"></p>
 
   <ul class="legend">
@@ -578,6 +588,12 @@
     <ul>
       <li><b>Durées</b>&nbsp;: durées de diffusion arrondies, génériques compris. Les blocs de
         séries additionnent les épisodes de la tranche indiquée.</li>
+      <li><b>Les parcours trient par studio, jamais par plateforme.</b> Les séries écartées du
+        parcours <i>Marvel Studios</i> sont pour la plupart disponibles sur Disney+ — les six
+        séries Netflix y sont depuis mars 2022, Agents of SHIELD et Agent Carter depuis
+        l'ouverture. À l'inverse, deux entrées conservées n'y sont pas&nbsp;: <i>The Daily
+        Bugle</i> (web-série Sony diffusée sur YouTube), gardée parce qu'elle accompagne
+        directement les films Spider-Man, eux-mêmes absents du catalogue Disney+ français.</li>
       <li><b>Les Quatre Fantastiques&nbsp;: Premiers pas</b> est placé au n°9, à sa position
         chronologique (1964, Terre-828). Le n°116 est un simple repère pour ceux qui préfèrent
         l'ordre officiel Disney+, qui le range après <i>Thunderbolts*</i>.</li>
@@ -749,9 +765,27 @@
   var DAYS = 14;
 
   var MODES = {
-    all:   { tracks: ["F", "D", "L"], label: "Intégrale" },
-    canon: { tracks: ["F", "D"],      label: "Films + Disney+" },
-    films: { tracks: ["F"],           label: "Films seuls" }
+    all: {
+      tracks: ["F", "D", "L"],
+      label: "Intégrale",
+      hint: "<b>Tout, sans exception.</b> Les productions Marvel Studios et Marvel Television " +
+            "réunies, dans l'ordre que tu as établi."
+    },
+    studios: {
+      tracks: ["F", "D"],
+      label: "Marvel Studios",
+      hint: "<b>Aucun film n'est retiré — les 38 sont là.</b> Ce parcours écarte les 40 entrées " +
+            "produites par Marvel Television : Agent Carter, les sept saisons d'Agents of SHIELD, " +
+            "les six séries Netflix, Inhumans, Runaways, Cloak &amp; Dagger, Helstrom et Slingshot. " +
+            "C'est un tri par studio de production, pas par plateforme : ces séries sont bien " +
+            "disponibles sur Disney+."
+    },
+    films: {
+      tracks: ["F"],
+      label: "Films & one-shots",
+      hint: "<b>Les 38 longs métrages et les 10 one-shots</b>, sans aucune série. Le fil narratif " +
+            "principal du MCU, et le seul parcours qui tient vraiment en quatorze jours."
+    }
   };
 
   var STORE = "marvel-marathon-v1";
@@ -874,6 +908,7 @@
 
     document.getElementById("eyebrow").textContent =
       "Parcours " + MODES[mode].label.toLowerCase() + " · " + list.length + " entrées · ordre chronologique";
+    document.getElementById("modeHint").innerHTML = MODES[mode].hint;
 
     // bandeau de synthèse
     tallyEl.innerHTML =
@@ -922,12 +957,12 @@
       return "<span><strong>Impossible en quatorze jours, et il faut le dire.</strong> " +
         "L'intégrale pèse " + hoursOnly(total) + " heures, soit " + h + " heures d'écran par " +
         "jour — plus que ta journée éveillée. Ce parcours est une feuille de route sur " +
-        "plusieurs mois. Pour deux semaines réelles, prends <em>Films seuls</em>.</span>";
+        "plusieurs mois. Pour deux semaines réelles, prends <em>Films &amp; one-shots</em>.</span>";
     }
     if (avg > 660) {
       return "<span><strong>Marathon extrême.</strong> " + h + " heures par jour pendant " +
         "quatorze jours&nbsp;: tenable en congés, à condition de commencer tôt et de compter " +
-        "les repas comme du temps d'écran. Si tu veux dormir, <em>Films seuls</em> " +
+        "les repas comme du temps d'écran. Si tu veux dormir, <em>Films &amp; one-shots</em> " +
         "reste le seul parcours vraiment confortable.</span>";
     }
     if (avg > 420) {
