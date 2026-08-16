@@ -422,6 +422,21 @@ section { padding: clamp(34px, 6vw, 60px) 0 0; }
   color: var(--ink-faint); display: block;
 }
 
+.table-scroll { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 14.5px; min-width: 420px;
+}
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line-soft); }
+th {
+  font-family: var(--f-display); font-size: 10px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-faint); border-bottom: 1px solid var(--line);
+}
+td.n { text-align: right; font-family: var(--f-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.sub td { font-weight: 700; border-top: 1px solid var(--line); background: var(--panel-2); }
+tr.total td { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 700; padding-top: 12px; }
+
 footer {
   margin-top: clamp(38px, 7vw, 68px); padding: 20px 0 44px;
   border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-faint);
@@ -466,6 +481,7 @@ footer {
       <div class="fact"><b>5</b><span>entrées CityPASS</span></div>
       <div class="fact"><b>4</b><span>vols et transferts</span></div>
       <div class="fact"><b>11 sept</b><span>dernier jour du pass</span></div>
+      <div class="fact"><b>~3 500 €</b><span>budget cible total</span></div>
       <div class="fact"><b id="doneCount">0 / 0</b><span>coché</span></div>
     </div>
   </div>
@@ -488,6 +504,7 @@ footer {
     <div class="pass-window">
       <span><b>Activé jeudi 3 septembre</b> — première utilisation, Architecture River Tour.</span>
       <span>Neuf jours consécutifs.</span>
+      <span><b>124 € déjà payés</b> — contre ~220 € à l'unité.</span>
       <span><b>Dernier jour valable : vendredi 11 septembre inclus.</b> Le programme rentre en entier.</span>
     </div>
     <div class="pass-grid">
@@ -549,8 +566,8 @@ footer {
         <div class="day-body">
           <div class="day-head"><h3>Field Museum et l'espace</h3><span class="tag">Museum Campus, hors CityPASS</span></div>
           <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Field Museum</b><em>Trois à quatre heures. En priorité : SUE, le <i>Tyrannosaurus rex</i> le plus complet jamais trouvé, les dinosaures, l'Égypte ancienne et les pierres précieuses.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Adler Planetarium</b><em>Astronomie et exploration spatiale, plus un spectacle sous dôme. Réserver le créneau du spectacle en arrivant, pas après la visite.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Field Museum</b><em>Trois à quatre heures. En priorité : SUE, le <i>Tyrannosaurus rex</i> le plus complet jamais trouvé, les dinosaures, l'Égypte ancienne et les pierres précieuses. Entrée ~26 €, la formule de base suffit.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Adler Planetarium</b><em>Astronomie et exploration spatiale, plus un spectacle sous dôme. Réserver le créneau du spectacle en arrivant, pas après la visite. Entrée + spectacle sous dôme ~28 €.</em></span></li>
             <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Museum Campus → Lakefront Trail → Grant Park → Buckingham Fountain</b><em>Entièrement à pied, en enfilade. La pointe de l'Adler est l'endroit d'où est prise la photo classique de la skyline : c'est sur le chemin, ne pas le rater.</em></span></li>
           </ul>
           <p class="note"><b>Transport</b>CTA jusqu'au Museum Campus, puis rien d'autre que la marche jusqu'au retour.</p>
@@ -564,7 +581,7 @@ footer {
           <div class="day-head"><h3>Art Institute et Route 66</h3><span class="tag">Tout à pied</span></div>
           <ul class="items">
             <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Art Institute of Chicago</b><em>La plus grosse collection d'impressionnistes hors de France, plus <i>Nighthawks</i> de Hopper et <i>American Gothic</i>. Prévoir large, et sortir avant la saturation plutôt qu'après.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Art Institute of Chicago</b><em>La plus grosse collection d'impressionnistes hors de France, plus <i>Nighthawks</i> de Hopper et <i>American Gothic</i>. Prévoir large, et sortir avant la saturation plutôt qu'après. Entrée ~28 €.</em></span></li>
             <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Juste à côté</span><span class="t"><b>Début historique de la Route 66</b><em>Le panneau <i>BEGIN Historic Route 66</i> se trouve sur Adams Street, à l'angle de Michigan Avenue, à une minute de la sortie du musée. Adams est en sens unique vers l'ouest : c'est le vrai point de départ, pas une reconstitution.</em></span></li>
             <li class="item" data-cat="air"><input type="checkbox"><span class="h">Selon énergie</span><span class="t"><b>The Loop → State Street → Millennium Park</b><em>Optionnel, purement à la fatigue. Le programme du jour est déjà rempli sans ça.</em></span></li>
           </ul>
@@ -578,7 +595,7 @@ footer {
           <div class="day-head"><h3>Balloon Museum et The 606</h3><span class="tag">Marche + Blue Line</span></div>
           <ul class="items">
             <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Balloon Museum / EmotionAir</b><em>Exposition itinérante : vérifier qu'elle est bien programmée à Chicago à cette date, et acheter le créneau en ligne. C'est le seul point du planning qui peut disparaître.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Balloon Museum / EmotionAir</b><em>Exposition itinérante : vérifier qu'elle est bien programmée à Chicago à cette date, et acheter le créneau en ligne (~32 €). C'est le seul point du planning qui peut disparaître.</em></span></li>
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Blue Line vers Wicker Park / Bucktown</b><em>Station Damen. Une dizaine de minutes depuis le Loop.</em></span></li>
             <li class="item" data-cat="air"><input type="checkbox"><span class="h">—</span><span class="t"><b>Une portion de The 606</b><em>Ancienne voie ferrée surélevée devenue promenade, 4,3 km sans un seul croisement de voiture. Inutile de la faire en entier : l'entrée de Damen suffit largement.</em></span></li>
             <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Wicker Park : boutiques et dîner économique</b><em>Milwaukee Avenue concentre les friperies, les cafés et les adresses pas chères. Un des rares endroits de la ville où dîner correctement pour 15 $.</em></span></li>
@@ -594,10 +611,10 @@ footer {
           <ul class="items">
             <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
             <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Money Museum de la Federal Reserve</b><em>Entrée gratuite, <b>passeport physique obligatoire</b> — la photo sur le téléphone ne passe pas le contrôle. Ouvert en semaine seulement et avec des horaires qui bougent : vérifier la veille.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Museum of Illusions Chicago</b><em>Une heure à une heure trente suffisent. Le billet se prend en ligne.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Museum of Illusions Chicago</b><em>Une heure à une heure trente suffisent. Billet en ligne, ~30–36 €.</em></span></li>
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Red Line jusqu'à Addison</b><em>La station donne directement sur le stade. Partir tôt : la ligne se remplit avant chaque match.</em></span></li>
             <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Avant</span><span class="t"><b>Wrigleyville</b><em>Arriver assez tôt pour manger et prendre l'ambiance du quartier avant le coup d'envoi. C'est la moitié de l'expérience.</em></span></li>
-            <li class="item" data-cat="sport"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Chicago Cubs — Milwaukee Brewers, Wrigley Field</b><em>Rivalité de division, dans le stade de 1914. Les <i>bleachers</i> n'ont pas de dossier et coûtent moins cher : c'est là que ça se passe.</em></span></li>
+            <li class="item" data-cat="sport"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Chicago Cubs — Milwaukee Brewers, Wrigley Field</b><em>Rivalité de division, dans le stade de 1914. Les <i>bleachers</i> n'ont pas de dossier et coûtent moins cher : c'est là que ça se passe. Billet prévu ~39 €.</em></span></li>
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Après</span><span class="t"><b>Retour en Red Line avec les supporters</b><em>Trente mille personnes sortent en même temps. Laisser passer dix minutes plutôt que de forcer sur le quai.</em></span></li>
           </ul>
         </div>
@@ -610,7 +627,7 @@ footer {
           <div class="day-head"><h3>Architecture — le pass démarre</h3><span class="tag">Quasiment tout à pied</span></div>
           <ul class="items">
             <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Architecture Center</b><em>La maquette de la ville, 4 000 bâtiments, permet enfin de comprendre la géographie avant de monter sur le bateau. Le centre est au pied même de l'embarcadère.</em></span></li>
+            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Architecture Center</b><em>La maquette de la ville, 4 000 bâtiments, permet enfin de comprendre la géographie avant de monter sur le bateau. Le centre est au pied même de l'embarcadère. Entrée ~13 € — l'expo se paie, c'est la croisière qui est sur le pass.</em></span></li>
             <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Puis</span><span class="t"><span class="badge">CITYPASS 1/5</span><b>Architecture River Tour</b><em>75 minutes sur la Chicago River, avec un guide bénévole formé par le centre. C'est la meilleure heure et quart du séjour, et c'est de là que le reste de la ville devient lisible.</em></span></li>
             <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Riverwalk, dîner, Downtown de nuit</b><em>Les gratte-ciel s'allument entre 20 h et 21 h en septembre.</em></span></li>
           </ul>
@@ -625,7 +642,7 @@ footer {
           <div class="day-head"><h3>Histoire, Lincoln Park, 360</h3><span class="tag">Rentrer tôt</span></div>
           <ul class="items">
             <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Dernier cours Kaplan</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago History Museum</b><em>Le grand incendie de 1871, les abattoirs, les émeutes, la ségrégation, la Prohibition. C'est le musée qui met en place tout ce que le Crime Tour du 8 racontera.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago History Museum</b><em>Le grand incendie de 1871, les abattoirs, les émeutes, la ségrégation, la Prohibition. C'est le musée qui met en place tout ce que le Crime Tour du 8 racontera. Entrée ~16 €.</em></span></li>
             <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Lincoln Park → Zoo → Conservatory</b><em>Le musée est déjà dans le parc. Le zoo, ouvert depuis 1868, et la serre sont tous les deux <b>gratuits</b> : deux des dernières entrées libres de la ville.</em></span></li>
             <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Ensuite</span><span class="t"><b>Descente vers Magnificent Mile</b><em>Une quarantaine de minutes à pied vers le sud, ou le bus 151 le long du parc.</em></span></li>
             <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Sunset</span><span class="t"><span class="badge">CITYPASS 2/5</span><b>360 CHICAGO</b><em>Réserver environ 45 minutes avant le coucher du soleil : tu prends la ville de jour, le sunset et le début de nuit sur le même billet. Le 360 regarde le Loop <i>et</i> le lac, alors que le Skydeck est posé dessus — d'où l'intérêt de faire les deux.</em></span></li>
@@ -646,7 +663,7 @@ footer {
           <div class="day-head"><h3>Memphis, puis Oxford</h3><span class="tag">La journée de transfert</span></div>
           <ul class="items">
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Vol Chicago → Memphis International</b></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Memphis → Oxford, 135 km</b><em>Environ 1 h 30 de route, presque entièrement sur autoroute. C'est le trajet le plus cher et le plus fragile de tout le voyage : voir les points de vigilance plus bas, et le régler avant le départ plutôt que sur place.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Memphis → Oxford, 135 km</b><em>Environ 1 h 30 de route, presque entièrement sur autoroute. Uber budgété ~90–115 € le trajet. C'est le trajet le plus cher et le plus fragile de tout le voyage : voir les points de vigilance plus bas, et le régler avant le départ plutôt que sur place.</em></span></li>
             <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Installation chez ton cousin</b></span></li>
             <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Découverte du campus, à pied et gratuitement</b><em>Dans l'ordre géographique, ça s'enchaîne sans détour :</em>
               <ol class="steps">
@@ -669,7 +686,7 @@ footer {
           <ul class="items">
             <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Oxford Square</b><em>Courthouse Square et ses boutiques, Square Books — l'une des librairies indépendantes les plus connues du Sud — et la statue de William Faulkner devant la mairie.</em></span></li>
             <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Midi</span><span class="t"><b>Déjeuner sur la Square</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Rowan Oak</b><em>La maison de Faulkner, à quinze minutes à pied de la Square. Le terrain se visite librement ; l'intérieur, où il a écrit le plan d'<i>Une fable</i> directement sur le mur de son bureau, se visite en plus.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Rowan Oak</b><em>La maison de Faulkner, à quinze minutes à pied de la Square. Le terrain se visite librement ; l'intérieur, où il a écrit le plan d'<i>Une fable</i> directement sur le mur de son bureau, se visite pour ~9 €.</em></span></li>
             <li class="item" data-cat="sport"><input type="checkbox"><span class="h">18 h 30</span><span class="t"><b>Ole Miss — Louisville, à regarder depuis Oxford</b><em>Le match se joue au Nissan Stadium de Nashville, à plus de six heures de route : il n'est pas question d'y aller. À voir avec ton cousin, ou dans un bar de la Square rempli de supporters des Rebels. L'ambiance d'Oxford un soir de match reste réelle même quand l'équipe joue ailleurs.</em></span></li>
           </ul>
         </div>
@@ -702,7 +719,7 @@ footer {
           <ul class="items">
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Oxford → Memphis Airport → vol vers Chicago</b><em>Repartir d'Oxford avec au moins 3 h 30 d'avance sur le décollage : 1 h 30 de route, plus l'enregistrement.</em></span></li>
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Installation à l'hôtel</b><em>Ce n'est plus le logement Kaplan : vérifier l'adresse et l'heure de check-in la veille.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Crime Tour</b><em>Deux heures à deux heures et demie : Al Capone, la Prohibition, la mafia, John Dillinger et les lieux réels qui vont avec. Le History Museum du 4 septembre en a déjà posé le décor.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Crime Tour</b><em>Deux heures à deux heures et demie : Al Capone, la Prohibition, la mafia, John Dillinger et les lieux réels qui vont avec. ~40 €, à réserver en ligne. Le History Museum du 4 septembre en a déjà posé le décor.</em></span></li>
             <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Soir</span><span class="t"><span class="badge">CITYPASS 3/5</span><b>Skydeck Chicago, Willis Tower</b><em>103<sup>e</sup> étage et The Ledge, ces caissons de verre suspendus dans le vide. Fait de nuit exprès, puisque le 360 a déjà pris le coucher de soleil : deux fois la même ville, deux fois autrement.</em></span></li>
           </ul>
           <p class="note"><b>Si le vol traîne</b>Toute cette journée dépend d'une arrivée en début d'après-midi. En cas de retard, sacrifie le Crime Tour et garde le Skydeck : le tour se reprogramme, le CityPASS expire le 11.</p>
@@ -716,8 +733,8 @@ footer {
           <div class="day-head"><h3>Shedd, Garfield, Green Mill</h3><span class="tag">Trois quartiers, tout en CTA</span></div>
           <ul class="items">
             <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Matin</span><span class="t"><span class="badge">CITYPASS 4/5</span><b>Shedd Aquarium</b><em>Trois à quatre heures. Y être à l'ouverture : c'est l'attraction la plus fréquentée du Museum Campus, et l'écart entre 9 h et 11 h est considérable.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Garfield Park Conservatory</b><em>Green Line jusqu'à Conservatory–Central Park Drive : la station est pratiquement devant l'entrée. Un hectare sous verre, l'une des plus grandes serres urbaines du monde, entrée libre. Métro → serre → métro, sans détour par le quartier.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Green Mill, Uptown</b><em>Red Line jusqu'à Lawrence. Club de jazz ouvert depuis 1907, jamais rénové, et l'un des repaires de Capone pendant la Prohibition — enchaînement parfait après le Crime Tour d'hier. <b>Liquide uniquement</b>, et on ne parle pas pendant les sets.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Garfield Park Conservatory</b><em>Green Line jusqu'à Conservatory–Central Park Drive : la station est pratiquement devant l'entrée. Un hectare sous verre, l'une des plus grandes serres urbaines du monde. L'entrée est en réalité libre — les ~9 € budgétés couvrent la donation suggérée. Métro → serre → métro, sans détour par le quartier.</em></span></li>
+            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Green Mill, Uptown</b><em>Red Line jusqu'à Lawrence. Club de jazz ouvert depuis 1907, jamais rénové, et l'un des repaires de Capone pendant la Prohibition — enchaînement parfait après le Crime Tour d'hier. Entrée ~13–17 € hors consommations, <b>liquide uniquement</b>, et on ne parle pas pendant les sets.</em></span></li>
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Retour</span><span class="t"><b>Red Line s'il y a du monde, sinon Uber</b><em>La règle simple : si le quai est vide, tu prends un Uber. Ça ne se discute pas à 1 h du matin.</em></span></li>
           </ul>
         </div>
@@ -743,7 +760,7 @@ footer {
             <li class="item" data-cat="air"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Promontory Point, avant la nuit</b><em>Une avancée de calcaire dans le lac, à vingt minutes du musée par Hyde Park. La meilleure vue de la skyline de toute la ville, à dix kilomètres de distance, et il n'y a jamais personne. À faire uniquement s'il te reste de l'énergie et de la lumière.</em></span></li>
             <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Retour Downtown en CTA</b><em>Bus 6 ou Metra Electric depuis Hyde Park.</em></span></li>
           </ul>
-          <p class="note tip"><b>Ce que le pass couvre ici</b>Entrée générale, <i>Anne Frank: The Exhibition</i> et une expérience spéciale — que tu utilises pour la Coal Mine. Le <b>U-505 On-Board Tour se paie en supplément</b> même avec le CityPASS : le prendre en ligne le matin même, les créneaux partent dans la journée.</p>
+          <p class="note tip"><b>Ce que le pass couvre ici</b>Entrée générale, <i>Anne Frank: The Exhibition</i>, Coal Mine et les grandes galeries (Powering the Future, Science Storms, Great Train Story, Boeing 727). Seul le <b>U-505 On-Board Tour se paie en supplément, ~16 €</b> : le prendre en ligne le matin même, les créneaux partent dans la journée.</p>
         </div>
       </article>
 
@@ -773,7 +790,7 @@ footer {
       <div class="card warn">
         <h3>Memphis ↔ Oxford, le point faible</h3>
         <span class="when">Sam 5 sept et mar 8 sept</span>
-        <p>135 km, environ 1 h 30. Un Uber sur cette distance coûte grossièrement 130–180 $ le trajet, soit 260–360 $ pour l'aller-retour : c'est la quasi-totalité de ton budget transport de 300 €.</p>
+        <p>135 km, environ 1 h 30. Tu as budgété 90–115 € le trajet en Uber, soit 180–230 € pour l'aller-retour : les deux tiers de ton budget transport de 300 €, qui doit aussi couvrir le CTA et les trajets aéroport.</p>
         <p>Plus gênant que le prix : sur un trajet aussi long et sans course retour, les chauffeurs annulent souvent, et la couverture Uber à Oxford est bien plus mince qu'à Memphis. Se retrouver sans voiture à 6 h du matin le 8 septembre coûterait un vol.</p>
         <p>Deux options plus sûres à comparer avant de partir : la <b>location de voiture à Memphis Airport</b> sur trois jours, souvent moins chère que deux Uber et qui te rend mobile à Oxford ; ou une <b>navette Memphis–Oxford réservée à l'avance</b>. Et si ton cousin peut faire ne serait-ce qu'un des deux trajets, le problème disparaît de moitié.</p>
       </div>
@@ -803,6 +820,38 @@ footer {
     </div>
   </section>
 
+  <!-- ======================= BUDGET ======================= -->
+  <section id="budget">
+    <div class="sec-head">
+      <h2>Budget</h2>
+      <p>Tes chiffres, vols compris. Cible : ~3 500 € hors shopping et souvenirs.</p>
+    </div>
+    <div class="card">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Poste</th><th>Détail</th><th class="n">Montant</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Vol international A/R</td><td>Marseille ↔ Chicago, déjà payé</td><td class="n">735 €</td></tr>
+            <tr><td>Vols Chicago ↔ Memphis</td><td>déjà payés</td><td class="n">314 €</td></tr>
+            <tr><td>Visa</td><td>déjà payé</td><td class="n">35 €</td></tr>
+            <tr><td>Kaplan + hébergement</td><td>29 août → 5 sept, déjà payé</td><td class="n">1 011 €</td></tr>
+            <tr><td>CityPASS Chicago</td><td>déjà payé</td><td class="n">124 €</td></tr>
+            <tr class="sub"><td colspan="2">Déjà payé</td><td class="n">2 219 €</td></tr>
+            <tr><td>Hôtel Chicago</td><td>8 → 11 sept, 3 nuits</td><td class="n">300 – 600 €</td></tr>
+            <tr><td>Activités hors CityPASS</td><td>musées, Cubs, Crime Tour, Green Mill…</td><td class="n">~304 €</td></tr>
+            <tr><td>Nourriture</td><td>budget économique, 14 jours</td><td class="n">~350 €</td></tr>
+            <tr><td>Transports</td><td>CTA, Uber Memphis ↔ Oxford, aéroports</td><td class="n">~300 €</td></tr>
+            <tr class="sub"><td colspan="2">Reste à payer</td><td class="n">1 254 – 1 554 €</td></tr>
+            <tr class="total"><td colspan="2">Total du voyage</td><td class="n">3 473 – 3 773 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px; font-size:13.5px; color: var(--ink-soft);">Petit écart avec ton estimation (3 173–3 473 €) : une fois l'hôtel compté dans les deux bornes, le vrai total va de 3 473 à 3 773 €. La cible de 3 500 € tient donc, mais seulement si l'hôtel reste proche de 300 € — c'est lui, et lui seul, qui fait déraper le budget.</p>
+    </div>
+  </section>
+
   <!-- ======================= BONUS ======================= -->
   <section id="bonus">
     <div class="sec-head">
@@ -812,7 +861,7 @@ footer {
     <div class="cols">
       <div class="card">
         <h3>Bonus prioritaire — Water Taxi et Chinatown</h3>
-        <p>Water Taxi depuis Downtown → Chinatown → balade et repas → retour en CTA par la Red Line. Compte une demi-journée.</p>
+        <p>Water Taxi depuis Downtown (~9 € le trajet) → Chinatown → balade et repas → retour en CTA par la Red Line. Compte une demi-journée.</p>
         <p>Les créneaux qui s'y prêtent le mieux : le <b>31 août</b> si tu écourtes l'Art Institute, ou le <b>9 septembre</b> entre Shedd et Garfield Park. Vérifier le calendrier de la ligne avant de compter dessus.</p>
       </div>
       <div class="card">
