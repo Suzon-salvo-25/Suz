@@ -336,6 +336,72 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
   padding: 4px 12px;
 }
 
+/* ---------- filtres + vue globale ---------- */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--f-round);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--panel);
+  border: 1.5px solid var(--line);
+  padding: 6px 11px 6px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip::before {
+  content: "";
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--dot, var(--ink-faint));
+  flex: 0 0 auto;
+}
+.chip.reset::before { display: none; }
+.chip[aria-pressed="true"] {
+  border-color: var(--dot, var(--ink));
+  background: color-mix(in srgb, var(--dot, var(--ink)) 14%, var(--panel));
+  color: var(--ink);
+}
+.seg {
+  display: flex;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+.seg button {
+  border: 0;
+  background: none;
+  font-family: var(--f-round);
+  font-weight: 800;
+  font-size: 12.5px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.seg button.on { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+.mini-day {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 20px 2px 10px;
+}
+.mini-day .me { font-size: 18px; }
+.mini-day .n { font-weight: 900; font-size: 15px; white-space: nowrap; }
+.mini-day .d { font-size: 12px; color: var(--ink-faint); font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-day::after { content: ""; flex: 1; height: 2.5px; border-radius: 2px; background: var(--pc, var(--line)); opacity: .45; min-width: 14px; }
+
 /* ---------- sélecteur de jours ---------- */
 .daypick {
   display: flex;
@@ -1035,7 +1101,11 @@ function dayDoneCount(day) {
   return n;
 }
 
-function dayCardHtml(day, kicker) {
+function itemMatches(it) {
+  return activeCats.length === 0 || activeCats.indexOf(it.c) !== -1;
+}
+
+function dayCardHtml(day, kicker, useFilter) {
   var dn = dayDoneCount(day);
   var html = '<div class="dayhero" data-p="' + day.p + '">' +
     '<span class="big-emoji">' + day.e + "</span>" +
@@ -1045,24 +1115,82 @@ function dayCardHtml(day, kicker) {
     '<span class="done-pill">' + dn + " / " + day.items.length + " coché" + (dn > 1 ? "s" : "") + "</span>" +
     "</div>";
   if (day.tip) html += '<div class="tipcard">💡 ' + esc(day.tip) + "</div>";
-  day.items.forEach(function (_, i) { html += itemHtml(day, i); });
+  var shown = 0;
+  day.items.forEach(function (it, i) {
+    if (!useFilter || itemMatches(it)) { html += itemHtml(day, i); shown++; }
+  });
+  if (useFilter && shown === 0) html += '<div class="tipcard">Rien ce jour-là pour ce filtre.</div>';
   return html;
 }
 
 /* ---------- écran Jours ---------- */
 var curDay = 1;
+var planView = "day";
+var activeCats = [];
+var CATS = [
+  ["musee",  "Musées",       "--c-musee"],
+  ["archi",  "Architecture", "--c-archi"],
+  ["air",    "Plein air",    "--c-air"],
+  ["soir",   "Soirées",      "--c-soir"],
+  ["sport",  "Sport",        "--c-sport"],
+  ["campus", "Ole Miss",     "--c-campus"],
+  ["cours",  "Kaplan",       "--c-cours"],
+  ["trajet", "Trajets",      "--c-trajet"]
+];
+
 function renderPlan() {
   var scr = document.getElementById("scr-plan");
-  var picks = DAYS.map(function (day) {
-    var all = dayDoneCount(day) === day.items.length;
-    return '<button class="dp' + (day.d === curDay ? " on" : "") + (all ? " alldone" : "") +
-      '" data-p="' + day.p + '" data-d="' + day.d + '" type="button">' +
-      '<span class="e">' + day.e + '</span><span class="n">' + day.d + '</span>' +
-      '<span class="d">' + day.dow + "</span></button>";
-  }).join("");
-  var day = DAYS[curDay - 1];
-  scr.innerHTML = '<h2 class="screen-title"><span>📅</span>Jour par jour</h2>' +
-    '<div class="daypick" id="daypick">' + picks + "</div>" + dayCardHtml(day);
+
+  var seg = '<div class="seg" role="tablist">' +
+    '<button type="button" data-view="day" class="' + (planView === "day" ? "on" : "") + '">Par jour</button>' +
+    '<button type="button" data-view="all" class="' + (planView === "all" ? "on" : "") + '">Tout le séjour</button></div>';
+
+  var chips = '<div class="filters">' +
+    '<button class="chip reset" type="button" data-cat="all" aria-pressed="' + (activeCats.length === 0 ? "true" : "false") + '">Tout</button>' +
+    CATS.map(function (c) {
+      var on = activeCats.indexOf(c[0]) !== -1;
+      return '<button class="chip" type="button" data-cat="' + c[0] + '" style="--dot: var(' + c[2] + ')" aria-pressed="' + (on ? "true" : "false") + '">' + c[1] + "</button>";
+    }).join("") + "</div>";
+
+  var body = "";
+  if (planView === "day") {
+    var picks = DAYS.map(function (day) {
+      var all = dayDoneCount(day) === day.items.length;
+      return '<button class="dp' + (day.d === curDay ? " on" : "") + (all ? " alldone" : "") +
+        '" data-p="' + day.p + '" data-d="' + day.d + '" type="button">' +
+        '<span class="e">' + day.e + '</span><span class="n">' + day.d + '</span>' +
+        '<span class="d">' + day.dow + "</span></button>";
+    }).join("");
+    body = '<div class="daypick" id="daypick">' + picks + "</div>" + dayCardHtml(DAYS[curDay - 1], null, true);
+  } else {
+    DAYS.forEach(function (day) {
+      var idx = [];
+      day.items.forEach(function (it, i) { if (itemMatches(it)) idx.push(i); });
+      if (!idx.length) return;
+      body += '<div class="mini-day" style="--pc: var(--g' + day.p + 'a)">' +
+        '<span class="me">' + day.e + '</span><span class="n">J' + day.d + '</span>' +
+        '<span class="d">' + day.dow + " " + day.lab + " · " + esc(day.title) + "</span></div>";
+      idx.forEach(function (i) { body += itemHtml(day, i); });
+    });
+    if (!body) body = '<div class="tipcard">Rien pour ce filtre.</div>';
+  }
+
+  scr.innerHTML = '<h2 class="screen-title"><span>📅</span>Le planning</h2>' + seg + chips + body;
+
+  scr.querySelectorAll(".seg button").forEach(function (b) {
+    b.addEventListener("click", function () { planView = b.dataset.view; renderPlan(); });
+  });
+  scr.querySelectorAll(".chip").forEach(function (ch) {
+    ch.addEventListener("click", function () {
+      var c = ch.dataset.cat;
+      if (c === "all") activeCats = [];
+      else {
+        var i = activeCats.indexOf(c);
+        if (i === -1) activeCats.push(c); else activeCats.splice(i, 1);
+      }
+      renderPlan();
+    });
+  });
   scr.querySelectorAll(".dp").forEach(function (b) {
     b.addEventListener("click", function () {
       curDay = +b.dataset.d;
