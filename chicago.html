@@ -230,14 +230,16 @@ main {
   transform: translateX(-50%);
   width: min(100%, 560px);
   z-index: 30;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--panel) 88%, transparent);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   border-top: 1px solid var(--line);
 }
+.tabbar::-webkit-scrollbar { display: none; }
 .tab {
   border: 0;
   background: none;
@@ -252,6 +254,8 @@ main {
   font-size: 9.5px;
   font-weight: 700;
   cursor: pointer;
+  flex: 1 0 auto;
+  min-width: 46px;
 }
 .tab .ico { font-size: 20px; line-height: 1; filter: grayscale(1) opacity(.55); transition: filter .15s, transform .15s; }
 .tab.on { color: var(--ink); }
@@ -626,6 +630,8 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
     <section class="screen on" id="scr-home"></section>
     <section class="screen" id="scr-plan"></section>
     <section class="screen" id="scr-pack"></section>
+    <section class="screen" id="scr-miam"></section>
+    <section class="screen" id="scr-shop"></section>
     <section class="screen" id="scr-pass"></section>
     <section class="screen" id="scr-budget"></section>
     <section class="screen" id="scr-infos"></section>
@@ -635,6 +641,8 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
     <button class="tab on" data-scr="home" type="button"><span class="ico">🏠</span>Auj.</button>
     <button class="tab" data-scr="plan" type="button"><span class="ico">📅</span>Jours</button>
     <button class="tab" data-scr="pack" type="button"><span class="ico">🧳</span>Valise</button>
+    <button class="tab" data-scr="miam" type="button"><span class="ico">🍕</span>Miam</button>
+    <button class="tab" data-scr="shop" type="button"><span class="ico">🛍️</span>Shops</button>
     <button class="tab" data-scr="pass" type="button"><span class="ico">🎫</span>Pass</button>
     <button class="tab" data-scr="budget" type="button"><span class="ico">💰</span>Budget</button>
     <button class="tab" data-scr="infos" type="button"><span class="ico">ℹ️</span>Infos</button>
@@ -655,97 +663,100 @@ var DAYS = [
   { d:1,  date:"2026-08-29", dow:"Sam", lab:"29 août", e:"✈️", p:1, title:"Arrivée",
     tip:"Décalage de 7 h : tout ce soir est annulable sans regret. La ville sera encore là demain.",
     items:[
-      { h:"15h10", c:"trajet", t:"Atterrissage à Chicago", n:"Immigration + bagages : 1 à 2 h, imprévisible. Rien ne doit en dépendre." },
-      { h:"—",     c:"trajet", t:"Blue Line → centre", n:"45 min. Carte Ventra à la borne, dans le terminal.", pr:"5 $" },
-      { h:"Soir",  c:"air",    t:"Millennium Park → Bean → Cultural Center", n:"Puis Michigan Avenue et le Riverwalk. Tout à pied.", pr:"Gratuit" }
+      { h:"15h10", c:"trajet", t:"Atterrissage à Chicago", n:"Immigration, bagages, douane : compter 1 à 2 h, imprévisible. Rien ne doit dépendre de cette heure-là." },
+      { h:"—",     c:"trajet", t:"Blue Line → centre + installation Kaplan", n:"45 min jusqu'au Loop, 24 h/24. Acheter la carte Ventra (5 $, rendus en crédit) à la borne dans la station du terminal — et le pass 7 jours à 20 $ au même endroit.", pr:"5 $" },
+      { h:"Fin d'aprem", c:"air", t:"Millennium Park : Cloud Gate + Crown Fountain", n:"Cloud Gate (« The Bean ») d'Anish Kapoor, 110 tonnes de miroir — la photo de rigueur. À 100 m, la Crown Fountain : deux tours de verre de 15 m qui crachent de l'eau par des visages vidéo de Chicagoans. Gratuit, sans horaire.", pr:"Gratuit" },
+      { h:"—",     c:"musee", t:"Chicago Cultural Center", n:"Entrée libre, en face du parc. La plus grande coupole Tiffany du monde — 30 000 pièces de verre — dans l'ancienne bibliothèque de 1897. Personne n'y va, c'est absurde. Vérifier l'heure de fermeture (souvent 17 h le samedi).", pr:"Gratuit" },
+      { h:"Soir",  c:"archi", t:"Michigan Ave → DuSable Bridge → Riverwalk", n:"Traverser le DuSable Bridge (pont à deux étages de 1920, vue carte postale sur le Wrigley Building blanc illuminé), puis descendre au Riverwalk, au niveau de l'eau. Première leçon d'architecture, gratuite — la croisière du 3 mettra des noms dessus.", pr:"Gratuit" }
     ]},
   { d:2,  date:"2026-08-30", dow:"Dim", lab:"30 août", e:"🦖", p:1, title:"Field + espace",
     items:[
-      { h:"Matin", c:"musee", t:"Field Museum", n:"SUE le T. rex, dinosaures, Égypte ancienne. Prévoir 3–4 h.", pr:"26 €" },
-      { h:"Aprem", c:"musee", t:"Adler Planetarium", n:"Réserver le spectacle sous dôme en arrivant. 📸 La pointe derrière = LA photo de la skyline.", pr:"28 €" },
-      { h:"Puis",  c:"air",   t:"Lakefront → Grant Park → Buckingham Fountain", n:"Tout à pied, en enfilade.", pr:"Gratuit" }
+      { h:"Matin", c:"musee", t:"Field Museum", n:"SUE, le Tyrannosaurus rex le plus complet jamais découvert (90 % du squelette), les dinosaures, l'Égypte ancienne et ses momies, les pierres précieuses. Prévoir 3–4 h en visant ces priorités. La formule de base suffit. CTA jusqu'à Museum Campus, puis tout se fait à pied.", pr:"26 €" },
+      { h:"Aprem", c:"musee", t:"Adler Planetarium", n:"Musée de l'espace et de l'astronomie + un spectacle sous dôme — réserver le créneau du dôme EN ARRIVANT, pas après la visite. 📸 La pointe derrière le planétarium, c'est LA photo classique de la skyline : gratuite, ventée, sur le chemin.", pr:"28 €" },
+      { h:"Puis",  c:"air",   t:"Lakefront → Grant Park → Buckingham Fountain", n:"Retour à pied par le Lakefront Trail et Grant Park jusqu'à la Buckingham Fountain (1927), une des plus grandes fontaines du monde : grands jets toutes les 20 min, show lumineux à la nuit tombée. Tout gratuit.", pr:"Gratuit" }
     ]},
   { d:3,  date:"2026-08-31", dow:"Lun", lab:"31 août", e:"🎨", p:1, title:"Art Institute + Route 66",
     items:[
       { h:"Matin", c:"cours", t:"Cours Kaplan" },
-      { h:"Aprem", c:"musee", t:"Art Institute of Chicago", n:"Monet, Van Gogh, Hopper, American Gothic. Sortir avant la saturation.", pr:"28 €" },
-      { h:"Puis",  c:"archi", t:"Panneau BEGIN Route 66", n:"Adams St × Michigan Ave, à 1 min de la sortie du musée.", pr:"Gratuit" },
-      { h:"Option",c:"air",   t:"The Loop → State Street", n:"Selon l'énergie restante.", pr:"Gratuit" }
+      { h:"Aprem", c:"musee", t:"Art Institute of Chicago", n:"Le deuxième plus grand musée d'art des États-Unis, gardé par ses deux lions de bronze : la plus grosse collection d'impressionnistes hors de France (Monet, Renoir), Van Gogh, La Grande Jatte de Seurat, Nighthawks de Hopper, American Gothic. Sortir avant la saturation plutôt qu'après.", pr:"28 €" },
+      { h:"Puis",  c:"archi", t:"Panneau BEGIN Route 66", n:"Sur Adams Street × Michigan Avenue, à 1 min de la sortie du musée. Le vrai point de départ des 3 940 km vers Los Angeles — pas une reconstitution.", pr:"Gratuit" },
+      { h:"Option",c:"air",   t:"The Loop → State Street → Chicago Theatre", n:"L'enseigne verticale « CHICAGO » du Chicago Theatre (1921) sur State Street est LE panneau photo de la ville — gratuit depuis le trottoir, illuminé le soir. L'intérieur ne se visite qu'en tour guidé ou concert. Selon l'énergie restante.", pr:"Gratuit" }
     ]},
   { d:4,  date:"2026-09-01", dow:"Mar", lab:"1 sept", e:"🎈", p:1, title:"Balloon + The 606",
     items:[
       { h:"Matin", c:"cours", t:"Cours Kaplan" },
-      { h:"Aprem", c:"musee", t:"Balloon Museum / EmotionAir", n:"Dispo confirmée le 1er sept, dès 38 $ (~35 €). Le billet standard suffit — l'Art Session est un atelier en plus, inutile ici. Réserver vite : plus de créneaux après le 7.", pr:"38 $" },
-      { h:"Puis",  c:"air",   t:"The 606 + Wicker Park", n:"Blue Line → Damen. Voie ferrée devenue promenade, puis friperies et dîner éco sur Milwaukee Ave.", pr:"Gratuit" }
+      { h:"Aprem", c:"musee", t:"Balloon Museum / EmotionAir", n:"Dispo confirmée le 1er sept, dès 38 $ (~35 €). Le billet standard suffit — l'Art Session (18 h–19 h) est un atelier créatif en supplément, inutile ici. Réserver vite : plus aucun créneau après le 7.", pr:"38 $" },
+      { h:"Puis",  c:"air",   t:"The 606 + Wicker Park", n:"Blue Line → Damen. Ancienne voie ferrée surélevée devenue promenade plantée : 4,3 km sans un seul croisement de voiture — en faire un bout suffit. Puis Wicker Park : friperies de Milwaukee Avenue, Myopic Books sur trois étages, dîner économique (~15 $).", pr:"Gratuit" }
     ]},
   { d:5,  date:"2026-09-02", dow:"Mer", lab:"2 sept", e:"⚾", p:1, title:"Musées + Cubs",
     items:[
       { h:"Matin", c:"cours", t:"Cours Kaplan" },
-      { h:"13h",   c:"musee", t:"Money Museum (Fed)", n:"🛂 Passeport PHYSIQUE obligatoire. Horaires à vérifier la veille.", pr:"Gratuit", w:1 },
-      { h:"14h45", c:"musee", t:"Museum of Illusions", n:"1 h – 1 h 30 suffisent.", pr:"30–36 €" },
-      { h:"17h30", c:"sport", t:"Cubs vs Brewers — Wrigley Field", n:"Red Line → Addison, partir tôt. Heure du match à confirmer sur mlb.com. Retour avec les supporters.", pr:"39 €", w:1 }
+      { h:"13h",   c:"musee", t:"Money Museum (Federal Reserve)", n:"On y voit un cube d'un million de dollars et on repart avec un sachet de vrais billets déchiquetés. Gratuit — mais 🛂 passeport PHYSIQUE obligatoire à l'entrée, et horaires de semaine à vérifier la veille.", pr:"Gratuit", w:1 },
+      { h:"14h45", c:"musee", t:"Museum of Illusions", n:"1 h – 1 h 30 suffisent largement. Billet en ligne.", pr:"30–36 €" },
+      { h:"17h30", c:"sport", t:"Cubs vs Brewers — Wrigley Field", n:"Le stade de 1914, deuxième plus vieux des ligues majeures : lierre sur les murs du champ extérieur, tableau d'affichage tenu à la main. Red Line → Addison, la station donne sur le stade — partir tôt. Arriver 1 h 30 avant pour Wrigleyville et manger. Les bleachers (bancs sans dossier) = la vraie expérience. ⚠️ Heure à confirmer sur mlb.com. Retour Red Line avec 30 000 supporters : laisser passer 10 min.", pr:"39 €", w:1 }
     ]},
   { d:6,  date:"2026-09-03", dow:"Jeu", lab:"3 sept", e:"🏙️", p:1, title:"Architecture + pass",
     tip:"🎷 Bonus gratuit ce soir : le Chicago Jazz Festival ouvre à Millennium Park (sans billet), à 5 min du Riverwalk.",
     items:[
       { h:"Matin", c:"cours", t:"Cours Kaplan" },
-      { h:"14h",   c:"archi", t:"Chicago Architecture Center", n:"La maquette de la ville — 4 000 bâtiments — avant de monter sur le bateau.", pr:"13 €" },
-      { h:"16h",   c:"archi", t:"Architecture River Tour 🚢", n:"75 min sur la rivière. Activation du CityPASS → valable jusqu'au 11 inclus.", pass:"1/5" },
-      { h:"Soir",  c:"soir",  t:"Riverwalk + Downtown de nuit", n:"Les gratte-ciel s'allument entre 20 h et 21 h.", pr:"Gratuit" }
+      { h:"14h",   c:"archi", t:"Chicago Architecture Center", n:"La maquette de la ville — 4 000 immeubles miniatures — rend enfin la géographie lisible, juste avant de monter sur le bateau. Le centre est au pied même de l'embarcadère de la croisière.", pr:"13 €" },
+      { h:"16h",   c:"archi", t:"Architecture River Tour 🚢", n:"75 min sur la Chicago River avec un guide formé par le centre : la meilleure heure et quart du séjour. Si tu ne devais garder qu'une activité payante de tout le voyage, c'est celle-ci. Activation du CityPASS → valable jusqu'au 11 inclus.", pass:"1/5" },
+      { h:"Soir",  c:"soir",  t:"Riverwalk + dîner + Downtown de nuit", n:"Les gratte-ciel s'allument entre 20 h et 21 h en septembre. Dîner sur le Riverwalk ou dans le Loop.", pr:"Gratuit" }
     ]},
   { d:7,  date:"2026-09-04", dow:"Ven", lab:"4 sept", e:"🌇", p:1, title:"Lincoln Park + 360",
     tip:"Rentrer tôt : vol pour Memphis demain matin. (Dernière soirée de Jazz Fest attrapable sur le chemin.)",
     items:[
       { h:"Matin", c:"cours", t:"Dernier cours Kaplan" },
-      { h:"13h30", c:"musee", t:"Chicago History Museum", n:"Incendie de 1871, Prohibition — le décor du Crime Tour du 8.", pr:"16 €" },
-      { h:"15h",   c:"air",   t:"Lincoln Park Zoo + Conservatory", n:"Les deux gratuits. Puis descente vers Magnificent Mile (bus 151 ou 40 min à pied).", pr:"Gratuit" },
-      { h:"18h30", c:"archi", t:"360 CHICAGO au coucher du soleil", n:"Monter 45 min avant le sunset (~19 h 15) : jour + sunset + nuit sur la même montée.", pass:"2/5" }
+      { h:"13h30", c:"musee", t:"Chicago History Museum", n:"Le grand incendie de 1871, les abattoirs, la Prohibition, les émeutes : tout le décor que le Crime Tour du 8 viendra peupler. Le musée est déjà dans Lincoln Park.", pr:"16 €" },
+      { h:"15h",   c:"air",   t:"Lincoln Park Zoo + Conservatory + Lily Pool", n:"Le zoo est gratuit depuis 1868 — l'un des derniers zoos gratuits des États-Unis. La serre victorienne (Conservatory) est gratuite aussi. Juste derrière : l'Alfred Caldwell Lily Pool, bassin caché de style Prairie, silencieux, que presque personne ne trouve. North Avenue Beach est à 10 min si le soleil donne.", pr:"Gratuit" },
+      { h:"16h45", c:"archi", t:"Magnificent Mile : Water Tower + Wrigley Building", n:"Descente vers le sud (bus 151 ou ~40 min à pied) : la Chicago Water Tower, château d'eau néogothique de 1869 et quasi seul survivant du Grand Incendie, puis le Wrigley Building blanc au bord de la rivière. Oak Street Beach est au passage, au pied des tours, pour tremper les pieds.", pr:"Gratuit" },
+      { h:"18h30", c:"archi", t:"360 CHICAGO au coucher du soleil", n:"94e étage de l'ancien Hancock Center. Monter ~45 min avant le sunset (~19 h 15) : la ville de jour, le coucher, puis les lumières — trois vues sur le même billet. Le 360 voit le Loop ET le lac ; le Skydeck y répondra de nuit le 8.", pass:"2/5" }
     ]},
   { d:8,  date:"2026-09-05", dow:"Sam", lab:"5 sept", e:"🚗", p:2, title:"Cap sur Ole Miss",
     tip:"⚠️ Le transfert Memphis → Oxford se règle AVANT le départ : navette, location ou cousin. Pas d'Uber improvisé.",
     items:[
-      { h:"Matin", c:"trajet", t:"✈️ Vol Chicago → Memphis", n:"Heure à confirmer sur le billet. Déjà payé.", w:1 },
-      { h:"Midi",  c:"trajet", t:"Memphis → Oxford (135 km)", n:"~1 h 30 de route. Installation chez le cousin — hébergement gratuit.", pr:"90–115 €" },
-      { h:"Aprem", c:"campus", t:"Campus Ole Miss à pied", n:"The Grove → Lyceum → Walk of Champions → Vaught-Hemingway → Student Union.", pr:"Gratuit" }
+      { h:"Matin", c:"trajet", t:"✈️ Vol Chicago → Memphis", n:"Heure à confirmer sur le billet. Déjà budgété avec le retour (314 €). Memphis est dans le même fuseau que Chicago.", w:1 },
+      { h:"Midi",  c:"trajet", t:"Memphis → Oxford (135 km)", n:"~1 h 30 de route, presque tout sur autoroute. Uber ~90–115 € le trajet — à régler AVANT le départ (navette, location ou cousin) : sur cette distance sans course retour, les annulations sont fréquentes et la couverture à Oxford est mince. Installation chez le cousin, hébergement gratuit.", pr:"90–115 €" },
+      { h:"Aprem", c:"campus", t:"Campus Ole Miss à pied", n:"The Grove (4 hectares de chênes, temple du tailgating du Sud) → Lyceum (1848, le plus vieux bâtiment, colonnes encore marquées par les balles des émeutes de 1962) → Walk of Champions → Vaught-Hemingway Stadium (64 000 places) → Student Union. Tout gratuit, tout à pied.", pr:"Gratuit" }
     ]},
   { d:9,  date:"2026-09-06", dow:"Dim", lab:"6 sept", e:"📚", p:2, title:"Oxford + Faulkner",
     items:[
-      { h:"Matin", c:"campus", t:"Oxford Square + Square Books", n:"Courthouse Square, boutiques, statue de Faulkner. Déjeuner sur la Square.", pr:"Gratuit" },
-      { h:"Aprem", c:"musee",  t:"Rowan Oak", n:"La maison de Faulkner, 15 min à pied. Terrain libre, intérieur payant.", pr:"9 €" },
-      { h:"18h30", c:"sport",  t:"Ole Miss – Louisville 🏈 au bar", n:"Le match est à Nashville (6 h de route) : on le regarde à Oxford, avec les supporters ou le cousin.", pr:"Gratuit" }
+      { h:"Matin", c:"campus", t:"Oxford Square + Square Books", n:"Courthouse Square et son tribunal blanc, les boutiques, Square Books — l'une des grandes librairies indépendantes du Sud — et la statue de Faulkner assis sur son banc devant la mairie. Déjeuner sur la Square.", pr:"Gratuit" },
+      { h:"Aprem", c:"musee",  t:"Rowan Oak", n:"La maison de William Faulkner (prix Nobel 1949), à 15 min à pied de la Square, dans son bois de cèdres. Le plan de son roman « A Fable » est écrit à la main sur le mur de son bureau. Terrain en accès libre, intérieur ~9 €.", pr:"9 €" },
+      { h:"18h30", c:"sport",  t:"Ole Miss – Louisville 🏈 au bar", n:"Le match se joue au Nissan Stadium de Nashville, à 6 h de route : hors de question d'y aller. Bar de la Square rempli de supporters ou canapé du cousin — l'ambiance d'Oxford un soir de match reste réelle même quand l'équipe joue ailleurs.", pr:"Gratuit" }
     ]},
   { d:10, date:"2026-09-07", dow:"Lun", lab:"7 sept", e:"🌳", p:2, title:"Labor Day tranquille",
     tip:"La seule journée volontairement vide du voyage. Elle est pour le cousin, pas pour cocher des cases.",
     items:[
-      { h:"Libre", c:"air", t:"Rail Trail, Lamar Park, la Square", n:"Jour férié : rien qui dépende d'un musée. Balades, cafés, boutiques.", pr:"Gratuit" }
+      { h:"Libre", c:"air", t:"Rail Trail, Lamar Park, la Square", n:"Jour férié : tout ce qui dépend d'un musée est fermé ou bondé — parfait pour ne rien programmer. South Campus Rail Trail (ancienne voie ferrée plate et ombragée), Lamar Park et son lac, cafés et boutiques de la Square.", pr:"Gratuit" }
     ]},
   { d:11, date:"2026-09-08", dow:"Mar", lab:"8 sept", e:"🕵️", p:3, title:"Retour + gangsters",
     tip:"Si le vol traîne : sacrifier le Crime Tour, garder le Skydeck — le pass expire le 11.",
     items:[
-      { h:"Matin", c:"trajet", t:"Oxford → Memphis → ✈️ Chicago", n:"Partir ≥ 3 h 30 avant le décollage. Transport confirmé la veille.", pr:"90–115 €", w:1 },
-      { h:"Aprem", c:"trajet", t:"Check-in hôtel", n:"Ce n'est plus le logement Kaplan : adresse et heure vérifiées la veille." },
-      { h:"15h30", c:"musee",  t:"Chicago Crime Tour", n:"2 h – 2 h 30 : Capone, Prohibition, Dillinger. À réserver en ligne.", pr:"40 €" },
-      { h:"20h30", c:"archi",  t:"Skydeck de nuit 🌃", n:"103ᵉ étage + The Ledge. De nuit exprès — le 360 a pris le sunset.", pass:"3/5" }
+      { h:"Matin", c:"trajet", t:"Oxford → Memphis → ✈️ Chicago", n:"Quitter Oxford AU MOINS 3 h 30 avant le décollage : 1 h 30 de route + enregistrement. Transport commandé et confirmé la veille, pas le matin même.", pr:"90–115 €", w:1 },
+      { h:"Aprem", c:"trajet", t:"Check-in hôtel", n:"Ce n'est plus le logement Kaplan : adresse et heure de check-in vérifiées la veille. Si le vol traîne : sacrifier le Crime Tour, jamais le Skydeck — le pass expire le 11." },
+      { h:"15h30", c:"musee",  t:"Chicago Crime Tour", n:"2 h – 2 h 30 : Al Capone, la Prohibition, la mafia, John Dillinger et les lieux réels qui vont avec. À réserver en ligne. Le History Museum de vendredi a posé tout le décor.", pr:"40 €" },
+      { h:"20h30", c:"archi",  t:"Skydeck de nuit 🌃", n:"103e étage de la Willis Tower (412 m) + The Ledge, les caissons de verre entièrement suspendus dans le vide. De nuit exprès — le 360 a pris le coucher du soleil le 4 : deux fois la même ville, deux fois autrement. Dernière entrée ~21 h 30, ne pas traîner au dîner.", pass:"3/5" }
     ]},
   { d:12, date:"2026-09-09", dow:"Mer", lab:"9 sept", e:"🐠", p:3, title:"Shedd + Green Mill",
     items:[
-      { h:"9h",  c:"musee", t:"Shedd Aquarium", n:"Y être à l'ouverture — l'écart de foule entre 9 h et 11 h est énorme.", pass:"4/5" },
-      { h:"14h", c:"air",   t:"Garfield Park Conservatory", n:"Green Line → station devant l'entrée. Entrée libre (les 9 € budgétés = donation).", pr:"Donation" },
-      { h:"21h", c:"soir",  t:"Green Mill 🎷", n:"💵 LIQUIDE uniquement. Red Line → Lawrence. Retour Red Line si du monde, sinon Uber.", pr:"13–17 €", w:1 }
+      { h:"9h",  c:"musee", t:"Shedd Aquarium", n:"32 000 animaux sous la rotonde de 1930, au bord du lac. Y être à l'OUVERTURE : c'est l'attraction la plus fréquentée du Museum Campus et l'écart de foule entre 9 h et 11 h est énorme. Prévoir 3–4 h.", pass:"4/5" },
+      { h:"14h", c:"air",   t:"Garfield Park Conservatory", n:"Green Line → Conservatory–Central Park Drive, la station est pratiquement devant l'entrée. Un hectare sous verre, l'une des plus grandes serres urbaines du monde. Entrée libre — les ~9 € budgétés couvrent la donation suggérée. Métro → serre → métro, sans balade dans le quartier.", pr:"Donation" },
+      { h:"21h", c:"soir",  t:"Green Mill 🎷", n:"Club de jazz de 1907 jamais rénové, repaire d'Al Capone pendant la Prohibition — il avait son box face aux deux portes. Enchaînement parfait après le Crime Tour d'hier. 💵 LIQUIDE uniquement, et on ne parle pas pendant les sets. Red Line → Lawrence. Retour Red Line s'il y a du monde sur le quai, sinon Uber — à 1 h du matin ça ne se discute pas.", pr:"13–17 €", w:1 }
     ]},
   { d:13, date:"2026-09-10", dow:"Jeu", lab:"10 sept", e:"🔬", p:3, title:"Griffin, la totale",
     tip:"U-505 On-Board (~16 €) à acheter en ligne LE MATIN MÊME — les créneaux partent dans la journée.",
     items:[
-      { h:"Journée", c:"musee", t:"Griffin Museum of Science and Industry", n:"Priorités : 1. Anne Frank · 2. U-505 · 3. Coal Mine · 4. Powering the Future · 5. Science Storms · 6. Great Train Story · 7. Boeing 727.", pass:"5/5" },
-      { h:"17h",     c:"air",   t:"Promontory Point (si énergie)", n:"20 min par Hyde Park. La meilleure vue de la skyline, et jamais personne. Retour bus 6 ou Metra.", pr:"Gratuit" }
+      { h:"Journée", c:"musee", t:"Griffin Museum of Science and Industry", n:"Le plus grand musée de sciences de l'hémisphère ouest, dans le dernier palais debout de l'Exposition universelle de 1893. Priorités dans l'ordre : 1. Anne Frank: The Exhibition · 2. U-505, le sous-marin allemand capturé en pleine mer en 1944 (visite intérieure en supplément ~16 €) · 3. Coal Mine · 4. Powering the Future · 5. Science Storms · 6. Great Train Story · 7. Boeing 727. Le pass couvre l'entrée, Anne Frank et les galeries.", pass:"5/5" },
+      { h:"17h",     c:"air",   t:"Promontory Point (si énergie)", n:"Avancée de calcaire dans le lac, à 20 min à travers Hyde Park : la meilleure vue de la skyline de toute la ville, à 10 km de distance, et il n'y a jamais personne. Avant la nuit. Retour Downtown en bus 6 ou Metra Electric.", pr:"Gratuit" }
     ]},
   { d:14, date:"2026-09-11", dow:"Ven", lab:"11 sept", e:"🎡", p:3, title:"Navy Pier + départ",
     tip:"✈️ Vol à 16 h 15. La Blue Line s'arrête sans prévenir : grosse marge, pas une marge raisonnable.",
     items:[
-      { h:"9h",    c:"air",    t:"Navy Pier", n:"Promenade, lac, skyline. Centennial Wheel seulement si le timing est bon.", pr:"Gratuit" },
-      { h:"11h30", c:"trajet", t:"Quitter le Pier — sans discuter", n:"Bus 124 ou 20 min à pied vers Grand (Red Line).", w:1 },
-      { h:"13h30", c:"trajet", t:"Bagages → O'Hare", n:"Blue Line 45 min. Être à l'aéroport vers 13 h 30." },
-      { h:"16h15", c:"trajet", t:"✈️ Vol retour" }
+      { h:"9h",    c:"air",    t:"Navy Pier", n:"La jetée de 1916 sur le lac Michigan : promenade, skyline vue depuis l'eau, boutiques. Le Pier est gratuit ; la Centennial Wheel (~19 $) seulement si le timing est large ET l'envie réelle.", pr:"Gratuit" },
+      { h:"11h30", c:"trajet", t:"Quitter le Pier — sans discuter", n:"Le Pier est le point le plus mal desservi du centre : bus 124, ou 20 min à pied vers Grand (Red Line). C'est exactement le genre de détail qui fait rater un vol.", w:1 },
+      { h:"13h30", c:"trajet", t:"Bagages → O'Hare", n:"Récupérer les bagages à l'hôtel puis Blue Line, 45 min. Être à l'aéroport vers 13 h 30 pour le vol de 16 h 15." },
+      { h:"16h15", c:"trajet", t:"✈️ Vol retour vers Marseille" }
     ]}
 ];
 
@@ -807,20 +818,91 @@ var PACK = [
     ["Chargeur + câbles", "Dont un câble de rechange."],
     ["Écouteurs", "9 h de vol + les trajets en L."]
   ]},
-  { c:"air", e:"👕", t:"Vêtements", items:[
-    ["Coupe-vent", "PAS de parapluie — le vent le retourne, c'est le principe de la ville."],
-    ["Chaussures de marche déjà rodées", "Pas neuves. Le point n°1 de toute la liste."],
-    ["Pull ou hoodie", "Le bord du lac perd 3–4 °C le soir (Navy Pier, Millennium Park)."],
-    ["Maillot de bain", "Plages du lac Michigan, baignable jusqu'à mi-septembre."],
-    ["Une tenue correcte", "Green Mill, Second City, restos du soir."],
-    ["Casquette + lunettes de soleil", "27 °C fin août."]
+  { c:"air", e:"👕", t:"Vêtements — 15 jours, 1 lessive à mi-séjour", items:[
+    ["Culottes × 10", "Avec une lessive chez le cousin vers le 6–7 sept. Sans machine : compter × 15."],
+    ["Chaussettes × 10 paires", "Dont 2 paires épaisses pour les journées à 15–18 km de marche."],
+    ["T-shirts / hauts × 7", "Ça tourne vite quand on marche autant — la lessive fait le reste."],
+    ["Pantalons × 3", "Dont un confortable pour les vols (9 h aller)."],
+    ["Shorts × 2", "27 °C fin août, 24 °C début septembre."],
+    ["Pulls / hoodies × 2", "Le bord du lac perd 3–4 °C le soir — Navy Pier, Millennium Park, la croisière."],
+    ["Coupe-vent × 1", "PAS de parapluie — le vent le retourne, c'est le principe de la ville."],
+    ["Tenue correcte × 1", "Green Mill, le dîner du séjour, un bar d'Oxford un soir de match."],
+    ["Pyjamas × 2", ""],
+    ["Maillot de bain × 1", "Plages du lac Michigan, baignable jusqu'à mi-septembre."],
+    ["Chaussures de marche rodées × 1 paire", "Déjà faites à ton pied, pas neuves. Le point n°1 de toute la liste."],
+    ["Deuxième paire (baskets propres) × 1", "Pour les soirs, et si la pluie trempe la première."],
+    ["Casquette + lunettes de soleil", ""],
+    ["Sac à linge sale + mini-lessive", "La machine du cousin à mi-séjour divise la valise par deux."]
   ]},
   { c:"soir", e:"🧴", t:"Divers", items:[
-    ["Crème solaire", "Le Lakefront Trail ne pardonne pas."],
-    ["Gourde vide", "Des fontaines partout, et elle passe la sécurité vide."],
-    ["Petit sac à dos de journée", "Pour les musées et le lakefront."],
+    ["Crème solaire", "Le Lakefront Trail ne pardonne pas, même en septembre."],
+    ["Gourde vide", "Des fontaines partout, et elle passe la sécurité d'aéroport vide."],
+    ["Petit sac à dos de journée", "Pour les musées et le lakefront — les grands sacs sont refusés au vestiaire de certains musées."],
     ["Médicaments perso + ibuprofène", "La pharmacie US coûte une fortune."],
-    ["Mini-dose de lessive", "14 jours — ça évite la demi-valise en plus."]
+    ["Petit cadeau pour le cousin", "Trois nuits chez lui — un truc de Marseille fait toujours plaisir."]
+  ]}
+];
+
+var FOOD = [
+  { c:"sport", e:"🍕", t:"Les classiques de Chicago", items:[
+    ["Deep dish — Pequod's", "Lincoln Park. La croûte caramélisée sur tout le bord, la version qui vaut le détour. 45 min de cuisson : commander en s'asseyant. ~20 $/pers.", "€€"],
+    ["Deep dish — Lou Malnati's", "Le classique historique, des adresses partout — le plan B sans file d'attente. ~18 $/pers.", "€€"],
+    ["Italian beef — Al's #1 Italian Beef", "Commander « dipped, hot ». Se mange debout, penché en avant, coudes sur la barre — il n'y a pas d'autre méthode. ~10 $.", "€"],
+    ["Chicago hot dog — Portillo's", "Tout dessus SAUF le ketchup : moutarde, oignon, relish vert fluo, cornichon, tomate, piment, céleri en sel. ~7 $.", "€"],
+    ["Jibarito — Papa's Cache Sabroso", "Le sandwich dont le pain est remplacé par deux bananes plantain frites, inventé à Humboldt Park en 1996. ~12 $.", "€"],
+    ["Garrett Popcorn — le Mix", "Caramel + cheddar mélangés dans le même sachet. L'odeur te trouvera avant que tu la cherches. ~8 $.", "€"]
+  ]},
+  { c:"campus", e:"🥐", t:"Boulangeries, donuts & cafés", items:[
+    ["Doughnut Vault", "River North. Échoppe minuscule, donuts old-fashioned — quand c'est fini, c'est fini pour la journée. ~4 $.", "€"],
+    ["Stan's Donuts", "Wicker Park et ailleurs. Le pistache-chocolat est la bonne réponse. ~4 $.", "€"],
+    ["Firecakes Donuts", "Le caramel beurre salé, et ouvert tard. ~4 $.", "€"],
+    ["Sweet Mandy B's", "Pâtisserie pastel de Lincoln Park : cupcakes et gâteaux régressifs. ~5 $.", "€"],
+    ["Intelligentsia Coffee", "Torréfacteur culte né à Chicago en 1995 — le Millennium Park Coffeebar est en face du parc. ~6 $.", "€"]
+  ]},
+  { c:"musee", e:"🍜", t:"Food halls & cuisines du monde", items:[
+    ["Revival Food Hall", "15 comptoirs locaux dans un sous-sol Art déco du Loop — parfait en solo, idéal les midis Kaplan. 12–18 $.", "€€"],
+    ["Time Out Market", "Fulton Market : 18 comptoirs tenus par les chefs de la ville. 15–20 $.", "€€"],
+    ["MingHin Cuisine — Chinatown", "Le dim sum de référence, service tard le soir. Red Line → Cermak-Chinatown. 20–30 $.", "€€"],
+    ["Qing Xiang Yuan Dumplings", "Raviolis faits main sous tes yeux, Chinatown. ~15 $.", "€"],
+    ["Taquerias de Pilsen", "18th Street : tacos al pastor à 3 $ dans le quartier mexicain historique — combinable avec le Water Taxi bonus.", "€"]
+  ]},
+  { c:"campus", e:"🏈", t:"Côté Oxford (Ole Miss)", items:[
+    ["Bottletree Bakery", "Sur la Square, institution du petit-déjeuner sudiste depuis 1995 : cinnamon rolls géants. ~10 $.", "€"],
+    ["Big Bad Breakfast", "LE brunch d'Oxford — biscuits & gravy, à faire une fois dans sa vie. ~15 $.", "€€"],
+    ["Ajax Diner", "Soul food du Sud sur la Square : fried catfish, mac & cheese, sweet tea. ~15 $.", "€€"],
+    ["City Grocery", "Le gastro historique d'Oxford, balcon au-dessus de la Square. Pour un vrai dîner avec le cousin. ~30 $.", "€€€"]
+  ]},
+  { c:"soir", e:"✨", t:"Le dîner du séjour (réserver tôt)", items:[
+    ["Girl & the Goat", "Fulton Market, la table emblématique de Stephanie Izard. En solo, le comptoir se libère souvent à 48 h. ~60 $.", "€€€"],
+    ["Monteverde", "Pâtes fraîches, West Loop. Se réserve à un mois — ou comptoir. ~50 $.", "€€€"],
+    ["Au Cheval", "Le burger le plus culte du pays. Pas de réservation : viser 15 h ou accepter la file. ~25 $.", "€€"]
+  ]}
+];
+
+var SHOP = [
+  { c:"archi", e:"🧢", t:"Souvenirs & petits prix", items:[
+    ["Boutique du Chicago Architecture Center", "Les plus beaux souvenirs « intelligents » de la ville : affiches, maquettes, livres. À prendre le 3 sept, tu y es déjà. 10–40 $.", "€"],
+    ["Garrett Popcorn en boîte", "Le souvenir comestible qui survit au vol retour. 8–15 $.", "€"],
+    ["Target State Street", "Basics, snacks américains et souvenirs pas chers en plein Loop.", "€"],
+    ["Cubs Team Store — Wrigley Field", "La casquette officielle, à prendre le soir du match du 2. 25–40 $.", "€€"],
+    ["Ole Miss Bookstore — Student Union", "Le hoodie Rebels, souvenir du week-end sudiste. 30–60 $.", "€€"]
+  ]},
+  { c:"soir", e:"🧥", t:"Friperies & vintage — Wicker Park (1er sept)", items:[
+    ["Buffalo Exchange", "Milwaukee Avenue : le tri est déjà fait, les prix restent doux. 10–40 $.", "€"],
+    ["Kokorokoko", "Vintage 80s-90s pointu, pièces uniques. 20–60 $.", "€€"],
+    ["Una Mae's", "Mi-vintage mi-neuf, la boutique signature du quartier. 20–80 $.", "€€"],
+    ["Reckless Records", "L'institution du vinyle indie, neuf et occasion. 5–30 $.", "€"],
+    ["Myopic Books", "Trois étages de livres d'occasion, ouvert tard le soir. 5–15 $.", "€"]
+  ]},
+  { c:"musee", e:"🏬", t:"Magnificent Mile & State Street", items:[
+    ["Starbucks Reserve Roastery", "Michigan Avenue : le plus grand Starbucks du monde, 5 étages, torréfacteur géant — à voir même sans rien acheter.", "€"],
+    ["Macy's State Street", "L'ancien grand magasin Marshall Field's (1907) : horloges de bronze, plafond en mosaïque Tiffany. Entrer rien que pour le bâtiment.", "€€"],
+    ["Water Tower Place", "8 étages de centre commercial juste à côté de la Water Tower — combinable avec la balade du 4 sept.", "€€"],
+    ["Flagships de Michigan Avenue", "Nike, Apple au bord de la rivière, Lego… Le lèche-vitrine olympique de la Magnificent Mile.", "€€"]
+  ]},
+  { c:"campus", e:"💎", t:"Oak Street — le chic", items:[
+    ["Oak Street", "La rue du luxe (Hermès, Prada, Chanel) à deux pas d'Oak Street Beach : lèche-vitrine gratuit, dégâts facultatifs.", "€€€"],
+    ["Ikram", "La boutique de mode pointue qui habillait Michelle Obama — plus galerie que magasin.", "€€€"]
   ]}
 ];
 
@@ -845,7 +927,7 @@ var BACKEND = (function () {
   return "mem";
 })();
 
-var DB = { done: {}, prep: {}, pass: {}, pack: {}, paid: null, theme: null };
+var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, paid: null, theme: null };
 
 function loadDB() {
   var raw = null;
@@ -869,7 +951,7 @@ function loadDB() {
     }
     if (raw) {
       var obj = JSON.parse(raw);
-      ["done", "prep", "pass", "pack"].forEach(function (k) {
+      ["done", "prep", "pass", "pack", "food", "shop"].forEach(function (k) {
         if (obj[k] && typeof obj[k] === "object") DB[k] = obj[k];
       });
       if (obj.paid && typeof obj.paid === "object") DB.paid = obj.paid;
@@ -1130,6 +1212,49 @@ function renderBudget() {
   });
 }
 
+/* ---------- écrans guides (Miam / Boutiques) ---------- */
+function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
+  var scr = document.getElementById(scrId);
+  var state = DB[dbKey];
+  var total = 0, ok = 0;
+  groups.forEach(function (g, gi) {
+    g.items.forEach(function (_, ii) { total++; if (state["g" + gi + "-" + ii]) ok++; });
+  });
+  var html = titleHtml +
+    '<div class="tipcard"><b>' + ok + " / " + total + "</b> " + verb + (ok > 1 ? "s" : "") + ". " + tip + "</div>";
+  groups.forEach(function (g, gi) {
+    html += '<div class="card"><h3>' + g.e + " " + esc(g.t) + "</h3>";
+    g.items.forEach(function (it, ii) {
+      var uid = "g" + gi + "-" + ii;
+      html += '<label class="item' + (state[uid] ? " done" : "") + '" style="--cat: var(--c-' + g.c + '); box-shadow:none; margin-bottom:8px;">' +
+        '<input type="checkbox" class="chk" data-guide="' + uid + '"' + (state[uid] ? " checked" : "") +
+        ' aria-label="' + esc(it[0]).replace(/"/g, "&quot;") + '">' +
+        '<span class="body"><span class="t">' + esc(it[0]) + "</span>" +
+        (it[1] ? '<div class="n">' + esc(it[1]) + "</div>" : "") + "</span>" +
+        (it[2] ? '<span class="price">' + esc(it[2]) + "</span>" : "") + "</label>";
+    });
+    html += "</div>";
+  });
+  scr.innerHTML = html;
+  scr.querySelectorAll("[data-guide]").forEach(function (box) {
+    box.addEventListener("change", function () {
+      if (box.checked) state[box.dataset.guide] = 1; else delete state[box.dataset.guide];
+      saveDB();
+      renderGuide(scrId, groups, dbKey, titleHtml, tip, verb);
+    });
+  });
+}
+function renderFood() {
+  renderGuide("scr-miam", FOOD, "food",
+    '<h2 class="screen-title"><span>🍕</span>À goûter</h2>',
+    "Coche au fil des découvertes — les € donnent l'ordre de prix par personne.", "goûté");
+}
+function renderShop() {
+  renderGuide("scr-shop", SHOP, "shop",
+    '<h2 class="screen-title"><span>🛍️</span>Boutiques</h2>',
+    "Du souvenir à 8 $ au lèche-vitrine de luxe, rangé par gamme de prix.", "faite");
+}
+
 /* ---------- écran Valise ---------- */
 function renderPack() {
   var scr = document.getElementById("scr-pack");
@@ -1198,7 +1323,7 @@ function importSave() {
   try {
     var obj = JSON.parse(raw.trim());
     if (typeof obj !== "object" || !obj) throw 0;
-    ["done", "prep", "pass", "pack"].forEach(function (k) {
+    ["done", "prep", "pass", "pack", "food", "shop"].forEach(function (k) {
       if (obj[k] && typeof obj[k] === "object") DB[k] = obj[k];
     });
     if (obj.paid && typeof obj.paid === "object") DB.paid = obj.paid;
@@ -1259,6 +1384,8 @@ function rerenderAll() {
   renderHome();
   renderPlan();
   renderPack();
+  renderFood();
+  renderShop();
   renderPass();
   renderBudget();
   renderInfos();
@@ -1313,7 +1440,7 @@ function bindChecks(scope) {
 }
 
 /* ---------- onglets ---------- */
-var renderers = { home: renderHome, plan: renderPlan, pack: renderPack, pass: renderPass, budget: renderBudget, infos: renderInfos };
+var renderers = { home: renderHome, plan: renderPlan, pack: renderPack, miam: renderFood, shop: renderShop, pass: renderPass, budget: renderBudget, infos: renderInfos };
 document.querySelectorAll(".tab").forEach(function (tab) {
   tab.addEventListener("click", function () {
     document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t === tab); });
@@ -1332,6 +1459,8 @@ if (d0) curDay = d0.d;
 renderHome();
 renderPlan();
 renderPack();
+renderFood();
+renderShop();
 renderPass();
 renderBudget();
 renderInfos();
