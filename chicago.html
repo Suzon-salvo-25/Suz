@@ -569,6 +569,20 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
 }
 .paychk:checked { background: var(--c-air); border-color: var(--c-air); }
 .paychk:checked::after { content: "✓"; color: #fff; font-size: 13px; font-weight: 900; }
+.btn {
+  display: inline-block;
+  border: 1.5px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  font-family: var(--f-round);
+  font-weight: 800;
+  font-size: 13px;
+  border-radius: 999px;
+  padding: 9px 15px;
+  cursor: pointer;
+  margin: 2px 8px 2px 0;
+}
+.btn:active { transform: scale(.96); }
 
 /* ---------- confettis ---------- */
 .confetti-box {
@@ -661,7 +675,7 @@ var DAYS = [
   { d:4,  date:"2026-09-01", dow:"Mar", lab:"1 sept", e:"🎈", p:1, title:"Balloon + The 606",
     items:[
       { h:"Matin", c:"cours", t:"Cours Kaplan" },
-      { h:"Aprem", c:"musee", t:"Balloon Museum / EmotionAir", n:"Billet en ligne. Expo itinérante : vérifier la date avant de partir.", pr:"32 €", w:1 },
+      { h:"Aprem", c:"musee", t:"Balloon Museum / EmotionAir", n:"Dispo confirmée le 1er sept, dès 38 $ (~35 €). Le billet standard suffit — l'Art Session est un atelier en plus, inutile ici. Réserver vite : plus de créneaux après le 7.", pr:"38 $" },
       { h:"Puis",  c:"air",   t:"The 606 + Wicker Park", n:"Blue Line → Damen. Voie ferrée devenue promenade, puis friperies et dîner éco sur Milwaukee Ave.", pr:"Gratuit" }
     ]},
   { d:5,  date:"2026-09-02", dow:"Mer", lab:"2 sept", e:"⚾", p:1, title:"Musées + Cubs",
@@ -751,7 +765,7 @@ var PREP = [
   { e:"🚢", t:"Réserver les créneaux CityPASS", n:"River Tour (3), 360 sunset (4), Skydeck (8), Shedd 9 h (9)." },
   { e:"🕵️", t:"Réserver le Crime Tour du 8", n:"~40 €, en ligne." },
   { e:"⚾", t:"Confirmer l'heure de Cubs–Brewers", n:"Sur mlb.com — un match en journée décale tout le 2 sept." },
-  { e:"🎈", t:"Vérifier le Balloon Museum", n:"Expo itinérante : bien à Chicago le 1er sept ?" },
+  { e:"🎈", t:"Réserver le Balloon Museum (mar 1er)", n:"Dispo confirmée dès 38 $. Billet standard, pas l'Art Session. Plus aucun créneau après le 7 sept — ne pas traîner." },
   { e:"🛂", t:"Passeport dans le sac du 2 sept", n:"Obligatoire au Money Museum, version physique." },
   { e:"💵", t:"Prévoir du liquide", n:"Green Mill (13–17 €) et la plupart des clubs." }
 ];
@@ -811,21 +825,81 @@ var PACK = [
 ];
 
 /* ============================================================
-   ÉTAT
+   ÉTAT — moteur de sauvegarde à 3 niveaux
+   1. localStorage (testé réellement, pas juste supposé)
+   2. cookies (si localStorage est bloqué par le bac à sable)
+   3. mémoire seule + alerte et export/import manuel
    ============================================================ */
-var store = {
-  get: function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
-  set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-};
-var done = store.get("chi26:done", {});
-var prepDone = store.get("chi26:prep", {});
-var passUsed = store.get("chi26:pass", {});
-var packDone = store.get("chi26:pack", {});
-var paidState = store.get("chi26:paid", null);
-if (!paidState) {
-  paidState = {};
-  BUDGET.fixed.forEach(function (r) { if (r.def) paidState[r.id] = 1; });
+var BACKEND = (function () {
+  try {
+    localStorage.setItem("chi26:t", "1");
+    if (localStorage.getItem("chi26:t") === "1") {
+      localStorage.removeItem("chi26:t");
+      return "local";
+    }
+  } catch (e) {}
+  try {
+    document.cookie = "chi26t=1; max-age=60; path=/; SameSite=Lax";
+    if (document.cookie.indexOf("chi26t=1") !== -1) return "cookie";
+  } catch (e) {}
+  return "mem";
+})();
+
+var DB = { done: {}, prep: {}, pass: {}, pack: {}, paid: null, theme: null };
+
+function loadDB() {
+  var raw = null;
+  try {
+    if (BACKEND === "local") {
+      raw = localStorage.getItem("chi26:db");
+      if (!raw) {
+        /* migration depuis les anciennes clés éclatées */
+        var legacy = {};
+        ["done", "prep", "pass", "pack", "paid"].forEach(function (k) {
+          var v = localStorage.getItem("chi26:" + k);
+          if (v) legacy[k] = JSON.parse(v);
+        });
+        var th = localStorage.getItem("chi26:theme");
+        if (th) legacy.theme = th.replace(/"/g, "");
+        if (Object.keys(legacy).length) raw = JSON.stringify(legacy);
+      }
+    } else if (BACKEND === "cookie") {
+      var m = document.cookie.match(/(?:^|;\s*)chi26db=([^;]*)/);
+      if (m) raw = decodeURIComponent(m[1]);
+    }
+    if (raw) {
+      var obj = JSON.parse(raw);
+      ["done", "prep", "pass", "pack"].forEach(function (k) {
+        if (obj[k] && typeof obj[k] === "object") DB[k] = obj[k];
+      });
+      if (obj.paid && typeof obj.paid === "object") DB.paid = obj.paid;
+      if (obj.theme) DB.theme = obj.theme;
+    }
+  } catch (e) {}
 }
+
+function saveDB() {
+  var raw = JSON.stringify(DB);
+  try {
+    if (BACKEND === "local") localStorage.setItem("chi26:db", raw);
+    else if (BACKEND === "cookie") {
+      document.cookie = "chi26db=" + encodeURIComponent(raw) + "; max-age=31536000; path=/; SameSite=Lax";
+    }
+  } catch (e) {}
+}
+
+loadDB();
+if (!DB.paid) {
+  DB.paid = {};
+  BUDGET.fixed.forEach(function (r) { if (r.def) DB.paid[r.id] = 1; });
+}
+saveDB();
+
+var done = DB.done, prepDone = DB.prep, passUsed = DB.pass, packDone = DB.pack, paidState = DB.paid;
+function relink() { done = DB.done; prepDone = DB.prep; passUsed = DB.pass; packDone = DB.pack; paidState = DB.paid; }
+
+/* compat : tous les appels existants passent par ici */
+var store = { set: function () { saveDB(); }, get: function (k, d) { return d; } };
 var totalItems = DAYS.reduce(function (a, d) { return a + d.items.length; }, 0);
 
 function todayChicago() {
@@ -837,15 +911,14 @@ function todayChicago() {
    THÈME
    ============================================================ */
 var root = document.documentElement;
-var savedTheme = null;
-try { savedTheme = localStorage.getItem("chi26:theme"); } catch (e) {}
-if (savedTheme) root.setAttribute("data-theme", savedTheme);
+if (DB.theme) root.setAttribute("data-theme", DB.theme);
 document.getElementById("themeBtn").addEventListener("click", function () {
   var cur = root.getAttribute("data-theme") ||
     (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
   var next = cur === "dark" ? "light" : "dark";
   root.setAttribute("data-theme", next);
-  try { localStorage.setItem("chi26:theme", next); } catch (e) {}
+  DB.theme = next;
+  saveDB();
 });
 
 /* ============================================================
@@ -923,6 +996,9 @@ function renderHome() {
   var t = todayChicago();
   var start = "2026-08-29", end = "2026-09-11";
   var html = "";
+  if (BACKEND === "mem") {
+    html += '<div class="tipcard">⚠️ <b>Ce navigateur bloque l\'enregistrement des coches.</b> Pense à Exporter ta sauvegarde (onglet ℹ️ Infos) avant de fermer.</div>';
+  }
   if (t < start) {
     var days = Math.round((new Date(start) - new Date(t)) / 864e5);
     var prepLeft = PREP.filter(function (_, i) { return !prepDone["p" + i]; }).length;
@@ -1093,9 +1169,60 @@ function renderPack() {
 }
 
 /* ---------- écran Infos ---------- */
+function exportSave() {
+  var data = JSON.stringify(DB);
+  var doClipboard = function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(data).then(function () {
+        alert("Sauvegarde copiée 📋 Colle-la dans une note pour la garder.");
+      }, function () { window.prompt("Copie ce code de sauvegarde :", data); });
+    } else {
+      window.prompt("Copie ce code de sauvegarde :", data);
+    }
+  };
+  if (window.claude && window.claude.use) {
+    window.claude.use("downloads").then(function (dl) {
+      if (!dl) { doClipboard(); return; }
+      dl.save({ filename: "chicago-sauvegarde.json", data: data }).catch(function (e) {
+        if (!e || e.code !== "declined") doClipboard();
+      });
+    }, doClipboard);
+  } else {
+    doClipboard();
+  }
+}
+
+function importSave() {
+  var raw = window.prompt("Colle ici ta sauvegarde (le contenu du fichier .json ou le code copié) :");
+  if (!raw) return;
+  try {
+    var obj = JSON.parse(raw.trim());
+    if (typeof obj !== "object" || !obj) throw 0;
+    ["done", "prep", "pass", "pack"].forEach(function (k) {
+      if (obj[k] && typeof obj[k] === "object") DB[k] = obj[k];
+    });
+    if (obj.paid && typeof obj.paid === "object") DB.paid = obj.paid;
+    if (obj.theme) { DB.theme = obj.theme; root.setAttribute("data-theme", obj.theme); }
+    relink();
+    saveDB();
+    rerenderAll();
+    alert("Sauvegarde restaurée ✅");
+  } catch (e) {
+    alert("Ce code n'est pas une sauvegarde valide.");
+  }
+}
+
 function renderInfos() {
   var scr = document.getElementById("scr-infos");
+  var saveStatus = BACKEND === "mem"
+    ? "⚠️ <b>Ce navigateur bloque l'enregistrement.</b> Tes coches seront perdues à la fermeture : exporte une sauvegarde avant de quitter, et réimporte-la à l'ouverture."
+    : "Tes coches sont enregistrées <b>dans ce navigateur</b>. Attention : Safari et le navigateur de l'appli Claude ont chacun leur propre sauvegarde — utilise toujours le même (celui de ton icône d'accueil), ou passe par Exporter / Importer pour transférer.";
   scr.innerHTML = '<h2 class="screen-title"><span>ℹ️</span>Infos pratiques</h2>' +
+
+    '<div class="card"><h3>💾 Sauvegarde</h3>' +
+    "<p>" + saveStatus + "</p>" +
+    '<button class="btn" id="btnExport" type="button">⬇️ Exporter</button>' +
+    '<button class="btn" id="btnImport" type="button">⬆️ Importer</button></div>' +
 
     '<div class="card"><h3>📲 Installer l\'appli sur ton téléphone</h3>' +
     "<p><b>iPhone (Safari)</b> : ouvre cette page → bouton Partager <b>⬆️</b> → « <b>Sur l'écran d'accueil</b> ». L'icône skyline apparaît et la page s'ouvre en plein écran, comme une appli.</p>" +
@@ -1123,6 +1250,19 @@ function renderInfos() {
     "<li><b>Water Taxi → Chinatown</b> (~9 €/trajet) : le 31 août ou le 9 sept. Vérifier le calendrier de la ligne.</li>" +
     "<li><b>Plages</b> : Oak Street ou North Avenue Beach, sur le Lakefront Trail. Gratuit, lac baignable jusqu'à mi-septembre.</li>" +
     "<li><b>Jazz Fest</b> (3–6 sept, gratuit) : tes soirées du 3 et du 4 sont les seules attrapables.</li></ul></div>";
+
+  document.getElementById("btnExport").addEventListener("click", exportSave);
+  document.getElementById("btnImport").addEventListener("click", importSave);
+}
+
+function rerenderAll() {
+  renderHome();
+  renderPlan();
+  renderPack();
+  renderPass();
+  renderBudget();
+  renderInfos();
+  refreshRing();
 }
 
 /* ============================================================
