@@ -1,13 +1,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Agenda jour par jour d'un voyage solo de quinze jours à Chicago, du 29 août au 12 septembre 2026.">
-<title>Chicago, quinze jours</title>
+<meta name="description" content="Planning jour par jour du 29 août au 11 septembre 2026 : Chicago avec Kaplan, week-end à Ole Miss, puis Chicago au CityPASS.">
+<title>Chicago &amp; Ole Miss</title>
 
 <style>
 /* ============================================================
-   TOKENS — palette acier / rouge Chicago
-   :root = clair complet. Les deux blocs suivants ne redéfinissent
-   que des tokens, jamais des composants.
+   TOKENS
+   :root = palette claire complète. Les deux blocs suivants ne
+   redéfinissent que des tokens, jamais des composants.
    ============================================================ */
 :root {
   color-scheme: light dark;
@@ -24,13 +24,24 @@
   --accent-ink: #ffffff;
   --shadow:     0 1px 2px rgba(18,23,28,.05), 0 8px 24px -18px rgba(18,23,28,.35);
 
-  --c-archi:    #1a6491;
-  --c-musee:    #61468c;
+  /* phases du voyage */
+  --p-one:      #1a6491;
+  --p-two:      #8f5d0a;
+  --p-three:    #b8202c;
+
+  /* catégories */
+  --c-cours:    #61468c;
+  --c-musee:    #1a6491;
+  --c-archi:    #0b6e75;
+  --c-air:      #2a6e45;
   --c-musique:  #b8202c;
-  --c-bouffe:   #8f5d0a;
-  --c-sport:    #2a6e45;
-  --c-air:      #0b6e75;
-  --c-transp:   #5a6672;
+  --c-sport:    #8f5d0a;
+  --c-bouffe:   #a0562a;
+  --c-trajet:   #5a6672;
+  --c-campus:   #7a3f6d;
+
+  --pass:       #0b6e75;
+  --pass-ink:   #ffffff;
 
   --f-display: "Futura", "Futura PT", "Century Gothic", "Avenir Next", "URW Gothic", system-ui, sans-serif;
   --f-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
@@ -54,13 +65,22 @@
     --accent-ink: #17070a;
     --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
 
-    --c-archi:    #5aa6d6;
-    --c-musee:    #a98bd8;
+    --p-one:      #5aa6d6;
+    --p-two:      #dca33f;
+    --p-three:    #f0656d;
+
+    --c-cours:    #a98bd8;
+    --c-musee:    #5aa6d6;
+    --c-archi:    #45bfc4;
+    --c-air:      #5fbd87;
     --c-musique:  #f0656d;
-    --c-bouffe:   #dca33f;
-    --c-sport:    #5fbd87;
-    --c-air:      #45bfc4;
-    --c-transp:   #92a0ad;
+    --c-sport:    #dca33f;
+    --c-bouffe:   #e08a5c;
+    --c-trajet:   #92a0ad;
+    --c-campus:   #d38ac2;
+
+    --pass:       #45bfc4;
+    --pass-ink:   #0a1c1e;
   }
 }
 
@@ -77,13 +97,22 @@
   --accent-ink: #17070a;
   --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
 
-  --c-archi:    #5aa6d6;
-  --c-musee:    #a98bd8;
+  --p-one:      #5aa6d6;
+  --p-two:      #dca33f;
+  --p-three:    #f0656d;
+
+  --c-cours:    #a98bd8;
+  --c-musee:    #5aa6d6;
+  --c-archi:    #45bfc4;
+  --c-air:      #5fbd87;
   --c-musique:  #f0656d;
-  --c-bouffe:   #dca33f;
-  --c-sport:    #5fbd87;
-  --c-air:      #45bfc4;
-  --c-transp:   #92a0ad;
+  --c-sport:    #dca33f;
+  --c-bouffe:   #e08a5c;
+  --c-trajet:   #92a0ad;
+  --c-campus:   #d38ac2;
+
+  --pass:       #45bfc4;
+  --pass-ink:   #0a1c1e;
 }
 
 /* ============================================================
@@ -101,472 +130,301 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.wrap {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 0 var(--gut);
-}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 var(--gut); }
 
 a { color: inherit; }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-.eyebrow {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
 /* ============================================================
    EN-TÊTE
    ============================================================ */
-.masthead {
-  border-bottom: 1px solid var(--line);
-  background: var(--panel);
-}
+.masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
 
 .masthead-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: clamp(28px, 6vw, 56px) 0 28px;
+  display: flex; flex-direction: column; gap: 20px;
+  padding: clamp(28px, 6vw, 52px) 0 26px;
 }
 
 .title-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  justify-content: space-between; gap: 16px;
 }
 
 h1 {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: clamp(34px, 8vw, 66px);
+  font-size: clamp(30px, 7vw, 60px);
   line-height: .95;
   letter-spacing: -.01em;
   text-transform: uppercase;
   margin: 0;
   text-wrap: balance;
 }
-
 h1 .thin {
   display: block;
-  font-size: .42em;
-  letter-spacing: .16em;
+  font-size: .36em;
+  letter-spacing: .15em;
   color: var(--accent);
-  margin-top: .5em;
+  margin-top: .55em;
 }
 
 .theme-toggle {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  padding: 8px 14px;
-  cursor: pointer;
-  border-radius: 2px;
+  font-family: var(--f-display); font-size: 11px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-soft); background: var(--panel-2);
+  border: 1px solid var(--line); padding: 8px 14px;
+  cursor: pointer; border-radius: 2px;
 }
 .theme-toggle:hover { color: var(--ink); border-color: var(--ink-faint); }
 
-.lede {
-  max-width: 62ch;
-  color: var(--ink-soft);
-  font-size: 17px;
-  margin: 0;
-}
+.lede { max-width: 64ch; color: var(--ink-soft); font-size: 17px; margin: 0; }
 
-/* bandeau de chiffres */
 .facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px; background: var(--line); border: 1px solid var(--line);
 }
-.fact {
-  background: var(--panel);
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+.fact { background: var(--panel); padding: 13px 15px; display: flex; flex-direction: column; gap: 2px; }
 .fact b {
-  font-family: var(--f-display);
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--f-display); font-size: 24px; font-weight: 700;
+  line-height: 1; font-variant-numeric: tabular-nums;
 }
-.fact span { font-size: 12px; color: var(--ink-faint); letter-spacing: .04em; }
+.fact span { font-size: 12px; color: var(--ink-faint); letter-spacing: .03em; }
 
 /* ============================================================
-   RÉGLETTE DES JOURS — motif de ligne de "L"
+   RÉGLETTE DES JOURS
    ============================================================ */
 .linebar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--panel);
-  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 20;
+  background: var(--panel); border-bottom: 1px solid var(--line);
 }
 .linebar-inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 0; overflow-x: auto; scrollbar-width: thin;
 }
 .linebar-label {
-  font-family: var(--f-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  flex: 0 0 auto;
-  padding-right: 4px;
+  font-family: var(--f-display); font-size: 10px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-faint); flex: 0 0 auto; padding-right: 2px;
 }
 .stop {
   flex: 0 0 auto;
-  font-family: var(--f-data);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
-  background: none;
-  border: 0;
-  border-bottom: 3px solid var(--line);
-  padding: 4px 7px 5px;
-  cursor: pointer;
-  border-radius: 0;
+  font-family: var(--f-data); font-size: 12px; font-variant-numeric: tabular-nums;
+  color: var(--ink-soft); background: none; border: 0;
+  border-bottom: 3px solid var(--railc, var(--line));
+  padding: 4px 7px 5px; cursor: pointer; border-radius: 0;
 }
-.stop:hover { color: var(--ink); border-bottom-color: var(--ink-faint); }
-.stop[data-anchor="1"] { border-bottom-color: var(--accent); color: var(--ink); font-weight: 700; }
+.stop:hover { color: var(--ink); }
+.stop[data-anchor="1"] { color: var(--ink); font-weight: 700; }
 
 /* ============================================================
    SECTIONS
    ============================================================ */
-section { padding: clamp(36px, 7vw, 64px) 0 0; }
+section { padding: clamp(34px, 6vw, 60px) 0 0; }
 
 .sec-head {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--ink);
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px;
+  margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--ink);
 }
 .sec-head h2 {
-  font-family: var(--f-display);
-  font-size: clamp(18px, 3.5vw, 24px);
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  margin: 0;
+  font-family: var(--f-display); font-size: clamp(18px, 3.4vw, 24px);
+  font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin: 0;
 }
 .sec-head p { margin: 0; font-size: 13px; color: var(--ink-faint); }
 
 /* ============================================================
-   ANCRAGES FIXES
+   CITYPASS
    ============================================================ */
-.anchors {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+.pass-window {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px;
+  padding: 12px 16px; margin-bottom: 14px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 4px solid var(--pass); border-radius: 3px;
+  font-size: 14px; color: var(--ink-soft);
 }
-.anchor {
-  background: var(--panel);
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+.pass-window b { color: var(--ink); }
+
+.pass-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px; background: var(--line); border: 1px solid var(--line);
 }
-.anchor-date {
-  font-family: var(--f-data);
-  font-size: 12px;
-  letter-spacing: .04em;
-  color: var(--accent);
-  font-weight: 700;
+.pass-slot { background: var(--panel); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.pass-slot .num {
+  font-family: var(--f-data); font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; color: var(--pass);
 }
-.anchor b { font-size: 15px; }
-.anchor span { font-size: 13px; color: var(--ink-soft); }
+.pass-slot b { font-size: 15px; line-height: 1.3; }
+.pass-slot span { font-size: 12.5px; color: var(--ink-faint); font-family: var(--f-data); }
 
 /* ============================================================
    FILTRES
    ============================================================ */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 26px;
-}
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 24px; }
 .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 13px;
-  font-family: var(--f-body);
-  color: var(--ink-soft);
-  background: var(--panel);
-  border: 1px solid var(--line);
-  padding: 6px 12px 6px 9px;
-  cursor: pointer;
-  border-radius: 2px;
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-family: var(--f-body); color: var(--ink-soft);
+  background: var(--panel); border: 1px solid var(--line);
+  padding: 6px 12px 6px 9px; cursor: pointer; border-radius: 2px;
 }
-.chip::before {
-  content: "";
-  width: 9px; height: 9px;
-  background: var(--dot, var(--ink-faint));
-  flex: 0 0 auto;
-}
+.chip::before { content: ""; width: 9px; height: 9px; background: var(--dot, var(--ink-faint)); flex: 0 0 auto; }
 .chip:hover { border-color: var(--ink-faint); color: var(--ink); }
-.chip[aria-pressed="true"] {
-  color: var(--ink);
-  border-color: var(--ink);
-  background: var(--panel-2);
-  font-weight: 600;
-}
+.chip[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); background: var(--panel-2); font-weight: 600; }
 .chip.reset::before { display: none; }
 .chip.reset { padding-left: 12px; }
 
 /* ============================================================
-   TIMELINE — chaque jour est une station sur la ligne
+   TIMELINE
    ============================================================ */
 .days { display: flex; flex-direction: column; }
 
-.day {
-  display: grid;
-  grid-template-columns: var(--rail) 1fr;
-  gap: 0 22px;
-  padding-bottom: 34px;
+[data-phase="chi1"]    { --railc: var(--p-one); }
+[data-phase="olemiss"] { --railc: var(--p-two); }
+[data-phase="chi2"]    { --railc: var(--p-three); }
+
+.phase-div, .day {
+  display: grid; grid-template-columns: var(--rail) 1fr; gap: 0 22px;
 }
+.day { padding-bottom: 32px; }
+.phase-div { padding-bottom: 14px; }
 
 .day-rail { position: relative; }
-
 .day-rail::before {
-  content: "";
-  position: absolute;
-  left: 7px;
-  top: 0;
-  bottom: -34px;
-  width: 2px;
-  background: var(--line);
+  content: ""; position: absolute; left: 7px; top: 0; bottom: -32px;
+  width: 2px; background: var(--railc, var(--line)); opacity: .4;
 }
+.phase-div .day-rail::before { bottom: -14px; }
 .day:last-child .day-rail::before { bottom: auto; height: 26px; }
 
 .node {
-  position: absolute;
-  left: 2px;
-  top: 8px;
-  width: 12px;
-  height: 12px;
-  background: var(--panel);
-  border: 2px solid var(--line);
-  z-index: 1;
+  position: absolute; left: 2px; top: 8px; width: 12px; height: 12px;
+  background: var(--panel); border: 2px solid var(--railc, var(--line)); z-index: 1;
 }
-.day[data-anchor="1"] .node { background: var(--accent); border-color: var(--accent); }
+.day[data-anchor="1"] .node { background: var(--railc); }
 
 .day-num {
-  font-family: var(--f-display);
-  font-weight: 700;
-  font-size: 30px;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  padding-left: 26px;
-  padding-top: 2px;
-  color: var(--ink);
+  font-family: var(--f-display); font-weight: 700; font-size: 28px; line-height: 1;
+  font-variant-numeric: tabular-nums; padding-left: 26px; padding-top: 2px;
 }
 .day-dow {
-  padding-left: 26px;
-  margin-top: 6px;
-  font-family: var(--f-data);
-  font-size: 11px;
-  line-height: 1.4;
-  color: var(--ink-faint);
-  text-transform: uppercase;
-  letter-spacing: .06em;
+  padding-left: 26px; margin-top: 6px;
+  font-family: var(--f-data); font-size: 11px; line-height: 1.4;
+  color: var(--ink-faint); text-transform: uppercase; letter-spacing: .05em;
 }
 
+.phase-label {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0 8px;
+  font-family: var(--f-display); font-size: 12px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--railc);
+}
+.phase-label::after { content: ""; flex: 1; height: 1px; background: var(--railc); opacity: .35; }
+.phase-div .day-rail .node { background: var(--railc); }
+
 .day-body {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-  border-radius: 3px;
-  overflow: hidden;
+  background: var(--panel); border: 1px solid var(--line);
+  box-shadow: var(--shadow); border-radius: 3px; overflow: hidden;
 }
 
 .day-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--line-soft);
-  background: var(--panel-2);
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); background: var(--panel-2);
 }
 .day-head h3 {
-  font-family: var(--f-display);
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-  margin: 0;
+  font-family: var(--f-display); font-size: 18px; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase; margin: 0;
 }
-.day-head .tag {
-  font-family: var(--f-data);
-  font-size: 11px;
-  letter-spacing: .05em;
-  color: var(--ink-faint);
-}
+.day-head .tag { font-family: var(--f-data); font-size: 11px; letter-spacing: .04em; color: var(--ink-faint); }
 
 .items { list-style: none; margin: 0; padding: 4px 0; }
 
 .item {
-  display: grid;
-  grid-template-columns: 22px 58px 1fr;
-  gap: 0 12px;
-  align-items: baseline;
-  padding: 9px 18px;
-  border-left: 3px solid transparent;
-  transition: opacity .18s ease;
+  display: grid; grid-template-columns: 22px 62px 1fr; gap: 0 12px;
+  align-items: baseline; padding: 9px 18px;
+  border-left: 3px solid transparent; transition: opacity .18s ease;
 }
 .item + .item { border-top: 1px solid var(--line-soft); }
-.item[data-cat="archi"]   { border-left-color: var(--c-archi); }
+.item[data-cat="cours"]   { border-left-color: var(--c-cours); }
 .item[data-cat="musee"]   { border-left-color: var(--c-musee); }
-.item[data-cat="musique"] { border-left-color: var(--c-musique); }
-.item[data-cat="bouffe"]  { border-left-color: var(--c-bouffe); }
-.item[data-cat="sport"]   { border-left-color: var(--c-sport); }
+.item[data-cat="archi"]   { border-left-color: var(--c-archi); }
 .item[data-cat="air"]     { border-left-color: var(--c-air); }
-.item[data-cat="transp"]  { border-left-color: var(--c-transp); }
+.item[data-cat="musique"] { border-left-color: var(--c-musique); }
+.item[data-cat="sport"]   { border-left-color: var(--c-sport); }
+.item[data-cat="bouffe"]  { border-left-color: var(--c-bouffe); }
+.item[data-cat="trajet"]  { border-left-color: var(--c-trajet); }
+.item[data-cat="campus"]  { border-left-color: var(--c-campus); }
 
-.item.dimmed { opacity: .2; }
+.item.dimmed { opacity: .18; }
 
 .item input[type="checkbox"] {
-  width: 15px; height: 15px;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
-  transform: translateY(2px);
+  width: 15px; height: 15px; margin: 0;
+  accent-color: var(--accent); cursor: pointer; transform: translateY(2px);
 }
 
 .item .h {
-  font-family: var(--f-data);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-faint);
-  letter-spacing: .02em;
-  white-space: nowrap;
+  font-family: var(--f-data); font-size: 12px; font-variant-numeric: tabular-nums;
+  color: var(--ink-faint); letter-spacing: .02em; white-space: nowrap;
 }
 
 .item .t { font-size: 15px; }
 .item .t b { font-weight: 600; }
 .item .t em {
-  font-style: normal;
-  display: block;
-  margin-top: 3px;
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--ink-soft);
+  font-style: normal; display: block; margin-top: 3px;
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-soft);
 }
 .item.done .t { text-decoration: line-through; text-decoration-thickness: 1px; }
 .item.done .t, .item.done .h { color: var(--ink-faint); }
 
+.badge {
+  display: inline-block; vertical-align: 1px; margin-right: 8px;
+  font-family: var(--f-data); font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  background: var(--pass); color: var(--pass-ink); padding: 2px 6px; border-radius: 2px;
+  white-space: nowrap;
+}
+
+.steps { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+.steps li { margin-bottom: 3px; }
+.steps li::marker { font-family: var(--f-data); font-size: 12px; color: var(--ink-faint); }
+
 .note {
-  margin: 0;
-  padding: 12px 18px 14px;
-  border-top: 1px solid var(--line-soft);
-  background: var(--panel-2);
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--ink-soft);
+  margin: 0; padding: 12px 18px 14px;
+  border-top: 1px solid var(--line-soft); background: var(--panel-2);
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-soft);
 }
 .note b {
-  font-family: var(--f-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--accent);
-  display: block;
-  margin-bottom: 3px;
+  font-family: var(--f-display); font-size: 10px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--accent);
+  display: block; margin-bottom: 3px;
 }
+.note.tip b { color: var(--pass); }
 
 /* ============================================================
-   ANNEXES
+   CARTES / ANNEXES
    ============================================================ */
-.cols {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 22px;
-}
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
 
 .card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  padding: 18px 20px 20px;
-  box-shadow: var(--shadow);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 3px; padding: 18px 20px 20px; box-shadow: var(--shadow);
 }
+.card.warn { border-left: 4px solid var(--accent); }
 .card h3 {
-  font-family: var(--f-display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin: 0 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line-soft);
+  font-family: var(--f-display); font-size: 13px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line-soft);
 }
 .card ul { margin: 0; padding-left: 18px; }
-.card li { margin-bottom: 8px; font-size: 14.5px; line-height: 1.5; }
+.card li { margin-bottom: 9px; font-size: 14.5px; line-height: 1.5; }
 .card li:last-child { margin-bottom: 0; }
-.card li b { font-weight: 600; }
 .card p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
 .card p:last-child { margin-bottom: 0; }
-
-.table-scroll { overflow-x: auto; }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14.5px;
-  min-width: 420px;
+.card .when {
+  font-family: var(--f-data); font-size: 11px; letter-spacing: .04em;
+  color: var(--ink-faint); display: block;
 }
-th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line-soft); }
-th {
-  font-family: var(--f-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  border-bottom: 1px solid var(--line);
-}
-td.n { text-align: right; font-family: var(--f-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
-tr.total td { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 700; padding-top: 12px; }
 
 footer {
-  margin-top: clamp(40px, 8vw, 72px);
-  padding: 22px 0 44px;
-  border-top: 1px solid var(--line);
-  font-size: 13px;
-  color: var(--ink-faint);
+  margin-top: clamp(38px, 7vw, 68px); padding: 20px 0 44px;
+  border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-faint);
 }
 
 /* ============================================================
@@ -574,8 +432,8 @@ footer {
    ============================================================ */
 @media (max-width: 640px) {
   :root { --rail: 52px; }
-  .day { gap: 0 12px; }
-  .day-num { font-size: 22px; padding-left: 22px; }
+  .phase-div, .day { gap: 0 12px; }
+  .day-num { font-size: 21px; padding-left: 22px; }
   .day-dow { padding-left: 22px; font-size: 10px; }
   .day-rail::before { left: 5px; }
   .node { left: 0; width: 10px; height: 10px; }
@@ -599,15 +457,15 @@ footer {
 <header class="masthead">
   <div class="wrap masthead-inner">
     <div class="title-row">
-      <h1>Chicago<span class="thin">29 août — 12 septembre 2026</span></h1>
+      <h1>Chicago<br>&amp; Ole Miss<span class="thin">29 août — 11 septembre 2026</span></h1>
       <button class="theme-toggle" id="themeBtn" type="button">Thème</button>
     </div>
-    <p class="lede">Quinze jours en solo, calés sur les deux seules dates qui ne bougent pas : le Chicago Jazz Festival et l'ARC, tous les deux au milieu du séjour. Le reste s'organise autour — architecture le matin, musées l'après-midi, clubs le soir, et un jour lent tous les cinq jours.</p>
+    <p class="lede">Quatorze jours en trois temps : Chicago avec Kaplan le matin, un week-end de vie universitaire du Sud à Oxford, puis quatre jours entièrement touristiques à Chicago portés par le CityPASS. Marche d'abord, CTA ensuite, Uber seulement quand il n'y a pas le choix.</p>
     <div class="facts">
-      <div class="fact"><b>15</b><span>jours, 14 nuits</span></div>
-      <div class="fact"><b>7</b><span>ancrages datés</span></div>
-      <div class="fact"><b>225 $</b><span>par jour, hors vol</span></div>
-      <div class="fact"><b>26 / 17 °C</b><span>moyennes de saison</span></div>
+      <div class="fact"><b>14</b><span>jours, 3 phases</span></div>
+      <div class="fact"><b>5</b><span>entrées CityPASS</span></div>
+      <div class="fact"><b>4</b><span>vols et transferts</span></div>
+      <div class="fact"><b>11 sept</b><span>dernier jour du pass</span></div>
       <div class="fact"><b id="doneCount">0 / 0</b><span>coché</span></div>
     </div>
   </div>
@@ -615,290 +473,289 @@ footer {
 
 <nav class="linebar" aria-label="Aller à un jour">
   <div class="wrap linebar-inner" id="lineBar">
-    <span class="linebar-label">Ligne</span>
+    <span class="linebar-label">Jours</span>
   </div>
 </nav>
 
 <main class="wrap">
 
-  <!-- ======================= ANCRAGES ======================= -->
-  <section id="ancrages">
+  <!-- ======================= CITYPASS ======================= -->
+  <section id="citypass">
     <div class="sec-head">
-      <h2>Ancrages fixes</h2>
-      <p>Ce qui a une date et ne se déplace pas. Tout le reste est négociable.</p>
+      <h2>CityPASS</h2>
+      <p>Cinq entrées, une fenêtre de neuf jours consécutifs.</p>
     </div>
-    <div class="anchors">
-      <div class="anchor">
-        <span class="anchor-date">SAM 29 AOÛT</span>
-        <b>Atterrissage à O'Hare</b>
-        <span>Blue Line jusqu'au centre, 45 min, 5 $.</span>
-      </div>
-      <div class="anchor">
-        <span class="anchor-date">JEU 3 → DIM 6 SEPT</span>
-        <b>Chicago Jazz Festival</b>
-        <span>Millennium Park et Cultural Center. Gratuit, sans billet, quatre jours.</span>
-      </div>
-      <div class="anchor">
-        <span class="anchor-date">VEN 4 → LUN 7 SEPT</span>
-        <b>ARC Music Festival</b>
-        <span>Union Park. Chicago a inventé la house ; c'est le festival qui la fête. Billet payant.</span>
-      </div>
-      <div class="anchor">
-        <span class="anchor-date">SAM 5 SEPT, 22 H</span>
-        <b>Derniers feux de la saison</b>
-        <span>Navy Pier. Se placer sur le Lakefront Trail, pas sur le Pier.</span>
-      </div>
-      <div class="anchor">
-        <span class="anchor-date">DIM 6 SEPT, 5 H 30</span>
-        <b>Bike the Drive</b>
-        <span>Lake Shore Drive fermée aux voitures. Inscription en ligne obligatoire.</span>
-      </div>
-      <div class="anchor">
-        <span class="anchor-date">LUN 7 SEPT</span>
-        <b>Labor Day</b>
-        <span>Jour férié : musées bondés, commerces en horaires réduits. Journée lente.</span>
-      </div>
-      <div class="anchor">
-        <span class="anchor-date">SAM 12 SEPT</span>
-        <b>Trois foires d'art le même jour</b>
-        <span>Ravenswood ArtWalk, Renegade Craft, Wicker Park Fine Art Fair. Puis départ.</span>
-      </div>
+    <div class="pass-window">
+      <span><b>Activé jeudi 3 septembre</b> — première utilisation, Architecture River Tour.</span>
+      <span>Neuf jours consécutifs.</span>
+      <span><b>Dernier jour valable : vendredi 11 septembre inclus.</b> Le programme rentre en entier.</span>
     </div>
+    <div class="pass-grid">
+      <div class="pass-slot"><span class="num">1 / 5</span><b>Architecture River Tour</b><span>jeu 3 sept · 75 min</span></div>
+      <div class="pass-slot"><span class="num">2 / 5</span><b>360 CHICAGO</b><span>ven 4 sept · coucher du soleil</span></div>
+      <div class="pass-slot"><span class="num">3 / 5</span><b>Skydeck Chicago</b><span>mar 8 sept · de nuit</span></div>
+      <div class="pass-slot"><span class="num">4 / 5</span><b>Shedd Aquarium</b><span>mer 9 sept · matin</span></div>
+      <div class="pass-slot"><span class="num">5 / 5</span><b>Griffin Museum of Science and Industry</b><span>jeu 10 sept · journée</span></div>
+    </div>
+    <p class="note" style="border:1px solid var(--line); border-top:0; border-radius:0 0 3px 3px;"><b>Payés hors pass</b>Field Museum, Adler Planetarium et Art Institute sont visités les 30 et 31 août, avant l'activation. C'est cohérent : dans les couples de choix du CityPASS, ils sont les alternatives à Griffin, à la croisière et à 360 CHICAGO. Vouloir les six impose d'en payer trois à part.</p>
   </section>
 
   <!-- ======================= AGENDA ======================= -->
   <section id="agenda">
     <div class="sec-head">
       <h2>Jour par jour</h2>
-      <p>Filtre par thème, coche au fur et à mesure. La progression est gardée sur cet appareil.</p>
+      <p>Filtre par thème, coche au fur et à mesure. La progression reste sur cet appareil.</p>
     </div>
 
     <div class="filters" id="filters">
       <button class="chip reset" type="button" data-cat="all" aria-pressed="true">Tout</button>
-      <button class="chip" type="button" data-cat="archi"   aria-pressed="false" style="--dot: var(--c-archi)">Architecture</button>
+      <button class="chip" type="button" data-cat="cours"   aria-pressed="false" style="--dot: var(--c-cours)">Kaplan</button>
       <button class="chip" type="button" data-cat="musee"   aria-pressed="false" style="--dot: var(--c-musee)">Musées</button>
-      <button class="chip" type="button" data-cat="musique" aria-pressed="false" style="--dot: var(--c-musique)">Musique &amp; nuit</button>
-      <button class="chip" type="button" data-cat="bouffe"  aria-pressed="false" style="--dot: var(--c-bouffe)">Bouffe</button>
-      <button class="chip" type="button" data-cat="sport"   aria-pressed="false" style="--dot: var(--c-sport)">Sport</button>
+      <button class="chip" type="button" data-cat="archi"   aria-pressed="false" style="--dot: var(--c-archi)">Architecture</button>
       <button class="chip" type="button" data-cat="air"     aria-pressed="false" style="--dot: var(--c-air)">Plein air</button>
-      <button class="chip" type="button" data-cat="transp"  aria-pressed="false" style="--dot: var(--c-transp)">Trajets</button>
+      <button class="chip" type="button" data-cat="musique" aria-pressed="false" style="--dot: var(--c-musique)">Musique</button>
+      <button class="chip" type="button" data-cat="sport"   aria-pressed="false" style="--dot: var(--c-sport)">Sport</button>
+      <button class="chip" type="button" data-cat="campus"  aria-pressed="false" style="--dot: var(--c-campus)">Ole Miss</button>
+      <button class="chip" type="button" data-cat="bouffe"  aria-pressed="false" style="--dot: var(--c-bouffe)">Repas</button>
+      <button class="chip" type="button" data-cat="trajet"  aria-pressed="false" style="--dot: var(--c-trajet)">Trajets</button>
     </div>
 
     <div class="days" id="days">
 
+      <div class="phase-div" data-phase="chi1">
+        <div class="day-rail"><div class="node"></div></div>
+        <div class="phase-label">Phase 1 — Chicago, Kaplan</div>
+      </div>
+
       <!-- J1 -->
-      <article class="day" id="j1" data-day="1" data-anchor="1">
+      <article class="day" id="j1" data-day="1" data-phase="chi1" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">01</div><div class="day-dow">Sam<br>29 août</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Atterrissage</h3><span class="tag">Ne rien forcer</span></div>
+          <div class="day-head"><h3>Arrivée</h3><span class="tag">Rien de payant, rien de réservé</span></div>
           <ul class="items">
-            <li class="item" data-cat="transp"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>O'Hare → centre en Blue Line</b><em>45 min, 5 $. Acheter la carte Ventra à la borne de la station, dans le terminal.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">17 h</span><span class="t"><b>Installation et courses</b><em>Un passage au Mariano's ou au Jewel-Osco du coin : petit-déjeuner et eau pour les quinze jours.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">18 h 30</span><span class="t"><b>Riverwalk, de State Street à Lake Street</b><em>La première leçon d'architecture de la ville, au niveau de l'eau et gratuite. Repère les bâtiments que la croisière du jour 3 va nommer.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">20 h</span><span class="t"><b>Dîner sans réservation</b><em>Time Out Market à Fulton Market, ou le burger d'Au Cheval si tu acceptes la file.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">15 h 10</span><span class="t"><b>Atterrissage à Chicago</b><em>Immigration, bagages et douane : compter une à deux heures avant de sortir du terminal, sans que ce soit prévisible. Rien ne doit dépendre de cette heure-là.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Rejoindre le logement</b><em>Blue Line depuis O'Hare : 5 $, environ 45 min jusqu'au Loop, 24 h/24. Acheter la carte Ventra à la borne, dans la station même du terminal.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Millennium Park et The Bean</b><em>Premier contact avec Downtown, sans horaire et sans billet.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">—</span><span class="t"><b>Chicago Cultural Center</b><em>Entrée libre. La plus grande coupole Tiffany du monde, 30 000 pièces de verre. Vérifier l'heure de fermeture avant de t'y rendre.</em></span></li>
+            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Michigan Avenue puis Chicago Riverwalk</b><em>Tout se fait à pied et tout est gratuit. Le Riverwalk au niveau de l'eau donne le premier aperçu de ce que la croisière du 3 septembre viendra nommer.</em></span></li>
           </ul>
-          <p class="note"><b>À retenir</b>Sept heures de décalage. Ne prévois aucune sortie ce soir : la ville sera encore là demain, et les quatorze jours qui suivent dépendent de cette nuit-là.</p>
+          <p class="note"><b>Le seul vrai enjeu du jour</b>Récupérer du décalage. Tout ce qui est programmé ici est annulable sans conséquence : c'est exactement pour ça que c'est programmé comme ça.</p>
         </div>
       </article>
 
       <!-- J2 -->
-      <article class="day" id="j2" data-day="2">
+      <article class="day" id="j2" data-day="2" data-phase="chi1">
         <div class="day-rail"><div class="node"></div><div class="day-num">02</div><div class="day-dow">Dim<br>30 août</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Le Loop à pied</h3><span class="tag">Tout est gratuit sauf le dîner</span></div>
+          <div class="day-head"><h3>Field Museum et l'espace</h3><span class="tag">Museum Campus, hors CityPASS</span></div>
           <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Chicago Cultural Center</b><em>La plus grande coupole Tiffany du monde, 30 000 pièces de verre. Entrée libre, personne n'y va, c'est absurde.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">11 h 30</span><span class="t"><b>Millennium Park</b><em>Cloud Gate (le « Bean »), le Pritzker Pavilion de Gehry, le Lurie Garden, la passerelle BP. C'est aussi la scène du Jazz Fest de la semaine prochaine : repère les angles.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">13 h</span><span class="t"><b>Revival Food Hall</b><em>Quinze comptoirs dans un sous-sol Art déco du Loop. Idéal en solo, aucune décision à prendre.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">14 h 30</span><span class="t"><b>La boucle des quatre bâtiments</b><em>Rookery (hall redessiné par Frank Lloyd Wright en 1907) → Marquette Building (mosaïques Tiffany dans le hall) → Monadnock (le dernier grand immeuble en murs porteurs, 1,8 m d'épaisseur au sol) → Chicago Board of Trade. Quinze minutes de marche entre les quatre.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">19 h</span><span class="t"><b>Green Mill, Uptown</b><em>Le bar de Capone, jamais rénové depuis 1907. Le dimanche c'est l'Uptown Poetry Slam — le slam a littéralement été inventé dans cette salle en 1986. Paiement en liquide, et on ne parle pas pendant les sets.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Field Museum</b><em>Trois à quatre heures. En priorité : SUE, le <i>Tyrannosaurus rex</i> le plus complet jamais trouvé, les dinosaures, l'Égypte ancienne et les pierres précieuses.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Adler Planetarium</b><em>Astronomie et exploration spatiale, plus un spectacle sous dôme. Réserver le créneau du spectacle en arrivant, pas après la visite.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Museum Campus → Lakefront Trail → Grant Park → Buckingham Fountain</b><em>Entièrement à pied, en enfilade. La pointe de l'Adler est l'endroit d'où est prise la photo classique de la skyline : c'est sur le chemin, ne pas le rater.</em></span></li>
           </ul>
+          <p class="note"><b>Transport</b>CTA jusqu'au Museum Campus, puis rien d'autre que la marche jusqu'au retour.</p>
         </div>
       </article>
 
       <!-- J3 -->
-      <article class="day" id="j3" data-day="3">
+      <article class="day" id="j3" data-day="3" data-phase="chi1">
         <div class="day-rail"><div class="node"></div><div class="day-num">03</div><div class="day-dow">Lun<br>31 août</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Le fleuve, puis l'Art Institute</h3><span class="tag">Réserver la croisière</span></div>
+          <div class="day-head"><h3>Art Institute et Route 66</h3><span class="tag">Tout à pied</span></div>
           <ul class="items">
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Croisière architecture du Chicago Architecture Center</b><em>90 min, ~55 $. Il en existe d'autres, moins chères, avec des guides moins bons. Prends celle-là. Si tu ne devais faire qu'une chose à Chicago, c'est celle-ci.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">12 h</span><span class="t"><b>Chicago Architecture Center</b><em>Au pied de l'embarcadère. La maquette de la ville, 4 000 bâtiments, permet enfin de comprendre la géographie.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">14 h</span><span class="t"><b>Art Institute, première moitié</b><em>Impressionnistes (la plus grosse collection hors de France), <i>Nighthawks</i> de Hopper, <i>American Gothic</i>. 32 $. Trois heures maximum, on garde le reste pour le jour 13.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">18 h</span><span class="t"><b>Italian beef chez Al's #1, Little Italy</b><em>Commander « dipped, hot ». Se manger debout, penché en avant, coudes sur la barre. Il n'y a pas d'autre méthode.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">21 h</span><span class="t"><b>Buddy Guy's Legends, South Loop</b><em>Buddy Guy lui-même n'y joue qu'en janvier, mais la programmation tient toute l'année et le son est meilleur que dans les clubs à touristes du North Side.</em></span></li>
+            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Art Institute of Chicago</b><em>La plus grosse collection d'impressionnistes hors de France, plus <i>Nighthawks</i> de Hopper et <i>American Gothic</i>. Prévoir large, et sortir avant la saturation plutôt qu'après.</em></span></li>
+            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Juste à côté</span><span class="t"><b>Début historique de la Route 66</b><em>Le panneau <i>BEGIN Historic Route 66</i> se trouve sur Adams Street, à l'angle de Michigan Avenue, à une minute de la sortie du musée. Adams est en sens unique vers l'ouest : c'est le vrai point de départ, pas une reconstitution.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Selon énergie</span><span class="t"><b>The Loop → State Street → Millennium Park</b><em>Optionnel, purement à la fatigue. Le programme du jour est déjà rempli sans ça.</em></span></li>
           </ul>
         </div>
       </article>
 
       <!-- J4 -->
-      <article class="day" id="j4" data-day="4">
+      <article class="day" id="j4" data-day="4" data-phase="chi1">
         <div class="day-rail"><div class="node"></div><div class="day-num">04</div><div class="day-dow">Mar<br>1 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Museum Campus et prise de hauteur</h3><span class="tag">Créneaux à réserver</span></div>
+          <div class="day-head"><h3>Balloon Museum et The 606</h3><span class="tag">Marche + Blue Line</span></div>
           <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">9 h 30</span><span class="t"><b>Field Museum</b><em>SUE, le <i>Tyrannosaurus rex</i> le plus complet jamais trouvé, et un étage égyptien sérieux. 30 $.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">13 h</span><span class="t"><b>La pointe de l'Adler Planetarium</b><em>Marche de dix minutes depuis le Field. C'est de là qu'est prise la photo du skyline que tu as en tête. Gratuit, et venté.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">15 h</span><span class="t"><b>Shedd Aquarium — ou pas</b><em>45 $ et beaucoup de monde. L'alternative honnête : Northerly Island et la 12th Street Beach, vides, à cinq minutes.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">18 h 30</span><span class="t"><b>Skydeck du Willis Tower au coucher du soleil</b><em>36 $, créneau à réserver. Le 360 Chicago sur le Hancock coûte moins cher et donne une meilleure vue, parce qu'on y voit le Loop <i>et</i> le lac au lieu d'être posé dessus.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">20 h 30</span><span class="t"><b>Chinatown en Red Line</b><em>Dim sum tardif chez MingHin, ou raviolis faits main chez Qing Xiang Yuan. Deuxième plus vieux Chinatown des États-Unis, et l'un des rares encore habité par sa communauté.</em></span></li>
+            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Balloon Museum / EmotionAir</b><em>Exposition itinérante : vérifier qu'elle est bien programmée à Chicago à cette date, et acheter le créneau en ligne. C'est le seul point du planning qui peut disparaître.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Blue Line vers Wicker Park / Bucktown</b><em>Station Damen. Une dizaine de minutes depuis le Loop.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">—</span><span class="t"><b>Une portion de The 606</b><em>Ancienne voie ferrée surélevée devenue promenade, 4,3 km sans un seul croisement de voiture. Inutile de la faire en entier : l'entrée de Damen suffit largement.</em></span></li>
+            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Wicker Park : boutiques et dîner économique</b><em>Milwaukee Avenue concentre les friperies, les cafés et les adresses pas chères. Un des rares endroits de la ville où dîner correctement pour 15 $.</em></span></li>
           </ul>
         </div>
       </article>
 
       <!-- J5 -->
-      <article class="day" id="j5" data-day="5">
+      <article class="day" id="j5" data-day="5" data-phase="chi1" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">05</div><div class="day-dow">Mer<br>2 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Oak Park, Frank Lloyd Wright</h3><span class="tag">Journée en banlieue</span></div>
+          <div class="day-head"><h3>Argent, illusions et Cubs</h3><span class="tag">Match le soir</span></div>
           <ul class="items">
-            <li class="item" data-cat="transp"><input type="checkbox"><span class="h">9 h</span><span class="t"><b>Green Line jusqu'à Oak Park</b><em>40 min depuis le Loop, tarif normal. Aucune voiture nécessaire.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Home &amp; Studio de Frank Lloyd Wright</b><em>Visite guidée uniquement, à réserver plusieurs jours à l'avance. La maison où il a inventé le style Prairie à vingt-deux ans, en s'endettant auprès de son patron.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">12 h</span><span class="t"><b>Le quartier, à pied et sans guide</b><em>La plus forte concentration de maisons Prairie au monde : vingt-cinq bâtiments de Wright dans un rayon de dix rues. Plan gratuit à la boutique.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">13 h 30</span><span class="t"><b>Unity Temple</b><em>1908, béton brut coulé sur place parce que le budget était ridicule. L'intérieur est une gifle. C'est le meilleur bâtiment de la journée et le moins photographié.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">20 h</span><span class="t"><b>The Second City, Old Town</b><em>30–45 $. L'école d'improvisation d'où sortent la moitié des comiques américains. Format parfait en solo : on te place au comptoir, personne ne t'adresse la parole.</em></span></li>
+            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Money Museum de la Federal Reserve</b><em>Entrée gratuite, <b>passeport physique obligatoire</b> — la photo sur le téléphone ne passe pas le contrôle. Ouvert en semaine seulement et avec des horaires qui bougent : vérifier la veille.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Museum of Illusions Chicago</b><em>Une heure à une heure trente suffisent. Le billet se prend en ligne.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Red Line jusqu'à Addison</b><em>La station donne directement sur le stade. Partir tôt : la ligne se remplit avant chaque match.</em></span></li>
+            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Avant</span><span class="t"><b>Wrigleyville</b><em>Arriver assez tôt pour manger et prendre l'ambiance du quartier avant le coup d'envoi. C'est la moitié de l'expérience.</em></span></li>
+            <li class="item" data-cat="sport"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Chicago Cubs — Milwaukee Brewers, Wrigley Field</b><em>Rivalité de division, dans le stade de 1914. Les <i>bleachers</i> n'ont pas de dossier et coûtent moins cher : c'est là que ça se passe.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Après</span><span class="t"><b>Retour en Red Line avec les supporters</b><em>Trente mille personnes sortent en même temps. Laisser passer dix minutes plutôt que de forcer sur le quai.</em></span></li>
           </ul>
-          <p class="note"><b>Rythme</b>Cinquième jour : c'est là que la fatigue arrive. Rentre après Unity Temple et dors deux heures avant le spectacle. Ce n'est pas du temps perdu.</p>
         </div>
       </article>
 
       <!-- J6 -->
-      <article class="day" id="j6" data-day="6" data-anchor="1">
+      <article class="day" id="j6" data-day="6" data-phase="chi1" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">06</div><div class="day-dow">Jeu<br>3 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Pilsen, puis ouverture du Jazz Fest</h3><span class="tag">Jazz Festival, jour 1</span></div>
+          <div class="day-head"><h3>Architecture — le pass démarre</h3><span class="tag">Quasiment tout à pied</span></div>
           <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>National Museum of Mexican Art</b><em>Entrée libre. L'une des meilleures collections d'art mexicain du pays, dans un quartier qui l'a construite lui-même.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">12 h</span><span class="t"><b>Murales de 16th Street, puis carnitas</b><em>Le plus long corridor de street art de la ville, le long de la voie ferrée. Ensuite Carnitas Uruapan sur Ashland : un seul plat, au poids, depuis 1975.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">17 h</span><span class="t"><b>Chicago Jazz Festival — ouverture</b><em>Ça démarre au Chicago Cultural Center puis bascule sur Millennium Park. Gratuit, sans billet, sans réservation. Prends une couverture : les pelouses partent vite.</em></span></li>
+            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
+            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Architecture Center</b><em>La maquette de la ville, 4 000 bâtiments, permet enfin de comprendre la géographie avant de monter sur le bateau. Le centre est au pied même de l'embarcadère.</em></span></li>
+            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Puis</span><span class="t"><span class="badge">CITYPASS 1/5</span><b>Architecture River Tour</b><em>75 minutes sur la Chicago River, avec un guide bénévole formé par le centre. C'est la meilleure heure et quart du séjour, et c'est de là que le reste de la ville devient lisible.</em></span></li>
+            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Riverwalk, dîner, Downtown de nuit</b><em>Les gratte-ciel s'allument entre 20 h et 21 h en septembre.</em></span></li>
           </ul>
+          <p class="note tip"><b>Occasion gratuite, ce soir</b>Le Chicago Jazz Festival ouvre aujourd'hui à Millennium Park : quatre jours de concerts, gratuits et sans billet, à cinq minutes à pied du Riverwalk. Tes soirées du 3 et du 4 sont libres et tu pars le 5 — ce sont les deux seules que tu peux en attraper.</p>
         </div>
       </article>
 
       <!-- J7 -->
-      <article class="day" id="j7" data-day="7" data-anchor="1">
+      <article class="day" id="j7" data-day="7" data-phase="chi1" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">07</div><div class="day-dow">Ven<br>4 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Nord-ouest à vélo</h3><span class="tag">Jazz Fest ou ARC</span></div>
+          <div class="day-head"><h3>Histoire, Lincoln Park, 360</h3><span class="tag">Rentrer tôt</span></div>
           <ul class="items">
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Le 606 en Divvy</b><em>Ancienne voie ferrée surélevée transformée en promenade, 4,3 km de Wicker Park à Humboldt Park, sans un seul croisement de voiture.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">12 h</span><span class="t"><b>Jibarito à Humboldt Park</b><em>Un sandwich dont le pain est remplacé par deux bananes plantain frites. Inventé à Chicago, dans ce quartier, en 1996. Papa's Cache Sabroso ou Borinquen.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">14 h</span><span class="t"><b>Wicker Park et Bucktown</b><em>Friperies de Milwaukee Avenue, Myopic Books sur trois étages, cafés. Rien d'obligatoire, c'est le but.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">17 h</span><span class="t"><b>Le choix du soir</b><em>Jazz Festival à Millennium Park, gratuit — ou ARC Music Festival à Union Park, ~150 $ la journée. Chicago a inventé la house au début des années 80 dans un club appelé le Warehouse ; l'ARC est ce qui en reste de plus sérieux.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">Minuit</span><span class="t"><b>Smartbar, sous le Metro</b><em>Si tu restes en ville. Ouvert jusqu'à 4 h le samedi matin, programmation house et techno pointue.</em></span></li>
+            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Dernier cours Kaplan</b></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago History Museum</b><em>Le grand incendie de 1871, les abattoirs, les émeutes, la ségrégation, la Prohibition. C'est le musée qui met en place tout ce que le Crime Tour du 8 racontera.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Lincoln Park → Zoo → Conservatory</b><em>Le musée est déjà dans le parc. Le zoo, ouvert depuis 1868, et la serre sont tous les deux <b>gratuits</b> : deux des dernières entrées libres de la ville.</em></span></li>
+            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Ensuite</span><span class="t"><b>Descente vers Magnificent Mile</b><em>Une quarantaine de minutes à pied vers le sud, ou le bus 151 le long du parc.</em></span></li>
+            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Sunset</span><span class="t"><span class="badge">CITYPASS 2/5</span><b>360 CHICAGO</b><em>Réserver environ 45 minutes avant le coucher du soleil : tu prends la ville de jour, le sunset et le début de nuit sur le même billet. Le 360 regarde le Loop <i>et</i> le lac, alors que le Skydeck est posé dessus — d'où l'intérêt de faire les deux.</em></span></li>
           </ul>
+          <p class="note"><b>Coupure</b>Rentrer tôt : vol pour Memphis demain, et la journée du 5 est la plus longue du séjour.</p>
         </div>
       </article>
 
+      <div class="phase-div" data-phase="olemiss">
+        <div class="day-rail"><div class="node"></div></div>
+        <div class="phase-label">Phase 2 — Ole Miss, Mississippi</div>
+      </div>
+
       <!-- J8 -->
-      <article class="day" id="j8" data-day="8" data-anchor="1">
+      <article class="day" id="j8" data-day="8" data-phase="olemiss" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">08</div><div class="day-dow">Sam<br>5 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Baseball, jazz, feux</h3><span class="tag">La grosse journée</span></div>
+          <div class="day-head"><h3>Memphis, puis Oxford</h3><span class="tag">La journée de transfert</span></div>
           <ul class="items">
-            <li class="item" data-cat="sport"><input type="checkbox"><span class="h">13 h</span><span class="t"><b>Match à Wrigley Field</b><em>Vérifier sur mlb.com que les Cubs sont à domicile : leur plus long enchaînement de matchs à la maison tombe fin août / début septembre, contre les Reds puis les Brewers. Prendre les <i>bleachers</i> : pas de dossier, beaucoup de bière, la vraie affaire. Sinon les White Sox à Rate Field, à partir de 15 $.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">16 h 30</span><span class="t"><b>Wrigleyville après le match</b><em>Murphy's Bleachers ou Gman Tavern. Trente mille personnes sortent du stade en même temps ; c'est le moment le plus chicagoan de la semaine.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">19 h</span><span class="t"><b>Jazz Festival, grande soirée</b><em>Le samedi est la plus grosse programmation des quatre jours, au Pritzker Pavilion.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">22 h</span><span class="t"><b>Derniers feux de la saison, Navy Pier</b><em>Se placer sur le Lakefront Trail vers Ohio Street Beach plutôt que sur le Pier : même spectacle, dix fois moins de monde, et le skyline en arrière-plan.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Vol Chicago → Memphis International</b></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Memphis → Oxford, 135 km</b><em>Environ 1 h 30 de route, presque entièrement sur autoroute. C'est le trajet le plus cher et le plus fragile de tout le voyage : voir les points de vigilance plus bas, et le régler avant le départ plutôt que sur place.</em></span></li>
+            <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Installation chez ton cousin</b></span></li>
+            <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Découverte du campus, à pied et gratuitement</b><em>Dans l'ordre géographique, ça s'enchaîne sans détour :</em>
+              <ol class="steps">
+                <li>The Grove — les quatre hectares de chênes où se tient le tailgating</li>
+                <li>Lyceum — le plus vieux bâtiment du campus, 1848</li>
+                <li>Walk of Champions</li>
+                <li>Vaught-Hemingway Stadium</li>
+                <li>Student Union, puis le reste du campus</li>
+              </ol>
+            </span></li>
           </ul>
         </div>
       </article>
 
       <!-- J9 -->
-      <article class="day" id="j9" data-day="9" data-anchor="1">
+      <article class="day" id="j9" data-day="9" data-phase="olemiss" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">09</div><div class="day-dow">Dim<br>6 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Bike the Drive</h3><span class="tag">Réveil à 5 h</span></div>
+          <div class="day-head"><h3>Oxford, Faulkner, football</h3><span class="tag">Match à distance</span></div>
           <ul class="items">
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">5 h 30</span><span class="t"><b>Lake Shore Drive fermée aux voitures</b><em>48 km d'autoroute urbaine rendus aux vélos, face au lac, au lever du soleil. Inscription en ligne obligatoire, ~70 $ avec la location. Réveil brutal, souvenir définitif.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">11 h</span><span class="t"><b>Petit-déjeuner de rattrapage</b><em>Lula Café à Logan Square, ou Little Goat dans le West Loop. Tu l'auras mérité.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">14 h</span><span class="t"><b>Lincoln Park Zoo et sa serre</b><em>L'un des derniers zoos gratuits des États-Unis, ouvert depuis 1868, en plein milieu du quartier. La Conservatory juste à côté est gratuite aussi.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">18 h</span><span class="t"><b>Clôture du Chicago Jazz Festival</b><em>Dernier soir des quatre. Après ça, la ville change de saison.</em></span></li>
+            <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Oxford Square</b><em>Courthouse Square et ses boutiques, Square Books — l'une des librairies indépendantes les plus connues du Sud — et la statue de William Faulkner devant la mairie.</em></span></li>
+            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Midi</span><span class="t"><b>Déjeuner sur la Square</b></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Rowan Oak</b><em>La maison de Faulkner, à quinze minutes à pied de la Square. Le terrain se visite librement ; l'intérieur, où il a écrit le plan d'<i>Une fable</i> directement sur le mur de son bureau, se visite en plus.</em></span></li>
+            <li class="item" data-cat="sport"><input type="checkbox"><span class="h">18 h 30</span><span class="t"><b>Ole Miss — Louisville, à regarder depuis Oxford</b><em>Le match se joue au Nissan Stadium de Nashville, à plus de six heures de route : il n'est pas question d'y aller. À voir avec ton cousin, ou dans un bar de la Square rempli de supporters des Rebels. L'ambiance d'Oxford un soir de match reste réelle même quand l'équipe joue ailleurs.</em></span></li>
           </ul>
         </div>
       </article>
 
       <!-- J10 -->
-      <article class="day" id="j10" data-day="10" data-anchor="1">
+      <article class="day" id="j10" data-day="10" data-phase="olemiss" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">10</div><div class="day-dow">Lun<br>7 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Labor Day, journée lente</h3><span class="tag">Rien de payant</span></div>
+          <div class="day-head"><h3>Labor Day, sans structure</h3><span class="tag">Rien qui dépende d'un musée</span></div>
           <ul class="items">
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">11 h</span><span class="t"><b>Grasse matinée assumée</b><em>Puis brunch de quartier, sans réservation et sans plan.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">13 h</span><span class="t"><b>Lakefront Trail vers le nord</b><em>North Avenue Beach, puis Montrose Beach et son sanctuaire ornithologique. 29 km de piste continue le long du lac : la meilleure infrastructure de la ville, et elle est gratuite.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">16 h</span><span class="t"><b>Garfield Park Conservatory</b><em>Un hectare sous verre, l'une des plus grandes serres urbaines du monde, entrée libre. Vérifier l'ouverture : c'est un jour férié.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">20 h</span><span class="t"><b>Bar de comptoir</b><em>Old Town Ale House, en face de Second City, ouvert depuis 1958 et couvert de peintures satiriques. Ou The Map Room à Bucktown pour la bière.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>South Campus Rail Trail, ou simplement le campus</b><em>Ancienne voie ferrée reconvertie, plate et ombragée. Parfaite pour un jour férié où tout est fermé.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Lamar Park et son lac</b><em>Le parc municipal d'Oxford, boucle facile autour de l'eau.</em></span></li>
+            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Retour vers Oxford Square, sans programme</b><em>Boutiques, cafés, et la ville à un rythme qui n'a rien à voir avec Chicago.</em></span></li>
           </ul>
-          <p class="note"><b>Pourquoi ce jour-là</b>Labor Day ferme ou surcharge presque tout. Autant en faire le jour de récupération du séjour : c'est aussi exactement le milieu des quinze jours.</p>
+          <p class="note"><b>Le vrai point du jour</b>C'est la seule journée du séjour laissée volontairement vide. Profites-en pour ton cousin, pas pour cocher des cases : c'est aussi exactement le milieu des quatorze jours, et le seul moment où tu peux vraiment souffler.</p>
         </div>
       </article>
 
+      <div class="phase-div" data-phase="chi2">
+        <div class="day-rail"><div class="node"></div></div>
+        <div class="phase-label">Phase 3 — Chicago, mode touriste</div>
+      </div>
+
       <!-- J11 -->
-      <article class="day" id="j11" data-day="11">
+      <article class="day" id="j11" data-day="11" data-phase="chi2" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">11</div><div class="day-dow">Mar<br>8 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Hyde Park et le South Side</h3><span class="tag">Réserver Robie House</span></div>
+          <div class="day-head"><h3>Retour, gangsters, Skydeck</h3><span class="tag">Journée sous contrainte de vol</span></div>
           <ul class="items">
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Robie House</b><em>1910, le sommet absolu du style Prairie : toits en porte-à-faux de six mètres sans poteau visible. Visite guidée, à réserver.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">12 h</span><span class="t"><b>Campus de l'Université de Chicago</b><em>Gothique néo-anglais posé au milieu du South Side, quadrangles compris. Déjeuner sur 53rd Street.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">14 h</span><span class="t"><b>Museum of Science and Industry</b><em>Le sous-marin allemand U-505, capturé en pleine mer en 1944 et remonté ici, se visite de l'intérieur. 30 $. Alternative plus courte et plus forte : le DuSable Black History Museum, à dix minutes.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">17 h</span><span class="t"><b>Promontory Point</b><em>Une avancée de calcaire dans le lac, à dix kilomètres du centre. La meilleure vue du skyline de toute la ville, et il n'y a jamais personne.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">20 h</span><span class="t"><b>Jazz Showcase, South Loop</b><em>Club assis, deux sets par soir, silence exigé. C'est l'inverse exact des clubs de blues, et ça fait du bien.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Oxford → Memphis Airport → vol vers Chicago</b><em>Repartir d'Oxford avec au moins 3 h 30 d'avance sur le décollage : 1 h 30 de route, plus l'enregistrement.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Installation à l'hôtel</b><em>Ce n'est plus le logement Kaplan : vérifier l'adresse et l'heure de check-in la veille.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Crime Tour</b><em>Deux heures à deux heures et demie : Al Capone, la Prohibition, la mafia, John Dillinger et les lieux réels qui vont avec. Le History Museum du 4 septembre en a déjà posé le décor.</em></span></li>
+            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Soir</span><span class="t"><span class="badge">CITYPASS 3/5</span><b>Skydeck Chicago, Willis Tower</b><em>103<sup>e</sup> étage et The Ledge, ces caissons de verre suspendus dans le vide. Fait de nuit exprès, puisque le 360 a déjà pris le coucher de soleil : deux fois la même ville, deux fois autrement.</em></span></li>
           </ul>
+          <p class="note"><b>Si le vol traîne</b>Toute cette journée dépend d'une arrivée en début d'après-midi. En cas de retard, sacrifie le Crime Tour et garde le Skydeck : le tour se reprogramme, le CityPASS expire le 11.</p>
         </div>
       </article>
 
       <!-- J12 -->
-      <article class="day" id="j12" data-day="12">
+      <article class="day" id="j12" data-day="12" data-phase="chi2">
         <div class="day-rail"><div class="node"></div><div class="day-num">12</div><div class="day-dow">Mer<br>9 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Indiana Dunes</h3><span class="tag">Sortie de ville</span></div>
+          <div class="day-head"><h3>Shedd, Garfield, Green Mill</h3><span class="tag">Trois quartiers, tout en CTA</span></div>
           <ul class="items">
-            <li class="item" data-cat="transp"><input type="checkbox"><span class="h">8 h 30</span><span class="t"><b>South Shore Line depuis Millennium Station</b><em>1 h 15 jusqu'à Dune Park, ~14 $ l'aller. Un des rares parcs nationaux américains accessibles en train de banlieue.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Indiana Dunes National Park</b><em>Des dunes de soixante mètres, une plage de sable sur le lac Michigan, et le skyline de Chicago visible à cinquante kilomètres par temps clair. Le Three Dune Challenge fait 2,5 km et t'achèvera.</em></span></li>
-            <li class="item" data-cat="transp"><input type="checkbox"><span class="h">16 h</span><span class="t"><b>Retour en ville</b><em>Vérifier l'horaire du dernier train en arrivant : ils sont espacés en semaine.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">21 h 30</span><span class="t"><b>Kingston Mines, Lincoln Park</b><em>Deux scènes qui alternent sans interruption jusqu'à 4 h du matin, sept soirs sur sept depuis 1968. Le B.L.U.E.S. est juste en face si tu veux plus petit.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Matin</span><span class="t"><span class="badge">CITYPASS 4/5</span><b>Shedd Aquarium</b><em>Trois à quatre heures. Y être à l'ouverture : c'est l'attraction la plus fréquentée du Museum Campus, et l'écart entre 9 h et 11 h est considérable.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Garfield Park Conservatory</b><em>Green Line jusqu'à Conservatory–Central Park Drive : la station est pratiquement devant l'entrée. Un hectare sous verre, l'une des plus grandes serres urbaines du monde, entrée libre. Métro → serre → métro, sans détour par le quartier.</em></span></li>
+            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Green Mill, Uptown</b><em>Red Line jusqu'à Lawrence. Club de jazz ouvert depuis 1907, jamais rénové, et l'un des repaires de Capone pendant la Prohibition — enchaînement parfait après le Crime Tour d'hier. <b>Liquide uniquement</b>, et on ne parle pas pendant les sets.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Retour</span><span class="t"><b>Red Line s'il y a du monde, sinon Uber</b><em>La règle simple : si le quai est vide, tu prends un Uber. Ça ne se discute pas à 1 h du matin.</em></span></li>
           </ul>
         </div>
       </article>
 
       <!-- J13 -->
-      <article class="day" id="j13" data-day="13">
+      <article class="day" id="j13" data-day="13" data-phase="chi2">
         <div class="day-rail"><div class="node"></div><div class="day-num">13</div><div class="day-dow">Jeu<br>10 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Art Institute, deuxième moitié</h3><span class="tag">Réserver le dîner</span></div>
+          <div class="day-head"><h3>Griffin, toute la journée</h3><span class="tag">Le plus gros musée du séjour</span></div>
           <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Ce que tu as laissé au jour 3</b><em>Art asiatique, armures, les Thorne Miniature Rooms (68 pièces d'époque à l'échelle 1/12, une obsession de trente ans), et l'aile moderne de Renzo Piano. Le billet ne vaut qu'une journée : il faut en reprendre un.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">14 h</span><span class="t"><b>Museum of Contemporary Art</b><em>Streeterville, quinze minutes à pied. Plus petit, plus rapide, bon contrepoint.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">16 h</span><span class="t"><b>Fulton Market à pied</b><em>Le quartier des abattoirs de la ville, devenu la rue de restaurants la plus dense du pays. Les crochets à viande sont encore accrochés aux façades.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">20 h</span><span class="t"><b>Le dîner du séjour</b><em>Kasama (philippin, une étoile), Monteverde (pâtes fraîches) ou Girl &amp; the Goat. À réserver dès aujourd'hui — mais demande une place au comptoir : en solo, ça se libère souvent à 48 h.</em></span></li>
+            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Journée</span><span class="t"><span class="badge">CITYPASS 5/5</span><b>Griffin Museum of Science and Industry</b><em>Le plus grand musée de sciences de l'hémisphère ouest, dans le dernier bâtiment debout de l'Exposition universelle de 1893. Ton ordre de priorité :</em>
+              <ol class="steps">
+                <li>Anne Frank: The Exhibition</li>
+                <li>U-505 On-Board Tour — le sous-marin allemand capturé en pleine mer en 1944</li>
+                <li>Coal Mine</li>
+                <li>Powering the Future</li>
+                <li>Science Storms</li>
+                <li>Great Train Story</li>
+                <li>Take Flight / Boeing 727</li>
+              </ol>
+            </span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Promontory Point, avant la nuit</b><em>Une avancée de calcaire dans le lac, à vingt minutes du musée par Hyde Park. La meilleure vue de la skyline de toute la ville, à dix kilomètres de distance, et il n'y a jamais personne. À faire uniquement s'il te reste de l'énergie et de la lumière.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Retour Downtown en CTA</b><em>Bus 6 ou Metra Electric depuis Hyde Park.</em></span></li>
           </ul>
+          <p class="note tip"><b>Ce que le pass couvre ici</b>Entrée générale, <i>Anne Frank: The Exhibition</i> et une expérience spéciale — que tu utilises pour la Coal Mine. Le <b>U-505 On-Board Tour se paie en supplément</b> même avec le CityPASS : le prendre en ligne le matin même, les créneaux partent dans la journée.</p>
         </div>
       </article>
 
       <!-- J14 -->
-      <article class="day" id="j14" data-day="14">
+      <article class="day" id="j14" data-day="14" data-phase="chi2" data-anchor="1">
         <div class="day-rail"><div class="node"></div><div class="day-num">14</div><div class="day-dow">Ven<br>11 sept</div></div>
         <div class="day-body">
-          <div class="day-head"><h3>Le nord de la ville</h3><span class="tag">Dernier concert</span></div>
+          <div class="day-head"><h3>Navy Pier et départ</h3><span class="tag">Vol à 16 h 15</span></div>
           <ul class="items">
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Bahá'í House of Worship, Wilmette</b><em>Purple Line jusqu'au terminus. Neuf côtés, une dentelle de béton blanc et de quartz, un silence complet. Entrée libre. C'est le bâtiment le moins connu et le plus étonnant de la région, et presque aucun guide ne l'envoie.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">13 h</span><span class="t"><b>Andersonville</b><em>Ancien quartier suédois, encore fléché comme tel. La librairie Women &amp; Children First, ouverte en 1979, vaut l'arrêt.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">15 h</span><span class="t"><b>Argyle Street, Uptown</b><em>La Little Saigon de Chicago, sur trois rues. Bánh mì et café glacé à la chicorée.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">20 h</span><span class="t"><b>Dernier concert</b><em>Empty Bottle (indie, Ukrainian Village), Thalia Hall (salle tchèque de 1892 à Pilsen), Lincoln Hall ou Metro à Wrigleyville. Regarder les programmations la veille et prendre ce qui tombe.</em></span></li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- J15 -->
-      <article class="day" id="j15" data-day="15" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">15</div><div class="day-dow">Sam<br>12 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Dernier tour et départ</h3><span class="tag">Trois foires le même jour</span></div>
-          <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">10 h</span><span class="t"><b>Une foire au choix</b><em>Ravenswood ArtWalk (ateliers d'artistes dans d'anciennes usines), Renegade Craft Fair à Wicker Park, ou Wicker Park Fine Art Fair. Tout tombe le même samedi ; prends la plus proche de ton logement.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">13 h</span><span class="t"><b>Le deep dish, enfin</b><em>Pequod's à Lincoln Park : croûte caramélisée sur tout le bord, la seule version qui vaut le détour. Compter 45 minutes de cuisson, ce n'est pas une blague.</em></span></li>
-            <li class="item" data-cat="transp"><input type="checkbox"><span class="h">16 h</span><span class="t"><b>Blue Line → O'Hare</b><em>45 min depuis Damen ou Clark/Lake. Prévoir large : la Blue Line s'arrête sans prévenir, régulièrement.</em></span></li>
+            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Navy Pier</b><em>La promenade, le lac Michigan et la skyline vue depuis l'eau. Le Pier lui-même est gratuit. La Centennial Wheel seulement si l'envie et l'horaire le permettent — ce n'est pas le jour pour improviser.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">11 h 30</span><span class="t"><b>Quitter le Pier, sans discuter</b><em>Navy Pier est le point le plus mal desservi du centre : bus 124 depuis les gares, ou vingt minutes de marche depuis Grand sur la Red Line. C'est exactement le genre de détail qui fait rater un vol.</em></span></li>
+            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Récupérer les bagages, puis O'Hare</b><em>Vol à 16 h 15 : être à l'aéroport vers 13 h 30. Blue Line, 45 min, mais elle s'arrête sans prévenir — prévoir une grosse marge, pas une marge raisonnable.</em></span></li>
           </ul>
         </div>
       </article>
@@ -906,118 +763,78 @@ footer {
     </div>
   </section>
 
-  <!-- ======================= À RÉSERVER ======================= -->
-  <section id="reserver">
+  <!-- ======================= VIGILANCE ======================= -->
+  <section id="vigilance">
     <div class="sec-head">
-      <h2>À réserver maintenant</h2>
-      <p>Par ordre d'urgence. Le reste se décide sur place.</p>
+      <h2>Points de vigilance</h2>
+      <p>Ce que j'ai vérifié et ce qui mérite un arbitrage avant le départ.</p>
     </div>
     <div class="cols">
+      <div class="card warn">
+        <h3>Memphis ↔ Oxford, le point faible</h3>
+        <span class="when">Sam 5 sept et mar 8 sept</span>
+        <p>135 km, environ 1 h 30. Un Uber sur cette distance coûte grossièrement 130–180 $ le trajet, soit 260–360 $ pour l'aller-retour : c'est la quasi-totalité de ton budget transport de 300 €.</p>
+        <p>Plus gênant que le prix : sur un trajet aussi long et sans course retour, les chauffeurs annulent souvent, et la couverture Uber à Oxford est bien plus mince qu'à Memphis. Se retrouver sans voiture à 6 h du matin le 8 septembre coûterait un vol.</p>
+        <p>Deux options plus sûres à comparer avant de partir : la <b>location de voiture à Memphis Airport</b> sur trois jours, souvent moins chère que deux Uber et qui te rend mobile à Oxford ; ou une <b>navette Memphis–Oxford réservée à l'avance</b>. Et si ton cousin peut faire ne serait-ce qu'un des deux trajets, le problème disparaît de moitié.</p>
+      </div>
       <div class="card">
-        <h3>Ça part vite</h3>
+        <h3>Deux soirées gratuites à récupérer</h3>
+        <span class="when">Jeu 3 et ven 4 sept</span>
+        <p>Le <b>Chicago Jazz Festival</b> se tient du 3 au 6 septembre à Millennium Park : gratuit, sans billet, sans réservation. Tes soirées du 3 et du 4 sont ouvertes, et tu pars le 5 — ce sont les deux seules attrapables.</p>
+        <p>Le 3, c'est à cinq minutes du Riverwalk. Le 4, c'est sur la route entre Magnificent Mile et ton logement, après le 360.</p>
+        <p>L'<b>ARC Music Festival</b> (house, Union Park, 4–7 sept) tombe aussi dans la fenêtre, mais il est payant, mange une journée entière et se heurte à ton départ. À écarter.</p>
+      </div>
+      <div class="card">
+        <h3>À revérifier avant de bloquer</h3>
         <ul>
-          <li><b>Bike the Drive</b> (dim 6) — inscription en ligne, ferme plusieurs jours avant.</li>
-          <li><b>Croisière architecture CAC</b> (lun 31) — les créneaux du matin partent en premier.</li>
-          <li><b>Home &amp; Studio de F. L. Wright</b> (mer 2) — visites guidées à effectif limité.</li>
-          <li><b>Robie House</b> (mar 8) — même chose, encore plus petit.</li>
-          <li><b>Le dîner du jour 13</b> — Kasama et Monteverde se réservent à un mois.</li>
+          <li><b>Balloon Museum</b> <span class="when">mar 1 sept</span> Exposition itinérante : confirmer qu'elle est bien à Chicago à cette date.</li>
+          <li><b>Money Museum</b> <span class="when">mer 2 sept</span> Ouvert en semaine, horaires variables, passeport physique exigé à l'entrée.</li>
+          <li><b>Cubs — Brewers</b> <span class="when">mer 2 sept</span> Cohérent avec le calendrier des Cubs, qui enchaînent à domicile fin août et début septembre. Confirmer l'heure exacte : un match en journée changerait tout l'après-midi.</li>
+          <li><b>Water Taxi vers Chinatown</b> <span class="when">bonus</span> La ligne Chinatown tourne sur un calendrier réduit en septembre, souvent le week-end seulement. À vérifier avant d'en faire un plan.</li>
+          <li><b>U-505 On-Board</b> <span class="when">jeu 10 sept</span> Supplément payant même avec le CityPASS.</li>
         </ul>
       </div>
       <div class="card">
-        <h3>Créneau horaire à prendre</h3>
-        <ul>
-          <li><b>Skydeck Willis</b> — le créneau coucher de soleil est le seul qui vaille le prix.</li>
-          <li><b>Shedd Aquarium</b> — entrée obligatoirement horodatée.</li>
-          <li><b>Second City</b> — les vendredis et samedis sont pleins, un mercredi est parfait.</li>
-          <li><b>Match des Cubs</b> — vérifier d'abord que l'équipe est à domicile le 5.</li>
-          <li><b>ARC Festival</b> — seulement si tu tranches en faveur de la house contre le jazz.</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3>Rien à réserver</h3>
-        <ul>
-          <li><b>Chicago Jazz Festival</b> — gratuit, sans billet, quatre jours.</li>
-          <li><b>Cultural Center, Bahá'í Temple, Lincoln Park Zoo, Garfield Park Conservatory</b> — entrée libre.</li>
-          <li><b>Les clubs de blues</b> — on paie 10–20 $ à la porte, en liquide.</li>
-          <li><b>Indiana Dunes</b> — le billet de train s'achète à quai.</li>
-        </ul>
+        <h3>Rythme</h3>
+        <p>Le programme est dense mais tient, parce que tout est groupé par zone : Museum Campus le 30, le Loop le 31, Wicker Park le 1<sup>er</sup>, Hyde Park le 10.</p>
+        <p>Les trois vraies journées longues sont le <b>2 septembre</b> (musées puis match jusqu'à tard), le <b>5 septembre</b> (vol, route, campus) et le <b>10 septembre</b> (Griffin en entier). Ne rien ajouter à celles-là.</p>
+        <p>À l'inverse, le 7 septembre est vide exprès et le 29 août est annulable en entier. Ce sont tes deux amortisseurs : ne pas les remplir.</p>
       </div>
     </div>
   </section>
 
-  <!-- ======================= BUDGET ======================= -->
-  <section id="budget">
+  <!-- ======================= BONUS ======================= -->
+  <section id="bonus">
     <div class="sec-head">
-      <h2>Budget</h2>
-      <p>Quinze jours, hors billet d'avion. Fourchette milieu de gamme.</p>
-    </div>
-    <div class="card">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr><th>Poste</th><th>Détail</th><th class="n">Bas</th><th class="n">Haut</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Logement</td><td>14 nuits, studio Airbnb ou hôtel correct</td><td class="n">1 550 $</td><td class="n">1 950 $</td></tr>
-            <tr><td>Nourriture</td><td>~60–75 $/jour, comptoirs et un vrai dîner</td><td class="n">900 $</td><td class="n">1 100 $</td></tr>
-            <tr><td>Transport local</td><td>2 pass CTA 7 jours, Divvy, South Shore Line</td><td class="n">120 $</td><td class="n">150 $</td></tr>
-            <tr><td>Musées et visites</td><td>Art Institute ×2, Field, MSI, croisière, Skydeck…</td><td class="n">420 $</td><td class="n">550 $</td></tr>
-            <tr><td>Concerts et bars</td><td>~6 sorties, entrées et consommations</td><td class="n">400 $</td><td class="n">500 $</td></tr>
-            <tr class="total"><td>Total</td><td>soit 225 à 285 $ par jour</td><td class="n">3 390 $</td><td class="n">4 250 $</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================= PRATIQUE ======================= -->
-  <section id="pratique">
-    <div class="sec-head">
-      <h2>Bases pratiques</h2>
-      <p>Ce qu'il faut savoir avant de partir.</p>
+      <h2>En réserve</h2>
+      <p>À insérer si une journée finit plus tôt que prévu.</p>
     </div>
     <div class="cols">
       <div class="card">
-        <h3>Où poser ses affaires</h3>
-        <p><b>West Loop / Fulton Market</b> — restaurants et vie nocturne à pied, le Loop à quinze minutes. Le meilleur compromis.</p>
-        <p><b>Wicker Park / Logan Square</b> — le plus vivant, le moins cher, et la Blue Line va directement à O'Hare sans changement.</p>
-        <p><b>Lakeview / Lincoln Park</b> — plus calme, Wrigley Field et les clubs de blues à pied.</p>
-        <p>Éviter le Loop pur : c'est un quartier de bureaux, mort après 19 h.</p>
+        <h3>Bonus prioritaire — Water Taxi et Chinatown</h3>
+        <p>Water Taxi depuis Downtown → Chinatown → balade et repas → retour en CTA par la Red Line. Compte une demi-journée.</p>
+        <p>Les créneaux qui s'y prêtent le mieux : le <b>31 août</b> si tu écourtes l'Art Institute, ou le <b>9 septembre</b> entre Shedd et Garfield Park. Vérifier le calendrier de la ligne avant de compter dessus.</p>
       </div>
       <div class="card">
-        <h3>Se déplacer</h3>
-        <ul>
-          <li>Carte <b>Ventra</b> à 5 $ (remboursés en crédit), puis 2,50 $ le trajet en « L », 2,25 $ en bus.</li>
-          <li>Pass <b>7 jours à 20 $</b> : en prendre deux. Rentable dès trois trajets par jour.</li>
-          <li>O'Hare en Blue Line : 5 $, 24 h/24. Midway en Orange Line : 2,50 $.</li>
-          <li><b>Divvy</b> pour le lakefront et le 606. Le pass journée se prend dans l'appli.</li>
-          <li>La ville est un damier orienté nord-sud, avec State et Madison pour origine. Tu ne te perdras pas.</li>
-        </ul>
+        <h3>Plages et lakefront</h3>
+        <p>S'il fait très chaud, remplace n'importe quelle promenade par une heure à <b>Oak Street Beach</b> ou <b>North Avenue Beach</b> : les deux sont sur le Lakefront Trail, à portée de tout le programme Downtown.</p>
+        <p>Fin août on est à 27 °C environ, début septembre plutôt 24 °C. Le lac reste baignable jusqu'à la mi-septembre, et la rive est trois à quatre degrés plus fraîche que la ville.</p>
       </div>
       <div class="card">
-        <h3>Voyager seul, ici</h3>
+        <h3>À emporter</h3>
         <ul>
-          <li>Le <b>comptoir</b> se prend sans réservation dans presque tous les restaurants, y compris les meilleurs. C'est ton principal levier pendant quinze jours.</li>
-          <li>Les Chicagoans parlent aux inconnus. Ce n'est pas un cliché, c'est mesurable au bar.</li>
-          <li>Le Loop, le North Side, le lakefront et tous les quartiers listés ici sont sûrs, y compris tard.</li>
-          <li>Le risque réel est le vol de téléphone à l'arraché, dans la rue et sur le « L » la nuit. Ne pas marcher le téléphone à la main ; monter dans la voiture où il y a du monde.</li>
-          <li>Pourboire : 18–20 % au restaurant, 1–2 $ par verre au bar.</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3>Météo et sac</h3>
-        <ul>
-          <li>Fin août : 27 °C le jour, 18 °C la nuit. Début septembre : 24 °C et 15 °C.</li>
-          <li>Le lac refroidit la rive de trois à quatre degrés. Les soirées à Millennium Park et à Navy Pier sont plus fraîches qu'annoncé.</li>
-          <li>Orages courts et violents possibles : un coupe-vent, pas un parapluie (le vent le retourne, c'est le principe de la ville).</li>
-          <li>De vraies chaussures : ce programme fait 12 à 18 km de marche par jour.</li>
+          <li><b>Passeport physique</b> — indispensable au Money Museum, utile ailleurs.</li>
+          <li><b>Liquide</b> — le Green Mill n'accepte que ça, et beaucoup de clubs font pareil.</li>
+          <li><b>Carte Ventra</b> — 5 $ rendus en crédit, 2,50 $ le trajet en « L ». Un pass 7 jours à 20 $ est rentable dès trois trajets par jour : deux pass couvrent tes deux séjours à Chicago.</li>
+          <li><b>Coupe-vent</b> plutôt qu'un parapluie : le vent le retourne, c'est littéralement le surnom de la ville.</li>
+          <li><b>Vraies chaussures</b> — ce programme fait 12 à 18 km de marche par jour.</li>
         </ul>
       </div>
     </div>
   </section>
 
   <footer>
-    Dates du Jazz Festival (3–6 sept), de l'ARC (4–7 sept), des feux de Navy Pier (5 sept) et des foires du 12 septembre confirmées sur les calendriers officiels de la ville. Les horaires de matchs, les programmations de clubs et les tarifs sont à revérifier à l'approche.
+    Dates du Chicago Jazz Festival (3–6 sept) et de l'ARC Music Festival (4–7 sept) confirmées sur les calendriers officiels de la ville. La fenêtre CityPASS de neuf jours consécutifs place bien le dernier jour d'utilisation au 11 septembre inclus. Horaires de matchs, programmations et tarifs restent à revérifier à l'approche du départ.
   </footer>
 
 </main>
@@ -1037,8 +854,7 @@ footer {
   document.getElementById("themeBtn").addEventListener("click", function () {
     var current = root.getAttribute("data-theme");
     if (!current) {
-      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      current = prefersDark ? "dark" : "light";
+      current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
     var next = current === "dark" ? "light" : "dark";
     root.setAttribute("data-theme", next);
@@ -1055,6 +871,7 @@ footer {
     btn.className = "stop";
     btn.textContent = day.dataset.day;
     btn.dataset.anchor = day.dataset.anchor === "1" ? "1" : "0";
+    btn.setAttribute("data-phase", day.dataset.phase);
     var head = day.querySelector(".day-head h3").textContent;
     btn.title = "Jour " + day.dataset.day + " — " + head;
     btn.setAttribute("aria-label", "Aller au jour " + day.dataset.day + " : " + head);
@@ -1095,11 +912,9 @@ footer {
   });
 
   /* ---------- progression, gardée sur l'appareil ---------- */
-  var KEY_DONE = "chi2026:done";
+  var KEY_DONE = "chi2026:done:v2";
   var done = {};
-  try {
-    done = JSON.parse(localStorage.getItem(KEY_DONE) || "{}") || {};
-  } catch (e) { done = {}; }
+  try { done = JSON.parse(localStorage.getItem(KEY_DONE) || "{}") || {}; } catch (e) { done = {}; }
 
   var counter = document.getElementById("doneCount");
 
@@ -1113,7 +928,7 @@ footer {
     try { localStorage.setItem(KEY_DONE, JSON.stringify(done)); } catch (e) {}
   }
 
-  items.forEach(function (item, i) {
+  items.forEach(function (item) {
     var dayEl = item.closest(".day");
     var uid = "d" + dayEl.dataset.day + "-" + Array.prototype.indexOf.call(
       dayEl.querySelectorAll(".item"), item
@@ -1124,10 +939,7 @@ footer {
     var label = item.querySelector(".t b").textContent;
     box.setAttribute("aria-label", "Fait : " + label);
 
-    if (done[uid]) {
-      box.checked = true;
-      item.classList.add("done");
-    }
+    if (done[uid]) { box.checked = true; item.classList.add("done"); }
 
     box.addEventListener("change", function () {
       item.classList.toggle("done", box.checked);
