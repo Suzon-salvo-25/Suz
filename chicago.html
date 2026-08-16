@@ -1,1003 +1,1075 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Planning jour par jour du 29 août au 11 septembre 2026 : Chicago avec Kaplan, week-end à Ole Miss, puis Chicago au CityPASS.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="L'appli du voyage : Chicago + Ole Miss, du 29 août au 11 septembre 2026, jour par jour avec prix et coches.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chicago">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F5FB">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0D1220">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAARCElEQVR42u2d+ZNU1RXHz1+Qyu/s+youqCiLAoIswzJsA0zPTPf0MvvCzMDMMCyKAm4Yo8imBoz7ghVDZDBEIQRLDUgi0WhKYxJjDFY0hiwmVUlFc8gzVnPvfT33vnPO0Km+VZ+iqO4+3/c9533f2o8G+vcp8niMgB+BJzQcA/rM83iMwMA+8zweIzCoz3yPxwgM7jPf4zECQ/ou8HiMwNC+CzweIzCs70KPxwgM71vs8RiBEX2LPR4jMLLfIo/HCIzqt8jjMQKj+y32eIzAmH6LPR4jMLbfEo/HCFzUb4nHYwTG9V/q8RiBi/sv83iMwCX9l3k8RuDS/iUejxG4rH+Jx2MExg9Y7vEY8eHwhIfj8gErPB4jcMWAFR6PEbhywEqPxwhMGFDq8RiBqwaWejxG4OqBMY/HCEwcGPN4jMCkgWUejxGYPLDM4zECUwaVezxG4JpB5R6PEbh2UIXHYwSmDop7PEZg2qC4x2MEpg9KeDxG4LrBCY/HCMwYXOlBvv61kV/hpxEAMwdXemaeHw4/jQC4fnDSg2SHw08jAGYNTnmQ7HD4aQTA7CEpD5IdDj+NAAxH2oOcHw4/kHPAnCFpz5zzwyG0iEWjU/EJybrpydVFlesWV25anthcmtgSO/cn/h1fwdfxXfwMfjIfZgJzh2Q8SHY4eJVLxqXrpqXWL67cVpm4rznxWFf82Zsrnr+94sg3y49tL//Rvef+xL/jK/g6voufwU/i57EKay/gTKBoSMZTdH44uDQTE1JrFyTvSiUe6Yh331rxyu7ytx4r++2B2Cc/iP3teOk/Xy3998nSL06d+xP/jq/g6/gufgY/iZ/HKqxFBdS5IDOBeUOqPEh2OOhqiSvTGxYld9Ulnr0pjmv6l/vLzh45lwN78PNYhbWogDqohpq9PBOYP7TKg2SHg6JTMjbTXpTaUVN5YHP81N7yM90xp0zooALqoBpqojLq99pMYMHQag+SHY7IIpmJmVtiySe6Eq/urvj9QWosskE11ERl1Mel9M5MYOHQGg+SHY5oCqtmZHZUJ5+/Lf7Ok2V4DsGYjADURGXUx6XgsnphJlA8tMZTfH44IpR3zE3vba48vr2Cfhzp8SiDS8Fl4RKlZwKLhtZ6kOxwuNZ2zcs81FZ5Yk/F2SOyyfjfuWoMl4VLxOWKzgQWD6v1INnhcCpcW5R5eHXlaw9UfHa8tBeSEYDLwiXicnHpcjOBJcPqPEh2OOyr2mZW7VuVPHFfrybjq3zgcnHp6EFoJrB0WJ1n6fnhsCypm1S9uyb10vb42aOxXk7Gl8eXozFcOnpAJxIzgWXD6j1IdjhsPl9+Ud22sszh2xIfdZddkGQE4NLRAzpBP+wzgZJh9Z6S88Nh8/kN86r3r0u++2T5BUxGAHpAJ+iHfSawfFiDB8kOR48frruq9v7a9Mk9cYn7GRHuf6AT9IOueGcCK4Y3epDscPT44S1Lqrs3J88cLLvgyfjy5sfBMvSDrnhnAiuHNxYg2VGwJ6htnFi3ryH9+t54niQjAP2gK/TGOCUoHd5UgEQLR1C7ubim++bkhT0PNZ6Zoiv0xjgliA1vKkCihQMLqy5t2JOpem1PIq+SEYCu0Bs65JoSlA1vLkCihQML186o39+Z/vUz5XkYDnSF3tAh15SgfERzARItHFh4+7LaI7cn/3yB7nrlBl2hN3TINSUMx6oCJFo40uOadqerT+XlMSUAvaFD9MkyJagYsaoAiRaOlkmNj7ZUvfN4PG/Dgd7QIfpkmRLER7QUINHCsX5mw3fXZz48UJ634UBv6BB9skwJEiNaC5Bo4diyoOHwlvSnL5TlbTjQGzpEnyxTgsoRrQVItHDcuaz+2LbUZ8djeRsO9IYO0SfLlCA5sq0AiRaOe2L1L9+dzIfvU3J8z4IO0SfLlCA1sq0AiRaOnRV1J+5Nfn4yf8OB3tAh+mSZEqRHri5AgpX9xVudxhAEr+vv7orXn9yZzNtkBKBD9MkyJciMXF2AKDkwhkNnV0X9/8WeA32yTAmqRq4pQHo8ghjzsSPW8OrdqX/l8TkHekOH6JNlSlA9qr0AyX34CHvx7pKm43em/57HVyvoDR2iT5YpQc2o9gIk2gnptuLmF7dW/SmP73OgN3SIPlmmBLWjOgqQaOHYPKule0PNmQMVeRsO9IYO0SfLlKBuVEcBEvH2+eS2/a117z0u9cVbNFdfHgf/q4De0CH6ZJkS1I/qLEAifvF2Sfu3Mw2n70vlbTjQGzpEnyxTgoZRnQVItBWAhTtKml+6o+ovR8vyMBzoCr2hQ64pQePotQVItBWAhbfMajvYVfvBM/E8DAe6Qm/okGtK0DR6bQHS4/0uI1jYeUX7ozWNP5M5shDDga7QGzrkmhI0j+4qQHq8pWF8MajdvqTl6Jaajw9V5FU40A+6Qm+MU4JVo9cVID3eBDO+HtRumtK+v6nx7X2pvAoH+kFX6I1xStAyel0BYnPvXA/HV+W7SlqOba35uLsif8KBftAV75Sgdcx6UVyblPYTzZXi7aYpnU83NL1xf5r3exZKONAPuuKdkg9HRG/3FK8+vLHu/acr8yQc6Id9StA2ZoMork1K+4nmSvfWNX7dg4mWl7fVfMJ3ZkoJB/phnxKsHrNBFNcmpf1Ec2X0tnVq59P1zT/dmfkr0z0xSjgkpgRrxmwUxbVJaT/RXIV5u2tux4G2xp8/kP7H8TKucLg+SBC8LjElaB+7URTXFSDtJ5qrHN52FK/p7mh8ey9DPmzuy4WFRmJK0DH2BlFcV4C0n2xXrttomNquxe2HOnD/gceXcpbDitNuQ25u0Dn2RlFcwyHtJ9uV6zaaQ3Bnccdzbc2nd1Z9ciguFI7coZGYEqwde6MoruGQ9qO4ctpGKX3l/qqdfkIqMSXoGrtJFOdLMmE/iiunbZTSl3Q4JKYE68ZuEsW1SWk/0Vzp3vItHBJTgvUXbRLF+VE8YT/RXOne8i0cElOCjeNuFMX1y3FpP7ore+gKxnB8fvLcvzfBK2GKjsSU4IaLbxDF9bpA2k+2K1foCjpv7q56Y1fV6XurT91VQ9GRmBJsunijKDa7jey3pP0orpygKxi+TU21PpVsfSLe+kisLdqDBHJzg5su2SiK6wN50n4UV07QFSw1Xe+dC80Nbr50gyiuw5L2Y+MqbBul9GXTb7SHF4MXJaYEWy5bL4rzTysJ+1FcOW2jlL5s+rU5fISlWWJKsHX8OlFch0WpjaZsnw8Jb1yaEusObh3fJYprk5RaV2XXbVTCG5emxLqD2y5fK4prk5RaaeUwhQhforL3K7Hu4I4rOkVxbZJSK62sK0R79kKiX4l1B9uu7BDF9de39Fou6MpGBcv7N2H54OpXYt3BNyZ0iOK67zXWskBXtu/L/iKZq1+JdQd3TWgXxfXXt5xqnaArS3gzakZ42Edi3cE3r1ojiusDeXotF3RlCW9hmq4nuRLrDu65erUCvWGKGq+THpWdtlEJb7pmtJNcfT3Sge0T2xToDVPUeJ3YKNtvoxLejJoRTnL19UgHdkxqVaA3TFHjdZJb2XUblfDGpamvRzqwc1KLAr1hihqvkx6VnbZRCW9cmvp6pAO7J7co0BumqDnVOp210XvUFVx/PV1/kWvyvN0FwJ4pqxTo4aCo6bXR/nkgr6scChHunWe/yzV53u4C4P5rmhXo4TCqWd4s0mvpt6hzuKL3RTTGNXne7gLggWubFOjhCFOzmZexlrh15nZF6Yu+V+OaPG93AfCtqY0K9HDoavbfNfA6ye2q9xXoswobIG93AbBvaoMCvWF7NX0QvE6iuZJTsNGMdpLL210APDitXoHeMEWN10luZddtVMKbUTPCYZTuTU8CPDS9ToHeMEWN10luZddtVMKbk2aO0NC96UmAh6+rU6Bfwetq9lBqIyg7baMS3rg06Tp6EuDRGbUK9GsEo5ollFpGZWObEt64NOk6ehLgsRk1CvQreCc1Bb3W9XeGw16kuMqhQHzYh+5KorsAeHxmtQL9Cl5Xs8e+1vV0kuIqt4LrP0DidSXRXQA8eX2VAn1XqavZR83oJEJG9XfpPTr1RemXxZvrXk1PAjw1K6NAD4euZn83M8wJZevMrUzpi75X45o8fW56EmD/7LQCPRxGNUuXvE54lSW8uc4qLHC6juteTU8CPDM7pUBv2Khm6ZLXCa+yhDenWeUYoL23sNDoSYDvzEkp0BumqPE66VHZaRuV8Bam6XoYpXvTkwDPzk0q0BumqPE66VHZaRuV8KZrRjvJpXvTkwAHiioV6FfwRjVLKLXRlO23UQlvXJp0HT0J8L15CQX6NUKYmg2UWldl121UwhuXJl1HTwI8Ny+uQL+C19XsMdayPOxDcRWmQH/Yh+5KorsA6J5foUC/grdXs6yNkFH9LYqrMAX6I4x0VxLdBcChBeUK9F2lvZq+IsNqKb+B4erKSYG4V+OavK7julfTkwDfX1iuQA+HUc3SpV7L9YAxvUf7vuz3alyTp89NTwIcLi5ToIcjTM1mRfI64VWW8OakmWOARh2nvZqeBHihOKZAb1hXs/+ugdcJr7KEN6dZ5dhLGb057dX0JMCLi0oV6A1T1HidRFY2jk/Cm64Z7TBK96YnAY4uXqlAb5iixuskt7LrNirhzagZ4SSX7k1PAvxwyQoF+hW8rmYPpdZV2XUblfDGpUnX0ZMAx5YuV6BfI+hq9lBqIyg7pV/CG5cmXUdPAhxfWqJAv4I3qlkSVkt/2IfiylXB/gSc7kqiuwB4aVmJAv0K3qhmiV4b7Z8H2ijTvdEfYaS7kuguAF4uWaZA31Ua1SyjptfSfwMjhyt6X8S9Gtfk7XXC5qYnAV5ZvlSBHo4wNZt5GWtZvnij96gr0PdqXJOnz01PAvx4xRIFejh0NfsVyeskt6veV7CflesxPcybfT70JMCJlYsV6A0b1Sy/a+B10qOrXlagaOYOja7julfTkwAnVy5SoDdMUeN1klvZdRuV8GbUjHCSS/emJwFOlRYr0BumqPE6iaYcFhoJb2Garie5dG96EuAnsYUK9Ct4ezXe2gjKTtuohDcuTbqOngR4vWyhAv0K3qhmCaU2mrJ9mxLeuDTpOnoS4HT5AgX6FXyYmg16LdfDPhRXORSID/vQXUl0FwBvlM9XoF/B62r2GGuJ/+EN3VVuBcojjHRXEt0FwJsV8xTou0pdzT5qRifE38DIoczSF2WvxjV5p7kZX9eTAG/FixTo4dDV7G+Bhzmhf/FG79GoQNyrcU2ePjc9CfB2Yq4CPRxGNUuXvE54lSW8UWaVW8d1r6YnAX5ROUeB3rCTmuKS1wmvsoQ3o2aEk1x7nbC9mp4EeKdyjgK9YYoar5MelZ22UQlvYZquOw+6Nz0J8G5ytgK9YYoar5MelZ22UQlvuma0k1y6Nz0J8F5qlgL9Ct6oZgmlNpqy/TYq4Y1Lk66jJwF+lb5egX4FH6ZmA6XWVdl1G5XwxqVJ19GTAL/JzFSgX8HravYYa1ke9qG4ClOgP+xDdyXRXQC8n5mhQL+CN6pZ4lTrFBqKqzAF+iOMdFcS3QXAB1XXKdB3lRQ1Xie8yhLeuDR5uwuA31VPV6A3TFHjdcKrLOGNS5O3uwD4sGa6Ar1hihqvE15lCW9cmrzdBcCZ2mkK9IYparxOeJUlvHFp8nYXAB/VTlWgN0xR43XCqyzhjUuTt7sA+EPdtQr0hilqvE54lSW8cWnydhcAH9dfo0BvmKLG64RXWcIblyZvdwHwx4YpCvSGKWq8TniVJbxxafJ2FwCfNk5WoDdMUeN1wqss4Y1Lk7e7ADjbOFmB3jBFjdcJr7KENy5N3u4C/gOMoe1+X4POJgAAAABJRU5ErkJggg==">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkNoaWNhZ28gJiBPbGUgTWlzcyIsICJzaG9ydF9uYW1lIjogIkNoaWNhZ28iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImJhY2tncm91bmRfY29sb3IiOiAiIzBkMTIyMCIsICJ0aGVtZV9jb2xvciI6ICIjMGQxMjIwIiwgImljb25zIjogW3sic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBTFFBQUFDMENBSUFBQUN5cjVGbEFBQVJDRWxFUVZSNDJ1MmQrWk5VMVJYSHoxK1F5dS9zK3lvdXFDaUxBb0lzd3pKc0EwelBUUGYwTXZ2Q3pNRE1NQ3lLQW00WW84aW1Cb3o3Z2hWRFpEQkVJUVJMRFVnaTBXaEtZeEpqREZZMGhpd21WVWxGYzhnelZuUHZmVDMzdm5QTzBLbStWWitpcU80KzMvYzk1MzNmMm84Ryt2Y3A4bmlNZ0IrQkp6UWNBL3JNODNpTXdNQSs4endlSXpDb3ozeVB4d2dNN2pQZjR6RUNRL291OEhpTXdOQytDendlSXpDczcwS1B4d2dNNzF2czhSaUJFWDJMUFI0ak1MTGZJby9IQ0l6cXQ4ampNUUtqK3kzMmVJekFtSDZMUFI0ak1MYmZFby9IQ0Z6VWI0bkhZd1RHOVYvcThSaUJpL3N2ODNpTXdDWDlsM2s4UnVEUy9pVWVqeEc0ckgrSngyTUV4ZzlZN3ZFWThlSHdoSWZqOGdFclBCNGpjTVdBRlI2UEViaHl3RXFQeHdoTUdGRHE4UmlCcXdhV2VqeEc0T3FCTVkvSENFd2NHUE40ak1Da2dXVWVqeEdZUExETTR6RUNVd2FWZXp4RzRKcEI1UjZQRWJoMlVJWEhZd1NtRG9wN1BFWmcycUM0eDJNRXBnOUtlRHhHNExyQkNZL0hDTXdZWE9sQnZ2NjFrVi9ocHhFQU13ZFhlbWFlSHc0L2pRQzRmbkRTZzJTSHcwOGpBR1lOVG5tUTdIRDRhUVRBN0NFcEQ1SWREaitOQUF4SDJvT2NIdzQva0hQQW5DRnB6NXp6d3lHMGlFV2pVL0VKeWJycHlkVkZsZXNXVjI1YW50aGNtdGdTTy9jbi9oMWZ3ZGZ4WGZ3TWZqSWZaZ0p6aDJROFNIWTRlSlZMeHFYcnBxWFdMNjdjVnBtNHJ6bnhXRmY4Mlpzcm5yKzk0c2czeTQ5dEwvL1J2ZWYreEwvaksvZzZ2b3Vmd1UvaTU3RUtheS9nVEtCb1NNWlRkSDQ0dURRVEUxSnJGeVR2U2lVZTZZaDMzMXJ4eXU3eXR4NHIrKzJCMkNjL2lQM3RlT2svWHkzOTk4blNMMDZkK3hQL2pxL2c2L2d1ZmdZL2laL0hLcXhGQmRTNUlET0JlVU9xUEVoMk9PaHFpU3ZUR3hZbGQ5VWxucjBwam12Nmwvdkx6aDQ1bHdONzhQTlloYldvZ0Rxb2hwcTlQQk9ZUDdUS2cyU0hnNkpUTWpiVFhwVGFVVk41WUhQODFON3lNOTB4cDB6b29BTHFvQnBxb2pMcTk5cE1ZTUhRYWcrU0hZN0lJcG1KbVZ0aXlTZTZFcS91cnZqOVFXb3Nza0UxMUVSbDFNZWw5TTVNWU9IUUdnK1NIWTVvQ3F0bVpIWlVKNSsvTGY3T2syVjREc0dZakFEVVJHWFV4Nlhnc25waEpsQTh0TVpUZkg0NElwUjN6RTN2YmE0OHZyMkNmaHpwOFNpRFM4Rmw0UktsWndLTGh0WjZrT3h3dU5aMnpjczgxRlo1WWsvRjJTT3l5ZmpmdVdvTWw0Vkx4T1dLemdRV0Q2djFJTm5oY0NwY1c1UjVlSFhsYXc5VWZIYTh0QmVTRVlETHdpWGljbkhwY2pPQkpjUHFQRWgyT095cjJtWlc3VnVWUEhGZnJ5YmpxM3pnY25IcDZFRm9KckIwV0oxbjZmbmhzQ3lwbTFTOXV5YjEwdmI0MmFPeFhrN0dsOGVYb3pGY09ucEFKeEl6Z1dYRDZqMUlkamhzUGw5K1VkMjJzc3poMnhJZmRaZGRrR1FFNE5MUkF6cEJQK3d6Z1pKaDlaNlM4OE5oOC9rTjg2cjNyMHUrKzJUNUJVeEdBSHBBSitpSGZTYXdmRmlEQjhrT1I0OGZycnVxOXY3YTlNazljWW43R1JIdWY2QVQ5SU91ZUdjQ0s0WTNlcERzY1BUNDRTMUxxcnMzSjg4Y0xMdmd5Zmp5NXNmQk12U0RybmhuQWl1SE54WWcyVkd3SjZodG5GaTNyeUg5K3Q1NG5pUWpBUDJnSy9UR09DVW9IZDVVZ0VRTFIxQzd1YmltKytia2hUMFBOWjZab2l2MHhqZ2xpQTF2S2tDaWhRTUxxeTV0MkpPcGVtMVBJcStTRVlDdTBCczY1Sm9TbEExdkxrQ2loUU1MMTg2bzM5K1ovdlV6NVhrWURuU0YzdEFoMTVTZ2ZFUnpBUkl0SEZoNCs3TGFJN2NuLzN5QjducmxCbDJoTjNUSU5TVU14Nm9DSkZvNDB1T2FkcWVyVCtYbE1TVUF2YUZEOU1reUphZ1lzYW9BaVJhT2xrbU5qN1pVdmZONFBHL0RnZDdRSWZwa21STEVSN1FVSU5IQ3NYNW13M2ZYWno0OFVKNjM0VUJ2NkJCOXNrd0pFaU5hQzVCbzRkaXlvT0h3bHZTbkw1VGxiVGpRR3pwRW55eFRnc29SclFWSXRIRGN1YXorMkxiVVo4ZGplUnNPOUlZTzBTZkxsQ0E1c3EwQWlSYU9lMkwxTDkrZHpJZnZVM0o4ejRJTzBTZkxsQ0Exc3EwQWlSYU9uUlYxSis1TmZuNHlmOE9CM3RBaCttU1pFcVJIcmk1QWdwWDl4VnVkeGhBRXIrdnY3b3JYbjl5WnpOdGtCS0JEOU1reUpjaU1YRjJBS0Rrd2hrTm5WMFg5LzhXZUEzMnlUQW1xUnE0cFFIbzhnaGp6c1NQVzhPcmRxWC9sOFRrSGVrT0g2Sk5sU2xBOXFyMEF5WDM0Q0h2eDdwS200M2VtLzU3SFZ5dm9EUjJpVDVZcFFjMm85Z0lrMmducHR1TG1GN2RXL1NtUDczT2dOM1NJUGxtbUJMV2pPZ3FRYU9IWVBLdWxlMFBObVFNVmVSc085SVlPMFNmTGxLQnVWRWNCRXZIMitlUzIvYTExN3owdTljVmJORmRmSGdmL3E0RGUwQ0g2WkprUzFJL3FMRUFpZnZGMlNmdTNNdzJuNzB2bGJUalFHenBFbnl4VGdvWlJuUVZJdEJXQWhUdEttbCs2bytvdlI4dnlNQnpvQ3IyaFE2NHBRZVBvdFFWSXRCV0FoYmZNYWp2WVZmdkJNL0U4REFlNlFtL29rR3RLMERSNmJRSFM0LzB1STFqWWVVWDdveldOUDVNNXNoRERnYTdRR3pya21oSTBqKzRxUUhxOHBXRjhNYWpkdnFUbDZKYWFqdzlWNUZVNDBBKzZRbStNVTRKVm85Y1ZJRDNlQkRPK0h0UnVtdEsrdjZueDdYMnB2QW9IK2tGWDZJMXhTdEF5ZWwwQlluUHZYQS9IVitXN1NscU9iYTM1dUxzaWY4S0JmdEFWNzVTZ2RjeDZVVnlibFBZVHpaWGk3YVlwblU4M05MMXhmNXIzZXhaS09OQVB1dUtka2c5SFJHLzNGSzgrdkxIdS9hY3I4eVFjNklkOVN0QTJab01vcmsxSys0bm1TdmZXTlg3ZGc0bVdsN2ZWZk1KM1prb0pCL3BobnhLc0hyTkJGTmNtcGYxRWMyWDB0blZxNTlQMXpUL2RtZmtyMHoweFNqZ2twZ1JyeG13VXhiVkphVC9SWElWNXUydHV4NEcyeHA4L2tQN0g4VEt1Y0xnK1NCQzhMakVsYUIrN1VSVFhGU0R0SjVxckhONTJGSy9wN21oOGV5OURQbXp1eTRXRlJtSkswREgyQmxGY1Y0QzBuMnhYcnR0b21OcXV4ZTJIT25EL2djZVhjcGJEaXROdVEyNXUwRG4yUmxGY3d5SHRKOXVWNnphYVEzQm5jY2R6YmMybmQxWjljaWd1Rkk3Y29aR1lFcXdkZTZNb3J1R1E5cU80Y3RwR0tYM2wvcXFkZmtJcU1TWG9HcnRKRk9kTE1tRS9paXVuYlpUU2wzUTRKS1lFNjhadUVzVzFTV2svMFZ6cDN2SXRIQkpUZ3ZVWGJSTEYrVkU4WVQvUlhPbmU4aTBjRWxPQ2plTnVGTVgxeTNGcFA3b3JlK2dLeG5COGZ2TGN2emZCSzJHS2pzU1U0SWFMYnhERjlicEEyaysySzFmb0NqcHY3cTU2WTFmVjZYdXJUOTFWUTlHUm1CSnN1bmlqS0RhN2pleTNwUDBvcnB5Z0t4aStUVTIxUHBWc2ZTTGUra2lzTGRxREJISnpnNXN1MlNpSzZ3TjUwbjRVVjA3UUZTdzFYZStkQzgwTmJyNTBneWl1dzVMMlkrTXFiQnVsOUdYVGI3U0hGNE1YSmFZRVd5NWJMNHJ6VHlzSisxRmNPVzJqbEw1cytyVTVmSVNsV1dKS3NIWDhPbEZjaDBXcGphWnNudzhKYjF5YUV1c09iaDNmSllwcms1UmFWMlhYYlZUQ0c1ZW14THFEMnk1Zks0cHJrNVJhYWVVd2hRaGZvckwzSzdIdTRJNHJPa1Z4YlpKU0s2MnNLMFI3OWtLaVg0bDFCOXV1N0JERjlkZTM5Rm91Nk1wR0JjdjdOMkg1NE9wWFl0M0JOeVowaU9LNjd6WFdza0JYdHUvTC9pS1pxMStKZFFkM1RXZ1h4ZlhYdDV4cW5hQXJTM2d6YWtaNDJFZGkzY0UzcjFvaml1c0RlWG90RjNSbENXOWhtcTRudVJMckR1NjVlclVDdldHS0dxK1RIcFdkdGxFSmI3cG10Sk5jZlQzU2dlMFQyeFRvRFZQVWVKM1lLTnR2b3hMZWpKb1JUbkwxOVVnSGRreHFWYUEzVEZIamRaSmIyWFVibGZER3BhbXZSenF3YzFLTEFyMWhpaHF2a3g2Vm5iWlJDVzljbXZwNnBBTzdKN2NvMEJ1bXFEblZPcDIxMFh2VUZWeC9QVjEva1d2eXZOMEZ3SjRwcXhUbzRhQ282YlhSL25rZ3I2c2NDaEh1bldlL3l6VjUzdTRDNFA1cm1oWG80VENxV2Q0czBtdnB0Nmh6dUtMM1JUVEdOWG5lN2dMZ2dXdWJGT2poQ0ZPem1aZXhscmgxNW5aRjZZdStWK09hUEc5M0FmQ3RxWTBLOUhEb2F2YmZOZkE2eWUycTl4WG9zd29iSUc5M0FiQnZhb01DdldGN05YMFF2RTZpdVpKVHNOR01kcExMMjEwQVBEaXRYb0hlTUVXTjEwbHVaZGR0Vk1LYlVUUENZWlR1VFU4Q1BEUzlUb0hlTUVXTjEwbHVaZGR0Vk1LYmsyYU8wTkM5NlVtQWg2K3JVNkJmd2V0cTlsQnFJeWc3YmFNUzNyZzA2VHA2RXVEUkdiVUs5R3NFbzVvbGxGcEdaV09iRXQ2NE5PazZlaExnc1JrMUN2UXJlQ2MxQmIzVzlYZUd3MTZrdU1xaFFIelloKzVLb3JzQWVIeG10UUw5Q2w1WHM4ZSsxdlYwa3VJcXQ0THJQMERpZFNYUlhRQThlWDJWQW4xWHFhdlpSODNvSkVKRzlYZnBQVHIxUmVtWHhadnJYazFQQWp3MUs2TkFENGV1Wm44M004d0paZXZNclV6cGk3NVg0NW84Zlc1NkVtRC83TFFDUFJ4R05VdVh2RTU0bFNXOHVjNHFMSEM2anV0ZVRVOENQRE03cFVCdjJLaG02WkxYQ2EreWhEZW5XZVVZb0wyM3NORG9TWUR2ekVrcDBCdW1xUEU2NlZIWmFSdVY4QmFtNlhvWXBYdlRrd0RQemswcTBCdW1xUEU2NlZIWmFSdVY4S1pyUmp2SnBYdlRrd0FIaWlvVjZGZndSalZMS0xYUmxPMjNVUWx2WEpwMEhUMEo4TDE1Q1FYNk5VS1ltZzJVV2xkbDEyMVV3aHVYSmwxSFR3SThOeSt1UUwrQzE5WHNNZGF5UE94RGNSV21RSC9ZaCs1S29yc0E2SjVmb1VDL2dyZFhzNnlOa0ZIOUxZcXJNQVg2STR4MFZ4TGRCY0NoQmVVSzlGMmx2WnErSXNOcUtiK0I0ZXJLU1lHNFYrT2F2SzdqdWxmVGt3RGZYMWl1UUErSFVjM1NwVjdMOVlBeHZVZjd2dXozYWx5VHA4OU5Ud0ljTGk1VG9JY2pUTTFtUmZJNjRWV1c4T2FrbVdPQVJoMm52WnFlQkhpaE9LWkFiMWhYcy8rdWdkY0pyN0tFTjZkWjVkaExHYjA1N2RYMEpNQ0xpMG9WNkExVDFIaWRSRlkyamsvQ202NFo3VEJLOTZZbkFZNHVYcWxBYjVpaXh1c2t0N0xyTmlyaHphZ1o0U1NYN2sxUEF2eHd5UW9GK2hXOHJtWVBwZFpWMlhVYmxmREdwVW5YMFpNQXg1WXVWNkJmSStocTlsQnFJeWc3cFYvQ0c1Y21YVWRQQWh4ZldxSkF2NEkzcWxrU1ZrdC8ySWZpeWxYQi9nU2M3a3FpdXdCNGFWbUpBdjBLM3FobWlWNGI3WjhIMmlqVHZkRWZZYVM3a3VndUFGNHVXYVpBMzFVYTFTeWpwdGZTZndNamh5dDZYOFM5R3RmazdYWEM1cVluQVY1WnZsU0JIbzR3Tlp0NUdXdFp2bmlqOTZncjBQZHFYSk9uejAxUEF2eDR4UklGZWpoME5mc1Z5ZXNrdDZ2ZVY3Q2ZsZXN4UGN5YmZUNzBKTUNKbFlzVjZBMGIxU3kvYStCMTBxT3JYbGFnYU9ZT2phN2p1bGZUa3dBblZ5NVNvRGRNVWVOMWtsdlpkUnVWOEdiVWpIQ1NTL2VtSndGT2xSWXIwQnVtcVBFNmlhWWNGaG9KYjJHYXJpZTVkRzk2RXVBbnNZVUs5Q3Q0ZXpYZTJnaktUdHVvaERjdVRicU9uZ1I0dld5aEF2MEszcWhtQ2FVMm1ySjlteExldURUcE9ub1M0SFQ1QWdYNkZYeVltZzE2TGRmRFBoUlhPUlNJRC92UVhVbDBGd0J2bE05WG9GL0I2MnIyR0d1Si8rRU4zVlZ1QmNvampIUlhFdDBGd0pzVjh4VG91MHBkelQ1cVJpZkUzOERJb2N6U0YyV3Z4alY1cDdrWlg5ZVRBRy9GaXhUbzRkRFY3RytCaHptaGYvRkc3OUdvUU55cmNVMmVQamM5Q2ZCMllxNENQUnhHTlV1WHZFNTRsU1c4VVdhVlc4ZDFyNlluQVg1Uk9VZUIzckNUbXVLUzF3bXZzb1EzbzJhRWsxeDduYkM5bXA0RWVLZHlqZ0s5WVlvYXI1TWVsWjIyVVFsdllacXVPdys2TnowSjhHNXl0Z0s5WVlvYXI1TWVsWjIyVVFsdnVtYTBrMXk2TnowSjhGNXFsZ0w5Q3Q2b1pnbWxOcHF5L1RZcTRZMUxrNjZqSndGK2xiNWVnWDRGSDZabUE2WFdWZGwxRzVYd3hxVkoxOUdUQUwvSnpGU2dYOEhyYXZZWWExa2U5cUc0Q2xPZ1AreERkeVhSWFFDOG41bWhRTCtDTjZwWjRsVHJGQnFLcXpBRitpT01kRmNTM1FYQUIxWFhLZEIzbFJRMVhpZTh5aExldURSNXV3dUEzMVZQVjZBM1RGSGpkY0tyTE9HTlM1TzN1d0Q0c0dhNkFyMWhpaHF2RTE1bENXOWNtcnpkQmNDWjJta0s5SVlwYXJ4T2VKVWx2SEZwOG5ZWEFCL1ZUbFdnTjB4UjQzWENxeXpoalV1VHQ3c0ErRVBkdFFyMGhpbHF2RTU0bFNXOGNXbnlkaGNBSDlkZm8wQnZtS0xHNjRSWFdjSWJseVp2ZHdId3g0WXBDdlNHS1dxOFRuaVZKYnh4YWZKMkZ3Q2ZOazVXb0RkTVVlTjF3cXNzNFkxTGs3ZTdBRGpiT0ZtQjNqQkZqZGNKcjdLRU55NU4zdTRDL2dPTW9lMStYNFBPSmdBQUFBQkpSVTVFcmtKZ2dnPT0iLCAic2l6ZXMiOiAiMTgweDE4MCIsICJ0eXBlIjogImltYWdlL3BuZyJ9XX0=">
 <title>Chicago &amp; Ole Miss</title>
 
 <style>
 /* ============================================================
-   TOKENS
-   :root = palette claire complète. Les deux blocs suivants ne
-   redéfinissent que des tokens, jamais des composants.
+   TOKENS — 3 états de thème (clair par défaut, dark via media
+   guardé, dark via toggle). Composants stylés via tokens only.
    ============================================================ */
 :root {
   color-scheme: light dark;
 
-  --ground:     #e7e9eb;
-  --panel:      #fdfdfd;
-  --panel-2:    #f1f3f5;
-  --ink:        #12171c;
-  --ink-soft:   #4a555f;
-  --ink-faint:  #7c8894;
-  --line:       #ccd2d8;
-  --line-soft:  #e0e4e8;
-  --accent:     #c8202f;
-  --accent-ink: #ffffff;
-  --shadow:     0 1px 2px rgba(18,23,28,.05), 0 8px 24px -18px rgba(18,23,28,.35);
+  --ground:     #f2f5fb;
+  --panel:      #ffffff;
+  --panel-2:    #eaeef7;
+  --ink:        #17203a;
+  --ink-soft:   #4c5872;
+  --ink-faint:  #8591a8;
+  --line:       #d9dfeb;
+  --shadow:     0 2px 6px rgba(23,32,58,.06), 0 12px 32px -20px rgba(23,32,58,.35);
 
-  /* phases du voyage */
-  --p-one:      #1a6491;
-  --p-two:      #8f5d0a;
-  --p-three:    #b8202c;
+  --g1a: #2563eb; --g1b: #22b8cf;   /* phase 1 : Chicago Kaplan   */
+  --g2a: #f59e0b; --g2b: #ef6c2f;   /* phase 2 : Ole Miss         */
+  --g3a: #e8447a; --g3b: #f97316;   /* phase 3 : Chicago touriste */
+  --on-grad: #ffffff;
 
-  /* catégories */
-  --c-cours:    #61468c;
-  --c-musee:    #1a6491;
-  --c-archi:    #0b6e75;
-  --c-air:      #2a6e45;
-  --c-musique:  #b8202c;
-  --c-sport:    #8f5d0a;
-  --c-bouffe:   #a0562a;
-  --c-trajet:   #5a6672;
-  --c-campus:   #7a3f6d;
+  --c-trajet: #64748b;
+  --c-cours:  #7c3aed;
+  --c-musee:  #2563eb;
+  --c-archi:  #0d9488;
+  --c-air:    #16a34a;
+  --c-soir:   #db2777;
+  --c-sport:  #ea580c;
+  --c-campus: #a21caf;
 
-  --pass:       #0b6e75;
-  --pass-ink:   #ffffff;
+  /* budget (palette validée, ordre fixe) */
+  --b-paid:  #6b7280;
+  --b-1: #2a78d6;  /* hôtel      */
+  --b-2: #eb6834;  /* activités  */
+  --b-3: #1baf7a;  /* nourriture */
+  --b-4: #eda100;  /* transports */
 
-  --f-display: "Futura", "Futura PT", "Century Gothic", "Avenir Next", "URW Gothic", system-ui, sans-serif;
-  --f-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --ok:   #15803d;
+  --warn: #b45309;
+
+  --f-round: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Segoe UI", system-ui, -apple-system, sans-serif;
   --f-data: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
-  --rail: 74px;
-  --gut: clamp(16px, 4vw, 32px);
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground:     #0e1216;
-    --panel:      #171c22;
-    --panel-2:    #1e242b;
-    --ink:        #e3e8ec;
-    --ink-soft:   #a2aeba;
-    --ink-faint:  #75818d;
-    --line:       #2a323a;
-    --line-soft:  #212831;
-    --accent:     #f0545e;
-    --accent-ink: #17070a;
-    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
+    --ground:   #0d1220;
+    --panel:    #1a2130;
+    --panel-2:  #232c40;
+    --ink:      #e8ecf6;
+    --ink-soft: #a6b0c6;
+    --ink-faint:#78829a;
+    --line:     #2c3650;
+    --shadow:   0 2px 6px rgba(0,0,0,.4), 0 14px 34px -20px rgba(0,0,0,.9);
 
-    --p-one:      #5aa6d6;
-    --p-two:      #dca33f;
-    --p-three:    #f0656d;
+    --g1a: #1d4ed8; --g1b: #0e7490;
+    --g2a: #b45309; --g2b: #c2410c;
+    --g3a: #be185d; --g3b: #c2410c;
 
-    --c-cours:    #a98bd8;
-    --c-musee:    #5aa6d6;
-    --c-archi:    #45bfc4;
-    --c-air:      #5fbd87;
-    --c-musique:  #f0656d;
-    --c-sport:    #dca33f;
-    --c-bouffe:   #e08a5c;
-    --c-trajet:   #92a0ad;
-    --c-campus:   #d38ac2;
+    --c-trajet: #9aa6b8;
+    --c-cours:  #a98beb;
+    --c-musee:  #7ca5f2;
+    --c-archi:  #3fc1b5;
+    --c-air:    #57c57b;
+    --c-soir:   #ef7fb1;
+    --c-sport:  #f0924e;
+    --c-campus: #d46bdd;
 
-    --pass:       #45bfc4;
-    --pass-ink:   #0a1c1e;
+    --b-paid: #8b94a6;
+    --b-1: #3987e5;
+    --b-2: #d95926;
+    --b-3: #199e70;
+    --b-4: #c98500;
+
+    --ok:   #4ade80;
+    --warn: #fbbf24;
   }
 }
 
 :root[data-theme="dark"] {
-  --ground:     #0e1216;
-  --panel:      #171c22;
-  --panel-2:    #1e242b;
-  --ink:        #e3e8ec;
-  --ink-soft:   #a2aeba;
-  --ink-faint:  #75818d;
-  --line:       #2a323a;
-  --line-soft:  #212831;
-  --accent:     #f0545e;
-  --accent-ink: #17070a;
-  --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
+  --ground:   #0d1220;
+  --panel:    #1a2130;
+  --panel-2:  #232c40;
+  --ink:      #e8ecf6;
+  --ink-soft: #a6b0c6;
+  --ink-faint:#78829a;
+  --line:     #2c3650;
+  --shadow:   0 2px 6px rgba(0,0,0,.4), 0 14px 34px -20px rgba(0,0,0,.9);
 
-  --p-one:      #5aa6d6;
-  --p-two:      #dca33f;
-  --p-three:    #f0656d;
+  --g1a: #1d4ed8; --g1b: #0e7490;
+  --g2a: #b45309; --g2b: #c2410c;
+  --g3a: #be185d; --g3b: #c2410c;
 
-  --c-cours:    #a98bd8;
-  --c-musee:    #5aa6d6;
-  --c-archi:    #45bfc4;
-  --c-air:      #5fbd87;
-  --c-musique:  #f0656d;
-  --c-sport:    #dca33f;
-  --c-bouffe:   #e08a5c;
-  --c-trajet:   #92a0ad;
-  --c-campus:   #d38ac2;
+  --c-trajet: #9aa6b8;
+  --c-cours:  #a98beb;
+  --c-musee:  #7ca5f2;
+  --c-archi:  #3fc1b5;
+  --c-air:    #57c57b;
+  --c-soir:   #ef7fb1;
+  --c-sport:  #f0924e;
+  --c-campus: #d46bdd;
 
-  --pass:       #45bfc4;
-  --pass-ink:   #0a1c1e;
+  --b-paid: #8b94a6;
+  --b-1: #3987e5;
+  --b-2: #d95926;
+  --b-3: #199e70;
+  --b-4: #c98500;
+
+  --ok:   #4ade80;
+  --warn: #fbbf24;
 }
 
 /* ============================================================
-   BASE
+   BASE + COQUILLE D'APPLI
    ============================================================ */
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
   background: var(--ground);
   color: var(--ink);
-  font-family: var(--f-body);
+  font-family: var(--f-round);
   font-size: 16px;
-  line-height: 1.55;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 
-.wrap { max-width: 1080px; margin: 0 auto; padding: 0 var(--gut); }
-
-a { color: inherit; }
-
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
-
-/* ============================================================
-   EN-TÊTE
-   ============================================================ */
-.masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
-
-.masthead-inner {
-  display: flex; flex-direction: column; gap: 20px;
-  padding: clamp(28px, 6vw, 52px) 0 26px;
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
-.title-row {
-  display: flex; flex-wrap: wrap; align-items: flex-end;
-  justify-content: space-between; gap: 16px;
+/* ---------- barre du haut ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background: color-mix(in srgb, var(--ground) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
 }
-
-h1 {
-  font-family: var(--f-display);
-  font-weight: 700;
-  font-size: clamp(30px, 7vw, 60px);
-  line-height: .95;
+.topbar .logo { font-size: 22px; }
+.topbar .name {
+  flex: 1;
+  font-weight: 800;
+  font-size: 17px;
   letter-spacing: -.01em;
-  text-transform: uppercase;
-  margin: 0;
-  text-wrap: balance;
 }
-h1 .thin {
+.topbar .name small {
   display: block;
-  font-size: .36em;
-  letter-spacing: .15em;
-  color: var(--accent);
-  margin-top: .55em;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--ink-faint);
 }
-
+.ring { width: 40px; height: 40px; flex: 0 0 auto; }
+.ring circle { fill: none; stroke-width: 4; }
+.ring .bg { stroke: var(--line); }
+.ring .fg {
+  stroke: var(--c-air);
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dashoffset .5s ease;
+}
+.ring text {
+  font-family: var(--f-round);
+  font-size: 11px;
+  font-weight: 800;
+  fill: var(--ink);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
 .theme-toggle {
-  font-family: var(--f-display); font-size: 11px; font-weight: 700;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-soft); background: var(--panel-2);
-  border: 1px solid var(--line); padding: 8px 14px;
-  cursor: pointer; border-radius: 2px;
+  border: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  font-size: 16px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
 }
-.theme-toggle:hover { color: var(--ink); border-color: var(--ink-faint); }
 
-.lede { max-width: 64ch; color: var(--ink-soft); font-size: 17px; margin: 0; }
+/* ---------- contenu défilant ---------- */
+main {
+  flex: 1;
+  padding: 16px 16px calc(86px + env(safe-area-inset-bottom));
+}
+.screen { display: none; }
+.screen.on { display: block; animation: pop .22s ease; }
+@keyframes pop {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
 
-.facts {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1px; background: var(--line); border: 1px solid var(--line);
+/* ---------- nav du bas ---------- */
+.tabbar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
 }
-.fact { background: var(--panel); padding: 13px 15px; display: flex; flex-direction: column; gap: 2px; }
-.fact b {
-  font-family: var(--f-display); font-size: 24px; font-weight: 700;
-  line-height: 1; font-variant-numeric: tabular-nums;
+.tab {
+  border: 0;
+  background: none;
+  font-family: var(--f-round);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
+  border-radius: var(--r-sm);
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
 }
-.fact span { font-size: 12px; color: var(--ink-faint); letter-spacing: .03em; }
-
-/* ============================================================
-   RÉGLETTE DES JOURS
-   ============================================================ */
-.linebar {
-  position: sticky; top: 0; z-index: 20;
-  background: var(--panel); border-bottom: 1px solid var(--line);
-}
-.linebar-inner {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 0; overflow-x: auto; scrollbar-width: thin;
-}
-.linebar-label {
-  font-family: var(--f-display); font-size: 10px; font-weight: 700;
-  letter-spacing: .16em; text-transform: uppercase;
-  color: var(--ink-faint); flex: 0 0 auto; padding-right: 2px;
-}
-.stop {
-  flex: 0 0 auto;
-  font-family: var(--f-data); font-size: 12px; font-variant-numeric: tabular-nums;
-  color: var(--ink-soft); background: none; border: 0;
-  border-bottom: 3px solid var(--railc, var(--line));
-  padding: 4px 7px 5px; cursor: pointer; border-radius: 0;
-}
-.stop:hover { color: var(--ink); }
-.stop[data-anchor="1"] { color: var(--ink); font-weight: 700; }
-
-/* ============================================================
-   SECTIONS
-   ============================================================ */
-section { padding: clamp(34px, 6vw, 60px) 0 0; }
-
-.sec-head {
-  display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px;
-  margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--ink);
-}
-.sec-head h2 {
-  font-family: var(--f-display); font-size: clamp(18px, 3.4vw, 24px);
-  font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin: 0;
-}
-.sec-head p { margin: 0; font-size: 13px; color: var(--ink-faint); }
+.tab .ico { font-size: 21px; line-height: 1; filter: grayscale(1) opacity(.55); transition: filter .15s, transform .15s; }
+.tab.on { color: var(--ink); }
+.tab.on .ico { filter: none; transform: scale(1.12); }
 
 /* ============================================================
-   CITYPASS
+   COMPOSANTS
    ============================================================ */
-.pass-window {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px;
-  padding: 12px 16px; margin-bottom: 14px;
-  background: var(--panel); border: 1px solid var(--line);
-  border-left: 4px solid var(--pass); border-radius: 3px;
-  font-size: 14px; color: var(--ink-soft);
+h2.screen-title {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  margin: 4px 0 14px;
 }
-.pass-window b { color: var(--ink); }
-
-.pass-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1px; background: var(--line); border: 1px solid var(--line);
-}
-.pass-slot { background: var(--panel); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
-.pass-slot .num {
-  font-family: var(--f-data); font-size: 11px; font-weight: 700;
-  letter-spacing: .1em; color: var(--pass);
-}
-.pass-slot b { font-size: 15px; line-height: 1.3; }
-.pass-slot span { font-size: 12.5px; color: var(--ink-faint); font-family: var(--f-data); }
-
-/* ============================================================
-   FILTRES
-   ============================================================ */
-.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 24px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 13px; font-family: var(--f-body); color: var(--ink-soft);
-  background: var(--panel); border: 1px solid var(--line);
-  padding: 6px 12px 6px 9px; cursor: pointer; border-radius: 2px;
-}
-.chip::before { content: ""; width: 9px; height: 9px; background: var(--dot, var(--ink-faint)); flex: 0 0 auto; }
-.chip:hover { border-color: var(--ink-faint); color: var(--ink); }
-.chip[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); background: var(--panel-2); font-weight: 600; }
-.chip.reset::before { display: none; }
-.chip.reset { padding-left: 12px; }
-
-/* ============================================================
-   TIMELINE
-   ============================================================ */
-.days { display: flex; flex-direction: column; }
-
-[data-phase="chi1"]    { --railc: var(--p-one); }
-[data-phase="olemiss"] { --railc: var(--p-two); }
-[data-phase="chi2"]    { --railc: var(--p-three); }
-
-.phase-div, .day {
-  display: grid; grid-template-columns: var(--rail) 1fr; gap: 0 22px;
-}
-.day { padding-bottom: 32px; }
-.phase-div { padding-bottom: 14px; }
-
-.day-rail { position: relative; }
-.day-rail::before {
-  content: ""; position: absolute; left: 7px; top: 0; bottom: -32px;
-  width: 2px; background: var(--railc, var(--line)); opacity: .4;
-}
-.phase-div .day-rail::before { bottom: -14px; }
-.day:last-child .day-rail::before { bottom: auto; height: 26px; }
-
-.node {
-  position: absolute; left: 2px; top: 8px; width: 12px; height: 12px;
-  background: var(--panel); border: 2px solid var(--railc, var(--line)); z-index: 1;
-}
-.day[data-anchor="1"] .node { background: var(--railc); }
-
-.day-num {
-  font-family: var(--f-display); font-weight: 700; font-size: 28px; line-height: 1;
-  font-variant-numeric: tabular-nums; padding-left: 26px; padding-top: 2px;
-}
-.day-dow {
-  padding-left: 26px; margin-top: 6px;
-  font-family: var(--f-data); font-size: 11px; line-height: 1.4;
-  color: var(--ink-faint); text-transform: uppercase; letter-spacing: .05em;
-}
-
-.phase-label {
-  display: flex; align-items: center; gap: 12px;
-  padding: 6px 0 8px;
-  font-family: var(--f-display); font-size: 12px; font-weight: 700;
-  letter-spacing: .18em; text-transform: uppercase; color: var(--railc);
-}
-.phase-label::after { content: ""; flex: 1; height: 1px; background: var(--railc); opacity: .35; }
-.phase-div .day-rail .node { background: var(--railc); }
-
-.day-body {
-  background: var(--panel); border: 1px solid var(--line);
-  box-shadow: var(--shadow); border-radius: 3px; overflow: hidden;
-}
-
-.day-head {
-  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
-  gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); background: var(--panel-2);
-}
-.day-head h3 {
-  font-family: var(--f-display); font-size: 18px; font-weight: 700;
-  letter-spacing: .03em; text-transform: uppercase; margin: 0;
-}
-.day-head .tag { font-family: var(--f-data); font-size: 11px; letter-spacing: .04em; color: var(--ink-faint); }
-
-.items { list-style: none; margin: 0; padding: 4px 0; }
-
-.item {
-  display: grid; grid-template-columns: 22px 62px 1fr; gap: 0 12px;
-  align-items: baseline; padding: 9px 18px;
-  border-left: 3px solid transparent; transition: opacity .18s ease;
-}
-.item + .item { border-top: 1px solid var(--line-soft); }
-.item[data-cat="cours"]   { border-left-color: var(--c-cours); }
-.item[data-cat="musee"]   { border-left-color: var(--c-musee); }
-.item[data-cat="archi"]   { border-left-color: var(--c-archi); }
-.item[data-cat="air"]     { border-left-color: var(--c-air); }
-.item[data-cat="musique"] { border-left-color: var(--c-musique); }
-.item[data-cat="sport"]   { border-left-color: var(--c-sport); }
-.item[data-cat="bouffe"]  { border-left-color: var(--c-bouffe); }
-.item[data-cat="trajet"]  { border-left-color: var(--c-trajet); }
-.item[data-cat="campus"]  { border-left-color: var(--c-campus); }
-
-.item.dimmed { opacity: .18; }
-
-.item input[type="checkbox"] {
-  width: 15px; height: 15px; margin: 0;
-  accent-color: var(--accent); cursor: pointer; transform: translateY(2px);
-}
-
-.item .h {
-  font-family: var(--f-data); font-size: 12px; font-variant-numeric: tabular-nums;
-  color: var(--ink-faint); letter-spacing: .02em; white-space: nowrap;
-}
-
-.item .t { font-size: 15px; }
-.item .t b { font-weight: 600; }
-.item .t em {
-  font-style: normal; display: block; margin-top: 3px;
-  font-size: 13.5px; line-height: 1.5; color: var(--ink-soft);
-}
-.item.done .t { text-decoration: line-through; text-decoration-thickness: 1px; }
-.item.done .t, .item.done .h { color: var(--ink-faint); }
-
-.badge {
-  display: inline-block; vertical-align: 1px; margin-right: 8px;
-  font-family: var(--f-data); font-size: 10px; font-weight: 700; letter-spacing: .08em;
-  background: var(--pass); color: var(--pass-ink); padding: 2px 6px; border-radius: 2px;
-  white-space: nowrap;
-}
-
-.steps { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
-.steps li { margin-bottom: 3px; }
-.steps li::marker { font-family: var(--f-data); font-size: 12px; color: var(--ink-faint); }
-
-.note {
-  margin: 0; padding: 12px 18px 14px;
-  border-top: 1px solid var(--line-soft); background: var(--panel-2);
-  font-size: 13.5px; line-height: 1.5; color: var(--ink-soft);
-}
-.note b {
-  font-family: var(--f-display); font-size: 10px; font-weight: 700;
-  letter-spacing: .16em; text-transform: uppercase; color: var(--accent);
-  display: block; margin-bottom: 3px;
-}
-.note.tip b { color: var(--pass); }
-
-/* ============================================================
-   CARTES / ANNEXES
-   ============================================================ */
-.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
+h2.screen-title span { font-size: 20px; margin-right: 6px; }
 
 .card {
-  background: var(--panel); border: 1px solid var(--line);
-  border-radius: 3px; padding: 18px 20px 20px; box-shadow: var(--shadow);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 14px;
 }
-.card.warn { border-left: 4px solid var(--accent); }
 .card h3 {
-  font-family: var(--f-display); font-size: 13px; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase;
-  margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line-soft);
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
 }
-.card ul { margin: 0; padding-left: 18px; }
-.card li { margin-bottom: 9px; font-size: 14.5px; line-height: 1.5; }
-.card li:last-child { margin-bottom: 0; }
-.card p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
+.card p { margin: 0 0 8px; font-size: 14px; color: var(--ink-soft); }
 .card p:last-child { margin-bottom: 0; }
-.card .when {
-  font-family: var(--f-data); font-size: 11px; letter-spacing: .04em;
-  color: var(--ink-faint); display: block;
+.card ul { margin: 0; padding-left: 18px; }
+.card li { font-size: 14px; color: var(--ink-soft); margin-bottom: 7px; }
+.card li b { color: var(--ink); }
+.card li:last-child { margin-bottom: 0; }
+
+/* ---------- en-tête de jour (dégradé) ---------- */
+.dayhero {
+  border-radius: var(--r-lg);
+  padding: 18px;
+  color: var(--on-grad);
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.dayhero[data-p="1"] { background: linear-gradient(135deg, var(--g1a), var(--g1b)); }
+.dayhero[data-p="2"] { background: linear-gradient(135deg, var(--g2a), var(--g2b)); }
+.dayhero[data-p="3"] { background: linear-gradient(135deg, var(--g3a), var(--g3b)); }
+.dayhero .big-emoji {
+  position: absolute;
+  right: -6px; bottom: -14px;
+  font-size: 84px;
+  opacity: .28;
+  transform: rotate(-8deg);
+}
+.dayhero .kicker {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  opacity: .85;
+}
+.dayhero h3 {
+  margin: 3px 0 2px;
+  font-size: 23px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+}
+.dayhero .sub { font-size: 13px; opacity: .9; font-weight: 600; }
+.dayhero .done-pill {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255,255,255,.22);
+  border-radius: 999px;
+  padding: 4px 12px;
 }
 
-.table-scroll { overflow-x: auto; }
-table {
-  width: 100%; border-collapse: collapse;
-  font-size: 14.5px; min-width: 420px;
+/* ---------- sélecteur de jours ---------- */
+.daypick {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 12px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
 }
-th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line-soft); }
-th {
-  font-family: var(--f-display); font-size: 10px; font-weight: 700;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-faint); border-bottom: 1px solid var(--line);
+.daypick::-webkit-scrollbar { display: none; }
+.dp {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 8px 10px 7px;
+  min-width: 54px;
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--f-round);
+  color: var(--ink);
 }
-td.n { text-align: right; font-family: var(--f-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
-tr.sub td { font-weight: 700; border-top: 1px solid var(--line); background: var(--panel-2); }
-tr.total td { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 700; padding-top: 12px; }
+.dp .e { font-size: 18px; display: block; }
+.dp .n { font-size: 14px; font-weight: 900; display: block; margin-top: 1px; }
+.dp .d { font-size: 9.5px; font-weight: 700; color: var(--ink-faint); display: block; }
+.dp.on { border-width: 2px; }
+.dp.on[data-p="1"] { border-color: var(--g1a); background: color-mix(in srgb, var(--g1a) 12%, var(--panel)); }
+.dp.on[data-p="2"] { border-color: var(--g2b); background: color-mix(in srgb, var(--g2b) 12%, var(--panel)); }
+.dp.on[data-p="3"] { border-color: var(--g3a); background: color-mix(in srgb, var(--g3a) 12%, var(--panel)); }
+.dp.alldone .e::after { content: " ✅"; font-size: 11px; }
 
-footer {
-  margin-top: clamp(38px, 7vw, 68px); padding: 20px 0 44px;
-  border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-faint);
+/* ---------- items ---------- */
+.item {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 4px 10px;
+  align-items: start;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--cat, var(--line));
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  padding: 12px 12px 12px 10px;
+  margin-bottom: 10px;
+}
+.item .chk {
+  width: 26px; height: 26px;
+  margin-top: 1px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2.5px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.item .chk:active { transform: scale(.88); }
+.item .chk:checked {
+  background: var(--c-air);
+  border-color: var(--c-air);
+}
+.item .chk:checked::after {
+  content: "✓";
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+}
+.item .body { min-width: 0; }
+.item .h {
+  font-family: var(--f-data);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  letter-spacing: .02em;
+}
+.item .t { font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
+.item .n { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.item .n.warn { color: var(--warn); font-weight: 600; }
+.item.done { opacity: .5; }
+.item.done .t { text-decoration: line-through; }
+.price {
+  font-family: var(--f-data);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  align-self: start;
+}
+.price.free { background: color-mix(in srgb, var(--c-air) 16%, var(--panel)); color: var(--ok); }
+.price.pass { background: color-mix(in srgb, var(--c-musee) 16%, var(--panel)); color: var(--c-musee); }
+
+.tipcard {
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  border: 1px dashed var(--line);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.tipcard b { color: var(--ink); }
+
+/* ---------- accueil ---------- */
+.hero-count {
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--g1a), var(--g3a));
+  color: var(--on-grad);
+  padding: 22px 18px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-count .skyline {
+  position: absolute; right: 8px; bottom: -8px;
+  font-size: 74px; opacity: .25; transform: rotate(-6deg);
+}
+.hero-count .jminus {
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+.hero-count .lbl { font-size: 13px; font-weight: 700; opacity: .9; margin-top: 4px; }
+
+/* ---------- CityPASS ---------- */
+.pass-slot {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  padding: 12px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.pass-slot .num {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  font-size: 22px;
+  background: color-mix(in srgb, var(--c-musee) 14%, var(--panel));
+}
+.pass-slot .t { font-weight: 800; font-size: 15px; }
+.pass-slot .d { font-size: 12px; color: var(--ink-faint); font-weight: 600; }
+.pass-slot .stamp-btn {
+  border: 1.5px solid var(--line);
+  background: var(--panel);
+  color: var(--ink-faint);
+  font-family: var(--f-round);
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 7px 11px;
+  cursor: pointer;
+}
+.pass-slot.used { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+.pass-slot.used .stamp-btn { border-color: var(--ok); color: var(--ok); }
+.pass-slot.used::after {
+  content: "TAMPONNÉ";
+  position: absolute;
+  right: 74px; top: 50%;
+  transform: translateY(-50%) rotate(-12deg);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  color: var(--ok);
+  border: 2.5px solid var(--ok);
+  border-radius: 6px;
+  padding: 2px 7px;
+  opacity: .85;
+  pointer-events: none;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 640px) {
-  :root { --rail: 52px; }
-  .phase-div, .day { gap: 0 12px; }
-  .day-num { font-size: 21px; padding-left: 22px; }
-  .day-dow { padding-left: 22px; font-size: 10px; }
-  .day-rail::before { left: 5px; }
-  .node { left: 0; width: 10px; height: 10px; }
-  .item { grid-template-columns: 20px 1fr; padding: 9px 13px; }
-  .item .h { grid-column: 2; margin-bottom: 2px; }
-  .item .t { grid-column: 2; }
-  .day-head, .note { padding-left: 13px; padding-right: 13px; }
+/* ---------- budget ---------- */
+.money-hero {
+  text-align: center;
+  padding: 20px 16px;
+}
+.money-hero .total {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+.money-hero .lbl { font-size: 12.5px; color: var(--ink-faint); font-weight: 700; }
+.stackbar {
+  display: flex;
+  height: 26px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 2px;
+  margin: 14px 0 12px;
+}
+.stackbar span { display: block; height: 100%; }
+.blegend { list-style: none; margin: 0; padding: 0; }
+.blegend li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 2px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.blegend li:last-child { border-bottom: 0; }
+.blegend .dot { width: 11px; height: 11px; border-radius: 4px; flex: 0 0 auto; }
+.blegend .lab { flex: 1; color: var(--ink-soft); font-weight: 600; }
+.blegend .val {
+  font-family: var(--f-data);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.blegend li.head .lab, .blegend li.head .val { color: var(--ink); font-weight: 800; }
+
+/* ---------- confettis ---------- */
+.confetti-box {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  overflow: hidden;
+}
+.confetti {
+  position: absolute;
+  top: -30px;
+  font-size: 22px;
+  animation: fall 1.6s ease-in forwards;
+}
+@keyframes fall {
+  to { transform: translateY(105vh) rotate(540deg); opacity: .4; }
 }
 
-@media print {
-  .linebar, .filters, .theme-toggle, .item input { display: none; }
-  body { background: #fff; color: #000; }
-  .day { break-inside: avoid; }
-}
+:focus-visible { outline: 2.5px solid var(--c-musee); outline-offset: 2px; border-radius: 4px; }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; scroll-behavior: auto !important; }
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 </style>
 
-<header class="masthead">
-  <div class="wrap masthead-inner">
-    <div class="title-row">
-      <h1>Chicago<br>&amp; Ole Miss<span class="thin">29 août — 11 septembre 2026</span></h1>
-      <button class="theme-toggle" id="themeBtn" type="button">Thème</button>
-    </div>
-    <p class="lede">Quatorze jours en trois temps : Chicago avec Kaplan le matin, un week-end de vie universitaire du Sud à Oxford, puis quatre jours entièrement touristiques à Chicago portés par le CityPASS. Marche d'abord, CTA ensuite, Uber seulement quand il n'y a pas le choix.</p>
-    <div class="facts">
-      <div class="fact"><b>14</b><span>jours, 3 phases</span></div>
-      <div class="fact"><b>5</b><span>entrées CityPASS</span></div>
-      <div class="fact"><b>4</b><span>vols et transferts</span></div>
-      <div class="fact"><b>11 sept</b><span>dernier jour du pass</span></div>
-      <div class="fact"><b>~3 500 €</b><span>budget cible total</span></div>
-      <div class="fact"><b id="doneCount">0 / 0</b><span>coché</span></div>
-    </div>
-  </div>
-</header>
+<div class="app">
 
-<nav class="linebar" aria-label="Aller à un jour">
-  <div class="wrap linebar-inner" id="lineBar">
-    <span class="linebar-label">Jours</span>
-  </div>
-</nav>
+  <header class="topbar">
+    <span class="logo">🌆</span>
+    <div class="name">Chicago &amp; Ole Miss<small>29 août → 11 sept 2026 · solo</small></div>
+    <svg class="ring" viewBox="0 0 40 40" aria-label="Progression">
+      <circle class="bg" cx="20" cy="20" r="16"></circle>
+      <circle class="fg" id="ringFg" cx="20" cy="20" r="16" stroke-dasharray="100.5" stroke-dashoffset="100.5" pathLength="100.5"></circle>
+      <text x="20" y="21" id="ringTxt">0%</text>
+    </svg>
+    <button class="theme-toggle" id="themeBtn" type="button" aria-label="Changer de thème">◐</button>
+  </header>
 
-<main class="wrap">
+  <main>
+    <section class="screen on" id="scr-home"></section>
+    <section class="screen" id="scr-plan"></section>
+    <section class="screen" id="scr-pass"></section>
+    <section class="screen" id="scr-budget"></section>
+    <section class="screen" id="scr-infos"></section>
+  </main>
 
-  <!-- ======================= CITYPASS ======================= -->
-  <section id="citypass">
-    <div class="sec-head">
-      <h2>CityPASS</h2>
-      <p>Cinq entrées, une fenêtre de neuf jours consécutifs.</p>
-    </div>
-    <div class="pass-window">
-      <span><b>Activé jeudi 3 septembre</b> — première utilisation, Architecture River Tour.</span>
-      <span>Neuf jours consécutifs.</span>
-      <span><b>124 € déjà payés</b> — contre ~220 € à l'unité.</span>
-      <span><b>Dernier jour valable : vendredi 11 septembre inclus.</b> Le programme rentre en entier.</span>
-    </div>
-    <div class="pass-grid">
-      <div class="pass-slot"><span class="num">1 / 5</span><b>Architecture River Tour</b><span>jeu 3 sept · 75 min</span></div>
-      <div class="pass-slot"><span class="num">2 / 5</span><b>360 CHICAGO</b><span>ven 4 sept · coucher du soleil</span></div>
-      <div class="pass-slot"><span class="num">3 / 5</span><b>Skydeck Chicago</b><span>mar 8 sept · de nuit</span></div>
-      <div class="pass-slot"><span class="num">4 / 5</span><b>Shedd Aquarium</b><span>mer 9 sept · matin</span></div>
-      <div class="pass-slot"><span class="num">5 / 5</span><b>Griffin Museum of Science and Industry</b><span>jeu 10 sept · journée</span></div>
-    </div>
-    <p class="note" style="border:1px solid var(--line); border-top:0; border-radius:0 0 3px 3px;"><b>Payés hors pass</b>Field Museum, Adler Planetarium et Art Institute sont visités les 30 et 31 août, avant l'activation. C'est cohérent : dans les couples de choix du CityPASS, ils sont les alternatives à Griffin, à la croisière et à 360 CHICAGO. Vouloir les six impose d'en payer trois à part.</p>
-  </section>
+  <nav class="tabbar" aria-label="Navigation">
+    <button class="tab on" data-scr="home" type="button"><span class="ico">🏠</span>Aujourd'hui</button>
+    <button class="tab" data-scr="plan" type="button"><span class="ico">📅</span>Jours</button>
+    <button class="tab" data-scr="pass" type="button"><span class="ico">🎫</span>Pass</button>
+    <button class="tab" data-scr="budget" type="button"><span class="ico">💰</span>Budget</button>
+    <button class="tab" data-scr="infos" type="button"><span class="ico">ℹ️</span>Infos</button>
+  </nav>
 
-  <!-- ======================= AGENDA ======================= -->
-  <section id="agenda">
-    <div class="sec-head">
-      <h2>Jour par jour</h2>
-      <p>Filtre par thème, coche au fur et à mesure. La progression reste sur cet appareil.</p>
-    </div>
+</div>
 
-    <div class="filters" id="filters">
-      <button class="chip reset" type="button" data-cat="all" aria-pressed="true">Tout</button>
-      <button class="chip" type="button" data-cat="cours"   aria-pressed="false" style="--dot: var(--c-cours)">Kaplan</button>
-      <button class="chip" type="button" data-cat="musee"   aria-pressed="false" style="--dot: var(--c-musee)">Musées</button>
-      <button class="chip" type="button" data-cat="archi"   aria-pressed="false" style="--dot: var(--c-archi)">Architecture</button>
-      <button class="chip" type="button" data-cat="air"     aria-pressed="false" style="--dot: var(--c-air)">Plein air</button>
-      <button class="chip" type="button" data-cat="musique" aria-pressed="false" style="--dot: var(--c-musique)">Musique</button>
-      <button class="chip" type="button" data-cat="sport"   aria-pressed="false" style="--dot: var(--c-sport)">Sport</button>
-      <button class="chip" type="button" data-cat="campus"  aria-pressed="false" style="--dot: var(--c-campus)">Ole Miss</button>
-      <button class="chip" type="button" data-cat="bouffe"  aria-pressed="false" style="--dot: var(--c-bouffe)">Repas</button>
-      <button class="chip" type="button" data-cat="trajet"  aria-pressed="false" style="--dot: var(--c-trajet)">Trajets</button>
-    </div>
-
-    <div class="days" id="days">
-
-      <div class="phase-div" data-phase="chi1">
-        <div class="day-rail"><div class="node"></div></div>
-        <div class="phase-label">Phase 1 — Chicago, Kaplan</div>
-      </div>
-
-      <!-- J1 -->
-      <article class="day" id="j1" data-day="1" data-phase="chi1" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">01</div><div class="day-dow">Sam<br>29 août</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Arrivée</h3><span class="tag">Rien de payant, rien de réservé</span></div>
-          <ul class="items">
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">15 h 10</span><span class="t"><b>Atterrissage à Chicago</b><em>Immigration, bagages et douane : compter une à deux heures avant de sortir du terminal, sans que ce soit prévisible. Rien ne doit dépendre de cette heure-là.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Rejoindre le logement</b><em>Blue Line depuis O'Hare : 5 $, environ 45 min jusqu'au Loop, 24 h/24. Acheter la carte Ventra à la borne, dans la station même du terminal.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Millennium Park et The Bean</b><em>Premier contact avec Downtown, sans horaire et sans billet.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">—</span><span class="t"><b>Chicago Cultural Center</b><em>Entrée libre. La plus grande coupole Tiffany du monde, 30 000 pièces de verre. Vérifier l'heure de fermeture avant de t'y rendre.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Michigan Avenue puis Chicago Riverwalk</b><em>Tout se fait à pied et tout est gratuit. Le Riverwalk au niveau de l'eau donne le premier aperçu de ce que la croisière du 3 septembre viendra nommer.</em></span></li>
-          </ul>
-          <p class="note"><b>Le seul vrai enjeu du jour</b>Récupérer du décalage. Tout ce qui est programmé ici est annulable sans conséquence : c'est exactement pour ça que c'est programmé comme ça.</p>
-        </div>
-      </article>
-
-      <!-- J2 -->
-      <article class="day" id="j2" data-day="2" data-phase="chi1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">02</div><div class="day-dow">Dim<br>30 août</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Field Museum et l'espace</h3><span class="tag">Museum Campus, hors CityPASS</span></div>
-          <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Field Museum</b><em>Trois à quatre heures. En priorité : SUE, le <i>Tyrannosaurus rex</i> le plus complet jamais trouvé, les dinosaures, l'Égypte ancienne et les pierres précieuses. Entrée ~26 €, la formule de base suffit.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Adler Planetarium</b><em>Astronomie et exploration spatiale, plus un spectacle sous dôme. Réserver le créneau du spectacle en arrivant, pas après la visite. Entrée + spectacle sous dôme ~28 €.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Museum Campus → Lakefront Trail → Grant Park → Buckingham Fountain</b><em>Entièrement à pied, en enfilade. La pointe de l'Adler est l'endroit d'où est prise la photo classique de la skyline : c'est sur le chemin, ne pas le rater.</em></span></li>
-          </ul>
-          <p class="note"><b>Transport</b>CTA jusqu'au Museum Campus, puis rien d'autre que la marche jusqu'au retour.</p>
-        </div>
-      </article>
-
-      <!-- J3 -->
-      <article class="day" id="j3" data-day="3" data-phase="chi1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">03</div><div class="day-dow">Lun<br>31 août</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Art Institute et Route 66</h3><span class="tag">Tout à pied</span></div>
-          <ul class="items">
-            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Art Institute of Chicago</b><em>La plus grosse collection d'impressionnistes hors de France, plus <i>Nighthawks</i> de Hopper et <i>American Gothic</i>. Prévoir large, et sortir avant la saturation plutôt qu'après. Entrée ~28 €.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Juste à côté</span><span class="t"><b>Début historique de la Route 66</b><em>Le panneau <i>BEGIN Historic Route 66</i> se trouve sur Adams Street, à l'angle de Michigan Avenue, à une minute de la sortie du musée. Adams est en sens unique vers l'ouest : c'est le vrai point de départ, pas une reconstitution.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Selon énergie</span><span class="t"><b>The Loop → State Street → Millennium Park</b><em>Optionnel, purement à la fatigue. Le programme du jour est déjà rempli sans ça.</em></span></li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- J4 -->
-      <article class="day" id="j4" data-day="4" data-phase="chi1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">04</div><div class="day-dow">Mar<br>1 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Balloon Museum et The 606</h3><span class="tag">Marche + Blue Line</span></div>
-          <ul class="items">
-            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Balloon Museum / EmotionAir</b><em>Exposition itinérante : vérifier qu'elle est bien programmée à Chicago à cette date, et acheter le créneau en ligne (~32 €). C'est le seul point du planning qui peut disparaître.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Blue Line vers Wicker Park / Bucktown</b><em>Station Damen. Une dizaine de minutes depuis le Loop.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">—</span><span class="t"><b>Une portion de The 606</b><em>Ancienne voie ferrée surélevée devenue promenade, 4,3 km sans un seul croisement de voiture. Inutile de la faire en entier : l'entrée de Damen suffit largement.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Wicker Park : boutiques et dîner économique</b><em>Milwaukee Avenue concentre les friperies, les cafés et les adresses pas chères. Un des rares endroits de la ville où dîner correctement pour 15 $.</em></span></li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- J5 -->
-      <article class="day" id="j5" data-day="5" data-phase="chi1" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">05</div><div class="day-dow">Mer<br>2 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Argent, illusions et Cubs</h3><span class="tag">Match le soir</span></div>
-          <ul class="items">
-            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Money Museum de la Federal Reserve</b><em>Entrée gratuite, <b>passeport physique obligatoire</b> — la photo sur le téléphone ne passe pas le contrôle. Ouvert en semaine seulement et avec des horaires qui bougent : vérifier la veille.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Museum of Illusions Chicago</b><em>Une heure à une heure trente suffisent. Billet en ligne, ~30–36 €.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Red Line jusqu'à Addison</b><em>La station donne directement sur le stade. Partir tôt : la ligne se remplit avant chaque match.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Avant</span><span class="t"><b>Wrigleyville</b><em>Arriver assez tôt pour manger et prendre l'ambiance du quartier avant le coup d'envoi. C'est la moitié de l'expérience.</em></span></li>
-            <li class="item" data-cat="sport"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Chicago Cubs — Milwaukee Brewers, Wrigley Field</b><em>Rivalité de division, dans le stade de 1914. Les <i>bleachers</i> n'ont pas de dossier et coûtent moins cher : c'est là que ça se passe. Billet prévu ~39 €.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Après</span><span class="t"><b>Retour en Red Line avec les supporters</b><em>Trente mille personnes sortent en même temps. Laisser passer dix minutes plutôt que de forcer sur le quai.</em></span></li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- J6 -->
-      <article class="day" id="j6" data-day="6" data-phase="chi1" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">06</div><div class="day-dow">Jeu<br>3 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Architecture — le pass démarre</h3><span class="tag">Quasiment tout à pied</span></div>
-          <ul class="items">
-            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Cours Kaplan</b></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Architecture Center</b><em>La maquette de la ville, 4 000 bâtiments, permet enfin de comprendre la géographie avant de monter sur le bateau. Le centre est au pied même de l'embarcadère. Entrée ~13 € — l'expo se paie, c'est la croisière qui est sur le pass.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Puis</span><span class="t"><span class="badge">CITYPASS 1/5</span><b>Architecture River Tour</b><em>75 minutes sur la Chicago River, avec un guide bénévole formé par le centre. C'est la meilleure heure et quart du séjour, et c'est de là que le reste de la ville devient lisible.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Riverwalk, dîner, Downtown de nuit</b><em>Les gratte-ciel s'allument entre 20 h et 21 h en septembre.</em></span></li>
-          </ul>
-          <p class="note tip"><b>Occasion gratuite, ce soir</b>Le Chicago Jazz Festival ouvre aujourd'hui à Millennium Park : quatre jours de concerts, gratuits et sans billet, à cinq minutes à pied du Riverwalk. Tes soirées du 3 et du 4 sont libres et tu pars le 5 — ce sont les deux seules que tu peux en attraper.</p>
-        </div>
-      </article>
-
-      <!-- J7 -->
-      <article class="day" id="j7" data-day="7" data-phase="chi1" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">07</div><div class="day-dow">Ven<br>4 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Histoire, Lincoln Park, 360</h3><span class="tag">Rentrer tôt</span></div>
-          <ul class="items">
-            <li class="item" data-cat="cours"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Dernier cours Kaplan</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago History Museum</b><em>Le grand incendie de 1871, les abattoirs, les émeutes, la ségrégation, la Prohibition. C'est le musée qui met en place tout ce que le Crime Tour du 8 racontera. Entrée ~16 €.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Lincoln Park → Zoo → Conservatory</b><em>Le musée est déjà dans le parc. Le zoo, ouvert depuis 1868, et la serre sont tous les deux <b>gratuits</b> : deux des dernières entrées libres de la ville.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Ensuite</span><span class="t"><b>Descente vers Magnificent Mile</b><em>Une quarantaine de minutes à pied vers le sud, ou le bus 151 le long du parc.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Sunset</span><span class="t"><span class="badge">CITYPASS 2/5</span><b>360 CHICAGO</b><em>Réserver environ 45 minutes avant le coucher du soleil : tu prends la ville de jour, le sunset et le début de nuit sur le même billet. Le 360 regarde le Loop <i>et</i> le lac, alors que le Skydeck est posé dessus — d'où l'intérêt de faire les deux.</em></span></li>
-          </ul>
-          <p class="note"><b>Coupure</b>Rentrer tôt : vol pour Memphis demain, et la journée du 5 est la plus longue du séjour.</p>
-        </div>
-      </article>
-
-      <div class="phase-div" data-phase="olemiss">
-        <div class="day-rail"><div class="node"></div></div>
-        <div class="phase-label">Phase 2 — Ole Miss, Mississippi</div>
-      </div>
-
-      <!-- J8 -->
-      <article class="day" id="j8" data-day="8" data-phase="olemiss" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">08</div><div class="day-dow">Sam<br>5 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Memphis, puis Oxford</h3><span class="tag">La journée de transfert</span></div>
-          <ul class="items">
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Vol Chicago → Memphis International</b></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Memphis → Oxford, 135 km</b><em>Environ 1 h 30 de route, presque entièrement sur autoroute. Uber budgété ~90–115 € le trajet. C'est le trajet le plus cher et le plus fragile de tout le voyage : voir les points de vigilance plus bas, et le régler avant le départ plutôt que sur place.</em></span></li>
-            <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Installation chez ton cousin</b></span></li>
-            <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Découverte du campus, à pied et gratuitement</b><em>Dans l'ordre géographique, ça s'enchaîne sans détour :</em>
-              <ol class="steps">
-                <li>The Grove — les quatre hectares de chênes où se tient le tailgating</li>
-                <li>Lyceum — le plus vieux bâtiment du campus, 1848</li>
-                <li>Walk of Champions</li>
-                <li>Vaught-Hemingway Stadium</li>
-                <li>Student Union, puis le reste du campus</li>
-              </ol>
-            </span></li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- J9 -->
-      <article class="day" id="j9" data-day="9" data-phase="olemiss" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">09</div><div class="day-dow">Dim<br>6 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Oxford, Faulkner, football</h3><span class="tag">Match à distance</span></div>
-          <ul class="items">
-            <li class="item" data-cat="campus"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Oxford Square</b><em>Courthouse Square et ses boutiques, Square Books — l'une des librairies indépendantes les plus connues du Sud — et la statue de William Faulkner devant la mairie.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Midi</span><span class="t"><b>Déjeuner sur la Square</b></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Rowan Oak</b><em>La maison de Faulkner, à quinze minutes à pied de la Square. Le terrain se visite librement ; l'intérieur, où il a écrit le plan d'<i>Une fable</i> directement sur le mur de son bureau, se visite pour ~9 €.</em></span></li>
-            <li class="item" data-cat="sport"><input type="checkbox"><span class="h">18 h 30</span><span class="t"><b>Ole Miss — Louisville, à regarder depuis Oxford</b><em>Le match se joue au Nissan Stadium de Nashville, à plus de six heures de route : il n'est pas question d'y aller. À voir avec ton cousin, ou dans un bar de la Square rempli de supporters des Rebels. L'ambiance d'Oxford un soir de match reste réelle même quand l'équipe joue ailleurs.</em></span></li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- J10 -->
-      <article class="day" id="j10" data-day="10" data-phase="olemiss" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">10</div><div class="day-dow">Lun<br>7 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Labor Day, sans structure</h3><span class="tag">Rien qui dépende d'un musée</span></div>
-          <ul class="items">
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>South Campus Rail Trail, ou simplement le campus</b><em>Ancienne voie ferrée reconvertie, plate et ombragée. Parfaite pour un jour férié où tout est fermé.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Lamar Park et son lac</b><em>Le parc municipal d'Oxford, boucle facile autour de l'eau.</em></span></li>
-            <li class="item" data-cat="bouffe"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Retour vers Oxford Square, sans programme</b><em>Boutiques, cafés, et la ville à un rythme qui n'a rien à voir avec Chicago.</em></span></li>
-          </ul>
-          <p class="note"><b>Le vrai point du jour</b>C'est la seule journée du séjour laissée volontairement vide. Profites-en pour ton cousin, pas pour cocher des cases : c'est aussi exactement le milieu des quatorze jours, et le seul moment où tu peux vraiment souffler.</p>
-        </div>
-      </article>
-
-      <div class="phase-div" data-phase="chi2">
-        <div class="day-rail"><div class="node"></div></div>
-        <div class="phase-label">Phase 3 — Chicago, mode touriste</div>
-      </div>
-
-      <!-- J11 -->
-      <article class="day" id="j11" data-day="11" data-phase="chi2" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">11</div><div class="day-dow">Mar<br>8 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Retour, gangsters, Skydeck</h3><span class="tag">Journée sous contrainte de vol</span></div>
-          <ul class="items">
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Oxford → Memphis Airport → vol vers Chicago</b><em>Repartir d'Oxford avec au moins 3 h 30 d'avance sur le décollage : 1 h 30 de route, plus l'enregistrement.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Installation à l'hôtel</b><em>Ce n'est plus le logement Kaplan : vérifier l'adresse et l'heure de check-in la veille.</em></span></li>
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Chicago Crime Tour</b><em>Deux heures à deux heures et demie : Al Capone, la Prohibition, la mafia, John Dillinger et les lieux réels qui vont avec. ~40 €, à réserver en ligne. Le History Museum du 4 septembre en a déjà posé le décor.</em></span></li>
-            <li class="item" data-cat="archi"><input type="checkbox"><span class="h">Soir</span><span class="t"><span class="badge">CITYPASS 3/5</span><b>Skydeck Chicago, Willis Tower</b><em>103<sup>e</sup> étage et The Ledge, ces caissons de verre suspendus dans le vide. Fait de nuit exprès, puisque le 360 a déjà pris le coucher de soleil : deux fois la même ville, deux fois autrement.</em></span></li>
-          </ul>
-          <p class="note"><b>Si le vol traîne</b>Toute cette journée dépend d'une arrivée en début d'après-midi. En cas de retard, sacrifie le Crime Tour et garde le Skydeck : le tour se reprogramme, le CityPASS expire le 11.</p>
-        </div>
-      </article>
-
-      <!-- J12 -->
-      <article class="day" id="j12" data-day="12" data-phase="chi2">
-        <div class="day-rail"><div class="node"></div><div class="day-num">12</div><div class="day-dow">Mer<br>9 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Shedd, Garfield, Green Mill</h3><span class="tag">Trois quartiers, tout en CTA</span></div>
-          <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Matin</span><span class="t"><span class="badge">CITYPASS 4/5</span><b>Shedd Aquarium</b><em>Trois à quatre heures. Y être à l'ouverture : c'est l'attraction la plus fréquentée du Museum Campus, et l'écart entre 9 h et 11 h est considérable.</em></span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Aprem</span><span class="t"><b>Garfield Park Conservatory</b><em>Green Line jusqu'à Conservatory–Central Park Drive : la station est pratiquement devant l'entrée. Un hectare sous verre, l'une des plus grandes serres urbaines du monde. L'entrée est en réalité libre — les ~9 € budgétés couvrent la donation suggérée. Métro → serre → métro, sans détour par le quartier.</em></span></li>
-            <li class="item" data-cat="musique"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Green Mill, Uptown</b><em>Red Line jusqu'à Lawrence. Club de jazz ouvert depuis 1907, jamais rénové, et l'un des repaires de Capone pendant la Prohibition — enchaînement parfait après le Crime Tour d'hier. Entrée ~13–17 € hors consommations, <b>liquide uniquement</b>, et on ne parle pas pendant les sets.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Retour</span><span class="t"><b>Red Line s'il y a du monde, sinon Uber</b><em>La règle simple : si le quai est vide, tu prends un Uber. Ça ne se discute pas à 1 h du matin.</em></span></li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- J13 -->
-      <article class="day" id="j13" data-day="13" data-phase="chi2">
-        <div class="day-rail"><div class="node"></div><div class="day-num">13</div><div class="day-dow">Jeu<br>10 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Griffin, toute la journée</h3><span class="tag">Le plus gros musée du séjour</span></div>
-          <ul class="items">
-            <li class="item" data-cat="musee"><input type="checkbox"><span class="h">Journée</span><span class="t"><span class="badge">CITYPASS 5/5</span><b>Griffin Museum of Science and Industry</b><em>Le plus grand musée de sciences de l'hémisphère ouest, dans le dernier bâtiment debout de l'Exposition universelle de 1893. Ton ordre de priorité :</em>
-              <ol class="steps">
-                <li>Anne Frank: The Exhibition</li>
-                <li>U-505 On-Board Tour — le sous-marin allemand capturé en pleine mer en 1944</li>
-                <li>Coal Mine</li>
-                <li>Powering the Future</li>
-                <li>Science Storms</li>
-                <li>Great Train Story</li>
-                <li>Take Flight / Boeing 727</li>
-              </ol>
-            </span></li>
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Fin d'aprem</span><span class="t"><b>Promontory Point, avant la nuit</b><em>Une avancée de calcaire dans le lac, à vingt minutes du musée par Hyde Park. La meilleure vue de la skyline de toute la ville, à dix kilomètres de distance, et il n'y a jamais personne. À faire uniquement s'il te reste de l'énergie et de la lumière.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Soir</span><span class="t"><b>Retour Downtown en CTA</b><em>Bus 6 ou Metra Electric depuis Hyde Park.</em></span></li>
-          </ul>
-          <p class="note tip"><b>Ce que le pass couvre ici</b>Entrée générale, <i>Anne Frank: The Exhibition</i>, Coal Mine et les grandes galeries (Powering the Future, Science Storms, Great Train Story, Boeing 727). Seul le <b>U-505 On-Board Tour se paie en supplément, ~16 €</b> : le prendre en ligne le matin même, les créneaux partent dans la journée.</p>
-        </div>
-      </article>
-
-      <!-- J14 -->
-      <article class="day" id="j14" data-day="14" data-phase="chi2" data-anchor="1">
-        <div class="day-rail"><div class="node"></div><div class="day-num">14</div><div class="day-dow">Ven<br>11 sept</div></div>
-        <div class="day-body">
-          <div class="day-head"><h3>Navy Pier et départ</h3><span class="tag">Vol à 16 h 15</span></div>
-          <ul class="items">
-            <li class="item" data-cat="air"><input type="checkbox"><span class="h">Matin</span><span class="t"><b>Navy Pier</b><em>La promenade, le lac Michigan et la skyline vue depuis l'eau. Le Pier lui-même est gratuit. La Centennial Wheel seulement si l'envie et l'horaire le permettent — ce n'est pas le jour pour improviser.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">11 h 30</span><span class="t"><b>Quitter le Pier, sans discuter</b><em>Navy Pier est le point le plus mal desservi du centre : bus 124 depuis les gares, ou vingt minutes de marche depuis Grand sur la Red Line. C'est exactement le genre de détail qui fait rater un vol.</em></span></li>
-            <li class="item" data-cat="trajet"><input type="checkbox"><span class="h">Puis</span><span class="t"><b>Récupérer les bagages, puis O'Hare</b><em>Vol à 16 h 15 : être à l'aéroport vers 13 h 30. Blue Line, 45 min, mais elle s'arrête sans prévenir — prévoir une grosse marge, pas une marge raisonnable.</em></span></li>
-          </ul>
-        </div>
-      </article>
-
-    </div>
-  </section>
-
-  <!-- ======================= VIGILANCE ======================= -->
-  <section id="vigilance">
-    <div class="sec-head">
-      <h2>Points de vigilance</h2>
-      <p>Ce que j'ai vérifié et ce qui mérite un arbitrage avant le départ.</p>
-    </div>
-    <div class="cols">
-      <div class="card warn">
-        <h3>Memphis ↔ Oxford, le point faible</h3>
-        <span class="when">Sam 5 sept et mar 8 sept</span>
-        <p>135 km, environ 1 h 30. Tu as budgété 90–115 € le trajet en Uber, soit 180–230 € pour l'aller-retour : les deux tiers de ton budget transport de 300 €, qui doit aussi couvrir le CTA et les trajets aéroport.</p>
-        <p>Plus gênant que le prix : sur un trajet aussi long et sans course retour, les chauffeurs annulent souvent, et la couverture Uber à Oxford est bien plus mince qu'à Memphis. Se retrouver sans voiture à 6 h du matin le 8 septembre coûterait un vol.</p>
-        <p>Deux options plus sûres à comparer avant de partir : la <b>location de voiture à Memphis Airport</b> sur trois jours, souvent moins chère que deux Uber et qui te rend mobile à Oxford ; ou une <b>navette Memphis–Oxford réservée à l'avance</b>. Et si ton cousin peut faire ne serait-ce qu'un des deux trajets, le problème disparaît de moitié.</p>
-      </div>
-      <div class="card">
-        <h3>Deux soirées gratuites à récupérer</h3>
-        <span class="when">Jeu 3 et ven 4 sept</span>
-        <p>Le <b>Chicago Jazz Festival</b> se tient du 3 au 6 septembre à Millennium Park : gratuit, sans billet, sans réservation. Tes soirées du 3 et du 4 sont ouvertes, et tu pars le 5 — ce sont les deux seules attrapables.</p>
-        <p>Le 3, c'est à cinq minutes du Riverwalk. Le 4, c'est sur la route entre Magnificent Mile et ton logement, après le 360.</p>
-        <p>L'<b>ARC Music Festival</b> (house, Union Park, 4–7 sept) tombe aussi dans la fenêtre, mais il est payant, mange une journée entière et se heurte à ton départ. À écarter.</p>
-      </div>
-      <div class="card">
-        <h3>À revérifier avant de bloquer</h3>
-        <ul>
-          <li><b>Balloon Museum</b> <span class="when">mar 1 sept</span> Exposition itinérante : confirmer qu'elle est bien à Chicago à cette date.</li>
-          <li><b>Money Museum</b> <span class="when">mer 2 sept</span> Ouvert en semaine, horaires variables, passeport physique exigé à l'entrée.</li>
-          <li><b>Cubs — Brewers</b> <span class="when">mer 2 sept</span> Cohérent avec le calendrier des Cubs, qui enchaînent à domicile fin août et début septembre. Confirmer l'heure exacte : un match en journée changerait tout l'après-midi.</li>
-          <li><b>Water Taxi vers Chinatown</b> <span class="when">bonus</span> La ligne Chinatown tourne sur un calendrier réduit en septembre, souvent le week-end seulement. À vérifier avant d'en faire un plan.</li>
-          <li><b>U-505 On-Board</b> <span class="when">jeu 10 sept</span> Supplément payant même avec le CityPASS.</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3>Rythme</h3>
-        <p>Le programme est dense mais tient, parce que tout est groupé par zone : Museum Campus le 30, le Loop le 31, Wicker Park le 1<sup>er</sup>, Hyde Park le 10.</p>
-        <p>Les trois vraies journées longues sont le <b>2 septembre</b> (musées puis match jusqu'à tard), le <b>5 septembre</b> (vol, route, campus) et le <b>10 septembre</b> (Griffin en entier). Ne rien ajouter à celles-là.</p>
-        <p>À l'inverse, le 7 septembre est vide exprès et le 29 août est annulable en entier. Ce sont tes deux amortisseurs : ne pas les remplir.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================= BUDGET ======================= -->
-  <section id="budget">
-    <div class="sec-head">
-      <h2>Budget</h2>
-      <p>Tes chiffres, vols compris. Cible : ~3 500 € hors shopping et souvenirs.</p>
-    </div>
-    <div class="card">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr><th>Poste</th><th>Détail</th><th class="n">Montant</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Vol international A/R</td><td>Marseille ↔ Chicago, déjà payé</td><td class="n">735 €</td></tr>
-            <tr><td>Vols Chicago ↔ Memphis</td><td>déjà payés</td><td class="n">314 €</td></tr>
-            <tr><td>Visa</td><td>déjà payé</td><td class="n">35 €</td></tr>
-            <tr><td>Kaplan + hébergement</td><td>29 août → 5 sept, déjà payé</td><td class="n">1 011 €</td></tr>
-            <tr><td>CityPASS Chicago</td><td>déjà payé</td><td class="n">124 €</td></tr>
-            <tr class="sub"><td colspan="2">Déjà payé</td><td class="n">2 219 €</td></tr>
-            <tr><td>Hôtel Chicago</td><td>8 → 11 sept, 3 nuits</td><td class="n">300 – 600 €</td></tr>
-            <tr><td>Activités hors CityPASS</td><td>musées, Cubs, Crime Tour, Green Mill…</td><td class="n">~304 €</td></tr>
-            <tr><td>Nourriture</td><td>budget économique, 14 jours</td><td class="n">~350 €</td></tr>
-            <tr><td>Transports</td><td>CTA, Uber Memphis ↔ Oxford, aéroports</td><td class="n">~300 €</td></tr>
-            <tr class="sub"><td colspan="2">Reste à payer</td><td class="n">1 254 – 1 554 €</td></tr>
-            <tr class="total"><td colspan="2">Total du voyage</td><td class="n">3 473 – 3 773 €</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="margin-top:12px; font-size:13.5px; color: var(--ink-soft);">Petit écart avec ton estimation (3 173–3 473 €) : une fois l'hôtel compté dans les deux bornes, le vrai total va de 3 473 à 3 773 €. La cible de 3 500 € tient donc, mais seulement si l'hôtel reste proche de 300 € — c'est lui, et lui seul, qui fait déraper le budget.</p>
-    </div>
-  </section>
-
-  <!-- ======================= BONUS ======================= -->
-  <section id="bonus">
-    <div class="sec-head">
-      <h2>En réserve</h2>
-      <p>À insérer si une journée finit plus tôt que prévu.</p>
-    </div>
-    <div class="cols">
-      <div class="card">
-        <h3>Bonus prioritaire — Water Taxi et Chinatown</h3>
-        <p>Water Taxi depuis Downtown (~9 € le trajet) → Chinatown → balade et repas → retour en CTA par la Red Line. Compte une demi-journée.</p>
-        <p>Les créneaux qui s'y prêtent le mieux : le <b>31 août</b> si tu écourtes l'Art Institute, ou le <b>9 septembre</b> entre Shedd et Garfield Park. Vérifier le calendrier de la ligne avant de compter dessus.</p>
-      </div>
-      <div class="card">
-        <h3>Plages et lakefront</h3>
-        <p>S'il fait très chaud, remplace n'importe quelle promenade par une heure à <b>Oak Street Beach</b> ou <b>North Avenue Beach</b> : les deux sont sur le Lakefront Trail, à portée de tout le programme Downtown.</p>
-        <p>Fin août on est à 27 °C environ, début septembre plutôt 24 °C. Le lac reste baignable jusqu'à la mi-septembre, et la rive est trois à quatre degrés plus fraîche que la ville.</p>
-      </div>
-      <div class="card">
-        <h3>À emporter</h3>
-        <ul>
-          <li><b>Passeport physique</b> — indispensable au Money Museum, utile ailleurs.</li>
-          <li><b>Liquide</b> — le Green Mill n'accepte que ça, et beaucoup de clubs font pareil.</li>
-          <li><b>Carte Ventra</b> — 5 $ rendus en crédit, 2,50 $ le trajet en « L ». Un pass 7 jours à 20 $ est rentable dès trois trajets par jour : deux pass couvrent tes deux séjours à Chicago.</li>
-          <li><b>Coupe-vent</b> plutôt qu'un parapluie : le vent le retourne, c'est littéralement le surnom de la ville.</li>
-          <li><b>Vraies chaussures</b> — ce programme fait 12 à 18 km de marche par jour.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    Dates du Chicago Jazz Festival (3–6 sept) et de l'ARC Music Festival (4–7 sept) confirmées sur les calendriers officiels de la ville. La fenêtre CityPASS de neuf jours consécutifs place bien le dernier jour d'utilisation au 11 septembre inclus. Horaires de matchs, programmations et tarifs restent à revérifier à l'approche du départ.
-  </footer>
-
-</main>
+<div class="confetti-box" id="confettiBox" aria-hidden="true"></div>
 
 <script>
 (function () {
-  "use strict";
+"use strict";
 
-  /* ---------- thème ---------- */
-  var root = document.documentElement;
-  var KEY_THEME = "chi2026:theme";
-  try {
-    var saved = localStorage.getItem(KEY_THEME);
-    if (saved) root.setAttribute("data-theme", saved);
-  } catch (e) {}
+/* ============================================================
+   DONNÉES
+   ============================================================ */
+var DAYS = [
+  { d:1,  date:"2026-08-29", dow:"Sam", lab:"29 août", e:"✈️", p:1, title:"Arrivée",
+    tip:"Décalage de 7 h : tout ce soir est annulable sans regret. La ville sera encore là demain.",
+    items:[
+      { h:"15h10", c:"trajet", t:"Atterrissage à Chicago", n:"Immigration + bagages : 1 à 2 h, imprévisible. Rien ne doit en dépendre." },
+      { h:"—",     c:"trajet", t:"Blue Line → centre", n:"45 min. Carte Ventra à la borne, dans le terminal.", pr:"5 $" },
+      { h:"Soir",  c:"air",    t:"Millennium Park → Bean → Cultural Center", n:"Puis Michigan Avenue et le Riverwalk. Tout à pied.", pr:"Gratuit" }
+    ]},
+  { d:2,  date:"2026-08-30", dow:"Dim", lab:"30 août", e:"🦖", p:1, title:"Field + espace",
+    items:[
+      { h:"Matin", c:"musee", t:"Field Museum", n:"SUE le T. rex, dinosaures, Égypte ancienne. Prévoir 3–4 h.", pr:"26 €" },
+      { h:"Aprem", c:"musee", t:"Adler Planetarium", n:"Réserver le spectacle sous dôme en arrivant. 📸 La pointe derrière = LA photo de la skyline.", pr:"28 €" },
+      { h:"Puis",  c:"air",   t:"Lakefront → Grant Park → Buckingham Fountain", n:"Tout à pied, en enfilade.", pr:"Gratuit" }
+    ]},
+  { d:3,  date:"2026-08-31", dow:"Lun", lab:"31 août", e:"🎨", p:1, title:"Art Institute + Route 66",
+    items:[
+      { h:"Matin", c:"cours", t:"Cours Kaplan" },
+      { h:"Aprem", c:"musee", t:"Art Institute of Chicago", n:"Monet, Van Gogh, Hopper, American Gothic. Sortir avant la saturation.", pr:"28 €" },
+      { h:"Puis",  c:"archi", t:"Panneau BEGIN Route 66", n:"Adams St × Michigan Ave, à 1 min de la sortie du musée.", pr:"Gratuit" },
+      { h:"Option",c:"air",   t:"The Loop → State Street", n:"Selon l'énergie restante.", pr:"Gratuit" }
+    ]},
+  { d:4,  date:"2026-09-01", dow:"Mar", lab:"1 sept", e:"🎈", p:1, title:"Balloon + The 606",
+    items:[
+      { h:"Matin", c:"cours", t:"Cours Kaplan" },
+      { h:"Aprem", c:"musee", t:"Balloon Museum / EmotionAir", n:"Billet en ligne. Expo itinérante : vérifier la date avant de partir.", pr:"32 €", w:1 },
+      { h:"Puis",  c:"air",   t:"The 606 + Wicker Park", n:"Blue Line → Damen. Voie ferrée devenue promenade, puis friperies et dîner éco sur Milwaukee Ave.", pr:"Gratuit" }
+    ]},
+  { d:5,  date:"2026-09-02", dow:"Mer", lab:"2 sept", e:"⚾", p:1, title:"Musées + Cubs",
+    items:[
+      { h:"Matin", c:"cours", t:"Cours Kaplan" },
+      { h:"13h",   c:"musee", t:"Money Museum (Fed)", n:"🛂 Passeport PHYSIQUE obligatoire. Horaires à vérifier la veille.", pr:"Gratuit", w:1 },
+      { h:"14h45", c:"musee", t:"Museum of Illusions", n:"1 h – 1 h 30 suffisent.", pr:"30–36 €" },
+      { h:"17h30", c:"sport", t:"Cubs vs Brewers — Wrigley Field", n:"Red Line → Addison, partir tôt. Heure du match à confirmer sur mlb.com. Retour avec les supporters.", pr:"39 €", w:1 }
+    ]},
+  { d:6,  date:"2026-09-03", dow:"Jeu", lab:"3 sept", e:"🏙️", p:1, title:"Architecture + pass",
+    tip:"🎷 Bonus gratuit ce soir : le Chicago Jazz Festival ouvre à Millennium Park (sans billet), à 5 min du Riverwalk.",
+    items:[
+      { h:"Matin", c:"cours", t:"Cours Kaplan" },
+      { h:"14h",   c:"archi", t:"Chicago Architecture Center", n:"La maquette de la ville — 4 000 bâtiments — avant de monter sur le bateau.", pr:"13 €" },
+      { h:"16h",   c:"archi", t:"Architecture River Tour 🚢", n:"75 min sur la rivière. Activation du CityPASS → valable jusqu'au 11 inclus.", pass:"1/5" },
+      { h:"Soir",  c:"soir",  t:"Riverwalk + Downtown de nuit", n:"Les gratte-ciel s'allument entre 20 h et 21 h.", pr:"Gratuit" }
+    ]},
+  { d:7,  date:"2026-09-04", dow:"Ven", lab:"4 sept", e:"🌇", p:1, title:"Lincoln Park + 360",
+    tip:"Rentrer tôt : vol pour Memphis demain matin. (Dernière soirée de Jazz Fest attrapable sur le chemin.)",
+    items:[
+      { h:"Matin", c:"cours", t:"Dernier cours Kaplan" },
+      { h:"13h30", c:"musee", t:"Chicago History Museum", n:"Incendie de 1871, Prohibition — le décor du Crime Tour du 8.", pr:"16 €" },
+      { h:"15h",   c:"air",   t:"Lincoln Park Zoo + Conservatory", n:"Les deux gratuits. Puis descente vers Magnificent Mile (bus 151 ou 40 min à pied).", pr:"Gratuit" },
+      { h:"18h30", c:"archi", t:"360 CHICAGO au coucher du soleil", n:"Monter 45 min avant le sunset (~19 h 15) : jour + sunset + nuit sur la même montée.", pass:"2/5" }
+    ]},
+  { d:8,  date:"2026-09-05", dow:"Sam", lab:"5 sept", e:"🚗", p:2, title:"Cap sur Ole Miss",
+    tip:"⚠️ Le transfert Memphis → Oxford se règle AVANT le départ : navette, location ou cousin. Pas d'Uber improvisé.",
+    items:[
+      { h:"Matin", c:"trajet", t:"✈️ Vol Chicago → Memphis", n:"Heure à confirmer sur le billet. Déjà payé.", w:1 },
+      { h:"Midi",  c:"trajet", t:"Memphis → Oxford (135 km)", n:"~1 h 30 de route. Installation chez le cousin — hébergement gratuit.", pr:"90–115 €" },
+      { h:"Aprem", c:"campus", t:"Campus Ole Miss à pied", n:"The Grove → Lyceum → Walk of Champions → Vaught-Hemingway → Student Union.", pr:"Gratuit" }
+    ]},
+  { d:9,  date:"2026-09-06", dow:"Dim", lab:"6 sept", e:"📚", p:2, title:"Oxford + Faulkner",
+    items:[
+      { h:"Matin", c:"campus", t:"Oxford Square + Square Books", n:"Courthouse Square, boutiques, statue de Faulkner. Déjeuner sur la Square.", pr:"Gratuit" },
+      { h:"Aprem", c:"musee",  t:"Rowan Oak", n:"La maison de Faulkner, 15 min à pied. Terrain libre, intérieur payant.", pr:"9 €" },
+      { h:"18h30", c:"sport",  t:"Ole Miss – Louisville 🏈 au bar", n:"Le match est à Nashville (6 h de route) : on le regarde à Oxford, avec les supporters ou le cousin.", pr:"Gratuit" }
+    ]},
+  { d:10, date:"2026-09-07", dow:"Lun", lab:"7 sept", e:"🌳", p:2, title:"Labor Day tranquille",
+    tip:"La seule journée volontairement vide du voyage. Elle est pour le cousin, pas pour cocher des cases.",
+    items:[
+      { h:"Libre", c:"air", t:"Rail Trail, Lamar Park, la Square", n:"Jour férié : rien qui dépende d'un musée. Balades, cafés, boutiques.", pr:"Gratuit" }
+    ]},
+  { d:11, date:"2026-09-08", dow:"Mar", lab:"8 sept", e:"🕵️", p:3, title:"Retour + gangsters",
+    tip:"Si le vol traîne : sacrifier le Crime Tour, garder le Skydeck — le pass expire le 11.",
+    items:[
+      { h:"Matin", c:"trajet", t:"Oxford → Memphis → ✈️ Chicago", n:"Partir ≥ 3 h 30 avant le décollage. Transport confirmé la veille.", pr:"90–115 €", w:1 },
+      { h:"Aprem", c:"trajet", t:"Check-in hôtel", n:"Ce n'est plus le logement Kaplan : adresse et heure vérifiées la veille." },
+      { h:"15h30", c:"musee",  t:"Chicago Crime Tour", n:"2 h – 2 h 30 : Capone, Prohibition, Dillinger. À réserver en ligne.", pr:"40 €" },
+      { h:"20h30", c:"archi",  t:"Skydeck de nuit 🌃", n:"103ᵉ étage + The Ledge. De nuit exprès — le 360 a pris le sunset.", pass:"3/5" }
+    ]},
+  { d:12, date:"2026-09-09", dow:"Mer", lab:"9 sept", e:"🐠", p:3, title:"Shedd + Green Mill",
+    items:[
+      { h:"9h",  c:"musee", t:"Shedd Aquarium", n:"Y être à l'ouverture — l'écart de foule entre 9 h et 11 h est énorme.", pass:"4/5" },
+      { h:"14h", c:"air",   t:"Garfield Park Conservatory", n:"Green Line → station devant l'entrée. Entrée libre (les 9 € budgétés = donation).", pr:"Donation" },
+      { h:"21h", c:"soir",  t:"Green Mill 🎷", n:"💵 LIQUIDE uniquement. Red Line → Lawrence. Retour Red Line si du monde, sinon Uber.", pr:"13–17 €", w:1 }
+    ]},
+  { d:13, date:"2026-09-10", dow:"Jeu", lab:"10 sept", e:"🔬", p:3, title:"Griffin, la totale",
+    tip:"U-505 On-Board (~16 €) à acheter en ligne LE MATIN MÊME — les créneaux partent dans la journée.",
+    items:[
+      { h:"Journée", c:"musee", t:"Griffin Museum of Science and Industry", n:"Priorités : 1. Anne Frank · 2. U-505 · 3. Coal Mine · 4. Powering the Future · 5. Science Storms · 6. Great Train Story · 7. Boeing 727.", pass:"5/5" },
+      { h:"17h",     c:"air",   t:"Promontory Point (si énergie)", n:"20 min par Hyde Park. La meilleure vue de la skyline, et jamais personne. Retour bus 6 ou Metra.", pr:"Gratuit" }
+    ]},
+  { d:14, date:"2026-09-11", dow:"Ven", lab:"11 sept", e:"🎡", p:3, title:"Navy Pier + départ",
+    tip:"✈️ Vol à 16 h 15. La Blue Line s'arrête sans prévenir : grosse marge, pas une marge raisonnable.",
+    items:[
+      { h:"9h",    c:"air",    t:"Navy Pier", n:"Promenade, lac, skyline. Centennial Wheel seulement si le timing est bon.", pr:"Gratuit" },
+      { h:"11h30", c:"trajet", t:"Quitter le Pier — sans discuter", n:"Bus 124 ou 20 min à pied vers Grand (Red Line).", w:1 },
+      { h:"13h30", c:"trajet", t:"Bagages → O'Hare", n:"Blue Line 45 min. Être à l'aéroport vers 13 h 30." },
+      { h:"16h15", c:"trajet", t:"✈️ Vol retour" }
+    ]}
+];
 
-  document.getElementById("themeBtn").addEventListener("click", function () {
-    var current = root.getAttribute("data-theme");
-    if (!current) {
-      current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+var PASS = [
+  { n:"1/5", e:"🚢", t:"Architecture River Tour", d:"Jeu 3 sept · 16 h" },
+  { n:"2/5", e:"🌇", t:"360 CHICAGO", d:"Ven 4 sept · sunset" },
+  { n:"3/5", e:"🌃", t:"Skydeck Chicago", d:"Mar 8 sept · nuit" },
+  { n:"4/5", e:"🐠", t:"Shedd Aquarium", d:"Mer 9 sept · 9 h" },
+  { n:"5/5", e:"🔬", t:"Griffin MSI", d:"Jeu 10 sept · journée" }
+];
+
+var PREP = [
+  { e:"🚗", t:"Régler Memphis ↔ Oxford", n:"Navette réservée, location ou cousin — décidé avant le départ." },
+  { e:"🏨", t:"Réserver l'hôtel du 8 → 11 sept", n:"≤ 330 € pour tenir la cible des 3 500 €." },
+  { e:"🚢", t:"Réserver les créneaux CityPASS", n:"River Tour (3), 360 sunset (4), Skydeck (8), Shedd 9 h (9)." },
+  { e:"🕵️", t:"Réserver le Crime Tour du 8", n:"~40 €, en ligne." },
+  { e:"⚾", t:"Confirmer l'heure de Cubs–Brewers", n:"Sur mlb.com — un match en journée décale tout le 2 sept." },
+  { e:"🎈", t:"Vérifier le Balloon Museum", n:"Expo itinérante : bien à Chicago le 1er sept ?" },
+  { e:"🛂", t:"Passeport dans le sac du 2 sept", n:"Obligatoire au Money Museum, version physique." },
+  { e:"💵", t:"Prévoir du liquide", n:"Green Mill (13–17 €) et la plupart des clubs." }
+];
+
+var BUDGET = {
+  paid: [
+    ["Vol international A/R", 735],
+    ["Vols Chicago ↔ Memphis", 314],
+    ["Visa", 35],
+    ["Kaplan + hébergement", 1011],
+    ["CityPASS", 124]
+  ],
+  toPay: [
+    ["Hôtel 8 → 11 sept", "300 – 600 €", 450, "b1"],
+    ["Activités hors pass", "~304 €", 304, "b2"],
+    ["Nourriture", "~350 €", 350, "b3"],
+    ["Transports", "~300 €", 300, "b4"]
+  ]
+};
+
+/* ============================================================
+   ÉTAT
+   ============================================================ */
+var store = {
+  get: function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
+  set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+var done = store.get("chi26:done", {});
+var prepDone = store.get("chi26:prep", {});
+var passUsed = store.get("chi26:pass", {});
+var totalItems = DAYS.reduce(function (a, d) { return a + d.items.length; }, 0);
+
+function todayChicago() {
+  var p = new Intl.DateTimeFormat("fr-CA", { timeZone: "America/Chicago" }).format(new Date());
+  return p; /* AAAA-MM-JJ */
+}
+
+/* ============================================================
+   THÈME
+   ============================================================ */
+var root = document.documentElement;
+var savedTheme = null;
+try { savedTheme = localStorage.getItem("chi26:theme"); } catch (e) {}
+if (savedTheme) root.setAttribute("data-theme", savedTheme);
+document.getElementById("themeBtn").addEventListener("click", function () {
+  var cur = root.getAttribute("data-theme") ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  var next = cur === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("chi26:theme", next); } catch (e) {}
+});
+
+/* ============================================================
+   RENDU
+   ============================================================ */
+function esc(s) { return String(s == null ? "" : s); }
+
+function priceHtml(it) {
+  if (it.pass) return '<span class="price pass">🎫 ' + it.pass + "</span>";
+  if (!it.pr) return "";
+  var cls = /Gratuit|Donation/.test(it.pr) ? "price free" : "price";
+  return '<span class="' + cls + '">' + esc(it.pr) + "</span>";
+}
+
+function itemHtml(day, idx) {
+  var it = day.items[idx];
+  var uid = "d" + day.d + "-" + idx;
+  var checked = done[uid] ? " checked" : "";
+  var doneCls = done[uid] ? " done" : "";
+  return '<label class="item' + doneCls + '" style="--cat: var(--c-' + it.c + ')" data-uid="' + uid + '">' +
+    '<input type="checkbox" class="chk" data-uid="' + uid + '" data-day="' + day.d + '"' + checked +
+    ' aria-label="Fait : ' + esc(it.t).replace(/"/g, "&quot;") + '">' +
+    '<span class="body"><span class="h">' + esc(it.h) + "</span><br>" +
+    '<span class="t">' + esc(it.t) + "</span>" +
+    (it.n ? '<div class="n' + (it.w ? " warn" : "") + '">' + esc(it.n) + "</div>" : "") +
+    "</span>" + priceHtml(it) + "</label>";
+}
+
+function dayDoneCount(day) {
+  var n = 0;
+  day.items.forEach(function (_, i) { if (done["d" + day.d + "-" + i]) n++; });
+  return n;
+}
+
+function dayCardHtml(day, kicker) {
+  var dn = dayDoneCount(day);
+  var html = '<div class="dayhero" data-p="' + day.p + '">' +
+    '<span class="big-emoji">' + day.e + "</span>" +
+    '<div class="kicker">' + esc(kicker || ("Jour " + day.d + " / 14 · " + day.dow + " " + day.lab)) + "</div>" +
+    "<h3>" + day.e + " " + esc(day.title) + "</h3>" +
+    '<div class="sub">' + ["", "Chicago · semaine Kaplan", "Mississippi · Ole Miss", "Chicago · mode touriste"][day.p] + "</div>" +
+    '<span class="done-pill">' + dn + " / " + day.items.length + " coché" + (dn > 1 ? "s" : "") + "</span>" +
+    "</div>";
+  if (day.tip) html += '<div class="tipcard">💡 ' + esc(day.tip) + "</div>";
+  day.items.forEach(function (_, i) { html += itemHtml(day, i); });
+  return html;
+}
+
+/* ---------- écran Jours ---------- */
+var curDay = 1;
+function renderPlan() {
+  var scr = document.getElementById("scr-plan");
+  var picks = DAYS.map(function (day) {
+    var all = dayDoneCount(day) === day.items.length;
+    return '<button class="dp' + (day.d === curDay ? " on" : "") + (all ? " alldone" : "") +
+      '" data-p="' + day.p + '" data-d="' + day.d + '" type="button">' +
+      '<span class="e">' + day.e + '</span><span class="n">' + day.d + '</span>' +
+      '<span class="d">' + day.dow + "</span></button>";
+  }).join("");
+  var day = DAYS[curDay - 1];
+  scr.innerHTML = '<h2 class="screen-title"><span>📅</span>Jour par jour</h2>' +
+    '<div class="daypick" id="daypick">' + picks + "</div>" + dayCardHtml(day);
+  scr.querySelectorAll(".dp").forEach(function (b) {
+    b.addEventListener("click", function () {
+      curDay = +b.dataset.d;
+      renderPlan();
+    });
+  });
+  bindChecks(scr);
+}
+
+/* ---------- écran Aujourd'hui ---------- */
+function renderHome() {
+  var scr = document.getElementById("scr-home");
+  var t = todayChicago();
+  var start = "2026-08-29", end = "2026-09-11";
+  var html = "";
+  if (t < start) {
+    var days = Math.round((new Date(start) - new Date(t)) / 864e5);
+    var prepLeft = PREP.filter(function (_, i) { return !prepDone["p" + i]; }).length;
+    html += '<div class="hero-count"><span class="skyline">🏙️</span>' +
+      '<div class="jminus">J−' + days + "</div>" +
+      '<div class="lbl">avant l\'embarquement · 14 jours · 3 villes · 5 CityPASS</div></div>';
+    html += '<div class="card"><h3>✅ À régler avant de partir' +
+      (prepLeft ? " · " + prepLeft + " restant" + (prepLeft > 1 ? "s" : "") : " · tout est prêt 🎉") + "</h3>";
+    PREP.forEach(function (p, i) {
+      var uid = "p" + i;
+      html += '<label class="item' + (prepDone[uid] ? " done" : "") + '" style="--cat: var(--c-cours)">' +
+        '<input type="checkbox" class="chk" data-prep="' + uid + '"' + (prepDone[uid] ? " checked" : "") +
+        ' aria-label="' + esc(p.t).replace(/"/g, "&quot;") + '">' +
+        '<span class="body"><span class="t">' + p.e + " " + esc(p.t) + '</span><div class="n">' + esc(p.n) + "</div></span></label>";
+    });
+    html += "</div>";
+    html += '<div class="tipcard">👉 Le jour J, cet écran affichera automatiquement le programme du jour, en heure de Chicago.</div>';
+  } else if (t > end) {
+    var checked = Object.keys(done).length;
+    html += '<div class="hero-count"><span class="skyline">🌆</span>' +
+      '<div class="jminus">Fini ✔</div>' +
+      '<div class="lbl">' + checked + " / " + totalItems + " activités cochées. Beau voyage.</div></div>";
+    html += '<div class="tipcard">Revois le détail dans l\'onglet 📅 Jours.</div>';
+  } else {
+    var day = DAYS.find(function (d) { return d.date === t; }) || DAYS[0];
+    html += dayCardHtml(day, "Aujourd'hui · " + day.dow + " " + day.lab);
+    var nxt = DAYS[day.d] ;
+    if (nxt) {
+      html += '<div class="tipcard">🔜 <b>Demain :</b> ' + nxt.e + " " + esc(nxt.title) +
+        (nxt.tip ? " — " + esc(nxt.tip) : "") + "</div>";
     }
-    var next = current === "dark" ? "light" : "dark";
-    root.setAttribute("data-theme", next);
-    try { localStorage.setItem(KEY_THEME, next); } catch (e) {}
-  });
-
-  /* ---------- réglette des jours ---------- */
-  var days = Array.prototype.slice.call(document.querySelectorAll(".day"));
-  var lineBar = document.getElementById("lineBar");
-
-  days.forEach(function (day) {
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "stop";
-    btn.textContent = day.dataset.day;
-    btn.dataset.anchor = day.dataset.anchor === "1" ? "1" : "0";
-    btn.setAttribute("data-phase", day.dataset.phase);
-    var head = day.querySelector(".day-head h3").textContent;
-    btn.title = "Jour " + day.dataset.day + " — " + head;
-    btn.setAttribute("aria-label", "Aller au jour " + day.dataset.day + " : " + head);
-    btn.addEventListener("click", function () {
-      day.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    lineBar.appendChild(btn);
-  });
-
-  /* ---------- filtres par thème ---------- */
-  var items = Array.prototype.slice.call(document.querySelectorAll(".item"));
-  var chips = Array.prototype.slice.call(document.querySelectorAll("#filters .chip"));
-  var active = [];
-
-  function applyFilter() {
-    items.forEach(function (item) {
-      var show = active.length === 0 || active.indexOf(item.dataset.cat) !== -1;
-      item.classList.toggle("dimmed", !show);
-    });
-    chips.forEach(function (chip) {
-      var cat = chip.dataset.cat;
-      var on = cat === "all" ? active.length === 0 : active.indexOf(cat) !== -1;
-      chip.setAttribute("aria-pressed", on ? "true" : "false");
-    });
   }
-
-  chips.forEach(function (chip) {
-    chip.addEventListener("click", function () {
-      var cat = chip.dataset.cat;
-      if (cat === "all") {
-        active = [];
-      } else {
-        var i = active.indexOf(cat);
-        if (i === -1) active.push(cat); else active.splice(i, 1);
-      }
-      applyFilter();
-    });
-  });
-
-  /* ---------- progression, gardée sur l'appareil ---------- */
-  var KEY_DONE = "chi2026:done:v2";
-  var done = {};
-  try { done = JSON.parse(localStorage.getItem(KEY_DONE) || "{}") || {}; } catch (e) { done = {}; }
-
-  var counter = document.getElementById("doneCount");
-
-  function refreshCount() {
-    var n = 0;
-    items.forEach(function (item) { if (item.classList.contains("done")) n++; });
-    counter.textContent = n + " / " + items.length;
-  }
-
-  function save() {
-    try { localStorage.setItem(KEY_DONE, JSON.stringify(done)); } catch (e) {}
-  }
-
-  items.forEach(function (item) {
-    var dayEl = item.closest(".day");
-    var uid = "d" + dayEl.dataset.day + "-" + Array.prototype.indexOf.call(
-      dayEl.querySelectorAll(".item"), item
-    );
-    item.dataset.uid = uid;
-
-    var box = item.querySelector('input[type="checkbox"]');
-    var label = item.querySelector(".t b").textContent;
-    box.setAttribute("aria-label", "Fait : " + label);
-
-    if (done[uid]) { box.checked = true; item.classList.add("done"); }
-
+  scr.innerHTML = html;
+  bindChecks(scr);
+  scr.querySelectorAll("[data-prep]").forEach(function (box) {
     box.addEventListener("change", function () {
-      item.classList.toggle("done", box.checked);
-      if (box.checked) done[uid] = 1; else delete done[uid];
-      save();
-      refreshCount();
+      prepDone[box.dataset.prep] = box.checked ? 1 : undefined;
+      if (!box.checked) delete prepDone[box.dataset.prep];
+      store.set("chi26:prep", prepDone);
+      renderHome();
     });
   });
+}
 
-  refreshCount();
+/* ---------- écran Pass ---------- */
+function renderPass() {
+  var scr = document.getElementById("scr-pass");
+  var used = PASS.filter(function (_, i) { return passUsed["s" + i]; }).length;
+  var html = '<h2 class="screen-title"><span>🎫</span>CityPASS</h2>' +
+    '<div class="card"><h3>' + used + " / 5 utilisées · 124 € déjà payés</h3>" +
+    "<p>Activé le <b>jeudi 3 septembre</b> (River Tour) → 9 jours consécutifs → dernier jour le <b>vendredi 11 inclus</b>. Tout le programme rentre.</p>" +
+    "<p>À l'unité, les cinq coûteraient ~220 €.</p></div>";
+  PASS.forEach(function (s, i) {
+    var uid = "s" + i;
+    html += '<div class="pass-slot' + (passUsed[uid] ? " used" : "") + '">' +
+      '<span class="num">' + s.e + "</span>" +
+      '<span><span class="t">' + esc(s.t) + '</span><br><span class="d">' + s.n + " · " + esc(s.d) + "</span></span>" +
+      '<button class="stamp-btn" data-pass="' + uid + '" type="button">' + (passUsed[uid] ? "Utilisé ✓" : "Tamponner") + "</button></div>";
+  });
+  html += '<div class="tipcard">💡 Field, Adler et Art Institute sont payés à part <b>exprès</b> : dans les couples de choix du pass, ils sont les alternatives de Griffin, de la croisière et du 360. Vouloir les six impose d\'en payer trois hors pass.</div>';
+  scr.innerHTML = html;
+  scr.querySelectorAll("[data-pass]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var uid = b.dataset.pass;
+      if (passUsed[uid]) delete passUsed[uid]; else { passUsed[uid] = 1; burst(["🎫", "✨", "🌆"]); }
+      store.set("chi26:pass", passUsed);
+      renderPass();
+    });
+  });
+}
+
+/* ---------- écran Budget ---------- */
+function renderBudget() {
+  var scr = document.getElementById("scr-budget");
+  var paidTotal = BUDGET.paid.reduce(function (a, r) { return a + r[1]; }, 0);
+  var segs = [["Déjà payé", paidTotal, "var(--b-paid)"]].concat(
+    BUDGET.toPay.map(function (r) { return [r[0], r[2], "var(--" + r[3].replace("b", "b-") + ")"]; })
+  );
+  var grand = segs.reduce(function (a, s) { return a + s[1]; }, 0);
+  var bar = segs.map(function (s) {
+    return '<span style="width:' + (s[1] / grand * 100).toFixed(1) + "%; background:" + s[2] + '" title="' + esc(s[0]) + '"></span>';
+  }).join("");
+
+  var html = '<h2 class="screen-title"><span>💰</span>Budget</h2>' +
+    '<div class="card money-hero">' +
+    '<div class="lbl">TOTAL ESTIMÉ DU VOYAGE</div>' +
+    '<div class="total">3 473 – 3 773 €</div>' +
+    '<div class="lbl">cible : ~3 500 € hors shopping</div>' +
+    '<div class="stackbar" role="img" aria-label="Répartition du budget">' + bar + "</div>" +
+    '<ul class="blegend">' +
+    '<li class="head"><span class="dot" style="background:var(--b-paid)"></span><span class="lab">Déjà payé</span><span class="val">2 219 €</span></li>' +
+    BUDGET.toPay.map(function (r) {
+      return '<li><span class="dot" style="background:var(--' + r[3].replace("b", "b-") + ')"></span><span class="lab">' + esc(r[0]) + '</span><span class="val">' + esc(r[1]) + "</span></li>";
+    }).join("") +
+    "</ul></div>";
+
+  html += '<div class="card"><h3>✔ Déjà payé — 2 219 €</h3><ul class="blegend">' +
+    BUDGET.paid.map(function (r) {
+      return '<li><span class="dot" style="background:var(--b-paid)"></span><span class="lab">' + esc(r[0]) + '</span><span class="val">' + r[1].toLocaleString("fr-FR") + " €</span></li>";
+    }).join("") + "</ul></div>";
+
+  html += '<div class="tipcard">⚠️ <b>Le seul poste qui peut faire déraper : l\'hôtel.</b> À 300 € les 3 nuits, le total tombe à 3 473 € — la cible tient. À 600 €, on est à 3 773 €. Viser ≤ 330 €.</div>';
+  html += '<div class="tipcard">🚗 L\'Uber Memphis ↔ Oxford (180–230 € A/R) mange les deux tiers des 300 € de transport. Une navette ou une location peut libérer 50–100 €.</div>';
+  scr.innerHTML = html;
+}
+
+/* ---------- écran Infos ---------- */
+function renderInfos() {
+  var scr = document.getElementById("scr-infos");
+  scr.innerHTML = '<h2 class="screen-title"><span>ℹ️</span>Infos pratiques</h2>' +
+
+    '<div class="card"><h3>📲 Installer l\'appli sur ton téléphone</h3>' +
+    "<p><b>iPhone (Safari)</b> : ouvre cette page → bouton Partager <b>⬆️</b> → « <b>Sur l'écran d'accueil</b> ». L'icône skyline apparaît et la page s'ouvre en plein écran, comme une appli.</p>" +
+    "<p><b>Android (Chrome)</b> : menu <b>⋮</b> → « <b>Ajouter à l'écran d'accueil</b> ».</p>" +
+    "<p>Tes coches et le thème restent enregistrés sur l'appareil — pas besoin de connexion pour les garder.</p></div>" +
+
+    '<div class="card"><h3>🚇 Se déplacer</h3><ul>' +
+    "<li><b>Carte Ventra</b> : 5 $ (rendus en crédit), 2,50 $ le trajet en « L ».</li>" +
+    "<li><b>Pass 7 jours : 20 $</b> — rentable dès 3 trajets/jour. Deux pass couvrent tes deux séjours.</li>" +
+    "<li><b>O'Hare ↔ centre</b> : Blue Line, 5 $, 45 min, 24 h/24.</li>" +
+    "<li>La ville est un damier : State × Madison = le point zéro. Impossible de se perdre.</li></ul></div>" +
+
+    '<div class="card"><h3>🎒 À ne pas oublier</h3><ul>' +
+    "<li><b>Passeport physique</b> — exigé au Money Museum (2 sept).</li>" +
+    "<li><b>Liquide</b> — Green Mill et la plupart des clubs.</li>" +
+    "<li><b>Coupe-vent</b>, pas de parapluie (le vent le retourne — d'où le surnom de la ville).</li>" +
+    "<li><b>Vraies chaussures</b> : 12–18 km de marche par jour.</li>" +
+    "<li>Pourboires : 18–20 % au resto, 1–2 $ par verre au bar.</li></ul></div>" +
+
+    '<div class="card"><h3>⚠️ Les trois pièges du voyage</h3><ul>' +
+    "<li><b>Memphis ↔ Oxford</b> : 135 km sans course retour → annulations Uber fréquentes. Se règle avant le départ.</li>" +
+    "<li><b>Mardi 8</b> : toute la journée dépend du vol. En cas de retard, sacrifier le Crime Tour, jamais le Skydeck.</li>" +
+    "<li><b>Vendredi 11</b> : quitter Navy Pier à 11 h 30 max — vol à 16 h 15 et le Pier est mal desservi.</li></ul></div>" +
+
+    '<div class="card"><h3>🎁 En bonus si le temps le permet</h3><ul>' +
+    "<li><b>Water Taxi → Chinatown</b> (~9 €/trajet) : le 31 août ou le 9 sept. Vérifier le calendrier de la ligne.</li>" +
+    "<li><b>Plages</b> : Oak Street ou North Avenue Beach, sur le Lakefront Trail. Gratuit, lac baignable jusqu'à mi-septembre.</li>" +
+    "<li><b>Jazz Fest</b> (3–6 sept, gratuit) : tes soirées du 3 et du 4 sont les seules attrapables.</li></ul></div>";
+}
+
+/* ============================================================
+   INTERACTIONS COMMUNES
+   ============================================================ */
+function refreshRing() {
+  var n = 0;
+  DAYS.forEach(function (day) { n += dayDoneCount(day); });
+  var pct = Math.round(n / totalItems * 100);
+  document.getElementById("ringFg").style.strokeDashoffset = (100.5 * (1 - n / totalItems)).toFixed(1);
+  document.getElementById("ringTxt").textContent = pct + "%";
+}
+
+function burst(emojis) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var box = document.getElementById("confettiBox");
+  for (var i = 0; i < 14; i++) {
+    var s = document.createElement("span");
+    s.className = "confetti";
+    s.textContent = emojis[i % emojis.length];
+    s.style.left = (5 + Math.random() * 90) + "%";
+    s.style.animationDelay = (Math.random() * .35) + "s";
+    s.style.fontSize = (16 + Math.random() * 14) + "px";
+    box.appendChild(s);
+    setTimeout(function (el) { return function () { el.remove(); }; }(s), 2200);
+  }
+}
+
+function bindChecks(scope) {
+  scope.querySelectorAll(".chk[data-uid]").forEach(function (box) {
+    box.addEventListener("change", function () {
+      var uid = box.dataset.uid;
+      if (box.checked) done[uid] = 1; else delete done[uid];
+      store.set("chi26:done", done);
+      box.closest(".item").classList.toggle("done", box.checked);
+      refreshRing();
+      var day = DAYS[+box.dataset.day - 1];
+      if (box.checked && dayDoneCount(day) === day.items.length) {
+        burst([day.e, "🎉", "⭐", "🎊"]);
+      }
+      var pill = scope.querySelector(".done-pill");
+      if (pill && day.d === curDay || (pill && scope.id === "scr-home")) {
+        var dn = dayDoneCount(day);
+        pill.textContent = dn + " / " + day.items.length + " coché" + (dn > 1 ? "s" : "");
+      }
+    });
+  });
+}
+
+/* ---------- onglets ---------- */
+var renderers = { home: renderHome, plan: renderPlan, pass: renderPass, budget: renderBudget, infos: renderInfos };
+document.querySelectorAll(".tab").forEach(function (tab) {
+  tab.addEventListener("click", function () {
+    document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t === tab); });
+    document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("on"); });
+    var id = tab.dataset.scr;
+    document.getElementById("scr-" + id).classList.add("on");
+    renderers[id]();
+    window.scrollTo({ top: 0 });
+  });
+});
+
+/* ---------- démarrage ---------- */
+var t0 = todayChicago();
+var d0 = DAYS.find(function (d) { return d.date === t0; });
+if (d0) curDay = d0.d;
+renderHome();
+renderPlan();
+renderPass();
+renderBudget();
+renderInfos();
+refreshRing();
 })();
 </script>
