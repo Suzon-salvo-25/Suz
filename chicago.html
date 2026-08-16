@@ -231,8 +231,8 @@ main {
   width: min(100%, 560px);
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  grid-template-columns: repeat(6, 1fr);
+  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--panel) 88%, transparent);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
@@ -249,11 +249,11 @@ main {
   padding: 6px 2px;
   border-radius: var(--r-sm);
   color: var(--ink-faint);
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 700;
   cursor: pointer;
 }
-.tab .ico { font-size: 21px; line-height: 1; filter: grayscale(1) opacity(.55); transition: filter .15s, transform .15s; }
+.tab .ico { font-size: 20px; line-height: 1; filter: grayscale(1) opacity(.55); transition: filter .15s, transform .15s; }
 .tab.on { color: var(--ink); }
 .tab.on .ico { filter: none; transform: scale(1.12); }
 
@@ -555,6 +555,20 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
   white-space: nowrap;
 }
 .blegend li.head .lab, .blegend li.head .val { color: var(--ink); font-weight: 800; }
+.paychk {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 23px; height: 23px;
+  flex: 0 0 auto;
+  border: 2.5px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color .15s, background .15s;
+}
+.paychk:checked { background: var(--c-air); border-color: var(--c-air); }
+.paychk:checked::after { content: "✓"; color: #fff; font-size: 13px; font-weight: 900; }
 
 /* ---------- confettis ---------- */
 .confetti-box {
@@ -597,14 +611,16 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
   <main>
     <section class="screen on" id="scr-home"></section>
     <section class="screen" id="scr-plan"></section>
+    <section class="screen" id="scr-pack"></section>
     <section class="screen" id="scr-pass"></section>
     <section class="screen" id="scr-budget"></section>
     <section class="screen" id="scr-infos"></section>
   </main>
 
   <nav class="tabbar" aria-label="Navigation">
-    <button class="tab on" data-scr="home" type="button"><span class="ico">🏠</span>Aujourd'hui</button>
+    <button class="tab on" data-scr="home" type="button"><span class="ico">🏠</span>Auj.</button>
     <button class="tab" data-scr="plan" type="button"><span class="ico">📅</span>Jours</button>
+    <button class="tab" data-scr="pack" type="button"><span class="ico">🧳</span>Valise</button>
     <button class="tab" data-scr="pass" type="button"><span class="ico">🎫</span>Pass</button>
     <button class="tab" data-scr="budget" type="button"><span class="ico">💰</span>Budget</button>
     <button class="tab" data-scr="infos" type="button"><span class="ico">ℹ️</span>Infos</button>
@@ -728,6 +744,8 @@ var PASS = [
 ];
 
 var PREP = [
+  { e:"📶", t:"Acheter + installer l'eSIM USA", n:"Airalo, Holafly ou Ubigi. À installer en wifi AVANT le départ, à activer à l'atterrissage." },
+  { e:"💸", t:"Payer Kaplan (1 011 €) + vols Memphis (314 €)", n:"Encore dus — vérifier les échéances, cocher dans l'onglet Budget une fois réglés." },
   { e:"🚗", t:"Régler Memphis ↔ Oxford", n:"Navette réservée, location ou cousin — décidé avant le départ." },
   { e:"🏨", t:"Réserver l'hôtel du 8 → 11 sept", n:"≤ 330 € pour tenir la cible des 3 500 €." },
   { e:"🚢", t:"Réserver les créneaux CityPASS", n:"River Tour (3), 360 sunset (4), Skydeck (8), Shedd 9 h (9)." },
@@ -739,20 +757,58 @@ var PREP = [
 ];
 
 var BUDGET = {
-  paid: [
-    ["Vol international A/R", 735],
-    ["Vols Chicago ↔ Memphis", 314],
-    ["Visa", 35],
-    ["Kaplan + hébergement", 1011],
-    ["CityPASS", 124]
+  fixed: [
+    { id:"intl", t:"Vol international A/R (Marseille)", v:735, def:1 },
+    { id:"pass", t:"CityPASS Chicago", v:124, def:1 },
+    { id:"esta", t:"ESTA", v:35, def:1 },
+    { id:"mem",  t:"Vols Chicago ↔ Memphis", v:314 },
+    { id:"kap",  t:"Kaplan + hébergement 29/8 → 5/9", v:1011 },
+    { id:"hot",  t:"Hôtel Chicago 8 → 11 sept", v:450, lab:"300 – 600 €" },
+    { id:"sim",  t:"eSIM USA (data ~15 j)", v:30, lab:"~20 – 40 €" }
   ],
-  toPay: [
-    ["Hôtel 8 → 11 sept", "300 – 600 €", 450, "b1"],
-    ["Activités hors pass", "~304 €", 304, "b2"],
-    ["Nourriture", "~350 €", 350, "b3"],
-    ["Transports", "~300 €", 300, "b4"]
+  onsite: [
+    ["Activités hors pass", "~304 €", 304, "b-2"],
+    ["Nourriture", "~350 €", 350, "b-3"],
+    ["Transports", "~300 €", 300, "b-4"]
   ]
 };
+
+var PACK = [
+  { c:"trajet", e:"📄", t:"Papiers", items:[
+    ["Passeport", "Physique — exigé au Money Museum le 2/09. Vérifier la validité."],
+    ["ESTA", "Payée ✔ — garder le PDF hors-ligne sur le téléphone."],
+    ["Confirmations hors-ligne", "Vols, Kaplan, hôtel, CityPASS : des captures d'écran, pas juste des mails."],
+    ["Adresses notées", "Logement Kaplan, hôtel, cousin — aussi sur papier."],
+    ["Permis de conduire", "Seulement si location de voiture pour Memphis ↔ Oxford."]
+  ]},
+  { c:"sport", e:"💳", t:"Argent", items:[
+    ["Carte bancaire sans frais US", "Vérifier plafonds et options avant de partir."],
+    ["Deuxième carte de secours", "Rangée ailleurs que la première."],
+    ["Du liquide en dollars", "Green Mill, clubs, pourboires. Retirer plutôt sur place, meilleur taux."]
+  ]},
+  { c:"cours", e:"📱", t:"Tech", items:[
+    ["eSIM USA installée AVANT le départ", "Airalo, Holafly, Ubigi… S'installe en wifi à la maison, s'active à l'atterrissage."],
+    ["Batterie externe", "12–18 km de marche par jour = GPS + photos non-stop."],
+    ["Adaptateur prises US (type A/B)", "Un seul + un chargeur multi-USB suffit."],
+    ["Chargeur + câbles", "Dont un câble de rechange."],
+    ["Écouteurs", "9 h de vol + les trajets en L."]
+  ]},
+  { c:"air", e:"👕", t:"Vêtements", items:[
+    ["Coupe-vent", "PAS de parapluie — le vent le retourne, c'est le principe de la ville."],
+    ["Chaussures de marche déjà rodées", "Pas neuves. Le point n°1 de toute la liste."],
+    ["Pull ou hoodie", "Le bord du lac perd 3–4 °C le soir (Navy Pier, Millennium Park)."],
+    ["Maillot de bain", "Plages du lac Michigan, baignable jusqu'à mi-septembre."],
+    ["Une tenue correcte", "Green Mill, Second City, restos du soir."],
+    ["Casquette + lunettes de soleil", "27 °C fin août."]
+  ]},
+  { c:"soir", e:"🧴", t:"Divers", items:[
+    ["Crème solaire", "Le Lakefront Trail ne pardonne pas."],
+    ["Gourde vide", "Des fontaines partout, et elle passe la sécurité vide."],
+    ["Petit sac à dos de journée", "Pour les musées et le lakefront."],
+    ["Médicaments perso + ibuprofène", "La pharmacie US coûte une fortune."],
+    ["Mini-dose de lessive", "14 jours — ça évite la demi-valise en plus."]
+  ]}
+];
 
 /* ============================================================
    ÉTAT
@@ -764,6 +820,12 @@ var store = {
 var done = store.get("chi26:done", {});
 var prepDone = store.get("chi26:prep", {});
 var passUsed = store.get("chi26:pass", {});
+var packDone = store.get("chi26:pack", {});
+var paidState = store.get("chi26:paid", null);
+if (!paidState) {
+  paidState = {};
+  BUDGET.fixed.forEach(function (r) { if (r.def) paidState[r.id] = 1; });
+}
 var totalItems = DAYS.reduce(function (a, d) { return a + d.items.length; }, 0);
 
 function todayChicago() {
@@ -933,12 +995,23 @@ function renderPass() {
 }
 
 /* ---------- écran Budget ---------- */
+function fmtEur(n) { return n.toLocaleString("fr-FR") + " €"; }
+
 function renderBudget() {
   var scr = document.getElementById("scr-budget");
-  var paidTotal = BUDGET.paid.reduce(function (a, r) { return a + r[1]; }, 0);
-  var segs = [["Déjà payé", paidTotal, "var(--b-paid)"]].concat(
-    BUDGET.toPay.map(function (r) { return [r[0], r[2], "var(--" + r[3].replace("b", "b-") + ")"]; })
-  );
+  var paidSum = 0, restFixed = 0;
+  BUDGET.fixed.forEach(function (r) {
+    if (paidState[r.id]) paidSum += r.v; else restFixed += r.v;
+  });
+  var onsiteSum = BUDGET.onsite.reduce(function (a, r) { return a + r[2]; }, 0);
+  var resteTotal = restFixed + onsiteSum;
+
+  var segs = [
+    ["Déjà payé", paidSum, "var(--b-paid)"],
+    ["Réservations restantes", restFixed, "var(--b-1)"]
+  ].concat(BUDGET.onsite.map(function (r) {
+    return [r[0], r[2], "var(--" + r[3] + ")"];
+  })).filter(function (s) { return s[1] > 0; });
   var grand = segs.reduce(function (a, s) { return a + s[1]; }, 0);
   var bar = segs.map(function (s) {
     return '<span style="width:' + (s[1] / grand * 100).toFixed(1) + "%; background:" + s[2] + '" title="' + esc(s[0]) + '"></span>';
@@ -947,24 +1020,76 @@ function renderBudget() {
   var html = '<h2 class="screen-title"><span>💰</span>Budget</h2>' +
     '<div class="card money-hero">' +
     '<div class="lbl">TOTAL ESTIMÉ DU VOYAGE</div>' +
-    '<div class="total">3 473 – 3 773 €</div>' +
+    '<div class="total">3 493 – 3 813 €</div>' +
     '<div class="lbl">cible : ~3 500 € hors shopping</div>' +
     '<div class="stackbar" role="img" aria-label="Répartition du budget">' + bar + "</div>" +
     '<ul class="blegend">' +
-    '<li class="head"><span class="dot" style="background:var(--b-paid)"></span><span class="lab">Déjà payé</span><span class="val">2 219 €</span></li>' +
-    BUDGET.toPay.map(function (r) {
-      return '<li><span class="dot" style="background:var(--' + r[3].replace("b", "b-") + ')"></span><span class="lab">' + esc(r[0]) + '</span><span class="val">' + esc(r[1]) + "</span></li>";
+    '<li class="head"><span class="dot" style="background:var(--b-paid)"></span><span class="lab">Déjà payé</span><span class="val">' + fmtEur(paidSum) + "</span></li>" +
+    '<li class="head"><span class="dot" style="background:var(--b-1)"></span><span class="lab">Reste à payer</span><span class="val">~' + fmtEur(resteTotal) + "</span></li>" +
+    BUDGET.onsite.map(function (r) {
+      return '<li><span class="dot" style="background:var(--' + r[3] + ')"></span><span class="lab">' + esc(r[0]) + " (sur place)</span><span class=\"val\">" + esc(r[1]) + "</span></li>";
     }).join("") +
     "</ul></div>";
 
-  html += '<div class="card"><h3>✔ Déjà payé — 2 219 €</h3><ul class="blegend">' +
-    BUDGET.paid.map(function (r) {
-      return '<li><span class="dot" style="background:var(--b-paid)"></span><span class="lab">' + esc(r[0]) + '</span><span class="val">' + r[1].toLocaleString("fr-FR") + " €</span></li>";
+  html += '<div class="card"><h3>🧾 Suivi des paiements — coche quand c\'est réglé</h3><ul class="blegend">' +
+    BUDGET.fixed.map(function (r) {
+      var on = paidState[r.id];
+      return '<li><input type="checkbox" class="paychk" data-pay="' + r.id + '"' + (on ? " checked" : "") +
+        ' aria-label="Payé : ' + esc(r.t).replace(/"/g, "&quot;") + '">' +
+        '<span class="lab"' + (on ? ' style="text-decoration:line-through; opacity:.6"' : "") + ">" + esc(r.t) + "</span>" +
+        '<span class="val">' + (r.lab || fmtEur(r.v)) + "</span></li>";
     }).join("") + "</ul></div>";
 
-  html += '<div class="tipcard">⚠️ <b>Le seul poste qui peut faire déraper : l\'hôtel.</b> À 300 € les 3 nuits, le total tombe à 3 473 € — la cible tient. À 600 €, on est à 3 773 €. Viser ≤ 330 €.</div>';
+  html += '<div class="tipcard">⚠️ <b>Le seul poste qui peut faire déraper : l\'hôtel.</b> À 300 € les 3 nuits, le total fait ~3 493 € — la cible tient tout juste. À 600 €, on file à 3 813 €. Viser ≤ 330 €.</div>';
   html += '<div class="tipcard">🚗 L\'Uber Memphis ↔ Oxford (180–230 € A/R) mange les deux tiers des 300 € de transport. Une navette ou une location peut libérer 50–100 €.</div>';
   scr.innerHTML = html;
+
+  scr.querySelectorAll("[data-pay]").forEach(function (box) {
+    box.addEventListener("change", function () {
+      if (box.checked) paidState[box.dataset.pay] = 1; else delete paidState[box.dataset.pay];
+      store.set("chi26:paid", paidState);
+      if (box.checked) burst(["💸", "✅", "💰"]);
+      renderBudget();
+    });
+  });
+}
+
+/* ---------- écran Valise ---------- */
+function renderPack() {
+  var scr = document.getElementById("scr-pack");
+  var total = 0, ok = 0;
+  PACK.forEach(function (g, gi) {
+    g.items.forEach(function (_, ii) { total++; if (packDone["k" + gi + "-" + ii]) ok++; });
+  });
+  var html = '<h2 class="screen-title"><span>🧳</span>Valise</h2>' +
+    '<div class="tipcard">' + (ok === total
+      ? "🎉 <b>Valise bouclée !</b> Bon voyage."
+      : "<b>" + ok + " / " + total + "</b> prêt" + (ok > 1 ? "s" : "") + ". 📶 L'eSIM se règle à la maison, pas à O'Hare.") + "</div>";
+  PACK.forEach(function (g, gi) {
+    html += '<div class="card"><h3>' + g.e + " " + esc(g.t) + "</h3>";
+    g.items.forEach(function (it, ii) {
+      var uid = "k" + gi + "-" + ii;
+      html += '<label class="item' + (packDone[uid] ? " done" : "") + '" style="--cat: var(--c-' + g.c + '); box-shadow:none; margin-bottom:8px;">' +
+        '<input type="checkbox" class="chk" data-packit="' + uid + '"' + (packDone[uid] ? " checked" : "") +
+        ' aria-label="' + esc(it[0]).replace(/"/g, "&quot;") + '">' +
+        '<span class="body"><span class="t">' + esc(it[0]) + "</span>" +
+        (it[1] ? '<div class="n">' + esc(it[1]) + "</div>" : "") + "</span></label>";
+    });
+    html += "</div>";
+  });
+  scr.innerHTML = html;
+  scr.querySelectorAll("[data-packit]").forEach(function (box) {
+    box.addEventListener("change", function () {
+      if (box.checked) packDone[box.dataset.packit] = 1; else delete packDone[box.dataset.packit];
+      store.set("chi26:pack", packDone);
+      var left = 0;
+      PACK.forEach(function (g, gi) {
+        g.items.forEach(function (_, ii) { if (!packDone["k" + gi + "-" + ii]) left++; });
+      });
+      if (box.checked && left === 0) burst(["🧳", "🎉", "✈️", "🎊"]);
+      renderPack();
+    });
+  });
 }
 
 /* ---------- écran Infos ---------- */
@@ -984,10 +1109,9 @@ function renderInfos() {
     "<li>La ville est un damier : State × Madison = le point zéro. Impossible de se perdre.</li></ul></div>" +
 
     '<div class="card"><h3>🎒 À ne pas oublier</h3><ul>' +
+    "<li><b>eSIM USA</b> installée avant le départ — la liste complète est dans l'onglet 🧳 Valise.</li>" +
     "<li><b>Passeport physique</b> — exigé au Money Museum (2 sept).</li>" +
     "<li><b>Liquide</b> — Green Mill et la plupart des clubs.</li>" +
-    "<li><b>Coupe-vent</b>, pas de parapluie (le vent le retourne — d'où le surnom de la ville).</li>" +
-    "<li><b>Vraies chaussures</b> : 12–18 km de marche par jour.</li>" +
     "<li>Pourboires : 18–20 % au resto, 1–2 $ par verre au bar.</li></ul></div>" +
 
     '<div class="card"><h3>⚠️ Les trois pièges du voyage</h3><ul>' +
@@ -1049,7 +1173,7 @@ function bindChecks(scope) {
 }
 
 /* ---------- onglets ---------- */
-var renderers = { home: renderHome, plan: renderPlan, pass: renderPass, budget: renderBudget, infos: renderInfos };
+var renderers = { home: renderHome, plan: renderPlan, pack: renderPack, pass: renderPass, budget: renderBudget, infos: renderInfos };
 document.querySelectorAll(".tab").forEach(function (tab) {
   tab.addEventListener("click", function () {
     document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t === tab); });
@@ -1067,6 +1191,7 @@ var d0 = DAYS.find(function (d) { return d.date === t0; });
 if (d0) curDay = d0.d;
 renderHome();
 renderPlan();
+renderPack();
 renderPass();
 renderBudget();
 renderInfos();
