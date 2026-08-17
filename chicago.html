@@ -804,6 +804,51 @@ details.acc .acc-body { padding: 0 12px 12px; }
   line-height: 1.7;
 }
 
+/* ---------- toast + édition de prix ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  background: var(--ink);
+  color: var(--ground);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 70;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity .2s ease;
+  pointer-events: none;
+  max-width: 86vw;
+  text-align: center;
+}
+.toast.show { opacity: 1; }
+.pin {
+  width: 88px;
+  font-family: var(--f-data);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 8px;
+  border: 1.5px solid var(--c-musee);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+}
+.mini {
+  border: 0;
+  background: var(--c-air);
+  color: #fff;
+  border-radius: 50%;
+  width: 30px; height: 30px;
+  font-weight: 900;
+  font-size: 14px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.mini.cancel { background: var(--ink-faint); }
+
 /* ---------- confettis ---------- */
 .confetti-box {
   position: fixed;
@@ -867,6 +912,7 @@ details.acc .acc-body { padding: 0 12px 12px; }
 </div>
 
 <div class="confetti-box" id="confettiBox" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function () {
@@ -1627,10 +1673,17 @@ function renderBudget() {
     '<p style="font-size:12.5px; margin-top:8px">Coche un poste dans le suivi ci-dessous dès qu\'il est réglé : il bascule automatiquement dans « Déjà payé ».</p></div></details>';
 
   html += '<div class="card"><h3>🧾 Suivi des paiements</h3>' +
-    '<p style="font-size:12.5px; margin-bottom:8px">Coche quand c\'est réglé · touche un prix ✏️ pour saisir ce que tu as vraiment payé.</p><ul class="blegend">' +
+    '<p style="font-size:12.5px; margin-bottom:8px">Coche quand c\'est réglé · touche un prix ✏️ pour saisir ce que tu as vraiment payé (vide + ✓ = retour à l\'estimation).</p><ul class="blegend">' +
     BUDGET.fixed.map(function (r) {
       var on = paidState[r.id];
       var edited = DB.prices[r.id] != null;
+      if (editingPay === r.id) {
+        var cur = edited ? DB.prices[r.id] : r.v;
+        return '<li><span class="lab">' + esc(r.t) + "</span>" +
+          '<input class="pin" type="number" inputmode="decimal" step="0.01" min="0" id="pinInput" value="' + cur + '" aria-label="Prix payé en euros">' +
+          '<button class="mini" type="button" data-pok="1" aria-label="Valider le prix">✓</button>' +
+          '<button class="mini cancel" type="button" data-pcancel="1" aria-label="Annuler">✕</button></li>';
+      }
       return '<li><input type="checkbox" class="paychk" data-pay="' + r.id + '"' + (on ? " checked" : "") +
         ' aria-label="Payé : ' + esc(r.t).replace(/"/g, "&quot;") + '">' +
         '<span class="lab"' + (on ? ' style="text-decoration:line-through; opacity:.6"' : "") + ">" + esc(r.t) + "</span>" +
@@ -1679,27 +1732,46 @@ function renderBudget() {
   });
   scr.querySelectorAll("[data-edit]").forEach(function (b) {
     b.addEventListener("click", function () {
-      var id = b.dataset.edit;
-      var item = null;
-      BUDGET.fixed.forEach(function (r) { if (r.id === id) item = r; });
-      if (!item) return;
-      var cur = DB.prices[id] != null ? DB.prices[id] : item.v;
-      var raw = window.prompt(
-        "Prix réellement payé pour « " + item.t + " » (en €).\nLaisse vide pour revenir à l'estimation (" + (item.lab || fmtEur(item.v)) + ").",
-        String(cur)
-      );
-      if (raw === null) return;
-      raw = raw.trim().replace(",", ".").replace(/[€\s]/g, "");
-      if (raw === "") { delete DB.prices[id]; }
-      else {
-        var val = parseFloat(raw);
-        if (isNaN(val) || val < 0) { alert("Montant invalide."); return; }
-        DB.prices[id] = Math.round(val * 100) / 100;
-      }
-      saveDB();
+      editingPay = b.dataset.edit;
       renderBudget();
+      var inp = document.getElementById("pinInput");
+      if (inp) { inp.focus(); if (inp.select) inp.select(); }
     });
   });
+  var pok = scr.querySelector("[data-pok]");
+  if (pok) pok.addEventListener("click", commitPrice);
+  var pcan = scr.querySelector("[data-pcancel]");
+  if (pcan) pcan.addEventListener("click", function () { editingPay = null; renderBudget(); });
+  var pinInp = document.getElementById("pinInput");
+  if (pinInp) pinInp.addEventListener("keydown", function (e) { if (e.key === "Enter") commitPrice(); });
+}
+
+var editingPay = null;
+
+function commitPrice() {
+  var inp = document.getElementById("pinInput");
+  if (!inp || editingPay == null) return;
+  var raw = String(inp.value).trim().replace(",", ".").replace(/[€\s]/g, "");
+  if (raw === "") {
+    delete DB.prices[editingPay];
+    toast("Prix remis à l'estimation");
+  } else {
+    var val = parseFloat(raw);
+    if (isNaN(val) || val < 0) { toast("Montant invalide"); return; }
+    DB.prices[editingPay] = Math.round(val * 100) / 100;
+    toast("Prix enregistré ✓");
+  }
+  editingPay = null;
+  saveDB();
+  renderBudget();
+}
+
+function toast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function () { t.classList.remove("show"); }, 2400);
 }
 
 /* ---------- écrans guides (Miam / Boutiques), en accordéons ---------- */
@@ -1776,21 +1848,36 @@ function renderPack() {
 }
 
 /* ---------- écran Infos ---------- */
+function showImpBox(prefill) {
+  var w = document.getElementById("impWrap");
+  var box = document.getElementById("impBox");
+  if (!w || !box) return;
+  w.style.display = "block";
+  if (prefill != null) box.value = prefill;
+  box.focus();
+}
+
 function exportSave() {
   var data = JSON.stringify(DB);
   var doClipboard = function () {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(data).then(function () {
-        alert("Sauvegarde copiée 📋 Colle-la dans une note pour la garder.");
-      }, function () { window.prompt("Copie ce code de sauvegarde :", data); });
+        toast("Sauvegarde copiée 📋 — colle-la dans une note");
+      }, function () {
+        showImpBox(data);
+        toast("Copie le texte affiché et garde-le");
+      });
     } else {
-      window.prompt("Copie ce code de sauvegarde :", data);
+      showImpBox(data);
+      toast("Copie le texte affiché et garde-le");
     }
   };
   if (window.claude && window.claude.use) {
     window.claude.use("downloads").then(function (dl) {
       if (!dl) { doClipboard(); return; }
-      dl.save({ filename: "chicago-sauvegarde.json", data: data }).catch(function (e) {
+      dl.save({ filename: "chicago-sauvegarde.json", data: data }).then(function () {
+        toast("Fichier de sauvegarde proposé ⬇️");
+      }, function (e) {
         if (!e || e.code !== "declined") doClipboard();
       });
     }, doClipboard);
@@ -1799,9 +1886,8 @@ function exportSave() {
   }
 }
 
-function importSave() {
-  var raw = window.prompt("Colle ici ta sauvegarde (le contenu du fichier .json ou le code copié) :");
-  if (!raw) return;
+function importSave(raw) {
+  if (!raw || !raw.trim()) { toast("Colle d'abord ta sauvegarde dans la zone"); return; }
   try {
     var obj = JSON.parse(raw.trim());
     if (typeof obj !== "object" || !obj) throw 0;
@@ -1814,9 +1900,9 @@ function importSave() {
     relink();
     saveDB();
     rerenderAll();
-    alert("Sauvegarde restaurée ✅");
+    toast("Sauvegarde restaurée ✅");
   } catch (e) {
-    alert("Ce code n'est pas une sauvegarde valide.");
+    toast("Ce texte n'est pas une sauvegarde valide");
   }
 }
 
@@ -1830,7 +1916,10 @@ function renderInfos() {
     '<div class="card"><h3>💾 Sauvegarde</h3>' +
     "<p>" + saveStatus + "</p>" +
     '<button class="btn" id="btnExport" type="button">⬇️ Exporter</button>' +
-    '<button class="btn" id="btnImport" type="button">⬆️ Importer</button></div>' +
+    '<button class="btn" id="btnImport" type="button">⬆️ Importer</button>' +
+    '<div id="impWrap" style="display:none; margin-top:10px">' +
+    '<textarea class="daynote" id="impBox" placeholder="Colle ici le contenu du fichier .json ou le code copié"></textarea>' +
+    '<button class="btn" id="impGo" type="button">Restaurer cette sauvegarde</button></div></div>' +
 
     '<div class="card"><h3>🧮 Pourboire &amp; euros</h3>' +
     "<p>Tape l'addition en dollars — je calcule le pourboire et l'équivalent en euros.</p>" +
@@ -1878,7 +1967,14 @@ function renderInfos() {
     '<button class="btn" id="btnReset" type="button">Réinitialiser l\'appli</button></div>';
 
   document.getElementById("btnExport").addEventListener("click", exportSave);
-  document.getElementById("btnImport").addEventListener("click", importSave);
+  document.getElementById("btnImport").addEventListener("click", function () {
+    var w = document.getElementById("impWrap");
+    w.style.display = w.style.display === "none" ? "block" : "none";
+    if (w.style.display === "block") document.getElementById("impBox").focus();
+  });
+  document.getElementById("impGo").addEventListener("click", function () {
+    importSave(document.getElementById("impBox").value);
+  });
   document.getElementById("btnReset").addEventListener("click", resetAll);
 
   var tipIn = document.getElementById("tipIn");
@@ -1896,8 +1992,20 @@ function renderInfos() {
   });
 }
 
+var resetArmed = false;
 function resetAll() {
-  if (!window.confirm("Tout effacer sur cet appareil ? (coches, notes, dépenses)")) return;
+  var btn = document.getElementById("btnReset");
+  if (!resetArmed) {
+    resetArmed = true;
+    btn.textContent = "⚠️ Appuie encore pour TOUT effacer";
+    setTimeout(function () {
+      resetArmed = false;
+      var b = document.getElementById("btnReset");
+      if (b) b.textContent = "Réinitialiser l'appli";
+    }, 5000);
+    return;
+  }
+  resetArmed = false;
   DB.done = {}; DB.prep = {}; DB.pass = {}; DB.pack = {};
   DB.food = {}; DB.shop = {}; DB.notes = {}; DB.prices = {}; DB.spend = [];
   DB.paid = {};
@@ -1905,6 +2013,7 @@ function resetAll() {
   relink();
   saveDB();
   rerenderAll();
+  toast("Appli remise à zéro ♻️");
 }
 
 function rerenderAll() {
