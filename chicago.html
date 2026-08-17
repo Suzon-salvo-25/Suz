@@ -512,6 +512,44 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
 }
 .lnk:active { transform: scale(.97); }
 
+/* ---------- édition d'activités ---------- */
+.item { position: relative; }
+.iedit {
+  position: absolute;
+  right: 10px; bottom: 8px;
+  border: 0;
+  background: var(--panel-2);
+  color: var(--ink-faint);
+  width: 27px; height: 27px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+}
+.modif {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--c-musee);
+  background: color-mix(in srgb, var(--c-musee) 12%, var(--panel));
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.ef input, .ef textarea, .ef select {
+  width: 100%;
+  font-family: var(--f-round);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 11px;
+  margin-bottom: 8px;
+}
+.ef textarea { min-height: 72px; resize: vertical; }
+.ef input:focus, .ef textarea:focus, .ef select:focus { outline: 2px solid var(--c-musee); }
+.ef-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
 .tipcard {
   border-radius: var(--r-md);
   background: var(--panel-2);
@@ -997,10 +1035,10 @@ var DAYS = [
       { h:"Midi",  c:"trajet", t:"Memphis → Oxford (135 km)", n:"~1 h 30 de route, presque tout sur autoroute. Le bon plan : la navette officielle Groome Transportation, ~45–55 $ le trajet, soit deux fois moins cher que l'Uber budgété (90–115 €) — et elle, elle vient. À réserver en ligne AVANT le départ. Installation chez le cousin, hébergement gratuit.", pr:"~50 $", u:"https://groometransportation.com/ole-miss/" },
       { h:"Aprem", c:"campus", t:"Campus Ole Miss à pied", u:"https://maps.google.com/?q=The+Grove+University+of+Mississippi", n:"The Grove (4 hectares de chênes, temple du tailgating du Sud) → Lyceum (1848, le plus vieux bâtiment, colonnes encore marquées par les balles des émeutes de 1962) → Walk of Champions → Vaught-Hemingway Stadium (64 000 places) → Student Union. Tout gratuit, tout à pied.", pr:"Gratuit" }
     ]},
-  { d:9,  date:"2026-09-06", dow:"Dim", lab:"6 sept", e:"📚", p:2, title:"Oxford + Faulkner",
+  { d:9,  date:"2026-09-06", dow:"Dim", lab:"6 sept", e:"📚", p:2, title:"Oxford + match",
     items:[
       { h:"Matin", c:"campus", t:"Oxford Square + Square Books", u:"https://www.squarebooks.com", n:"Courthouse Square et son tribunal blanc, les boutiques, Square Books — l'une des grandes librairies indépendantes du Sud — et la statue de Faulkner assis sur son banc devant la mairie. Déjeuner sur la Square.", pr:"Gratuit" },
-      { h:"Aprem", c:"musee",  t:"Rowan Oak", u:"https://rowanoak.com", n:"La maison de William Faulkner (prix Nobel 1949), à 15 min à pied de la Square, dans son bois de cèdres. Le plan de son roman « A Fable » est écrit à la main sur le mur de son bureau. Terrain en accès libre, intérieur ~9 €.", pr:"9 €" },
+      { h:"Aprem", c:"campus", t:"Après-midi à l'américaine avec le cousin", u:"https://maps.google.com/?q=Sardis+Lake+Beach+Mississippi", n:"Le vrai programme du Sud, au choix : si le cousin a une voiture, plage de Sardis Lake (30 min de route) ou disc golf à Avent Park ; sans voiture, hamac sous les chênes du Grove, glace sur la Square et Bailey's Woods Trail, le sentier boisé du campus. Le but du dimanche : vivre l'Amérique, pas la visiter.", pr:"Gratuit" },
       { h:"18h30", c:"sport",  t:"Ole Miss – Louisville 🏈 devant l'écran", u:"https://olemisssports.com", n:"Le match se joue au Nissan Stadium de Nashville, à 6 h de route : hors de question d'y aller. À regarder chez le cousin, ou dans un restaurant de la Square plein de supporters — un resto, pas un bar : là-bas aussi c'est 21 ans minimum. L'ambiance d'Oxford un soir de match reste réelle même quand l'équipe joue ailleurs.", pr:"Gratuit" }
     ]},
   { d:10, date:"2026-09-07", dow:"Lun", lab:"7 sept", e:"🌳", p:2, title:"Labor Day tranquille",
@@ -1230,7 +1268,7 @@ var STORY = [
   { e:"🎧", t:"La house music est née ici", x:"Fin des années 1970, un club au 206 S. Jefferson Street : <b>The Warehouse</b>. Aux platines, Frankie Knuckles mixe disco, soul et boîtes à rythmes jusqu'à inventer un son que les disquaires du coin étiquettent « <b>house</b> » — la musique du Warehouse. De Chicago, elle conquerra Detroit, Londres, Ibiza, le monde. La ville a inventé la musique sur laquelle la planète danse encore tous les samedis soir." },
   { e:"🐐", t:"La malédiction de la chèvre", x:"1945, finale de baseball : Billy Sianis, patron de taverne, se fait expulser de Wrigley Field à cause de l'odeur de sa chèvre Murphy. Furieux, il maudit les Cubs : « <b>Ils ne gagneront plus jamais</b> ». Les Cubs ne regagneront le titre qu'en… <b>2016</b>, après 108 ans de disette — la plus longue de l'histoire du sport américain. Le stade où tu vas le 2 septembre est celui de 1914 : lierre planté en 1937, tableau d'affichage encore tourné à la main." },
   { e:"🍕", t:"Deep dish, italian beef : la cuisine des ouvriers", x:"1943 : Pizzeria Uno invente la <b>deep dish</b>, une pizza-casserole pensée pour nourrir un ouvrier avec une part. L'<b>italian beef</b> vient des mariages italiens des années 1930 : peu de viande, beaucoup d'invités, donc du bœuf tranché fin et trempé de jus pour « l'étirer ». Et le hot dog de Chicago se commande « dragged through the garden » (traîné dans le jardin) — tout dessus, <b>sauf le ketchup</b>, considéré ici comme un crime alimentaire." },
-  { e:"🎓", t:"Oxford : Faulkner, et la nuit de 1962", x:"Côté Mississippi : <b>William Faulkner</b>, prix Nobel 1949, écrivait le plan de ses romans directement sur les murs de son bureau — tu les verras à Rowan Oak le 6. Et le 30 septembre 1962, Ole Miss vit la nuit la plus grave de son histoire : des émeutes ségrégationnistes éclatent contre l'inscription de <b>James Meredith, premier étudiant noir</b> de l'université. Deux morts, des centaines de blessés, Kennedy envoie l'armée. Les colonnes du <b>Lyceum</b>, devant lequel tu passeras le 5, portent encore les impacts de balles. The Grove, lui, reste le tailgating le plus élégant du Sud — nappes blanches et chandeliers sous les chênes." }
+  { e:"🎓", t:"Oxford : Faulkner, et la nuit de 1962", x:"Côté Mississippi : <b>William Faulkner</b>, prix Nobel 1949, écrivait le plan de ses romans directement sur les murs de son bureau — sa maison Rowan Oak, dans un bois de cèdres à 15 min de la Square, se visite (~9 €) si l'envie te prend le 6. Et le 30 septembre 1962, Ole Miss vit la nuit la plus grave de son histoire : des émeutes ségrégationnistes éclatent contre l'inscription de <b>James Meredith, premier étudiant noir</b> de l'université. Deux morts, des centaines de blessés, Kennedy envoie l'armée. Les colonnes du <b>Lyceum</b>, devant lequel tu passeras le 5, portent encore les impacts de balles. The Grove, lui, reste le tailgating le plus élégant du Sud — nappes blanches et chandeliers sous les chênes." }
 ];
 
 /* ============================================================
@@ -1254,7 +1292,7 @@ var BACKEND = (function () {
   return "mem";
 })();
 
-var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, prices: {}, spend: [], paid: null, theme: null };
+var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, prices: {}, edits: {}, hidden: {}, added: {}, spend: [], paid: null, theme: null };
 
 function loadDB() {
   var raw = null;
@@ -1278,7 +1316,7 @@ function loadDB() {
     }
     if (raw) {
       var obj = JSON.parse(raw);
-      ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices"].forEach(function (k) {
+      ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices", "edits", "hidden", "added"].forEach(function (k) {
         if (obj[k] && typeof obj[k] === "object" && !Array.isArray(obj[k])) DB[k] = obj[k];
       });
       if (Array.isArray(obj.spend)) DB.spend = obj.spend;
@@ -1310,7 +1348,6 @@ function relink() { done = DB.done; prepDone = DB.prep; passUsed = DB.pass; pack
 
 /* compat : tous les appels existants passent par ici */
 var store = { set: function () { saveDB(); }, get: function (k, d) { return d; } };
-var totalItems = DAYS.reduce(function (a, d) { return a + d.items.length; }, 0);
 
 function todayChicago() {
   var p = new Intl.DateTimeFormat("fr-CA", { timeZone: "America/Chicago" }).format(new Date());
@@ -1349,25 +1386,80 @@ function priceHtml(it) {
   return '<span class="' + cls + '">' + esc(it.pr) + "</span>";
 }
 
-function itemHtml(day, idx) {
-  var it = day.items[idx];
-  var uid = "d" + day.d + "-" + idx;
+var editItem = null;
+
+function dayItems(day) {
+  var arr = [];
+  day.items.forEach(function (base, i) {
+    var uid = "d" + day.d + "-" + i;
+    if (DB.hidden[uid]) return;
+    var it = DB.edits[uid] ? Object.assign({}, base, DB.edits[uid]) : base;
+    arr.push({ it: it, uid: uid });
+  });
+  (DB.added[day.d] || []).forEach(function (c, i) {
+    var uid = "a" + day.d + "-" + i;
+    if (DB.hidden[uid]) return;
+    arr.push({ it: c, uid: uid, custom: true });
+  });
+  return arr;
+}
+
+function hiddenCount(day) {
+  var n = 0;
+  day.items.forEach(function (_, i) { if (DB.hidden["d" + day.d + "-" + i]) n++; });
+  (DB.added[day.d] || []).forEach(function (_, i) { if (DB.hidden["a" + day.d + "-" + i]) n++; });
+  return n;
+}
+
+function editFormHtml(uid, it) {
+  var cats = CATS.map(function (c) {
+    return '<option value="' + c[0] + '"' + ((it.c || "air") === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
+  }).join("");
+  var isNew = uid.indexOf("new-") === 0;
+  return '<div class="card ef" data-efuid="' + uid + '">' +
+    "<h3>" + (isNew ? "➕ Nouvelle activité" : "✏️ Modifier l'activité") + "</h3>" +
+    '<input class="ef-h" type="text" placeholder="Heure (ex : 14h30, Aprem…)" value="' + esc(it.h || "").replace(/"/g, "&quot;") + '">' +
+    '<input class="ef-t" type="text" placeholder="Titre de l\'activité" value="' + esc(it.t || "").replace(/"/g, "&quot;") + '">' +
+    '<textarea class="ef-n" placeholder="Note, détails, transport…">' + escT(it.n || "") + "</textarea>" +
+    '<div class="ef-row"><input class="ef-pr" type="text" placeholder="Prix (26 €, Gratuit…)" value="' + esc(it.pr || "").replace(/"/g, "&quot;") + '">' +
+    '<select class="ef-c">' + cats + "</select></div>" +
+    "<div>" +
+    '<button class="btn" type="button" data-efsave="1">✓ Enregistrer</button>' +
+    '<button class="btn" type="button" data-efcancel="1">✕ Annuler</button>' +
+    (isNew ? "" : '<button class="btn" type="button" data-efhide="1">🗑 Retirer</button>') +
+    (!isNew && DB.edits[uid] ? '<button class="btn" type="button" data-eforig="1">↩︎ Original</button>' : "") +
+    "</div></div>";
+}
+
+function itemHtml(day, uid, it, showEdit) {
+  if (editItem === uid) return editFormHtml(uid, it);
   var checked = done[uid] ? " checked" : "";
   var doneCls = done[uid] ? " done" : "";
-  return '<label class="item' + doneCls + '" style="--cat: var(--c-' + it.c + ')" data-uid="' + uid + '">' +
+  var badge = uid.charAt(0) === "a" ? '<span class="modif">ajouté</span>' : (DB.edits[uid] ? '<span class="modif">modifié</span>' : "");
+  return '<label class="item' + doneCls + '" style="--cat: var(--c-' + (it.c || "air") + ')" data-uid="' + uid + '">' +
     '<input type="checkbox" class="chk" data-uid="' + uid + '" data-day="' + day.d + '"' + checked +
     ' aria-label="Fait : ' + esc(it.t).replace(/"/g, "&quot;") + '">' +
-    '<span class="body"><span class="h">' + esc(it.h) + "</span><br>" +
+    '<span class="body"><span class="h">' + esc(it.h || "—") + "</span> " + badge + "<br>" +
     '<span class="t">' + esc(it.t) + "</span>" +
     (it.n ? '<div class="n' + (it.w ? " warn" : "") + '">' + esc(it.n) + "</div>" : "") +
     (it.u ? '<a class="lnk" href="' + it.u + '" target="_blank" rel="noopener">' + linkLabel(it) + " ↗</a>" : "") +
-    "</span>" + priceHtml(it) + "</label>";
+    "</span>" + priceHtml(it) +
+    (showEdit ? '<button class="iedit" type="button" data-iedit="' + uid + '" aria-label="Modifier cette activité">✎</button>' : "") +
+    "</label>";
 }
 
 function dayDoneCount(day) {
   var n = 0;
-  day.items.forEach(function (_, i) { if (done["d" + day.d + "-" + i]) n++; });
+  dayItems(day).forEach(function (en) { if (done[en.uid]) n++; });
   return n;
+}
+
+function progressCounts() {
+  var ok = 0, total = 0;
+  DAYS.forEach(function (day) {
+    dayItems(day).forEach(function (en) { total++; if (done[en.uid]) ok++; });
+  });
+  return { ok: ok, total: total };
 }
 
 function itemMatches(it) {
@@ -1381,18 +1473,91 @@ function dayCardHtml(day, kicker, useFilter) {
     '<div class="kicker">' + esc(kicker || ("Jour " + day.d + " / 14 · " + day.dow + " " + day.lab)) + "</div>" +
     "<h3>" + day.e + " " + esc(day.title) + "</h3>" +
     '<div class="sub">' + ["", "Chicago · semaine Kaplan", "Mississippi · Ole Miss", "Chicago · mode touriste"][day.p] + "</div>" +
-    '<span class="done-pill">' + dn + " / " + day.items.length + " coché" + (dn > 1 ? "s" : "") + "</span>" +
+    '<span class="done-pill">' + dn + " / " + dayItems(day).length + " coché" + (dn > 1 ? "s" : "") + "</span>" +
     "</div>";
   if (day.tip) html += '<div class="tipcard">💡 ' + esc(day.tip) + "</div>";
   html += routeStrip(day);
   var shown = 0;
-  day.items.forEach(function (it, i) {
-    if (!useFilter || itemMatches(it)) { html += itemHtml(day, i); shown++; }
+  dayItems(day).forEach(function (en) {
+    if (!useFilter || itemMatches(en.it)) { html += itemHtml(day, en.uid, en.it, true); shown++; }
   });
   if (useFilter && shown === 0) html += '<div class="tipcard">Rien ce jour-là pour ce filtre.</div>';
+  var hc = hiddenCount(day);
+  html += '<div style="margin-bottom:10px">' +
+    '<button class="btn" type="button" data-addday="' + day.d + '">＋ Ajouter une activité</button>' +
+    (hc ? '<button class="btn" type="button" data-unhide="' + day.d + '">↩︎ Réafficher ' + hc + " retirée" + (hc > 1 ? "s" : "") + "</button>" : "") +
+    "</div>";
   html += '<textarea class="daynote" data-note="d' + day.d + '" placeholder="📓 Journal du jour ' + day.d +
     ' — ce que tu as vu, aimé, raté…">' + escT(DB.notes["d" + day.d] || "") + "</textarea>";
   return html;
+}
+
+function bindEditing(scope) {
+  scope.querySelectorAll("[data-iedit]").forEach(function (b) {
+    b.addEventListener("click", function (e) {
+      e.preventDefault();
+      editItem = b.dataset.iedit;
+      renderPlan(); renderHome();
+    });
+  });
+  scope.querySelectorAll("[data-addday]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      editItem = "new-" + b.dataset.addday;
+      renderPlan(); renderHome();
+    });
+  });
+  scope.querySelectorAll("[data-unhide]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var d = b.dataset.unhide;
+      Object.keys(DB.hidden).forEach(function (k) {
+        if (k === "d" + d || k.indexOf("d" + d + "-") === 0 || k.indexOf("a" + d + "-") === 0) delete DB.hidden[k];
+      });
+      saveDB(); renderPlan(); renderHome(); refreshRing();
+      toast("Activités réaffichées ↩︎");
+    });
+  });
+  var ef = scope.querySelector("[data-efuid]");
+  if (!ef) return;
+  var uid = ef.dataset.efuid;
+  var val = function (sel) { var el = ef.querySelector(sel); return el ? el.value : ""; };
+  ef.querySelector("[data-efsave]").addEventListener("click", function () {
+    var vals = { h: val(".ef-h").trim() || "—", t: val(".ef-t").trim(), c: val(".ef-c") || "air" };
+    if (!vals.t) { toast("Il faut au moins un titre"); return; }
+    var n = val(".ef-n").trim(); if (n) vals.n = n;
+    var pr = val(".ef-pr").trim(); if (pr) vals.pr = pr;
+    if (uid.indexOf("new-") === 0) {
+      var d = +uid.slice(4);
+      (DB.added[d] = DB.added[d] || []).push(vals);
+      toast("Activité ajoutée ➕");
+    } else if (uid.charAt(0) === "a") {
+      var p = uid.slice(1).split("-");
+      DB.added[+p[0]][+p[1]] = vals;
+      toast("Activité modifiée ✓");
+    } else {
+      DB.edits[uid] = vals;
+      toast("Activité modifiée ✓");
+    }
+    editItem = null;
+    saveDB(); renderPlan(); renderHome(); refreshRing();
+  });
+  ef.querySelector("[data-efcancel]").addEventListener("click", function () {
+    editItem = null;
+    renderPlan(); renderHome();
+  });
+  var hideBtn = ef.querySelector("[data-efhide]");
+  if (hideBtn) hideBtn.addEventListener("click", function () {
+    DB.hidden[uid] = 1;
+    editItem = null;
+    saveDB(); renderPlan(); renderHome(); refreshRing();
+    toast("Retirée — « Réafficher » en bas du jour pour annuler");
+  });
+  var origBtn = ef.querySelector("[data-eforig]");
+  if (origBtn) origBtn.addEventListener("click", function () {
+    delete DB.edits[uid];
+    editItem = null;
+    saveDB(); renderPlan(); renderHome();
+    toast("Original rétabli ↩︎");
+  });
 }
 
 function escT(s) {
@@ -1400,7 +1565,7 @@ function escT(s) {
 }
 
 function routeStrip(day) {
-  var steps = day.items.filter(function (it) { return it.c !== "cours"; });
+  var steps = dayItems(day).map(function (en) { return en.it; }).filter(function (it) { return it.c !== "cours"; });
   if (steps.length < 2) return "";
   var h = '<div class="route-strip" aria-label="Ordre de la journée">';
   steps.forEach(function (it, i) {
@@ -1455,7 +1620,7 @@ function renderPlan() {
   var body = "";
   if (planView === "day") {
     var picks = DAYS.map(function (day) {
-      var all = dayDoneCount(day) === day.items.length;
+      var all = dayItems(day).length > 0 && dayDoneCount(day) === dayItems(day).length;
       return '<button class="dp' + (day.d === curDay ? " on" : "") + (all ? " alldone" : "") +
         '" data-p="' + day.p + '" data-d="' + day.d + '" type="button">' +
         '<span class="e">' + day.e + '</span><span class="n">' + day.d + '</span>' +
@@ -1464,13 +1629,12 @@ function renderPlan() {
     body = '<div class="daypick" id="daypick">' + picks + "</div>" + dayCardHtml(DAYS[curDay - 1], null, true);
   } else {
     DAYS.forEach(function (day) {
-      var idx = [];
-      day.items.forEach(function (it, i) { if (itemMatches(it)) idx.push(i); });
-      if (!idx.length) return;
+      var ens = dayItems(day).filter(function (en) { return itemMatches(en.it); });
+      if (!ens.length) return;
       body += '<div class="mini-day" style="--pc: var(--g' + day.p + 'a)">' +
         '<span class="me">' + day.e + '</span><span class="n">J' + day.d + '</span>' +
         '<span class="d">' + day.dow + " " + day.lab + " · " + esc(day.title) + "</span></div>";
-      idx.forEach(function (i) { body += itemHtml(day, i); });
+      ens.forEach(function (en) { body += itemHtml(day, en.uid, en.it, false); });
     });
     if (!body) body = '<div class="tipcard">Rien pour ce filtre.</div>';
   }
@@ -1499,6 +1663,7 @@ function renderPlan() {
   });
   bindChecks(scr);
   bindNotes(scr);
+  bindEditing(scr);
 }
 
 /* ---------- écran Aujourd'hui ---------- */
@@ -1528,10 +1693,10 @@ function renderHome() {
     html += "</div>";
     html += '<div class="tipcard">👉 Le jour J, cet écran affichera automatiquement le programme du jour, en heure de Chicago.</div>';
   } else if (t > end) {
-    var checked = Object.keys(done).length;
+    var pcEnd = progressCounts();
     html += '<div class="hero-count"><span class="skyline">🌆</span>' +
       '<div class="jminus">Fini ✔</div>' +
-      '<div class="lbl">' + checked + " / " + totalItems + " activités cochées. Beau voyage.</div></div>";
+      '<div class="lbl">' + pcEnd.ok + " / " + pcEnd.total + " activités cochées. Beau voyage.</div></div>";
     html += '<div class="tipcard">Revois le détail dans l\'onglet 📅 Jours.</div>';
   } else {
     var day = DAYS.find(function (d) { return d.date === t; }) || DAYS[0];
@@ -1560,8 +1725,9 @@ function renderHome() {
   FOOD.forEach(function (g) { foodTotal += g.items.length; });
   SHOP.forEach(function (g) { shopTotal += g.items.length; });
   var spentSum = DB.spend.reduce(function (a, e) { return a + (+e.a || 0); }, 0);
+  var pc = progressCounts();
   html += '<div class="card"><h3>📊 Le voyage en chiffres</h3><ul class="blegend">' +
-    '<li><span class="dot" style="background:var(--c-air)"></span><span class="lab">Activités cochées</span><span class="val">' + Object.keys(done).length + " / " + totalItems + "</span></li>" +
+    '<li><span class="dot" style="background:var(--c-air)"></span><span class="lab">Activités cochées</span><span class="val">' + pc.ok + " / " + pc.total + "</span></li>" +
     '<li><span class="dot" style="background:var(--c-musee)"></span><span class="lab">CityPASS tamponnés</span><span class="val">' + Object.keys(passUsed).length + " / 5</span></li>" +
     '<li><span class="dot" style="background:var(--c-sport)"></span><span class="lab">Adresses goûtées</span><span class="val">' + Object.keys(DB.food).length + " / " + foodTotal + "</span></li>" +
     '<li><span class="dot" style="background:var(--c-soir)"></span><span class="lab">Boutiques faites</span><span class="val">' + Object.keys(DB.shop).length + " / " + shopTotal + "</span></li>" +
@@ -1572,6 +1738,7 @@ function renderHome() {
   scr.innerHTML = html;
   bindChecks(scr);
   bindNotes(scr);
+  bindEditing(scr);
   scr.querySelectorAll("[data-prep]").forEach(function (box) {
     box.addEventListener("change", function () {
       prepDone[box.dataset.prep] = box.checked ? 1 : undefined;
@@ -1950,7 +2117,7 @@ function importSave(raw) {
   try {
     var obj = JSON.parse(raw.trim());
     if (typeof obj !== "object" || !obj) throw 0;
-    ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices"].forEach(function (k) {
+    ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices", "edits", "hidden", "added"].forEach(function (k) {
       if (obj[k] && typeof obj[k] === "object" && !Array.isArray(obj[k])) DB[k] = obj[k];
     });
     if (Array.isArray(obj.spend)) DB.spend = obj.spend;
@@ -2078,6 +2245,7 @@ function resetAll() {
   resetArmed = false;
   DB.done = {}; DB.prep = {}; DB.pass = {}; DB.pack = {};
   DB.food = {}; DB.shop = {}; DB.notes = {}; DB.prices = {}; DB.spend = [];
+  DB.edits = {}; DB.hidden = {}; DB.added = {};
   DB.paid = {};
   BUDGET.fixed.forEach(function (r) { if (r.def) DB.paid[r.id] = 1; });
   relink();
@@ -2103,11 +2271,10 @@ function rerenderAll() {
    INTERACTIONS COMMUNES
    ============================================================ */
 function refreshRing() {
-  var n = 0;
-  DAYS.forEach(function (day) { n += dayDoneCount(day); });
-  var pct = Math.round(n / totalItems * 100);
-  document.getElementById("ringFg").style.strokeDashoffset = (100.5 * (1 - n / totalItems)).toFixed(1);
-  document.getElementById("ringTxt").textContent = pct + "%";
+  var pc = progressCounts();
+  var ratio = pc.total ? pc.ok / pc.total : 0;
+  document.getElementById("ringFg").style.strokeDashoffset = (100.5 * (1 - ratio)).toFixed(1);
+  document.getElementById("ringTxt").textContent = Math.round(ratio * 100) + "%";
 }
 
 function burst(emojis) {
@@ -2134,13 +2301,13 @@ function bindChecks(scope) {
       box.closest(".item").classList.toggle("done", box.checked);
       refreshRing();
       var day = DAYS[+box.dataset.day - 1];
-      if (box.checked && dayDoneCount(day) === day.items.length) {
+      if (box.checked && dayDoneCount(day) === dayItems(day).length) {
         burst([day.e, "🎉", "⭐", "🎊"]);
       }
       var pill = scope.querySelector(".done-pill");
       if (pill && day.d === curDay || (pill && scope.id === "scr-home")) {
         var dn = dayDoneCount(day);
-        pill.textContent = dn + " / " + day.items.length + " coché" + (dn > 1 ? "s" : "");
+        pill.textContent = dn + " / " + dayItems(day).length + " coché" + (dn > 1 ? "s" : "");
       }
     });
   });
