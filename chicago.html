@@ -639,6 +639,20 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
 }
 .paychk:checked { background: var(--c-air); border-color: var(--c-air); }
 .paychk:checked::after { content: "✓"; color: #fff; font-size: 13px; font-weight: 900; }
+button.pedit {
+  border: 0;
+  background: var(--panel-2);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 4px 9px;
+  border: 1px dashed var(--line);
+}
+button.pedit.edited {
+  border-style: solid;
+  border-color: var(--c-musee);
+  background: color-mix(in srgb, var(--c-musee) 12%, var(--panel));
+}
 .btn {
   display: inline-block;
   border: 1.5px solid var(--line);
@@ -1161,7 +1175,7 @@ var BACKEND = (function () {
   return "mem";
 })();
 
-var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, spend: [], paid: null, theme: null };
+var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, prices: {}, spend: [], paid: null, theme: null };
 
 function loadDB() {
   var raw = null;
@@ -1185,7 +1199,7 @@ function loadDB() {
     }
     if (raw) {
       var obj = JSON.parse(raw);
-      ["done", "prep", "pass", "pack", "food", "shop", "notes"].forEach(function (k) {
+      ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices"].forEach(function (k) {
         if (obj[k] && typeof obj[k] === "object" && !Array.isArray(obj[k])) DB[k] = obj[k];
       });
       if (Array.isArray(obj.spend)) DB.spend = obj.spend;
@@ -1512,14 +1526,32 @@ function renderPass() {
 /* ---------- écran Budget ---------- */
 function fmtEur(n) { return n.toLocaleString("fr-FR") + " €"; }
 
+function effPrice(r) {
+  return DB.prices[r.id] != null ? +DB.prices[r.id] : r.v;
+}
+function effLabel(r) {
+  return DB.prices[r.id] != null ? fmtEur(+DB.prices[r.id]) : (r.lab || fmtEur(r.v));
+}
+
 function renderBudget() {
   var scr = document.getElementById("scr-budget");
   var paidSum = 0, restFixed = 0;
   BUDGET.fixed.forEach(function (r) {
-    if (paidState[r.id]) paidSum += r.v; else restFixed += r.v;
+    if (paidState[r.id]) paidSum += effPrice(r); else restFixed += effPrice(r);
   });
   var onsiteSum = BUDGET.onsite.reduce(function (a, r) { return a + r[2]; }, 0);
   var resteTotal = restFixed + onsiteSum;
+
+  var tMin = onsiteSum, tMax = onsiteSum;
+  BUDGET.fixed.forEach(function (r) {
+    if (DB.prices[r.id] != null) { tMin += +DB.prices[r.id]; tMax += +DB.prices[r.id]; }
+    else if (r.id === "hot") { tMin += 300; tMax += 600; }
+    else if (r.id === "sim") { tMin += 20; tMax += 40; }
+    else { tMin += r.v; tMax += r.v; }
+  });
+  var totalTxt = tMin === tMax
+    ? fmtEur(tMin)
+    : tMin.toLocaleString("fr-FR") + " – " + tMax.toLocaleString("fr-FR") + " €";
 
   var segs = [
     ["Déjà payé", paidSum, "var(--b-paid)"],
@@ -1564,8 +1596,8 @@ function renderBudget() {
 
     '<div class="card money-hero">' +
     '<div class="lbl">TOTAL ESTIMÉ DU VOYAGE</div>' +
-    '<div class="total">3 493 – 3 813 €</div>' +
-    '<div class="lbl">cible : ~3 500 € hors shopping</div>' +
+    '<div class="total">' + totalTxt + "</div>" +
+    '<div class="lbl">cible : ~3 500 € hors shopping · les prix corrigés recalculent tout</div>' +
     '<div class="stackbar" role="img" aria-label="Répartition du budget">' + bar + "</div>" +
     '<ul class="blegend">' +
     '<li class="head"><span class="dot" style="background:var(--b-paid)"></span><span class="lab">Déjà payé</span><span class="val">' + fmtEur(paidSum) + "</span></li>" +
@@ -1579,7 +1611,7 @@ function renderBudget() {
   var paidRows = "", restRows = "";
   BUDGET.fixed.forEach(function (r) {
     var row = '<li><span class="dot" style="background:var(--b-' + (paidState[r.id] ? "paid" : "1") + ')"></span>' +
-      '<span class="lab">' + esc(r.t) + '</span><span class="val">' + (r.lab || fmtEur(r.v)) + "</span></li>";
+      '<span class="lab">' + esc(r.t) + '</span><span class="val">' + effLabel(r) + "</span></li>";
     if (paidState[r.id]) paidRows += row; else restRows += row;
   });
   BUDGET.onsite.forEach(function (r) {
@@ -1594,13 +1626,16 @@ function renderBudget() {
     '<div class="acc-body"><ul class="blegend">' + restRows + "</ul>" +
     '<p style="font-size:12.5px; margin-top:8px">Coche un poste dans le suivi ci-dessous dès qu\'il est réglé : il bascule automatiquement dans « Déjà payé ».</p></div></details>';
 
-  html += '<div class="card"><h3>🧾 Suivi des paiements — coche quand c\'est réglé</h3><ul class="blegend">' +
+  html += '<div class="card"><h3>🧾 Suivi des paiements</h3>' +
+    '<p style="font-size:12.5px; margin-bottom:8px">Coche quand c\'est réglé · touche un prix ✏️ pour saisir ce que tu as vraiment payé.</p><ul class="blegend">' +
     BUDGET.fixed.map(function (r) {
       var on = paidState[r.id];
+      var edited = DB.prices[r.id] != null;
       return '<li><input type="checkbox" class="paychk" data-pay="' + r.id + '"' + (on ? " checked" : "") +
         ' aria-label="Payé : ' + esc(r.t).replace(/"/g, "&quot;") + '">' +
         '<span class="lab"' + (on ? ' style="text-decoration:line-through; opacity:.6"' : "") + ">" + esc(r.t) + "</span>" +
-        '<span class="val">' + (r.lab || fmtEur(r.v)) + "</span></li>";
+        '<button class="val pedit' + (edited ? " edited" : "") + '" type="button" data-edit="' + r.id +
+        '" aria-label="Corriger le prix de ' + esc(r.t).replace(/"/g, "&quot;") + '">' + effLabel(r) + " ✏️</button></li>";
     }).join("") + "</ul></div>";
 
   html += '<div class="tipcard">⚠️ <b>Le seul poste qui peut faire déraper : l\'hôtel.</b> À 300 € les 3 nuits, le total fait ~3 493 € — la cible tient tout juste. À 600 €, on file à 3 813 €. Viser ≤ 330 €.</div>';
@@ -1640,6 +1675,29 @@ function renderBudget() {
   scr.querySelectorAll("[data-bacc]").forEach(function (d) {
     d.addEventListener("toggle", function () {
       if (d.open) accOpen.budget[d.dataset.bacc] = 1; else delete accOpen.budget[d.dataset.bacc];
+    });
+  });
+  scr.querySelectorAll("[data-edit]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var id = b.dataset.edit;
+      var item = null;
+      BUDGET.fixed.forEach(function (r) { if (r.id === id) item = r; });
+      if (!item) return;
+      var cur = DB.prices[id] != null ? DB.prices[id] : item.v;
+      var raw = window.prompt(
+        "Prix réellement payé pour « " + item.t + " » (en €).\nLaisse vide pour revenir à l'estimation (" + (item.lab || fmtEur(item.v)) + ").",
+        String(cur)
+      );
+      if (raw === null) return;
+      raw = raw.trim().replace(",", ".").replace(/[€\s]/g, "");
+      if (raw === "") { delete DB.prices[id]; }
+      else {
+        var val = parseFloat(raw);
+        if (isNaN(val) || val < 0) { alert("Montant invalide."); return; }
+        DB.prices[id] = Math.round(val * 100) / 100;
+      }
+      saveDB();
+      renderBudget();
     });
   });
 }
@@ -1747,7 +1805,7 @@ function importSave() {
   try {
     var obj = JSON.parse(raw.trim());
     if (typeof obj !== "object" || !obj) throw 0;
-    ["done", "prep", "pass", "pack", "food", "shop", "notes"].forEach(function (k) {
+    ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices"].forEach(function (k) {
       if (obj[k] && typeof obj[k] === "object" && !Array.isArray(obj[k])) DB[k] = obj[k];
     });
     if (Array.isArray(obj.spend)) DB.spend = obj.spend;
@@ -1841,7 +1899,7 @@ function renderInfos() {
 function resetAll() {
   if (!window.confirm("Tout effacer sur cet appareil ? (coches, notes, dépenses)")) return;
   DB.done = {}; DB.prep = {}; DB.pass = {}; DB.pack = {};
-  DB.food = {}; DB.shop = {}; DB.notes = {}; DB.spend = [];
+  DB.food = {}; DB.shop = {}; DB.notes = {}; DB.prices = {}; DB.spend = [];
   DB.paid = {};
   BUDGET.fixed.forEach(function (r) { if (r.def) DB.paid[r.id] = 1; });
   relink();
