@@ -55,9 +55,9 @@
   --f-round: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Segoe UI", system-ui, -apple-system, sans-serif;
   --f-data: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
-  --r-lg: 22px;
-  --r-md: 16px;
-  --r-sm: 10px;
+  --r-lg: 24px;
+  --r-md: 17px;
+  --r-sm: 11px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -138,6 +138,10 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   background: var(--ground);
+  background-image:
+    radial-gradient(900px 420px at 20% -8%, color-mix(in srgb, var(--g1a) 9%, transparent), transparent 70%),
+    radial-gradient(700px 360px at 95% 4%, color-mix(in srgb, var(--g3a) 7%, transparent), transparent 70%);
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--f-round);
   font-size: 16px;
@@ -257,8 +261,13 @@ main {
   flex: 1 0 auto;
   min-width: 46px;
 }
+.tab { transition: background .15s ease; }
 .tab .ico { font-size: 20px; line-height: 1; filter: grayscale(1) opacity(.55); transition: filter .15s, transform .15s; }
-.tab.on { color: var(--ink); }
+.tab.on {
+  color: var(--ink);
+  background: var(--panel-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
 .tab.on .ico { filter: none; transform: scale(1.12); }
 
 /* ============================================================
@@ -305,6 +314,13 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
 .dayhero[data-p="1"] { background: linear-gradient(135deg, var(--g1a), var(--g1b)); }
 .dayhero[data-p="2"] { background: linear-gradient(135deg, var(--g2a), var(--g2b)); }
 .dayhero[data-p="3"] { background: linear-gradient(135deg, var(--g3a), var(--g3b)); }
+.dayhero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(440px 190px at 88% -25%, rgba(255,255,255,.30), transparent 70%);
+  pointer-events: none;
+}
 .dayhero .big-emoji {
   position: absolute;
   right: -6px; bottom: -14px;
@@ -428,7 +444,9 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
 .dp .e { font-size: 18px; display: block; }
 .dp .n { font-size: 14px; font-weight: 900; display: block; margin-top: 1px; }
 .dp .d { font-size: 9.5px; font-weight: 700; color: var(--ink-faint); display: block; }
-.dp.on { border-width: 2px; }
+.dp { transition: transform .12s ease, border-color .12s ease; }
+.dp:active { transform: scale(.94); }
+.dp.on { border-width: 2px; box-shadow: var(--shadow); }
 .dp.on[data-p="1"] { border-color: var(--g1a); background: color-mix(in srgb, var(--g1a) 12%, var(--panel)); }
 .dp.on[data-p="2"] { border-color: var(--g2b); background: color-mix(in srgb, var(--g2b) 12%, var(--panel)); }
 .dp.on[data-p="3"] { border-color: var(--g3a); background: color-mix(in srgb, var(--g3a) 12%, var(--panel)); }
@@ -1277,63 +1295,105 @@ var STORY = [
    2. cookies (si localStorage est bloqué par le bac à sable)
    3. mémoire seule + alerte et export/import manuel
    ============================================================ */
-var BACKEND = (function () {
+var LS_OK = (function () {
   try {
     localStorage.setItem("chi26:t", "1");
-    if (localStorage.getItem("chi26:t") === "1") {
-      localStorage.removeItem("chi26:t");
-      return "local";
-    }
-  } catch (e) {}
-  try {
-    document.cookie = "chi26t=1; max-age=60; path=/; SameSite=Lax";
-    if (document.cookie.indexOf("chi26t=1") !== -1) return "cookie";
-  } catch (e) {}
-  return "mem";
+    var ok = localStorage.getItem("chi26:t") === "1";
+    localStorage.removeItem("chi26:t");
+    return ok;
+  } catch (e) { return false; }
 })();
+
+/* Les cookies posés sur le domaine parent survivent aux republications
+   de l'appli (qui changent l'origine du cadre) — c'est la copie durable. */
+var COOKIE_DOMAIN = (function () {
+  try {
+    var h = location.hostname.split(".");
+    if (h.length >= 3) return "; domain=." + h.slice(1).join(".");
+  } catch (e) {}
+  return "";
+})();
+
+function readCookieRaw() {
+  try {
+    var out = "";
+    for (var i = 0; i < 6; i++) {
+      var m = document.cookie.match(new RegExp("(?:^|;\\s*)chi26p" + i + "=([^;]*)"));
+      if (!m || !m[1]) break;
+      out += m[1];
+    }
+    return out ? decodeURIComponent(out) : null;
+  } catch (e) { return null; }
+}
+
+function writeCookieChunks(enc, domain) {
+  var CH = 3500;
+  var n = Math.ceil(enc.length / CH) || 0;
+  if (n > 6) return false;
+  for (var i = 0; i < 6; i++) {
+    var part = i < n ? enc.slice(i * CH, (i + 1) * CH) : "";
+    document.cookie = "chi26p" + i + "=" + part + "; path=/; SameSite=Lax; max-age=" + (part ? 31536000 : 0) + domain;
+  }
+  return true;
+}
+
+function writeCookieRaw(raw) {
+  try {
+    var enc = encodeURIComponent(raw);
+    writeCookieChunks(enc, COOKIE_DOMAIN);
+    if (readCookieRaw() === raw) return true;
+    writeCookieChunks(enc, "");
+    return readCookieRaw() === raw;
+  } catch (e) { return false; }
+}
+
+var CK_OK = (function () {
+  var existing = readCookieRaw();
+  return writeCookieRaw(existing !== null ? existing : "chi26probe");
+})();
+
+var BACKEND = LS_OK ? "local" : (CK_OK ? "cookie" : "mem");
 
 var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, prices: {}, edits: {}, hidden: {}, added: {}, spend: [], paid: null, theme: null };
 
-function loadDB() {
-  var raw = null;
+function parseCand(raw) {
+  if (!raw) return null;
   try {
-    if (BACKEND === "local") {
-      raw = localStorage.getItem("chi26:db");
-      if (!raw) {
-        /* migration depuis les anciennes clés éclatées */
-        var legacy = {};
-        ["done", "prep", "pass", "pack", "paid"].forEach(function (k) {
-          var v = localStorage.getItem("chi26:" + k);
-          if (v) legacy[k] = JSON.parse(v);
-        });
-        var th = localStorage.getItem("chi26:theme");
-        if (th) legacy.theme = th.replace(/"/g, "");
-        if (Object.keys(legacy).length) raw = JSON.stringify(legacy);
-      }
-    } else if (BACKEND === "cookie") {
-      var m = document.cookie.match(/(?:^|;\s*)chi26db=([^;]*)/);
-      if (m) raw = decodeURIComponent(m[1]);
-    }
-    if (raw) {
-      var obj = JSON.parse(raw);
-      ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices", "edits", "hidden", "added"].forEach(function (k) {
-        if (obj[k] && typeof obj[k] === "object" && !Array.isArray(obj[k])) DB[k] = obj[k];
-      });
-      if (Array.isArray(obj.spend)) DB.spend = obj.spend;
-      if (obj.paid && typeof obj.paid === "object") DB.paid = obj.paid;
-      if (obj.theme) DB.theme = obj.theme;
-    }
+    var o = JSON.parse(raw);
+    return o && typeof o === "object" ? o : null;
+  } catch (e) { return null; }
+}
+
+function loadDB() {
+  var cands = [];
+  try { cands.push(parseCand(localStorage.getItem("chi26:db"))); } catch (e) {}
+  cands.push(parseCand(readCookieRaw()));
+  try {
+    var legacy = {};
+    ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices"].forEach(function (k) {
+      var v = localStorage.getItem("chi26:" + k);
+      if (v) legacy[k] = JSON.parse(v);
+    });
+    if (Object.keys(legacy).length) cands.push(legacy);
   } catch (e) {}
+  var best = null;
+  cands.forEach(function (c) {
+    if (c && (!best || (+c.ts || 0) >= (+best.ts || 0))) best = c;
+  });
+  if (!best) return;
+  ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices", "edits", "hidden", "added"].forEach(function (k) {
+    if (best[k] && typeof best[k] === "object" && !Array.isArray(best[k])) DB[k] = best[k];
+  });
+  if (Array.isArray(best.spend)) DB.spend = best.spend;
+  if (best.paid && typeof best.paid === "object") DB.paid = best.paid;
+  if (best.theme) DB.theme = best.theme;
 }
 
 function saveDB() {
+  DB.ts = Date.now();
   var raw = JSON.stringify(DB);
-  try {
-    if (BACKEND === "local") localStorage.setItem("chi26:db", raw);
-    else if (BACKEND === "cookie") {
-      document.cookie = "chi26db=" + encodeURIComponent(raw) + "; max-age=31536000; path=/; SameSite=Lax";
-    }
-  } catch (e) {}
+  try { localStorage.setItem("chi26:db", raw); } catch (e) {}
+  writeCookieRaw(raw);
 }
 
 loadDB();
@@ -2136,7 +2196,7 @@ function renderInfos() {
   var scr = document.getElementById("scr-infos");
   var saveStatus = BACKEND === "mem"
     ? "⚠️ <b>Ce navigateur bloque l'enregistrement.</b> Tes coches seront perdues à la fermeture : exporte une sauvegarde avant de quitter, et réimporte-la à l'ouverture."
-    : "Tes coches sont enregistrées <b>dans ce navigateur</b>. Attention : Safari et le navigateur de l'appli Claude ont chacun leur propre sauvegarde — utilise toujours le même (celui de ton icône d'accueil), ou passe par Exporter / Importer pour transférer.";
+    : "Tes coches sont enregistrées en <b>double copie</b> (navigateur + cookie longue durée), et la plus récente est rechargée au démarrage — elles survivent désormais aux mises à jour de l'appli. Attention : Safari et le navigateur de l'appli Claude restent deux mondes séparés — utilise toujours celui de ton icône d'accueil, ou Exporter / Importer pour transférer.";
   scr.innerHTML = '<h2 class="screen-title"><span>ℹ️</span>Infos pratiques</h2>' +
 
     '<div class="card"><h3>💾 Sauvegarde</h3>' +
