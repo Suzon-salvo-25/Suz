@@ -654,6 +654,111 @@ h2.screen-title span { font-size: 20px; margin-right: 6px; }
 }
 .btn:active { transform: scale(.96); }
 
+/* ---------- accordéons (Miam / Shops) ---------- */
+details.acc { padding: 0; overflow: hidden; }
+details.acc summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 16px;
+  font-size: 15px;
+  font-weight: 800;
+  -webkit-user-select: none;
+  user-select: none;
+}
+details.acc summary::-webkit-details-marker { display: none; }
+details.acc summary .cnt {
+  margin-left: auto;
+  font-family: var(--f-data);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+details.acc summary::after {
+  content: "▾";
+  color: var(--ink-faint);
+  transition: transform .18s ease;
+}
+details.acc[open] summary::after { transform: rotate(180deg); }
+details.acc .acc-body { padding: 0 12px 12px; }
+
+/* ---------- journal du jour ---------- */
+.daynote {
+  width: 100%;
+  min-height: 74px;
+  resize: vertical;
+  font-family: var(--f-round);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  padding: 11px 13px;
+  margin-bottom: 10px;
+}
+.daynote::placeholder { color: var(--ink-faint); }
+.daynote:focus { outline: 2px solid var(--c-musee); border-style: solid; }
+
+/* ---------- dépenses & pourboire ---------- */
+.spend-form {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.spend-form input {
+  font-family: var(--f-round);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 9px 11px;
+  min-width: 0;
+}
+.spend-form input:focus { outline: 2px solid var(--c-musee); }
+.spend-list { list-style: none; margin: 0; padding: 0; }
+.spend-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 2px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.spend-list li:last-child { border-bottom: 0; }
+.spend-list .sd { font-family: var(--f-data); font-size: 11px; color: var(--ink-faint); white-space: nowrap; }
+.spend-list .st { flex: 1; color: var(--ink-soft); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.spend-list .sa { font-family: var(--f-data); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.spend-list .sx {
+  border: 0; background: none; cursor: pointer;
+  color: var(--ink-faint); font-size: 14px; padding: 0 2px;
+}
+.gauge {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  margin: 10px 0 4px;
+}
+.gauge span { display: block; height: 100%; background: var(--c-air); border-radius: 999px; }
+.gauge.over span { background: var(--c-soir); }
+.tip-out {
+  font-family: var(--f-data);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  background: var(--panel-2);
+  border-radius: var(--r-sm);
+  padding: 10px 13px;
+  margin-top: 8px;
+  line-height: 1.7;
+}
+
 /* ---------- confettis ---------- */
 .confetti-box {
   position: fixed;
@@ -918,12 +1023,26 @@ var FOOD = [
     ["Jibarito — Papa's Cache Sabroso", "Le sandwich dont le pain est remplacé par deux bananes plantain frites, inventé à Humboldt Park en 1996. ~12 $.", "€"],
     ["Garrett Popcorn — le Mix", "Caramel + cheddar mélangés dans le même sachet. L'odeur te trouvera avant que tu la cherches. ~8 $.", "€"]
   ]},
+  { c:"soir", e:"🧁", t:"Sucré & viral", items:[
+    ["Nutella Café", "Michigan Avenue, en face de Millennium Park : le premier café Nutella du monde. Crêpes, brioches et pots à rapporter. ~8–12 $.", "€"],
+    ["Magnolia Bakery", "State Street. LE banana pudding rendu célèbre par New York — la file avance vite, le pot moyen suffit. ~6 $.", "€"],
+    ["Wildberry Pancakes & Cafe", "Face à Millennium Park : les pancakes du voyage, portions énormes. Y aller tôt ou attendre 45 min. ~15 $.", "€€"],
+    ["The Original Rainbow Cone", "Institution de 1926 : le cône à 5 parfums tranchés à la spatule. Stand à Navy Pier — parfait pour le dernier jour. ~7 $.", "€"],
+    ["Margie's Candies", "1921, banquettes d'origine : sundaes géants servis dans des coquillages, sauce chaude à part. Les Beatles y sont passés en 1965. ~10 $.", "€"],
+    ["Bombobar", "West Loop : bomboloni (beignets italiens fourrés) et chocolats chauds spectaculaires, au guichet. ~7 $.", "€"],
+    ["Jeni's Splendid Ice Creams", "Wicker Park entre autres : la glace artisanale culte des États-Unis. Goûter Brambleberry Crisp. ~6 $.", "€"],
+    ["Vanille Pâtisserie", "La pâtisserie française du Chicago French Market : éclairs et macarons au niveau de Paris — pour comparer. ~6 $.", "€"],
+    ["Molly's Cupcakes", "Lincoln Park : cupcakes fourrés au centre coulant. ~5 $.", "€"]
+  ]},
   { c:"campus", e:"🥐", t:"Boulangeries, donuts & cafés", items:[
     ["Doughnut Vault", "River North. Échoppe minuscule, donuts old-fashioned — quand c'est fini, c'est fini pour la journée. ~4 $.", "€"],
     ["Stan's Donuts", "Wicker Park et ailleurs. Le pistache-chocolat est la bonne réponse. ~4 $.", "€"],
     ["Firecakes Donuts", "Le caramel beurre salé, et ouvert tard. ~4 $.", "€"],
+    ["Do-Rite Donuts", "Le Loop : le donut-poulet frit existe, et il est sérieux. ~6 $.", "€"],
     ["Sweet Mandy B's", "Pâtisserie pastel de Lincoln Park : cupcakes et gâteaux régressifs. ~5 $.", "€"],
-    ["Intelligentsia Coffee", "Torréfacteur culte né à Chicago en 1995 — le Millennium Park Coffeebar est en face du parc. ~6 $.", "€"]
+    ["Lou Mitchell's", "Diner de 1923 au départ de la Route 66 : donut holes offerts dans la file, petit-déj historique. ~15 $.", "€€"],
+    ["Intelligentsia Coffee", "Torréfacteur culte né à Chicago en 1995 — le Millennium Park Coffeebar est en face du parc. ~6 $.", "€"],
+    ["Sawada Coffee", "West Loop : le Military Latte (matcha + espresso), célèbre à raison. ~7 $.", "€"]
   ]},
   { c:"musee", e:"🍜", t:"Food halls & cuisines du monde", items:[
     ["Revival Food Hall", "15 comptoirs locaux dans un sous-sol Art déco du Loop — parfait en solo, idéal les midis Kaplan. 12–18 $.", "€€"],
@@ -966,6 +1085,24 @@ var SHOP = [
     ["Water Tower Place", "8 étages de centre commercial juste à côté de la Water Tower — combinable avec la balade du 4 sept.", "€€"],
     ["Flagships de Michigan Avenue", "Nike, Apple au bord de la rivière, Lego… Le lèche-vitrine olympique de la Magnificent Mile.", "€€"]
   ]},
+  { c:"soir", e:"💄", t:"Beauté & dégriffé — les bons plans", items:[
+    ["Sephora & Ulta Beauty", "State Street / Michigan Ave : les marques US introuvables ou plus chères en France (Sol de Janeiro, Glow Recipe…).", "€€"],
+    ["TJ Maxx / Marshalls", "Grandes marques dégriffées jusqu'à −60 % : le sport national américain. Plusieurs adresses dans le Loop.", "€"],
+    ["Nordstrom Rack", "Le déstockage de Nordstrom, State Street : Nike, Levi's, Ralph Lauren à prix cassés.", "€"],
+    ["Ross Dress for Less", "Encore moins cher — plus de fouille, plus de pépites.", "€"]
+  ]},
+  { c:"air", e:"🧸", t:"Fun & iconiques", items:[
+    ["American Girl Place", "Water Tower Place : hallucinant même sans rien acheter — il y a un salon de coiffure pour poupées.", "€€"],
+    ["LEGO Store", "Water Tower Place : sets exclusifs, dont la skyline de Chicago — le souvenir malin.", "€€"],
+    ["It'Sugar", "Bonbons américains en format géant : souvenirs à 5 $ pour tout le monde.", "€"],
+    ["Trader Joe's", "Le supermarché culte : les meilleurs souvenirs comestibles à moins de 5 $ (beurre de cacahuète, everything bagel seasoning).", "€"],
+    ["Barnes & Noble", "La grande librairie américaine — éditions et goodies introuvables en France.", "€"]
+  ]},
+  { c:"sport", e:"👟", t:"Streetwear & sneakers", items:[
+    ["RSVP Gallery", "Wicker Park : le concept-store cofondé par Virgil Abloh — pèlerinage streetwear.", "€€€"],
+    ["Notre", "West Loop : sélection sneakers et design ultra pointue.", "€€€"],
+    ["Nike Chicago & flagships Michigan Ave", "Cinq étages de flagship — exclus locales frappées Chicago.", "€€"]
+  ]},
   { c:"campus", e:"💎", t:"Oak Street — le chic", items:[
     ["Oak Street", "La rue du luxe (Hermès, Prada, Chanel) à deux pas d'Oak Street Beach : lèche-vitrine gratuit, dégâts facultatifs.", "€€€"],
     ["Ikram", "La boutique de mode pointue qui habillait Michelle Obama — plus galerie que magasin.", "€€€"]
@@ -993,7 +1130,7 @@ var BACKEND = (function () {
   return "mem";
 })();
 
-var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, paid: null, theme: null };
+var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, spend: [], paid: null, theme: null };
 
 function loadDB() {
   var raw = null;
@@ -1017,9 +1154,10 @@ function loadDB() {
     }
     if (raw) {
       var obj = JSON.parse(raw);
-      ["done", "prep", "pass", "pack", "food", "shop"].forEach(function (k) {
-        if (obj[k] && typeof obj[k] === "object") DB[k] = obj[k];
+      ["done", "prep", "pass", "pack", "food", "shop", "notes"].forEach(function (k) {
+        if (obj[k] && typeof obj[k] === "object" && !Array.isArray(obj[k])) DB[k] = obj[k];
       });
+      if (Array.isArray(obj.spend)) DB.spend = obj.spend;
       if (obj.paid && typeof obj.paid === "object") DB.paid = obj.paid;
       if (obj.theme) DB.theme = obj.theme;
     }
@@ -1120,7 +1258,24 @@ function dayCardHtml(day, kicker, useFilter) {
     if (!useFilter || itemMatches(it)) { html += itemHtml(day, i); shown++; }
   });
   if (useFilter && shown === 0) html += '<div class="tipcard">Rien ce jour-là pour ce filtre.</div>';
+  html += '<textarea class="daynote" data-note="d' + day.d + '" placeholder="📓 Journal du jour ' + day.d +
+    ' — ce que tu as vu, aimé, raté…">' + escT(DB.notes["d" + day.d] || "") + "</textarea>";
   return html;
+}
+
+function escT(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+}
+
+function bindNotes(scope) {
+  scope.querySelectorAll(".daynote").forEach(function (ta) {
+    ta.addEventListener("input", function () {
+      var k = ta.dataset.note;
+      var v = ta.value;
+      if (v) DB.notes[k] = v; else delete DB.notes[k];
+      saveDB();
+    });
+  });
 }
 
 /* ---------- écran Jours ---------- */
@@ -1198,6 +1353,7 @@ function renderPlan() {
     });
   });
   bindChecks(scr);
+  bindNotes(scr);
 }
 
 /* ---------- écran Aujourd'hui ---------- */
@@ -1243,6 +1399,7 @@ function renderHome() {
   }
   scr.innerHTML = html;
   bindChecks(scr);
+  bindNotes(scr);
   scr.querySelectorAll("[data-prep]").forEach(function (box) {
     box.addEventListener("change", function () {
       prepDone[box.dataset.prep] = box.checked ? 1 : undefined;
@@ -1303,7 +1460,36 @@ function renderBudget() {
     return '<span style="width:' + (s[1] / grand * 100).toFixed(1) + "%; background:" + s[2] + '" title="' + esc(s[0]) + '"></span>';
   }).join("");
 
+  var spent = DB.spend.reduce(function (a, e) { return a + (+e.a || 0); }, 0);
+  var envelope = 954; /* activités 304 + nourriture 350 + transports 300 */
+  var pct = Math.min(100, spent / envelope * 100);
+  var spendRows = DB.spend.slice().reverse().map(function (e, ri) {
+    var i = DB.spend.length - 1 - ri;
+    var dayObj = null;
+    DAYS.forEach(function (d) { if (d.date === e.d) dayObj = d; });
+    var lbl = dayObj ? "J" + dayObj.d : (e.d || "").slice(5);
+    return '<li><span class="sd">' + esc(lbl) + '</span><span class="st">' + esc(e.t || "—") +
+      '</span><span class="sa">' + (+e.a).toLocaleString("fr-FR", { maximumFractionDigits: 2 }) + " €" +
+      '</span><button class="sx" type="button" data-del="' + i + '" aria-label="Supprimer">✕</button></li>';
+  }).join("");
+
   var html = '<h2 class="screen-title"><span>💰</span>Budget</h2>' +
+
+    '<div class="card"><h3>💸 Carnet de dépenses — ' +
+    spent.toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " € dépensés</h3>" +
+    '<div class="spend-form">' +
+    '<input type="number" inputmode="decimal" min="0" step="0.5" id="spAmt" placeholder="12,50">' +
+    '<input type="text" id="spTxt" placeholder="ex : deep dish Pequod\'s" maxlength="60">' +
+    '<button class="btn" id="spAdd" type="button" style="margin:0">＋</button></div>' +
+    '<div class="gauge' + (spent > envelope ? " over" : "") + '"><span style="width:' + pct.toFixed(1) + '%"></span></div>' +
+    '<p style="font-size:12.5px">' +
+    (spent > envelope
+      ? "Enveloppe « sur place » de 954 € dépassée de " + Math.round(spent - envelope) + " € — à compenser sur l'hôtel ou le shopping."
+      : "Reste " + Math.round(envelope - spent) + " € sur l'enveloppe « sur place » (activités + nourriture + transports : 954 €).") +
+    "</p>" +
+    (spendRows ? '<ul class="spend-list">' + spendRows + "</ul>" : '<p style="font-size:12.5px">Saisis chaque dépense en 2 secondes — le total se compare tout seul au budget.</p>') +
+    "</div>" +
+
     '<div class="card money-hero">' +
     '<div class="lbl">TOTAL ESTIMÉ DU VOYAGE</div>' +
     '<div class="total">3 493 – 3 813 €</div>' +
@@ -1316,6 +1502,25 @@ function renderBudget() {
       return '<li><span class="dot" style="background:var(--' + r[3] + ')"></span><span class="lab">' + esc(r[0]) + " (sur place)</span><span class=\"val\">" + esc(r[1]) + "</span></li>";
     }).join("") +
     "</ul></div>";
+
+  var accB = accOpen.budget || (accOpen.budget = {});
+  var paidRows = "", restRows = "";
+  BUDGET.fixed.forEach(function (r) {
+    var row = '<li><span class="dot" style="background:var(--b-' + (paidState[r.id] ? "paid" : "1") + ')"></span>' +
+      '<span class="lab">' + esc(r.t) + '</span><span class="val">' + (r.lab || fmtEur(r.v)) + "</span></li>";
+    if (paidState[r.id]) paidRows += row; else restRows += row;
+  });
+  BUDGET.onsite.forEach(function (r) {
+    restRows += '<li><span class="dot" style="background:var(--' + r[3] + ')"></span>' +
+      '<span class="lab">' + esc(r[0]) + ' (sur place)</span><span class="val">' + esc(r[1]) + "</span></li>";
+  });
+  html += '<details class="card acc" data-bacc="paid"' + (accB.paid ? " open" : "") + ">" +
+    "<summary>✅ Déjà payé — le détail<span class=\"cnt\">" + fmtEur(paidSum) + "</span></summary>" +
+    '<div class="acc-body"><ul class="blegend">' + (paidRows || "<li><span class=\"lab\">Rien pour l'instant.</span></li>") + "</ul></div></details>";
+  html += '<details class="card acc" data-bacc="rest"' + (accB.rest ? " open" : "") + ">" +
+    "<summary>⏳ Reste à payer — le détail<span class=\"cnt\">~" + fmtEur(resteTotal) + "</span></summary>" +
+    '<div class="acc-body"><ul class="blegend">' + restRows + "</ul>" +
+    '<p style="font-size:12.5px; margin-top:8px">Coche un poste dans le suivi ci-dessous dès qu\'il est réglé : il bascule automatiquement dans « Déjà payé ».</p></div></details>';
 
   html += '<div class="card"><h3>🧾 Suivi des paiements — coche quand c\'est réglé</h3><ul class="blegend">' +
     BUDGET.fixed.map(function (r) {
@@ -1338,12 +1543,42 @@ function renderBudget() {
       renderBudget();
     });
   });
+
+  var addBtn = document.getElementById("spAdd");
+  var amtIn = document.getElementById("spAmt");
+  var txtIn = document.getElementById("spTxt");
+  function addSpend() {
+    var a = parseFloat(String(amtIn.value).replace(",", "."));
+    if (!a || a <= 0) { amtIn.focus(); return; }
+    DB.spend.push({ d: todayChicago(), a: a, t: txtIn.value.trim() });
+    saveDB();
+    renderBudget();
+  }
+  if (addBtn) {
+    addBtn.addEventListener("click", addSpend);
+    txtIn.addEventListener("keydown", function (e) { if (e.key === "Enter") addSpend(); });
+  }
+  scr.querySelectorAll("[data-del]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      DB.spend.splice(+b.dataset.del, 1);
+      saveDB();
+      renderBudget();
+    });
+  });
+  scr.querySelectorAll("[data-bacc]").forEach(function (d) {
+    d.addEventListener("toggle", function () {
+      if (d.open) accOpen.budget[d.dataset.bacc] = 1; else delete accOpen.budget[d.dataset.bacc];
+    });
+  });
 }
 
-/* ---------- écrans guides (Miam / Boutiques) ---------- */
+/* ---------- écrans guides (Miam / Boutiques), en accordéons ---------- */
+var accOpen = {};
+
 function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
   var scr = document.getElementById(scrId);
   var state = DB[dbKey];
+  var opened = accOpen[scrId] || (accOpen[scrId] = {});
   var total = 0, ok = 0;
   groups.forEach(function (g, gi) {
     g.items.forEach(function (_, ii) { total++; if (state["g" + gi + "-" + ii]) ok++; });
@@ -1351,7 +1586,12 @@ function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
   var html = titleHtml +
     '<div class="tipcard"><b>' + ok + " / " + total + "</b> " + verb + (ok > 1 ? "s" : "") + ". " + tip + "</div>";
   groups.forEach(function (g, gi) {
-    html += '<div class="card"><h3>' + g.e + " " + esc(g.t) + "</h3>";
+    var gOk = 0;
+    g.items.forEach(function (_, ii) { if (state["g" + gi + "-" + ii]) gOk++; });
+    html += '<details class="card acc" data-gi="' + gi + '"' + (opened[gi] ? " open" : "") + ">" +
+      "<summary>" + g.e + " " + esc(g.t) +
+      '<span class="cnt">' + gOk + " / " + g.items.length + "</span></summary>" +
+      '<div class="acc-body">';
     g.items.forEach(function (it, ii) {
       var uid = "g" + gi + "-" + ii;
       html += '<label class="item' + (state[uid] ? " done" : "") + '" style="--cat: var(--c-' + g.c + '); box-shadow:none; margin-bottom:8px;">' +
@@ -1361,13 +1601,25 @@ function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
         (it[1] ? '<div class="n">' + esc(it[1]) + "</div>" : "") + "</span>" +
         (it[2] ? '<span class="price">' + esc(it[2]) + "</span>" : "") + "</label>";
     });
-    html += "</div>";
+    html += "</div></details>";
   });
   scr.innerHTML = html;
+  scr.querySelectorAll("details.acc").forEach(function (d) {
+    d.addEventListener("toggle", function () {
+      if (d.open) opened[d.dataset.gi] = 1; else delete opened[d.dataset.gi];
+    });
+  });
   scr.querySelectorAll("[data-guide]").forEach(function (box) {
     box.addEventListener("change", function () {
       if (box.checked) state[box.dataset.guide] = 1; else delete state[box.dataset.guide];
       saveDB();
+      if (box.checked) {
+        var left = 0;
+        groups.forEach(function (g, gi) {
+          g.items.forEach(function (_, ii) { if (!state["g" + gi + "-" + ii]) left++; });
+        });
+        if (left === 0) burst(["🎉", "⭐", "🎊"]);
+      }
       renderGuide(scrId, groups, dbKey, titleHtml, tip, verb);
     });
   });
@@ -1383,42 +1635,14 @@ function renderShop() {
     "Du souvenir à 8 $ au lèche-vitrine de luxe, rangé par gamme de prix.", "faite");
 }
 
-/* ---------- écran Valise ---------- */
+/* ---------- écran Valise (mêmes accordéons) ---------- */
 function renderPack() {
-  var scr = document.getElementById("scr-pack");
-  var total = 0, ok = 0;
-  PACK.forEach(function (g, gi) {
-    g.items.forEach(function (_, ii) { total++; if (packDone["k" + gi + "-" + ii]) ok++; });
+  Object.keys(DB.pack).forEach(function (k) {
+    if (k.charAt(0) === "k") { DB.pack["g" + k.slice(1)] = DB.pack[k]; delete DB.pack[k]; }
   });
-  var html = '<h2 class="screen-title"><span>🧳</span>Valise</h2>' +
-    '<div class="tipcard">' + (ok === total
-      ? "🎉 <b>Valise bouclée !</b> Bon voyage."
-      : "<b>" + ok + " / " + total + "</b> prêt" + (ok > 1 ? "s" : "") + ". 📶 L'eSIM se règle à la maison, pas à O'Hare.") + "</div>";
-  PACK.forEach(function (g, gi) {
-    html += '<div class="card"><h3>' + g.e + " " + esc(g.t) + "</h3>";
-    g.items.forEach(function (it, ii) {
-      var uid = "k" + gi + "-" + ii;
-      html += '<label class="item' + (packDone[uid] ? " done" : "") + '" style="--cat: var(--c-' + g.c + '); box-shadow:none; margin-bottom:8px;">' +
-        '<input type="checkbox" class="chk" data-packit="' + uid + '"' + (packDone[uid] ? " checked" : "") +
-        ' aria-label="' + esc(it[0]).replace(/"/g, "&quot;") + '">' +
-        '<span class="body"><span class="t">' + esc(it[0]) + "</span>" +
-        (it[1] ? '<div class="n">' + esc(it[1]) + "</div>" : "") + "</span></label>";
-    });
-    html += "</div>";
-  });
-  scr.innerHTML = html;
-  scr.querySelectorAll("[data-packit]").forEach(function (box) {
-    box.addEventListener("change", function () {
-      if (box.checked) packDone[box.dataset.packit] = 1; else delete packDone[box.dataset.packit];
-      store.set("chi26:pack", packDone);
-      var left = 0;
-      PACK.forEach(function (g, gi) {
-        g.items.forEach(function (_, ii) { if (!packDone["k" + gi + "-" + ii]) left++; });
-      });
-      if (box.checked && left === 0) burst(["🧳", "🎉", "✈️", "🎊"]);
-      renderPack();
-    });
-  });
+  renderGuide("scr-pack", PACK, "pack",
+    '<h2 class="screen-title"><span>🧳</span>Valise</h2>',
+    "📶 L'eSIM se règle à la maison, pas à O'Hare.", "prêt");
 }
 
 /* ---------- écran Infos ---------- */
@@ -1451,9 +1675,10 @@ function importSave() {
   try {
     var obj = JSON.parse(raw.trim());
     if (typeof obj !== "object" || !obj) throw 0;
-    ["done", "prep", "pass", "pack", "food", "shop"].forEach(function (k) {
-      if (obj[k] && typeof obj[k] === "object") DB[k] = obj[k];
+    ["done", "prep", "pass", "pack", "food", "shop", "notes"].forEach(function (k) {
+      if (obj[k] && typeof obj[k] === "object" && !Array.isArray(obj[k])) DB[k] = obj[k];
     });
+    if (Array.isArray(obj.spend)) DB.spend = obj.spend;
     if (obj.paid && typeof obj.paid === "object") DB.paid = obj.paid;
     if (obj.theme) { DB.theme = obj.theme; root.setAttribute("data-theme", obj.theme); }
     relink();
@@ -1476,6 +1701,20 @@ function renderInfos() {
     "<p>" + saveStatus + "</p>" +
     '<button class="btn" id="btnExport" type="button">⬇️ Exporter</button>' +
     '<button class="btn" id="btnImport" type="button">⬆️ Importer</button></div>' +
+
+    '<div class="card"><h3>🧮 Pourboire &amp; euros</h3>' +
+    "<p>Tape l'addition en dollars — je calcule le pourboire et l'équivalent en euros.</p>" +
+    '<div class="spend-form" style="grid-template-columns:1fr">' +
+    '<input type="number" inputmode="decimal" min="0" id="tipIn" placeholder="Addition en $, ex : 42"></div>' +
+    '<div class="tip-out" id="tipOut">15 % · 18 % · 20 % s\'afficheront ici.</div></div>' +
+
+    '<div class="card"><h3>🌧️ S\'il pleut</h3><ul>' +
+    "<li>Les orages de fin d'été sont violents mais courts : 30 min au sec suffisent souvent.</li>" +
+    "<li><b>Refuges toujours bons :</b> Cultural Center, Revival Food Hall, Macy's et son plafond Tiffany, Starbucks Reserve (5 étages), Water Tower Place.</li>" +
+    "<li><b>4 sept :</b> zoo écourté → prolonger le History Museum, puis Water Tower Place.</li>" +
+    "<li><b>9 sept :</b> journée déjà couverte (Shedd + serre de Garfield).</li>" +
+    "<li><b>10 sept :</b> sauter Promontory Point, le Griffin remplit la journée.</li>" +
+    "<li><b>11 sept :</b> Navy Pier est aux trois quarts couvert.</li></ul></div>" +
 
     '<div class="card"><h3>📲 Installer l\'appli sur ton téléphone</h3>' +
     "<p><b>iPhone (Safari)</b> : ouvre cette page → bouton Partager <b>⬆️</b> → « <b>Sur l'écran d'accueil</b> ». L'icône skyline apparaît et la page s'ouvre en plein écran, comme une appli.</p>" +
@@ -1502,10 +1741,40 @@ function renderInfos() {
     '<div class="card"><h3>🎁 En bonus si le temps le permet</h3><ul>' +
     "<li><b>Water Taxi → Chinatown</b> (~9 €/trajet) : le 31 août ou le 9 sept. Vérifier le calendrier de la ligne.</li>" +
     "<li><b>Plages</b> : Oak Street ou North Avenue Beach, sur le Lakefront Trail. Gratuit, lac baignable jusqu'à mi-septembre.</li>" +
-    "<li><b>Jazz Fest</b> (3–6 sept, gratuit) : tes soirées du 3 et du 4 sont les seules attrapables.</li></ul></div>";
+    "<li><b>Jazz Fest</b> (3–6 sept, gratuit) : tes soirées du 3 et du 4 sont les seules attrapables.</li></ul></div>" +
+
+    '<div class="card"><h3>♻️ Tout remettre à zéro</h3>' +
+    "<p>Efface toutes les coches, notes et dépenses de cet appareil. Exporte une sauvegarde avant si tu hésites.</p>" +
+    '<button class="btn" id="btnReset" type="button">Réinitialiser l\'appli</button></div>';
 
   document.getElementById("btnExport").addEventListener("click", exportSave);
   document.getElementById("btnImport").addEventListener("click", importSave);
+  document.getElementById("btnReset").addEventListener("click", resetAll);
+
+  var tipIn = document.getElementById("tipIn");
+  var tipOut = document.getElementById("tipOut");
+  tipIn.addEventListener("input", function () {
+    var v = parseFloat(String(tipIn.value).replace(",", "."));
+    if (!v || v <= 0) { tipOut.textContent = "15 % · 18 % · 20 % s'afficheront ici."; return; }
+    var RATE = 0.87; /* taux approximatif $ → € */
+    function line(p) {
+      var tot = v * (1 + p / 100);
+      return p + " % → " + tot.toFixed(2) + " $ (≈ " + (tot * RATE).toFixed(0) + " €)";
+    }
+    tipOut.innerHTML = line(15) + "<br>" + line(18) + " ← resto standard<br>" + line(20) +
+      "<br><span style='color:var(--ink-faint)'>Sans pourboire : ≈ " + (v * RATE).toFixed(0) + " € · taux ~0,87</span>";
+  });
+}
+
+function resetAll() {
+  if (!window.confirm("Tout effacer sur cet appareil ? (coches, notes, dépenses)")) return;
+  DB.done = {}; DB.prep = {}; DB.pass = {}; DB.pack = {};
+  DB.food = {}; DB.shop = {}; DB.notes = {}; DB.spend = [];
+  DB.paid = {};
+  BUDGET.fixed.forEach(function (r) { if (r.def) DB.paid[r.id] = 1; });
+  relink();
+  saveDB();
+  rerenderAll();
 }
 
 function rerenderAll() {
