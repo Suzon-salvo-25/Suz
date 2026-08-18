@@ -515,6 +515,8 @@ h2.screen-title::after {
 .tlb.done { opacity: .45; }
 .tlb.done b { text-decoration: line-through; }
 .tlb:active { transform: scale(.985); }
+.tlb.lane1 { left: 52%; box-shadow: 0 2px 10px -2px rgba(9,11,30,.5); }
+.twb.lane1 { left: 42%; z-index: 2; }
 
 /* ---------- vue semaine ---------- */
 .twhead { display: flex; gap: 3px; margin-bottom: 6px; }
@@ -1383,7 +1385,7 @@ var DAYS = [
   { d:13, date:"2026-09-10", dow:"Jeu", lab:"10 sept", e:"🔬", p:3, title:"Griffin, la totale",
     tip:"U-505 On-Board (~16 €) à acheter en ligne LE MATIN MÊME — les créneaux partent dans la journée.",
     items:[
-      { h:"Journée", c:"musee", t:"Griffin Museum of Science and Industry", m:"Griffin Museum of Science and Industry", u:"https://www.msichicago.org", n:"Le plus grand musée de sciences de l'hémisphère ouest, dans le dernier palais debout de l'Exposition universelle de 1893. Priorités dans l'ordre : 1. Anne Frank: The Exhibition · 2. U-505, le sous-marin allemand capturé en pleine mer en 1944 (visite intérieure en supplément ~16 €) · 3. Coal Mine · 4. Powering the Future · 5. Science Storms · 6. Great Train Story · 7. Boeing 727. Le pass couvre l'entrée, Anne Frank et les galeries.", pass:"5/5" },
+      { h:"Journée", c:"musee", t:"Griffin Museum of Science and Industry", m:"Griffin Museum of Science and Industry", u:"https://www.msichicago.org", n:"Le plus grand musée de sciences de l'hémisphère ouest, dans le dernier palais debout de l'Exposition universelle de 1893. Priorités dans l'ordre : 1. Anne Frank: The Exhibition · 2. U-505, le sous-marin allemand capturé en pleine mer en 1944 (visite intérieure en supplément ~16 €) · 3. Coal Mine · 4. Powering the Future · 5. Science Storms · 6. Great Train Story · 7. Boeing 727. Le pass couvre l'entrée, Anne Frank et les galeries. 🍔 On mange sur place : Brain Food Court (burgers, pizzas, salades, ~12–18 $) + café — et le pique-nique apporté est autorisé dans les zones prévues.", pass:"5/5" },
       { h:"17h",     c:"air",   t:"Promontory Point (si énergie)", m:"Promontory Point Chicago", n:"Avancée de calcaire dans le lac, à 20 min à travers Hyde Park : la meilleure vue de la skyline de toute la ville, à 10 km de distance, et il n'y a jamais personne. Avant la nuit. Retour Downtown en bus 6 ou Metra Electric.", pr:"Gratuit" }
     ]},
   { d:14, date:"2026-09-11", dow:"Ven", lab:"11 sept", e:"🎡", p:3, title:"Navy Pier + départ",
@@ -1815,7 +1817,9 @@ function editFormHtml(uid, it) {
   var isNew = uid.indexOf("new-") === 0;
   return '<div class="card ef" data-efuid="' + uid + '">' +
     "<h3>" + (isNew ? "➕ Nouvelle activité" : "✏️ Modifier l'activité") + "</h3>" +
-    '<input class="ef-h" type="text" placeholder="Heure (ex : 14h30, Aprem…)" value="' + esc(it.h || "").replace(/"/g, "&quot;") + '">' +
+    '<div class="ef-row">' +
+    '<input class="ef-h" type="text" placeholder="Heure (ex : 14h30)" value="' + esc(it.h || "").replace(/"/g, "&quot;") + '">' +
+    '<input class="ef-dur" type="number" inputmode="numeric" min="15" step="15" placeholder="Durée (min)" value="' + (it.dur || "") + '"></div>' +
     '<input class="ef-t" type="text" placeholder="Titre de l\'activité" value="' + esc(it.t || "").replace(/"/g, "&quot;") + '">' +
     '<textarea class="ef-n" placeholder="Note, détails, transport…">' + escT(it.n || "") + "</textarea>" +
     '<div class="ef-row"><input class="ef-pr" type="text" placeholder="Prix (26 €, Gratuit…)" value="' + esc(it.pr || "").replace(/"/g, "&quot;") + '">' +
@@ -1883,6 +1887,7 @@ function dayCardHtml(day, kicker, useFilter, hideDone) {
   });
   if (useFilter && shown === 0) html += '<div class="tipcard">Rien ce jour-là pour ce filtre.</div>';
   if (hideDone && shown === 0) html += '<div class="tipcard">🎉 Tout est fait pour aujourd\'hui !</div>';
+  if (editItem === "new-" + day.d) html += editFormHtml(editItem, { h: "", t: "", c: "air" });
   var hc = hiddenCount(day);
   html += '<div style="margin-bottom:10px">' +
     '<button class="btn" type="button" data-addday="' + day.d + '">＋ Ajouter une activité</button>' +
@@ -1926,6 +1931,8 @@ function bindEditing(scope) {
     if (!vals.t) { toast("Il faut au moins un titre"); return; }
     var n = val(".ef-n").trim(); if (n) vals.n = n;
     var pr = val(".ef-pr").trim(); if (pr) vals.pr = pr;
+    var dur = parseInt(val(".ef-dur"), 10);
+    if (dur && dur >= 15) vals.dur = Math.min(720, dur);
     if (uid.indexOf("new-") === 0) {
       var d = +uid.slice(4);
       (DB.added[d] = DB.added[d] || []).push(vals);
@@ -2039,10 +2046,21 @@ function tlSlots(day) {
     t = s;
   });
   slots.forEach(function (o, i) {
-    var c = o.en.it.c;
+    var it = o.en.it;
+    if (it.dur) {
+      o.e = o.s + it.dur;   /* durée fixée à la main : jamais rognée */
+      return;
+    }
+    var c = it.c;
     var dur = c === "cours" ? 210 : c === "soir" ? 150 : c === "trajet" ? 75 : 105;
     if (i + 1 < slots.length) dur = Math.max(40, Math.min(dur, slots[i + 1].s - o.s - 5));
     o.e = o.s + dur;
+  });
+  /* chevauchements (durées manuelles) : décalage en 2e colonne */
+  var maxEnd = -1;
+  slots.forEach(function (o) {
+    o.lane = o.s < maxEnd ? 1 : 0;
+    if (o.e > maxEnd) maxEnd = o.e;
   });
   return slots;
 }
@@ -2071,7 +2089,7 @@ function weekHtml(w) {
     var b = o.slots.map(function (s) {
       var top = (s.s - h0) * PX;
       var height = Math.max(16, (s.e - s.s) * PX - 2);
-      return '<button type="button" class="twb' + (done[s.en.uid] ? " done" : "") +
+      return '<button type="button" class="twb' + (done[s.en.uid] ? " done" : "") + (s.lane ? " lane1" : "") +
         '" style="top:' + top.toFixed(1) + "px;height:" + height.toFixed(1) + "px;--cat:var(--c-" + (s.en.it.c || "air") +
         ')" data-tlb="' + s.en.uid + '" data-day="' + o.d.d + '"><span>' + esc(s.en.it.t) + "</span></button>";
     }).join("");
@@ -2096,7 +2114,7 @@ function timelineHtml(day) {
   slots.forEach(function (o) {
     var top = (o.s - h0) * PX;
     var height = Math.max(30, (o.e - o.s) * PX - 3);
-    html += '<button type="button" class="tlb' + (height < 46 ? " sm" : "") + (done[o.en.uid] ? " done" : "") +
+    html += '<button type="button" class="tlb' + (height < 46 ? " sm" : "") + (done[o.en.uid] ? " done" : "") + (o.lane ? " lane1" : "") +
       '" style="top:' + top.toFixed(1) + "px; height:" + height.toFixed(1) + "px; --cat: var(--c-" + (o.en.it.c || "air") + ')" data-tlb="' + o.en.uid + '" data-day="' + day.d + '">' +
       '<span class="tltime">' + fmtMin(o.s) + " – " + fmtMin(o.e) + "</span><b>" + esc(o.en.it.t) + "</b></button>";
   });
@@ -2144,7 +2162,10 @@ function renderPlan() {
         body += '<div class="daypick" id="daypick">' + picks + "</div>" +
           '<div class="mini-day" style="--pc: var(--g' + td.p + 'a)"><span class="me">' + td.e +
           '</span><span class="n">J' + td.d + '</span><span class="d">' + td.dow + " " + td.lab + " · " + esc(td.title) + "</span></div>" +
-          timelineHtml(td);
+          timelineHtml(td) +
+          (editItem === "new-" + td.d
+            ? editFormHtml(editItem, { h: "", t: "", c: "air" })
+            : '<button class="btn" type="button" data-addday="' + td.d + '">＋ Ajouter une activité à ce jour</button>');
       }
     } else {
       body = '<div class="daypick" id="daypick">' + picks + "</div>" + dayCardHtml(DAYS[curDay - 1], null, true);
@@ -2164,7 +2185,11 @@ function renderPlan() {
   scr.innerHTML = '<h2 class="screen-title"><span>📅</span>Le planning</h2>' + seg + chips + body;
 
   scr.querySelectorAll(".seg button").forEach(function (b) {
-    b.addEventListener("click", function () { planView = b.dataset.view; renderPlan(); });
+    b.addEventListener("click", function () {
+      if (!b.dataset.view) return; /* laisse Jour/Semaine et Sem.1/Sem.2 à leurs propres gestionnaires */
+      planView = b.dataset.view;
+      renderPlan();
+    });
   });
   scr.querySelectorAll(".chip").forEach(function (ch) {
     ch.addEventListener("click", function () {
