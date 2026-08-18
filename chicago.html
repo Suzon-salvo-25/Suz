@@ -1405,10 +1405,29 @@ var SHOP = [
     ["Cubs Team Store — Wrigley Field", "La casquette officielle, à prendre le soir du match du 2. 25–40 $.", "€€"],
     ["Ole Miss Bookstore — Student Union", "Le hoodie Rebels, souvenir du week-end sudiste. 30–60 $.", "€€"]
   ]},
+  { c:"musee", e:"👕", t:"Vêtements — les enseignes US", items:[
+    ["Abercrombie & Fitch", "Michigan Ave : la marque en pleine renaissance, nettement moins chère qu'en France.", "€€"],
+    ["American Eagle & Aerie", "Le jean culte des campus américains et la lingerie confort Aerie — quasi introuvables en France.", "€"],
+    ["Old Navy", "State Street : les basics les moins chers d'Amérique (t-shirts à 5 $) — la soupape si la valise sans lessive craque.", "€"],
+    ["Levi's Store", "Michigan Ave : les 501 environ 40 % moins chers qu'en Europe, toutes coupes, retouches sur place.", "€€"],
+    ["Uniqlo", "Michigan Ave sur trois étages — collabs parfois exclusives aux États-Unis.", "€"],
+    ["Lululemon Lincoln Park", "Le flagship avec studio et café — le legging culte, moins cher qu'en France.", "€€"]
+  ]},
+  { c:"soir", e:"👗", t:"Mode & tendances", items:[
+    ["Aritzia", "Rush Street : la marque canadienne culte de TikTok — Effortless Pant et compagnie.", "€€"],
+    ["Brandy Melville", "Rush Street : bien plus grande que les boutiques européennes, prix doux.", "€"],
+    ["Urban Outfitters", "State Street : vêtements, vinyles, déco — l'institution jeune américaine.", "€€"],
+    ["Madewell", "Michigan Ave : « le jean parfait » selon les Américaines.", "€€"],
+    ["Free People", "Bohème chic, la grande sœur d'Urban Outfitters.", "€€€"],
+    ["Anthropologie", "Michigan Ave : mode et maison — magnifique rien qu'à traverser.", "€€€"]
+  ]},
   { c:"soir", e:"🧥", t:"Friperies & vintage — Wicker Park (1er sept)", items:[
     ["Buffalo Exchange", "Milwaukee Avenue : le tri est déjà fait, les prix restent doux. 10–40 $.", "€"],
+    ["Ragstock", "Milwaukee Avenue : la friperie-chaîne géante — vintage au kilo, chemises à 10 $.", "€"],
     ["Kokorokoko", "Vintage 80s-90s pointu, pièces uniques. 20–60 $.", "€€"],
     ["Una Mae's", "Mi-vintage mi-neuf, la boutique signature du quartier. 20–80 $.", "€€"],
+    ["Crossroads Trading", "La revente triée façon boutique, à deux pas de Buffalo Exchange.", "€"],
+    ["Village Discount Outlet", "Roscoe Village : le thrift XXL des Chicagoans — pépites à 3 $ pour qui fouille.", "€"],
     ["Reckless Records", "L'institution du vinyle indie, neuf et occasion. 5–30 $.", "€"],
     ["Myopic Books", "Trois étages de livres d'occasion, ouvert tard le soir. 5–15 $.", "€"]
   ]},
@@ -1422,7 +1441,8 @@ var SHOP = [
     ["Sephora & Ulta Beauty", "State Street / Michigan Ave : les marques US introuvables ou plus chères en France (Sol de Janeiro, Glow Recipe…).", "€€"],
     ["TJ Maxx / Marshalls", "Grandes marques dégriffées jusqu'à −60 % : le sport national américain. Plusieurs adresses dans le Loop.", "€"],
     ["Nordstrom Rack", "Le déstockage de Nordstrom, State Street : Nike, Levi's, Ralph Lauren à prix cassés.", "€"],
-    ["Ross Dress for Less", "Encore moins cher — plus de fouille, plus de pépites.", "€"]
+    ["Ross Dress for Less", "Encore moins cher — plus de fouille, plus de pépites.", "€"],
+    ["Fashion Outlets of Chicago", "Rosemont, SUR ta Blue Line vers O'Hare : 130 outlets (Nike, Levi's, Coach, Ralph Lauren…). Combinable avec le trajet aéroport du dernier jour si tu pars très tôt — ou dangereux pour la valise, à toi de voir.", "€"]
   ]},
   { c:"air", e:"🧸", t:"Fun & iconiques", items:[
     ["American Girl Place", "Water Tower Place : hallucinant même sans rien acheter — il y a un salon de coiffure pour poupées.", "€€"],
@@ -2329,7 +2349,7 @@ function renderFood() {
 function renderShop() {
   renderGuide("scr-shop", SHOP, "shop",
     '<h2 class="screen-title"><span>🛍️</span>Boutiques</h2>',
-    "Du souvenir à 8 $ au lèche-vitrine de luxe, rangé par gamme de prix.", "faite");
+    "Du souvenir à 8 $ au lèche-vitrine de luxe, rangé par gamme. ⚠️ Les prix affichés sont hors taxe : +10,25 % en caisse à Chicago.", "faite");
 }
 
 /* ---------- écran Histoire ---------- */
