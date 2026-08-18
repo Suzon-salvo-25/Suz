@@ -516,6 +516,78 @@ h2.screen-title::after {
 .tlb.done b { text-decoration: line-through; }
 .tlb:active { transform: scale(.985); }
 
+/* ---------- vue semaine ---------- */
+.twhead { display: flex; gap: 3px; margin-bottom: 6px; }
+.twhead .twgut, .tw .twgut { width: 34px; flex: 0 0 34px; position: relative; }
+.twd {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--pc, var(--line));
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 5px 2px 4px;
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--f-round);
+  color: var(--ink);
+}
+.twd span { display: block; font-size: 9px; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; }
+.twd b { font-size: 13px; font-weight: 900; }
+.tw {
+  display: flex;
+  gap: 3px;
+  position: relative;
+  background: var(--panel);
+  background-image: repeating-linear-gradient(to bottom,
+    color-mix(in srgb, var(--line) 60%, transparent) 0 1px, transparent 1px 44px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.tw .twgut span {
+  position: absolute;
+  left: 3px;
+  font-family: var(--f-data);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  background: var(--panel);
+  padding: 0 2px;
+}
+.twc {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  border-left: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+.twb {
+  position: absolute;
+  left: 1px; right: 1px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--cat, var(--ink-faint));
+  color: var(--on-cat);
+  padding: 2px 3px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--f-round);
+}
+.twb span {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 8.5px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.twb.done { opacity: .4; }
+.twb.done span { text-decoration: line-through; }
+
 /* ---------- sélecteur de jours ---------- */
 .daypick {
   display: flex;
@@ -1920,6 +1992,8 @@ function bindNotes(scope) {
 /* ---------- écran Jours ---------- */
 var curDay = 1;
 var planView = "day";
+var tlMode = "day";
+var tlWeek = null;
 var activeCats = [];
 var CATS = [
   ["musee",  "Musées",       "--c-musee"],
@@ -1954,9 +2028,8 @@ function fmtMin(mn) {
   return hh + "h" + (mm ? String(mm).padStart(2, "0") : "");
 }
 
-function timelineHtml(day) {
+function tlSlots(day) {
   var ens = dayItems(day).filter(function (en) { return itemMatches(en.it); });
-  if (!ens.length) return '<div class="tipcard">Rien ce jour-là pour ce filtre.</div>';
   var t = null, slots = [];
   ens.forEach(function (en) {
     var s = parseMin(en.it.h);
@@ -1971,6 +2044,47 @@ function timelineHtml(day) {
     if (i + 1 < slots.length) dur = Math.max(40, Math.min(dur, slots[i + 1].s - o.s - 5));
     o.e = o.s + dur;
   });
+  return slots;
+}
+
+function weekHtml(w) {
+  var days = DAYS.slice(w * 7, w * 7 + 7);
+  var all = days.map(function (d) { return { d: d, slots: tlSlots(d) }; });
+  var h0 = 480, h1 = 1320;
+  all.forEach(function (o) {
+    o.slots.forEach(function (s) {
+      if (s.s < h0) h0 = Math.floor(s.s / 60) * 60;
+      if (s.e > h1) h1 = Math.ceil(s.e / 60) * 60;
+    });
+  });
+  var PX = 44 / 60;
+  var head = '<div class="twhead"><div class="twgut"></div>' + all.map(function (o) {
+    return '<button type="button" class="twd" data-goday="' + o.d.d + '" style="--pc: var(--g' + o.d.p + 'a)">' +
+      "<span>" + o.d.dow + "</span><b>" + esc(o.d.lab.split(" ")[0]) + "</b></button>";
+  }).join("") + "</div>";
+  var gut = '<div class="twgut">';
+  for (var hh = h0 + 60; hh < h1; hh += 60) {
+    gut += '<span style="top:' + ((hh - h0) * PX - 6).toFixed(1) + 'px">' + (hh / 60) + "h</span>";
+  }
+  gut += "</div>";
+  var cols = all.map(function (o) {
+    var b = o.slots.map(function (s) {
+      var top = (s.s - h0) * PX;
+      var height = Math.max(16, (s.e - s.s) * PX - 2);
+      return '<button type="button" class="twb' + (done[s.en.uid] ? " done" : "") +
+        '" style="top:' + top.toFixed(1) + "px;height:" + height.toFixed(1) + "px;--cat:var(--c-" + (s.en.it.c || "air") +
+        ')" data-tlb="' + s.en.uid + '" data-day="' + o.d.d + '"><span>' + esc(s.en.it.t) + "</span></button>";
+    }).join("");
+    return '<div class="twc">' + b + "</div>";
+  }).join("");
+  return head +
+    '<div class="tw" style="height:' + ((h1 - h0) * PX).toFixed(0) + 'px">' + gut + cols + "</div>" +
+    '<div class="tipcard">👆 Un tap sur un bloc = coché · tape l\'en-tête d\'un jour pour l\'ouvrir en grand.</div>';
+}
+
+function timelineHtml(day) {
+  var slots = tlSlots(day);
+  if (!slots.length) return '<div class="tipcard">Rien ce jour-là pour ce filtre.</div>';
   var h0 = Math.min(480, Math.floor(slots[0].s / 60) * 60);
   var h1 = Math.max(1320, Math.ceil(slots[slots.length - 1].e / 60) * 60);
   var PX = 56 / 60;
@@ -2015,14 +2129,25 @@ function renderPlan() {
         '<span class="e">' + day.e + '</span><span class="n">' + day.d + '</span>' +
         '<span class="d">' + day.dow + "</span></button>";
     }).join("");
-    body = '<div class="daypick" id="daypick">' + picks + "</div>";
     if (planView === "time") {
-      var td = DAYS[curDay - 1];
-      body += '<div class="mini-day" style="--pc: var(--g' + td.p + 'a)"><span class="me">' + td.e +
-        '</span><span class="n">J' + td.d + '</span><span class="d">' + td.dow + " " + td.lab + " · " + esc(td.title) + "</span></div>" +
-        timelineHtml(td);
+      if (tlWeek == null) tlWeek = curDay <= 7 ? 0 : 1;
+      body = '<div class="seg">' +
+        '<button type="button" data-tlmode="day" class="' + (tlMode === "day" ? "on" : "") + '">Jour</button>' +
+        '<button type="button" data-tlmode="week" class="' + (tlMode === "week" ? "on" : "") + '">Semaine</button></div>';
+      if (tlMode === "week") {
+        body += '<div class="seg">' +
+          '<button type="button" data-week="0" class="' + (tlWeek === 0 ? "on" : "") + '">Sem. 1 · Kaplan</button>' +
+          '<button type="button" data-week="1" class="' + (tlWeek === 1 ? "on" : "") + '">Sem. 2 · Ole Miss + Chicago</button></div>' +
+          weekHtml(tlWeek);
+      } else {
+        var td = DAYS[curDay - 1];
+        body += '<div class="daypick" id="daypick">' + picks + "</div>" +
+          '<div class="mini-day" style="--pc: var(--g' + td.p + 'a)"><span class="me">' + td.e +
+          '</span><span class="n">J' + td.d + '</span><span class="d">' + td.dow + " " + td.lab + " · " + esc(td.title) + "</span></div>" +
+          timelineHtml(td);
+      }
     } else {
-      body += dayCardHtml(DAYS[curDay - 1], null, true);
+      body = '<div class="daypick" id="daypick">' + picks + "</div>" + dayCardHtml(DAYS[curDay - 1], null, true);
     }
   } else {
     DAYS.forEach(function (day) {
@@ -2061,6 +2186,19 @@ function renderPlan() {
   bindChecks(scr);
   bindNotes(scr);
   bindEditing(scr);
+  scr.querySelectorAll("[data-tlmode]").forEach(function (b) {
+    b.addEventListener("click", function () { tlMode = b.dataset.tlmode; renderPlan(); });
+  });
+  scr.querySelectorAll("[data-week]").forEach(function (b) {
+    b.addEventListener("click", function () { tlWeek = +b.dataset.week; renderPlan(); });
+  });
+  scr.querySelectorAll("[data-goday]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      curDay = +b.dataset.goday;
+      tlMode = "day";
+      renderPlan();
+    });
+  });
   scr.querySelectorAll("[data-tlb]").forEach(function (b) {
     b.addEventListener("click", function () {
       var uid = b.dataset.tlb;
@@ -2973,6 +3111,11 @@ document.getElementById("imgClose").addEventListener("click", function () {
     var dx = e.changedTouches[0].clientX - sx;
     var dy = e.changedTouches[0].clientY - sy;
     if (Math.abs(dx) > 70 && Math.abs(dy) < 50) {
+      if (planView === "time" && tlMode === "week") {
+        var nw = dx < 0 ? 1 : 0;
+        if (nw !== tlWeek) { tlWeek = nw; renderPlan(); }
+        return;
+      }
       var next = Math.min(DAYS.length, Math.max(1, curDay + (dx < 0 ? 1 : -1)));
       if (next !== curDay) { curDay = next; renderPlan(); }
     }
