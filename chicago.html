@@ -53,6 +53,7 @@
   --warn: #b45309;
 
   --gold: #b8862f;
+  --on-cat: #ffffff;
 
   --f-round: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Segoe UI", system-ui, -apple-system, sans-serif;
   --f-disp: "Avenir Next Condensed", "AvenirNextCondensed-Bold", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
@@ -96,6 +97,7 @@
     --b-4: #c98500;
 
     --gold: #e3c06b;
+    --on-cat: #0d1220;
 
     --ok:   #4ade80;
     --warn: #fbbf24;
@@ -132,6 +134,7 @@
   --b-4: #c98500;
 
   --gold: #e3c06b;
+  --on-cat: #0d1220;
 
   --ok:   #4ade80;
   --warn: #fbbf24;
@@ -455,6 +458,63 @@ h2.screen-title::after {
 .mini-day .n { font-weight: 900; font-size: 15px; white-space: nowrap; }
 .mini-day .d { font-size: 12px; color: var(--ink-faint); font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mini-day::after { content: ""; flex: 1; height: 2.5px; border-radius: 2px; background: var(--pc, var(--line)); opacity: .45; min-width: 14px; }
+
+/* ---------- vue horaire (type Google Calendar) ---------- */
+.tl {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.tlh {
+  height: 56px;
+  border-top: 1px solid var(--line);
+  position: relative;
+}
+.tlh:first-child { border-top: 0; }
+.tlh span {
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  font-family: var(--f-data);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  background: var(--panel);
+  padding: 0 4px;
+}
+.tlb {
+  position: absolute;
+  left: 52px;
+  right: 8px;
+  background: var(--cat, var(--ink-faint));
+  color: var(--on-cat);
+  border-radius: 10px;
+  padding: 5px 9px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 2px 8px -3px rgba(9, 11, 30, .4);
+  border: 0;
+  text-align: left;
+  font-family: var(--f-round);
+  line-height: 1.25;
+}
+.tlb .tltime {
+  display: block;
+  font-family: var(--f-data);
+  font-size: 10px;
+  font-weight: 700;
+  opacity: .85;
+}
+.tlb b { font-size: 12.5px; font-weight: 800; display: block; }
+.tlb.sm .tltime { display: none; }
+.tlb.sm b { font-size: 11.5px; }
+.tlb.done { opacity: .45; }
+.tlb.done b { text-decoration: line-through; }
+.tlb:active { transform: scale(.985); }
 
 /* ---------- sélecteur de jours ---------- */
 .daypick {
@@ -1872,12 +1932,72 @@ var CATS = [
   ["trajet", "Trajets",      "--c-trajet"]
 ];
 
+var TL_LABELS = [
+  ["fin d'aprem", 990], ["après-midi", 840], ["aprem", 840], ["matin", 540],
+  ["midi", 720], ["sunset", 1110], ["soir", 1140], ["minuit", 1380],
+  ["journée", 570], ["libre", 600]
+];
+
+function parseMin(h) {
+  if (!h) return null;
+  var m = /(\d{1,2})h(\d{0,2})/.exec(h);
+  if (m) return (+m[1]) * 60 + (+(m[2] || 0));
+  var k = h.toLowerCase();
+  for (var i = 0; i < TL_LABELS.length; i++) {
+    if (k.indexOf(TL_LABELS[i][0]) !== -1) return TL_LABELS[i][1];
+  }
+  return null;
+}
+
+function fmtMin(mn) {
+  var hh = Math.floor(mn / 60) % 24, mm = mn % 60;
+  return hh + "h" + (mm ? String(mm).padStart(2, "0") : "");
+}
+
+function timelineHtml(day) {
+  var ens = dayItems(day).filter(function (en) { return itemMatches(en.it); });
+  if (!ens.length) return '<div class="tipcard">Rien ce jour-là pour ce filtre.</div>';
+  var t = null, slots = [];
+  ens.forEach(function (en) {
+    var s = parseMin(en.it.h);
+    if (s == null) s = (t == null ? 540 : t + 30);
+    if (t != null && s < t + 15) s = t + 15;
+    slots.push({ en: en, s: s });
+    t = s;
+  });
+  slots.forEach(function (o, i) {
+    var c = o.en.it.c;
+    var dur = c === "cours" ? 210 : c === "soir" ? 150 : c === "trajet" ? 75 : 105;
+    if (i + 1 < slots.length) dur = Math.max(40, Math.min(dur, slots[i + 1].s - o.s - 5));
+    o.e = o.s + dur;
+  });
+  var h0 = Math.min(480, Math.floor(slots[0].s / 60) * 60);
+  var h1 = Math.max(1320, Math.ceil(slots[slots.length - 1].e / 60) * 60);
+  var PX = 56 / 60;
+  var html = '<div class="tl" style="height:' + ((h1 - h0) * PX) + 'px">';
+  for (var hh = h0; hh < h1; hh += 60) {
+    html += '<div class="tlh"' + (hh === h0 ? "" : "") + ">" +
+      (hh === h0 ? "" : '<span>' + (hh / 60) + "h</span>") + "</div>";
+  }
+  slots.forEach(function (o) {
+    var top = (o.s - h0) * PX;
+    var height = Math.max(30, (o.e - o.s) * PX - 3);
+    html += '<button type="button" class="tlb' + (height < 46 ? " sm" : "") + (done[o.en.uid] ? " done" : "") +
+      '" style="top:' + top.toFixed(1) + "px; height:" + height.toFixed(1) + "px; --cat: var(--c-" + (o.en.it.c || "air") + ')" data-tlb="' + o.en.uid + '" data-day="' + day.d + '">' +
+      '<span class="tltime">' + fmtMin(o.s) + " – " + fmtMin(o.e) + "</span><b>" + esc(o.en.it.t) + "</b></button>";
+  });
+  html += "</div>" +
+    '<div class="tipcard">👆 Touche un bloc pour le cocher · les heures « Matin / Aprem / Soir » sont placées automatiquement.</div>';
+  return html;
+}
+
 function renderPlan() {
   var scr = document.getElementById("scr-plan");
 
   var seg = '<div class="seg" role="tablist">' +
     '<button type="button" data-view="day" class="' + (planView === "day" ? "on" : "") + '">Par jour</button>' +
-    '<button type="button" data-view="all" class="' + (planView === "all" ? "on" : "") + '">Tout le séjour</button></div>';
+    '<button type="button" data-view="time" class="' + (planView === "time" ? "on" : "") + '">🕐 Horaire</button>' +
+    '<button type="button" data-view="all" class="' + (planView === "all" ? "on" : "") + '">Tout</button></div>';
 
   var chips = '<div class="filters">' +
     '<button class="chip reset" type="button" data-cat="all" aria-pressed="' + (activeCats.length === 0 ? "true" : "false") + '">Tout</button>' +
@@ -1887,7 +2007,7 @@ function renderPlan() {
     }).join("") + "</div>";
 
   var body = "";
-  if (planView === "day") {
+  if (planView === "day" || planView === "time") {
     var picks = DAYS.map(function (day) {
       var all = dayItems(day).length > 0 && dayDoneCount(day) === dayItems(day).length;
       return '<button class="dp' + (day.d === curDay ? " on" : "") + (all ? " alldone" : "") +
@@ -1895,7 +2015,15 @@ function renderPlan() {
         '<span class="e">' + day.e + '</span><span class="n">' + day.d + '</span>' +
         '<span class="d">' + day.dow + "</span></button>";
     }).join("");
-    body = '<div class="daypick" id="daypick">' + picks + "</div>" + dayCardHtml(DAYS[curDay - 1], null, true);
+    body = '<div class="daypick" id="daypick">' + picks + "</div>";
+    if (planView === "time") {
+      var td = DAYS[curDay - 1];
+      body += '<div class="mini-day" style="--pc: var(--g' + td.p + 'a)"><span class="me">' + td.e +
+        '</span><span class="n">J' + td.d + '</span><span class="d">' + td.dow + " " + td.lab + " · " + esc(td.title) + "</span></div>" +
+        timelineHtml(td);
+    } else {
+      body += dayCardHtml(DAYS[curDay - 1], null, true);
+    }
   } else {
     DAYS.forEach(function (day) {
       var ens = dayItems(day).filter(function (en) { return itemMatches(en.it); });
@@ -1933,6 +2061,17 @@ function renderPlan() {
   bindChecks(scr);
   bindNotes(scr);
   bindEditing(scr);
+  scr.querySelectorAll("[data-tlb]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var uid = b.dataset.tlb;
+      if (done[uid]) delete done[uid]; else done[uid] = 1;
+      saveDB();
+      refreshRing();
+      var day = DAYS[+b.dataset.day - 1];
+      if (done[uid] && dayDoneCount(day) === dayItems(day).length) burst([day.e, "🎉", "⭐"]);
+      renderPlan();
+    });
+  });
 }
 
 /* ---------- écran Aujourd'hui ---------- */
@@ -2828,7 +2967,7 @@ document.getElementById("imgClose").addEventListener("click", function () {
     sx = e.touches[0].clientX; sy = e.touches[0].clientY;
   }, { passive: true });
   scr.addEventListener("touchend", function (e) {
-    if (planView !== "day" || editItem) return;
+    if (planView === "all" || editItem) return;
     var t = e.target;
     if (t.closest && (t.closest(".daypick") || t.closest("textarea") || t.closest("input") || t.closest(".ef") || t.closest(".filters"))) return;
     var dx = e.changedTouches[0].clientX - sx;
