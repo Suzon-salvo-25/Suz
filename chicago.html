@@ -869,18 +869,28 @@ h2.screen-title::after {
 .shday.cur { opacity: .35; }
 .shday:not(.cur):active { transform: scale(.92); }
 
-/* ---------- résas : horodatage ---------- */
+/* ---------- résas : coché = validé, jamais barré ni grisé ---------- */
+#scr-resa .item.done { opacity: 1; }
+#scr-resa .item.done .t { text-decoration: none; }
+#scr-resa .item.done {
+  border: 1.5px solid color-mix(in srgb, var(--ok) 45%, var(--line));
+  background: color-mix(in srgb, var(--ok) 7%, var(--panel));
+  border-radius: var(--r-sm);
+}
+#scr-resa .item.done .t::after { content: " ✔"; color: var(--ok); }
+
+/* horodatage de la résa */
 .rsat {
   display: inline-block;
-  margin-top: 6px;
-  border: 0;
-  background: color-mix(in srgb, var(--gold) 14%, var(--panel));
+  margin-top: 7px;
+  border: 1.5px dashed color-mix(in srgb, var(--gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold) 12%, var(--panel));
   color: var(--gold);
   font-family: var(--f-data);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   border-radius: 999px;
-  padding: 3px 10px;
+  padding: 4px 12px;
   cursor: pointer;
   text-align: left;
 }
@@ -3403,7 +3413,7 @@ function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb, opts) {
         } else if (at) {
           stampHtml = '<button class="rsat" type="button" data-rstamp="' + uid + '">📌 Réservé le ' + esc(at) + ' <i>✎</i></button>';
         } else {
-          stampHtml = '<button class="rsat" type="button" data-rstamp="' + uid + '">📌 Ajouter la date de résa</button>';
+          stampHtml = '<button class="rsat" type="button" data-rstamp="' + uid + '">📌 Noter quand tu as réservé ✎</button>';
         }
       }
       html += '<label class="item' + (state[uid] ? " done" : "") + '" style="--cat: var(--c-' + g.c + '); box-shadow:none; margin-bottom:8px;">' +
@@ -3589,7 +3599,7 @@ function renderPack() {
 function renderResa() {
   renderGuide("scr-resa", RESA, "resa",
     '<h2 class="screen-title"><span>🎟️</span>Résas</h2>',
-    "Coche quand c'est réservé — l'heure de ta résa s'enregistre automatiquement (touche-la pour la corriger). Le lien « Réserver ↗ » ouvre le bon site.", "réservé",
+    "Coche quand c'est réservé : l'item passe en vert ✔ (jamais barré) et l'heure de ta résa s'inscrit toute seule dans la pastille dorée 📌 — touche-la pour mettre l'horaire que tu veux. Le lien « Réserver ↗ » ouvre le bon site.", "réservé",
     { stamp: true });
 }
 
