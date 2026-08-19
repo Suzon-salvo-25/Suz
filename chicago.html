@@ -966,6 +966,14 @@ h2.screen-title::after {
   display: grid;
   place-items: center;
 }
+.gdel.arm {
+  background: #dc2626;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  transform: scale(1.25);
+  box-shadow: 0 3px 10px -2px rgba(220, 38, 38, .6);
+}
 .ef input, .ef textarea, .ef select {
   width: 100%;
   font-family: var(--f-round);
@@ -2197,6 +2205,13 @@ if (!DB.paid) {
   DB.paid = {};
   BUDGET.fixed.forEach(function (r) { if (r.def) DB.paid[r.id] = 1; });
 }
+/* réparation ponctuelle : restaure l'item de Résas supprimé par erreur (19/08) */
+if (!DB.resa._fix1) {
+  Object.keys(DB.ghide).forEach(function (k) {
+    if (k.indexOf("resa:") === 0) delete DB.ghide[k];
+  });
+  DB.resa._fix1 = 1;
+}
 /* premier lancement : pré-coche ce qui est déjà payé/réservé */
 if (!DB.resa._seed) {
   RESA.forEach(function (g, gi) {
@@ -3375,6 +3390,7 @@ function guideItems(dbKey, g, gi) {
 }
 
 var editingStamp = null;
+var gdelArm = null; /* croix « armée » en attente de confirmation */
 
 function stampNow() {
   var d = new Date();
@@ -3469,7 +3485,20 @@ function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb, opts) {
   scr.querySelectorAll("[data-gdel]").forEach(function (b) {
     b.addEventListener("click", function (e) {
       e.preventDefault();
-      DB.ghide[dbKey + ":" + b.dataset.gdel] = 1;
+      var key = dbKey + ":" + b.dataset.gdel;
+      /* confirmation en deux taps : le 1er arme la croix, le 2e supprime */
+      if (gdelArm !== key) {
+        gdelArm = key;
+        b.classList.add("arm");
+        b.textContent = "?";
+        toast("Supprimer ? Touche encore la croix rouge pour confirmer");
+        setTimeout(function () {
+          if (gdelArm === key) { gdelArm = null; rerender(); }
+        }, 3500);
+        return;
+      }
+      gdelArm = null;
+      DB.ghide[key] = 1;
       saveDB();
       rerender();
       toast("Retiré — « Réafficher » tout en bas pour annuler");
