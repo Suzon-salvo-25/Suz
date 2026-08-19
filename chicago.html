@@ -848,6 +848,77 @@ h2.screen-title::after {
 .sh-links .lnk.lnkmap { margin-left: 0; }
 .sh-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .sh-btns .btn { margin: 0; flex: 1; white-space: nowrap; }
+.sh-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin: 4px 0 12px;
+}
+.shday {
+  border: 1.5px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 5px 0 4px;
+  cursor: pointer;
+  font-family: var(--f-round);
+  text-align: center;
+}
+.shday span { display: block; font-size: 8.5px; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; }
+.shday b { font-size: 14px; font-weight: 900; }
+.shday.cur { opacity: .35; }
+.shday:not(.cur):active { transform: scale(.92); }
+
+/* ---------- résas : horodatage ---------- */
+.rsat {
+  display: inline-block;
+  margin-top: 6px;
+  border: 0;
+  background: color-mix(in srgb, var(--gold) 14%, var(--panel));
+  color: var(--gold);
+  font-family: var(--f-data);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.rsat i { font-style: normal; opacity: .7; }
+.rs-in {
+  display: block;
+  margin-top: 6px;
+  width: 100%;
+  font-family: var(--f-data);
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1.5px solid color-mix(in srgb, var(--gold) 55%, var(--line));
+  border-radius: 10px;
+  padding: 7px 10px;
+}
+
+/* ---------- marche : lignes de km ---------- */
+.wrow { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.wrow .wl { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 800; }
+.wrow .wl small { display: block; font-weight: 600; color: var(--ink-faint); font-size: 10.5px; }
+.wrow .wbar { flex: 0 0 64px; height: 8px; border-radius: 4px; background: var(--panel-2); overflow: hidden; }
+.wrow .wbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--c-air), var(--c-archi)); border-radius: 4px; }
+.wrow input {
+  width: 84px;
+  text-align: right;
+  font-family: var(--f-data);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.wrow input:focus { outline: 2px solid var(--c-air); }
+.wtotal { font-family: var(--f-disp); font-size: 44px; font-weight: 800; line-height: 1; }
+.wtotal small { font-size: 17px; color: var(--ink-faint); }
 
 /* ---------- édition d'activités ---------- */
 .item { position: relative; }
@@ -1457,6 +1528,8 @@ details.acc .acc-body { padding: 0 12px 12px; }
     <section class="screen" id="scr-shop"></section>
     <section class="screen" id="scr-story"></section>
     <section class="screen" id="scr-pass"></section>
+    <section class="screen" id="scr-resa"></section>
+    <section class="screen" id="scr-walk"></section>
     <section class="screen" id="scr-budget"></section>
     <section class="screen" id="scr-infos"></section>
   </main>
@@ -1464,11 +1537,13 @@ details.acc .acc-body { padding: 0 12px 12px; }
   <nav class="tabbar" aria-label="Navigation">
     <button class="tab on" data-scr="home" type="button"><span class="ico">🏠</span>Auj.</button>
     <button class="tab" data-scr="plan" type="button"><span class="ico">📅</span>Jours</button>
+    <button class="tab" data-scr="resa" type="button"><span class="ico">🎟️</span>Résas</button>
     <button class="tab" data-scr="pack" type="button"><span class="ico">🧳</span>Valise</button>
     <button class="tab" data-scr="miam" type="button"><span class="ico">🍕</span>Miam</button>
     <button class="tab" data-scr="shop" type="button"><span class="ico">🛍️</span>Shops</button>
     <button class="tab" data-scr="story" type="button"><span class="ico">🕰️</span>Histoire</button>
     <button class="tab" data-scr="pass" type="button"><span class="ico">🎫</span>Pass</button>
+    <button class="tab" data-scr="walk" type="button"><span class="ico">👟</span>Km</button>
     <button class="tab" data-scr="budget" type="button"><span class="ico">💰</span>Budget</button>
     <button class="tab" data-scr="infos" type="button"><span class="ico">ℹ️</span>Infos</button>
   </nav>
@@ -1808,6 +1883,38 @@ var SHOP = [
   ]}
 ];
 
+/* items : [titre, note, prix("" ici), lien, préCoché] */
+var RESA = [
+  { e:"✈️", t:"Transports", c:"trajet", items:[
+    ["Vol AR Marseille ↔ Chicago", "Payé et réservé — 735 €.", "", "", 1],
+    ["Vols Chicago ↔ Memphis", "Payés — 314 €. Vérifier les horaires exacts sur le billet.", "", "", 1],
+    ["Navette Groome Memphis → Oxford (sam 5)", "~50 $ — prendre le créneau aligné sur l'atterrissage.", "", "https://groometransportation.com/ole-miss/"],
+    ["Navette Groome Oxford → Memphis (mar 8)", "~50 $ — départ ≥ 3 h 30 avant le décollage.", "", "https://groometransportation.com/ole-miss/"],
+    ["Pass CTA 7 jours × 2 (appli Ventra)", "20 $ chacun — s'achète dans le téléphone, sans borne.", "", "https://www.ventrachicago.com"]
+  ]},
+  { e:"🛏️", t:"Logement", c:"cours", items:[
+    ["Résidence Kaplan (29 août → 5 sept)", "Payée avec les cours — 1 011 €. 829 S Wabash Ave.", "", "", 1],
+    ["Warwick Allerton (8 → 11 sept)", "Réservé ✔ — 701 N Michigan Ave, Magnificent Mile.", "", "", 1]
+  ]},
+  { e:"🎫", t:"Billets & créneaux", c:"musee", items:[
+    ["CityPASS acheté", "124 € payés — 5 attractions, s'active au 360 le 4.", "", "", 1],
+    ["Croisière Architecture — mer 9, 18 h 45", "RÉSERVÉ ✔ — embarcadère 112 E Wacker, y être 18 h 15.", "", "", 1],
+    ["Créneau 360 CHICAGO — ven 4 au sunset", "Inclus pass — réserver l'horaire (~18 h 30) en ligne.", "", "https://360chicago.com"],
+    ["Créneau Skydeck — mar 8 au soir", "Inclus pass — dernière entrée ~21 h 30.", "", "https://theskydeck.com"],
+    ["Créneau Shedd — mer 9 à 9 h", "Inclus pass — créneau horodaté fortement conseillé.", "", "https://www.sheddaquarium.org"],
+    ["Chicago Crime Tour — mar 8, 15 h 30", "~40 € — réserver en ligne.", "", "https://chicagocrimetours.com"],
+    ["Jazz Showcase — jeu 10, set de 20 h", "20–35 $ — réserver le set en ligne.", "", "https://www.jazzshowcase.com"],
+    ["Billet Cubs – Brewers — mer 2", "Comparer SeatGeek et mlb.com.", "", "https://seatgeek.com"],
+    ["U-505 On-Board — jeu 10 AU MATIN", "~16 € — s'achète le matin même, les créneaux partent vite.", "", "https://www.msichicago.org"],
+    ["Balloon Museum — créneau daté", "Réserver la session en ligne.", "", "https://www.balloonmuseum.world"]
+  ]},
+  { e:"📄", t:"Papiers & tech", c:"archi", items:[
+    ["ESTA", "Payé ✔ — 35 €.", "", "", 1],
+    ["eSIM USA installée avant le départ", "Airalo (au volume) ou Holafly (illimité).", "", "https://www.airalo.com"],
+    ["Chicago Greeter (balade gratuite)", "À réserver ~10 jours avant si l'idée te tente.", "", "https://www.chicagogreeter.com"]
+  ]}
+];
+
 var ERAS = [
   ["Les origines", "1780 – 1848"],
   ["La ville monstre", "1865 – 1893"],
@@ -1929,7 +2036,7 @@ var CK_OK = (function () {
 
 var BACKEND = LS_OK ? "local" : (CK_OK ? "cookie" : "mem");
 
-var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, prices: {}, edits: {}, hidden: {}, added: {}, gadd: {}, ghide: {}, spend: [], paid: null, theme: null };
+var DB = { done: {}, prep: {}, pass: {}, pack: {}, food: {}, shop: {}, notes: {}, prices: {}, edits: {}, hidden: {}, added: {}, gadd: {}, ghide: {}, resa: {}, walk: {}, spend: [], paid: null, theme: null };
 
 function parseCand(raw) {
   if (!raw) return null;
@@ -1961,7 +2068,7 @@ function loadDB() {
     if (c && (!best || (+c.ts || 0) >= (+best.ts || 0))) best = c;
   });
   if (!best) return;
-  ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices", "edits", "hidden", "added", "gadd", "ghide"].forEach(function (k) {
+  ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices", "edits", "hidden", "added", "gadd", "ghide", "resa", "walk"].forEach(function (k) {
     if (best[k] && typeof best[k] === "object" && !Array.isArray(best[k])) DB[k] = best[k];
   });
   if (Array.isArray(best.spend)) DB.spend = best.spend;
@@ -2080,6 +2187,16 @@ if (!DB.paid) {
   DB.paid = {};
   BUDGET.fixed.forEach(function (r) { if (r.def) DB.paid[r.id] = 1; });
 }
+/* premier lancement : pré-coche ce qui est déjà payé/réservé */
+if (!DB.resa._seed) {
+  RESA.forEach(function (g, gi) {
+    g.items.forEach(function (it, ii) {
+      var uid = "g" + gi + "-" + ii;
+      if (it[4] && !DB.resa[uid]) DB.resa[uid] = { at: "avant le départ" };
+    });
+  });
+  DB.resa._seed = 1;
+}
 saveDB();
 
 var done = DB.done, prepDone = DB.prep, passUsed = DB.pass, packDone = DB.pack, paidState = DB.paid;
@@ -2153,6 +2270,7 @@ function dayItems(day) {
     arr.push({ it: it, uid: uid });
   });
   (DB.added[day.d] || []).forEach(function (c, i) {
+    if (!c) return; /* emplacement vidé par un déplacement de jour */
     var uid = "a" + day.d + "-" + i;
     if (DB.hidden[uid]) return;
     arr.push({ it: c, uid: uid, custom: true });
@@ -2173,7 +2291,7 @@ function dayItems(day) {
 function hiddenCount(day) {
   var n = 0;
   day.items.forEach(function (_, i) { if (DB.hidden["d" + day.d + "-" + i]) n++; });
-  (DB.added[day.d] || []).forEach(function (_, i) { if (DB.hidden["a" + day.d + "-" + i]) n++; });
+  (DB.added[day.d] || []).forEach(function (c, i) { if (c && DB.hidden["a" + day.d + "-" + i]) n++; });
   return n;
 }
 
@@ -2365,8 +2483,8 @@ function bindNotes(scope) {
 
 /* ---------- écran Jours ---------- */
 var curDay = 1;
-var planView = "day";
-var tlMode = "day";
+var planView = "time"; /* l'onglet Jours s'ouvre sur le planning semaine */
+var tlMode = "week";
 var tlWeek = null;
 var activeCats = [];
 var CATS = [
@@ -2517,6 +2635,7 @@ function timelineHtml(day) {
 
 /* fiche événement — s'ouvre au tap sur un bloc, comme dans Google Agenda */
 var tlSheet = null;
+var tlSheetMove = false;
 
 function sheetHtml() {
   if (!tlSheet) return "";
@@ -2549,15 +2668,50 @@ function sheetHtml() {
     (it.u ? '<a class="lnk" href="' + it.u + '" target="_blank" rel="noopener">' + linkLabel(it) + " ↗</a>" : "") +
     (it.m ? '<a class="lnk lnkmap" href="' + mapsUrl(day, it) + '" target="_blank" rel="noopener">🗺️ Itinéraire ↗</a>' : "") +
     "</div>" +
+    (tlSheetMove
+      ? '<div class="sh-days">' + DAYS.map(function (dd) {
+          return '<button type="button" class="shday' + (dd.d === day.d ? " cur" : "") + '" data-shday="' + dd.d + '"' +
+            (dd.d === day.d ? " disabled" : "") + "><span>" + dd.dow + "</span><b>" + dd.d + "</b></button>";
+        }).join("") + "</div>"
+      : "") +
     '<div class="sh-btns">' +
     '<button class="btn" type="button" data-shdone="1">' + (done[en.uid] ? "↺ Pas fait finalement" : "✓ Marquer fait") + "</button>" +
     '<button class="btn" type="button" data-shedit="1">✏️ Modifier</button>' +
+    '<button class="btn" type="button" data-shmove="1">' + (tlSheetMove ? "✕ Garder ce jour" : "📅 Autre jour") + "</button>" +
     '<button class="btn" type="button" data-shx="1">Fermer</button>' +
     "</div></div></div>";
 }
 
 /* ---------- déplacement d'un bloc par appui long (façon Google Agenda) ---------- */
 var justDragged = false;
+
+/* déplacer une activité vers un autre jour (copie fidèle, source masquée) */
+function moveToDay(uid, fromD, toD, newH, durMin) {
+  if (fromD === toD) return false;
+  var day = DAYS[fromD - 1], target = DAYS[toD - 1];
+  if (!day || !target) return false;
+  var en = null;
+  dayItems(day).forEach(function (x) { if (x.uid === uid) en = x; });
+  if (!en) return false;
+  var copy = {};
+  Object.keys(en.it).forEach(function (k) { if (k.charAt(0) !== "_") copy[k] = en.it[k]; });
+  if (newH != null) copy.h = newH;
+  if (durMin && !copy.dur) copy.dur = durMin;
+  (DB.added[toD] = DB.added[toD] || []).push(copy);
+  var newUid = "a" + toD + "-" + (DB.added[toD].length - 1);
+  if (uid.charAt(0) === "a") {
+    var p = uid.slice(1).split("-");
+    if (DB.added[+p[0]]) DB.added[+p[0]][+p[1]] = null;
+    delete DB.hidden[uid];
+  } else {
+    DB.hidden[uid] = 1;
+    delete DB.edits[uid];
+  }
+  if (done[uid]) { done[newUid] = 1; delete done[uid]; }
+  saveDB();
+  toast("Déplacé au J" + toD + " · " + target.dow + " " + target.lab + " ✓");
+  return true;
+}
 
 function moveActivity(uid, slot, newS) {
   var h = fmtMin(newS);
@@ -2581,30 +2735,50 @@ function moveActivity(uid, slot, newS) {
 
 function bindBlockDrag(b) {
   var uid = b.dataset.tlb, dnum = +b.dataset.day;
-  var PXd = (b.classList.contains("twb") ? 44 : 56) / 60;
-  var timer = null, dragging = false, y0 = 0, slot = null, newS = null;
+  var isWeek = b.classList.contains("twb");
+  var PXd = (isWeek ? 44 : 56) / 60;
+  var timer = null, dragging = false, y0 = 0, x0 = 0, slot = null, newS = null;
+  var colW = 0, colShift = 0;
 
+  function targetDay() {
+    if (!colShift) return dnum;
+    var lo = tlWeek * 7 + 1, hi = Math.min(DAYS.length, tlWeek * 7 + 7);
+    return Math.max(lo, Math.min(hi, dnum + colShift));
+  }
+  function badgeTxt() {
+    var d = slot.e - slot.s;
+    var td = targetDay();
+    return (td !== dnum ? "📅 " + DAYS[td - 1].dow + " " + DAYS[td - 1].lab + " · " : "↕ ") +
+      fmtMin(newS) + " – " + fmtMin(newS + d);
+  }
   function start(e) {
     var s0 = null;
     tlSlots(DAYS[dnum - 1]).forEach(function (s) { if (s.en.uid === uid) s0 = s; });
     if (!s0) return;
     slot = s0;
     newS = slot.s;
+    colShift = 0;
+    colW = 0;
+    if (isWeek) {
+      try { colW = b.parentElement.getBoundingClientRect().width + 3; } catch (err) {}
+    }
     dragging = true;
     try { b.setPointerCapture(e.pointerId); } catch (err) {}
     b.classList.add("drag");
     var badge = document.getElementById("dragBadge");
     if (badge) {
-      badge.textContent = "↕ " + fmtMin(slot.s) + " – " + fmtMin(slot.e);
+      badge.textContent = badgeTxt();
       badge.classList.add("show");
     }
   }
-  function update(dy) {
+  function update(dy, dx) {
     var d = slot.e - slot.s;
     newS = Math.max(0, Math.min(1440 - d, Math.round((slot.s + dy / PXd) / 5) * 5));
-    b.style.transform = "translateY(" + ((newS - slot.s) * PXd).toFixed(1) + "px)";
+    colShift = isWeek && colW > 0 ? Math.round(dx / colW) : 0;
+    var tx = (targetDay() - dnum) * colW;
+    b.style.transform = "translate(" + tx.toFixed(1) + "px," + ((newS - slot.s) * PXd).toFixed(1) + "px)";
     var badge = document.getElementById("dragBadge");
-    if (badge) badge.textContent = "↕ " + fmtMin(newS) + " – " + fmtMin(newS + d);
+    if (badge) badge.textContent = badgeTxt();
   }
   function stop(commit) {
     if (timer) { clearTimeout(timer); timer = null; }
@@ -2616,17 +2790,25 @@ function bindBlockDrag(b) {
     if (badge) badge.classList.remove("show");
     justDragged = true;
     setTimeout(function () { justDragged = false; }, 400);
-    if (commit && newS != null && newS !== slot.s) moveActivity(uid, slot, newS);
+    if (!commit || newS == null) return;
+    var td = targetDay();
+    if (td !== dnum) {
+      moveToDay(uid, dnum, td, fmtMin(newS), Math.max(15, Math.round((slot.e - slot.s) / 5) * 5));
+      renderPlan(); renderHome(); refreshRing();
+    } else if (newS !== slot.s) {
+      moveActivity(uid, slot, newS);
+    }
   }
 
   b.addEventListener("pointerdown", function (e) {
     y0 = e.clientY;
+    x0 = e.clientX;
     if (timer) clearTimeout(timer);
     timer = setTimeout(function () { timer = null; start(e); }, 420);
   });
   b.addEventListener("pointermove", function (e) {
-    if (dragging) { update(e.clientY - y0); return; }
-    if (timer && Math.abs(e.clientY - y0) > 10) { clearTimeout(timer); timer = null; }
+    if (dragging) { update(e.clientY - y0, e.clientX - x0); return; }
+    if (timer && (Math.abs(e.clientY - y0) > 10 || Math.abs(e.clientX - x0) > 10)) { clearTimeout(timer); timer = null; }
   });
   b.addEventListener("pointerup", function () { stop(true); });
   b.addEventListener("pointercancel", function () { stop(false); });
@@ -2768,11 +2950,25 @@ function renderPlan() {
   var shw = scr.querySelector("[data-shclose]");
   if (shw) {
     shw.addEventListener("click", function (e) {
-      if (e.target === shw) { tlSheet = null; renderPlan(); }
+      if (e.target === shw) { tlSheet = null; tlSheetMove = false; renderPlan(); }
     });
     shw.querySelector("[data-shx]").addEventListener("click", function () {
       tlSheet = null;
+      tlSheetMove = false;
       renderPlan();
+    });
+    shw.querySelector("[data-shmove]").addEventListener("click", function () {
+      tlSheetMove = !tlSheetMove;
+      renderPlan();
+    });
+    shw.querySelectorAll("[data-shday]").forEach(function (db) {
+      db.addEventListener("click", function () {
+        var s = tlSheet;
+        tlSheet = null;
+        tlSheetMove = false;
+        moveToDay(s.uid, s.d, +db.dataset.shday, null, null);
+        renderPlan(); renderHome(); refreshRing();
+      });
     });
     shw.querySelector("[data-shdone]").addEventListener("click", function () {
       var uid = tlSheet.uid, day = DAYS[tlSheet.d - 1];
@@ -2785,6 +2981,7 @@ function renderPlan() {
     shw.querySelector("[data-shedit]").addEventListener("click", function () {
       var s = tlSheet;
       tlSheet = null;
+      tlSheetMove = false;
       curDay = s.d;
       planView = "day";
       editItem = s.uid;
@@ -3167,7 +3364,17 @@ function guideItems(dbKey, g, gi) {
   return out;
 }
 
-function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
+var editingStamp = null;
+
+function stampNow() {
+  var d = new Date();
+  var mo = ["janv", "févr", "mars", "avril", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+  var mn = d.getMinutes();
+  return d.getDate() + " " + mo[d.getMonth()] + " · " + d.getHours() + "h" + (mn < 10 ? "0" : "") + mn;
+}
+
+function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb, opts) {
+  opts = opts || {};
   var scr = document.getElementById(scrId);
   var state = DB[dbKey];
   var opened = accOpen[scrId] || (accOpen[scrId] = {});
@@ -3187,11 +3394,25 @@ function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
       '<div class="acc-body">';
     ens.forEach(function (en) {
       var it = en.it, uid = en.uid;
+      var stampHtml = "";
+      if (opts.stamp && state[uid]) {
+        var at = state[uid] && state[uid].at;
+        if (editingStamp === dbKey + ":" + uid) {
+          stampHtml = '<input class="rs-in" type="text" data-rsin="' + uid + '" placeholder="ex : 19 août · 14h30" value="' +
+            esc(at || "").replace(/"/g, "&quot;") + '">';
+        } else if (at) {
+          stampHtml = '<button class="rsat" type="button" data-rstamp="' + uid + '">📌 Réservé le ' + esc(at) + ' <i>✎</i></button>';
+        } else {
+          stampHtml = '<button class="rsat" type="button" data-rstamp="' + uid + '">📌 Ajouter la date de résa</button>';
+        }
+      }
       html += '<label class="item' + (state[uid] ? " done" : "") + '" style="--cat: var(--c-' + g.c + '); box-shadow:none; margin-bottom:8px;">' +
         '<input type="checkbox" class="chk" data-guide="' + uid + '"' + (state[uid] ? " checked" : "") +
         ' aria-label="' + esc(it[0]).replace(/"/g, "&quot;") + '">' +
         '<span class="body"><span class="t">' + esc(it[0]) + (en.custom ? ' <span class="modif">ajouté</span>' : "") + "</span>" +
-        (it[1] ? '<div class="n">' + esc(it[1]) + "</div>" : "") + "</span>" +
+        (it[1] ? '<div class="n">' + esc(it[1]) + "</div>" : "") +
+        (it[3] ? '<a class="lnk" href="' + it[3] + '" target="_blank" rel="noopener">Réserver ↗</a>' : "") +
+        stampHtml + "</span>" +
         (it[2] ? '<span class="price">' + esc(it[2]) + "</span>" : "") +
         '<button class="gdel" type="button" data-gdel="' + uid + '" aria-label="Retirer ' + esc(it[0]).replace(/"/g, "&quot;") + '">✕</button>' +
         "</label>";
@@ -3222,7 +3443,8 @@ function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
   });
   scr.querySelectorAll("[data-guide]").forEach(function (box) {
     box.addEventListener("change", function () {
-      if (box.checked) state[box.dataset.guide] = 1; else delete state[box.dataset.guide];
+      if (box.checked) state[box.dataset.guide] = opts.stamp ? { at: stampNow() } : 1;
+      else delete state[box.dataset.guide];
       saveDB();
       if (box.checked) {
         var left = 0;
@@ -3243,6 +3465,33 @@ function renderGuide(scrId, groups, dbKey, titleHtml, tip, verb) {
       toast("Retiré — « Réafficher » tout en bas pour annuler");
     });
   });
+  scr.querySelectorAll("[data-rstamp]").forEach(function (b) {
+    b.addEventListener("click", function (e) {
+      e.preventDefault();
+      editingStamp = dbKey + ":" + b.dataset.rstamp;
+      rerender();
+      var inp = scr.querySelector(".rs-in");
+      if (inp) { inp.focus(); if (inp.select) inp.select(); }
+    });
+  });
+  var rsin = scr.querySelector("[data-rsin]");
+  if (rsin) {
+    var commitStamp = function () {
+      var uid = rsin.dataset.rsin;
+      if (state[uid]) {
+        var v = rsin.value.trim();
+        if (typeof state[uid] !== "object") state[uid] = {};
+        state[uid].at = v;
+        saveDB();
+      }
+      editingStamp = null;
+      rerender();
+    };
+    rsin.addEventListener("change", commitStamp);
+    rsin.addEventListener("blur", commitStamp);
+    rsin.addEventListener("keydown", function (e) { if (e.key === "Enter") rsin.blur(); });
+    rsin.addEventListener("click", function (e) { e.preventDefault(); });
+  }
   scr.querySelectorAll("[data-gadd]").forEach(function (b) {
     b.addEventListener("click", function () {
       editingGuide = scrId + ":" + b.dataset.gadd;
@@ -3334,6 +3583,61 @@ function renderPack() {
   renderGuide("scr-pack", PACK, "pack",
     '<h2 class="screen-title"><span>🧳</span>Valise</h2>',
     "📶 L'eSIM se règle à la maison, pas à O'Hare.", "prêt");
+}
+
+/* ---------- écran Résas ---------- */
+function renderResa() {
+  renderGuide("scr-resa", RESA, "resa",
+    '<h2 class="screen-title"><span>🎟️</span>Résas</h2>',
+    "Coche quand c'est réservé — l'heure de ta résa s'enregistre automatiquement (touche-la pour la corriger). Le lien « Réserver ↗ » ouvre le bon site.", "réservé",
+    { stamp: true });
+}
+
+/* ---------- écran Marche (km à pied) ---------- */
+function renderWalk() {
+  var scr = document.getElementById("scr-walk");
+  var total = 0, best = null, filled = 0, maxKm = 0;
+  DAYS.forEach(function (day) {
+    var v = +DB.walk[day.date] || 0;
+    if (v > 0) { total += v; filled++; }
+    if (v > maxKm) { maxKm = v; best = day; }
+  });
+  var frKm = function (v) { return (Math.round(v * 10) / 10).toString().replace(".", ","); };
+  var steps = Math.round(total * 1350);
+  var html = '<h2 class="screen-title"><span>👟</span>Kilomètres à pied</h2>' +
+    '<div class="card" style="text-align:center">' +
+    '<div class="wtotal">' + frKm(total) + " <small>km</small></div>" +
+    '<div class="n" style="color:var(--ink-faint); font-size:13px; margin-top:4px">' +
+    (filled
+      ? "≈ " + steps.toLocaleString("fr-FR") + " pas · moyenne " + frKm(total / filled) + " km/jour marché" +
+        (best ? " · record : J" + best.d + " (" + frKm(maxKm) + " km)" : "")
+      : "Note tes km chaque soir — le compteur fait le reste.") + "</div>" +
+    (total > 0
+      ? '<div class="n" style="font-size:12.5px; margin-top:8px">🏙️ ' + Math.round(total / 0.442) + " Willis Tower couchées · " +
+        frKm(total / 42.195) + " marathon" + (total / 42.195 >= 2 ? "s" : "") + "</div>"
+      : "") +
+    "</div><div class='card'>";
+  DAYS.forEach(function (day) {
+    var v = DB.walk[day.date];
+    var pct = maxKm > 0 && v ? Math.max(6, Math.round((+v / maxKm) * 100)) : 0;
+    html += '<div class="wrow">' +
+      '<span class="wl">' + day.e + " J" + day.d + "<small>" + day.dow + " " + esc(day.lab) + "</small></span>" +
+      '<span class="wbar"><i style="width:' + pct + '%"></i></span>' +
+      '<input type="number" inputmode="decimal" min="0" max="99" step="0.1" placeholder="km" data-wd="' + day.date + '" value="' + (v != null ? v : "") + '">' +
+      "</div>";
+  });
+  html += "</div>" +
+    '<div class="tipcard">💡 Ton téléphone compte déjà tes pas (app Santé sur iPhone) : recopie le chiffre du soir ici pour garder la trace du voyage.</div>';
+  scr.innerHTML = html;
+  scr.querySelectorAll("[data-wd]").forEach(function (inp) {
+    inp.addEventListener("change", function () {
+      var v = parseFloat(String(inp.value).replace(",", "."));
+      if (!isNaN(v) && v > 0) DB.walk[inp.dataset.wd] = Math.round(v * 10) / 10;
+      else delete DB.walk[inp.dataset.wd];
+      saveDB();
+      renderWalk();
+    });
+  });
 }
 
 /* ---------- écran Infos ---------- */
@@ -3483,6 +3787,11 @@ function resetAll() {
   DB.food = {}; DB.shop = {}; DB.notes = {}; DB.prices = {}; DB.spend = [];
   DB.edits = {}; DB.hidden = {}; DB.added = {};
   DB.gadd = {}; DB.ghide = {};
+  DB.resa = {}; DB.walk = {};
+  RESA.forEach(function (g, gi) {
+    g.items.forEach(function (it, ii) { if (it[4]) DB.resa["g" + gi + "-" + ii] = { at: "avant le départ" }; });
+  });
+  DB.resa._seed = 1;
   DB.paid = {};
   BUDGET.fixed.forEach(function (r) { if (r.def) DB.paid[r.id] = 1; });
   relink();
@@ -3557,7 +3866,7 @@ function bindChecks(scope) {
 }
 
 /* ---------- onglets ---------- */
-var renderers = { home: renderHome, plan: renderPlan, pack: renderPack, miam: renderFood, shop: renderShop, story: renderStory, pass: renderPass, budget: renderBudget, infos: renderInfos };
+var renderers = { home: renderHome, plan: renderPlan, pack: renderPack, miam: renderFood, shop: renderShop, story: renderStory, pass: renderPass, resa: renderResa, walk: renderWalk, budget: renderBudget, infos: renderInfos };
 
 function switchTab(id) {
   document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.dataset.scr === id); });
@@ -3600,6 +3909,12 @@ function doSearch(q) {
     guideItems("pack", g, gi).forEach(function (en) {
       if ((en.it[0] + " " + (en.it[1] || "")).toLowerCase().indexOf(q) !== -1)
         searchHits.push({ e: g.e, l: en.it[0], w: "🧳 Valise · " + g.t, go: ["pack", gi] });
+    });
+  });
+  RESA.forEach(function (g, gi) {
+    guideItems("resa", g, gi).forEach(function (en) {
+      if ((en.it[0] + " " + (en.it[1] || "")).toLowerCase().indexOf(q) !== -1)
+        searchHits.push({ e: g.e, l: en.it[0], w: "🎟️ Résas · " + g.t, go: ["resa", gi] });
     });
   });
   STORY.forEach(function (st, i) {
@@ -3793,6 +4108,8 @@ renderFood();
 renderShop();
 renderStory();
 renderPass();
+renderResa();
+renderWalk();
 renderBudget();
 renderInfos();
 refreshRing();
