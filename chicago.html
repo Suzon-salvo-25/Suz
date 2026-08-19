@@ -767,6 +767,37 @@ h2.screen-title::after {
 }
 .twd.today { box-shadow: inset 0 0 0 2px #ea4335; }
 .tdy { width: 100%; }
+.tlb, .twb {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.tlb.drag, .twb.drag {
+  z-index: 30;
+  opacity: .93;
+  transform-origin: center;
+  box-shadow: 0 14px 30px -6px rgba(9, 11, 30, .55);
+  outline: 2px solid var(--panel);
+  transition: none;
+}
+#dragBadge {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  z-index: 90;
+  background: var(--ink);
+  color: var(--panel);
+  font-family: var(--f-data);
+  font-weight: 800;
+  font-size: 15px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  transition: transform .18s;
+  pointer-events: none;
+}
+#dragBadge.show { transform: translateX(-50%) translateY(0); }
 .shwrap {
   position: fixed;
   inset: 0;
@@ -1378,6 +1409,7 @@ details.acc .acc-body { padding: 0 12px 12px; }
 
 <div class="confetti-box" id="confettiBox" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="dragBadge" aria-hidden="true"></div>
 
 <div class="ovl" id="searchOvl" hidden>
   <div class="ovl-box">
@@ -1397,6 +1429,7 @@ details.acc .acc-body { padding: 0 12px 12px; }
   </div>
 </div>
 
+<script type="application/json" id="dbsave">null</script>
 <script>
 (function () {
 "use strict";
@@ -1813,6 +1846,11 @@ function loadDB() {
   var cands = [];
   try { cands.push(parseCand(localStorage.getItem("chi26:db"))); } catch (e) {}
   cands.push(parseCand(readCookieRaw()));
+  /* sauvegarde embarquée DANS la page elle-même (survit à tout) */
+  try {
+    var emb = document.getElementById("dbsave");
+    if (emb) cands.push(parseCand(emb.textContent.trim()));
+  } catch (e) {}
   try {
     var legacy = {};
     ["done", "prep", "pass", "pack", "food", "shop", "notes", "prices"].forEach(function (k) {
@@ -1850,7 +1888,95 @@ function saveDB() {
     saveWarned = true;
     try { toast("⚠️ Sauvegarde bloquée ici — exporte ta sauvegarde (onglet Infos)"); } catch (e) {}
   }
+  scheduleArtSave();
 }
+
+/* ============================================================
+   SAUVEGARDE EN LIGNE — la page réécrit sa propre version publiée
+   (capacité « artifact ») : l'état est gravé dans la page, il survit
+   à la fermeture, aux mises à jour de l'appli et au changement
+   d'appareil. localStorage + cookies restent la copie instantanée.
+   ============================================================ */
+var artCap = null, artSrc = null, artDirty = false, artTimer = null, artBusy = false;
+var ART_OK = null; /* null = pas encore su, true = ok, false = indispo ici */
+
+(function () {
+  try {
+    if (window.claude && typeof window.claude.use === "function") {
+      window.claude.use("artifact").then(function (ns) { artCap = ns || null; if (!ns) ART_OK = false; },
+        function () { ART_OK = false; });
+    } else { ART_OK = false; }
+  } catch (e) { ART_OK = false; }
+})();
+
+function artSource() {
+  if (artSrc) return Promise.resolve(artSrc);
+  return fetch(location.href).then(function (r) {
+    if (!r.ok) throw new Error("http " + r.status);
+    return r.text();
+  }).then(function (t) {
+    if (t.indexOf('id="dbsave"') === -1 || t.indexOf("chi26:db") === -1) throw new Error("source inattendue");
+    artSrc = t;
+    return t;
+  });
+}
+
+function editingNow() {
+  if (editItem || editingGuide || tlSheet || editingPay != null) return true;
+  var a = document.activeElement;
+  return !!(a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.tagName === "SELECT"));
+}
+
+var appReady = false;
+
+function scheduleArtSave() {
+  if (!appReady) return; /* pas de publication pour la normalisation du démarrage */
+  artDirty = true;
+  if (artTimer) clearTimeout(artTimer);
+  artTimer = setTimeout(function () { artSave(false); }, 8000);
+}
+
+function artSave(force) {
+  if (!artCap || !artDirty || artBusy) return;
+  if (!force && editingNow()) { artTimer = setTimeout(function () { artSave(false); }, 8000); return; }
+  artBusy = true;
+  artSource().then(function (src) {
+    var json = JSON.stringify(DB).replace(/</g, "\\u003c");
+    var html = src.replace(
+      /(<script type="application\/json" id="dbsave">)[\s\S]*?(<\/script>)/,
+      function (_, a, b) { return a + json + b; }
+    );
+    try {
+      var tabEl = document.querySelector(".tab.on");
+      sessionStorage.setItem("chi26:resume", JSON.stringify({
+        tab: tabEl ? tabEl.dataset.scr : null,
+        day: curDay, pv: planView, tm: tlMode, tw: tlWeek,
+        acc: accOpen, sy: window.pageYOffset || 0
+      }));
+    } catch (e) {}
+    return artCap.publish(html);
+  }).then(function () {
+    artDirty = false;
+    artBusy = false;
+    ART_OK = true;
+    /* la vue se recharge toute seule sur la nouvelle version */
+  }, function (err) {
+    artBusy = false;
+    var code = err && err.code;
+    if (code === "conflict") { artDirty = false; ART_OK = true; }
+    else if (code === "rate_limited") { artTimer = setTimeout(function () { artSave(false); }, 45000); }
+    else if (code === "not_granted" || code === "not_writer" || code === "not_declared" ||
+             code === "capability_disabled" || code === "capability_removed" || code === "consent_required") {
+      ART_OK = false; artCap = null;
+    } else { ART_OK = false; }
+  });
+}
+
+/* dernière chance quand on quitte la page */
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") artSave(true);
+});
+window.addEventListener("pagehide", function () { artSave(true); });
 
 loadDB();
 if (!DB.paid) {
@@ -1933,6 +2059,16 @@ function dayItems(day) {
     if (DB.hidden[uid]) return;
     arr.push({ it: c, uid: uid, custom: true });
   });
+  /* tri par horaire, pour que la liste suive les déplacements ;
+     un item sans heure reste collé après son prédécesseur */
+  var last = -1;
+  arr.forEach(function (en, i) {
+    var k = parseMin(en.it.h);
+    if (k == null) k = last + 0.01; else last = k;
+    en._k = k;
+    en._i = i;
+  });
+  arr.sort(function (a, b) { return a._k - b._k || a._i - b._i; });
   return arr;
 }
 
@@ -2249,7 +2385,7 @@ function weekHtml(w) {
   }).join("");
   return head +
     '<div class="tw" style="height:' + ((h1 - h0) * PX).toFixed(0) + 'px">' + gut + cols + "</div>" +
-    '<div class="tipcard">👆 Un tap sur un bloc ouvre sa fiche (liens, horaires, coché) · tape l\'en-tête d\'un jour pour l\'ouvrir en grand.</div>';
+    '<div class="tipcard">👆 Tap = fiche du bloc · reste appuyé ½ s puis glisse pour changer l\'heure · l\'en-tête d\'un jour l\'ouvre en grand.</div>';
 }
 
 function timelineHtml(day) {
@@ -2277,7 +2413,7 @@ function timelineHtml(day) {
     }
   }
   html += "</div>" +
-    '<div class="tipcard">👆 Touche un bloc pour ouvrir sa fiche : liens, itinéraire, durée, « fait ». Les heures « Matin / Aprem / Soir » sont placées automatiquement.</div>';
+    '<div class="tipcard">👆 Tap = fiche (liens, itinéraire, « fait ») · reste appuyé ½ s puis glisse un bloc pour le déplacer — la liste et les horaires suivent.</div>';
   return html;
 }
 
@@ -2320,6 +2456,85 @@ function sheetHtml() {
     '<button class="btn" type="button" data-shedit="1">✏️ Modifier</button>' +
     '<button class="btn" type="button" data-shx="1">Fermer</button>' +
     "</div></div></div>";
+}
+
+/* ---------- déplacement d'un bloc par appui long (façon Google Agenda) ---------- */
+var justDragged = false;
+
+function moveActivity(uid, slot, newS) {
+  var h = fmtMin(newS);
+  var durMin = Math.max(15, Math.round((slot.e - slot.s) / 5) * 5);
+  if (uid.charAt(0) === "a") {
+    var p = uid.slice(1).split("-");
+    var it = DB.added[+p[0]] && DB.added[+p[0]][+p[1]];
+    if (!it) return;
+    it.h = h;
+    if (!it.dur) it.dur = durMin;
+  } else {
+    var e = DB.edits[uid] || (DB.edits[uid] = {});
+    e.h = h;
+    if (!slot.en.it.dur) e.dur = durMin; /* on fige la durée affichée pour que le bloc ne change pas de taille */
+  }
+  saveDB();
+  toast("Déplacé à " + h + " ✓");
+  renderPlan();
+  renderHome();
+}
+
+function bindBlockDrag(b) {
+  var uid = b.dataset.tlb, dnum = +b.dataset.day;
+  var PXd = (b.classList.contains("twb") ? 44 : 56) / 60;
+  var timer = null, dragging = false, y0 = 0, slot = null, newS = null;
+
+  function start(e) {
+    var s0 = null;
+    tlSlots(DAYS[dnum - 1]).forEach(function (s) { if (s.en.uid === uid) s0 = s; });
+    if (!s0) return;
+    slot = s0;
+    newS = slot.s;
+    dragging = true;
+    try { b.setPointerCapture(e.pointerId); } catch (err) {}
+    b.classList.add("drag");
+    var badge = document.getElementById("dragBadge");
+    if (badge) {
+      badge.textContent = "↕ " + fmtMin(slot.s) + " – " + fmtMin(slot.e);
+      badge.classList.add("show");
+    }
+  }
+  function update(dy) {
+    var d = slot.e - slot.s;
+    newS = Math.max(0, Math.min(1440 - d, Math.round((slot.s + dy / PXd) / 5) * 5));
+    b.style.transform = "translateY(" + ((newS - slot.s) * PXd).toFixed(1) + "px)";
+    var badge = document.getElementById("dragBadge");
+    if (badge) badge.textContent = "↕ " + fmtMin(newS) + " – " + fmtMin(newS + d);
+  }
+  function stop(commit) {
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (!dragging) return;
+    dragging = false;
+    b.classList.remove("drag");
+    b.style.transform = "";
+    var badge = document.getElementById("dragBadge");
+    if (badge) badge.classList.remove("show");
+    justDragged = true;
+    setTimeout(function () { justDragged = false; }, 400);
+    if (commit && newS != null && newS !== slot.s) moveActivity(uid, slot, newS);
+  }
+
+  b.addEventListener("pointerdown", function (e) {
+    y0 = e.clientY;
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(function () { timer = null; start(e); }, 420);
+  });
+  b.addEventListener("pointermove", function (e) {
+    if (dragging) { update(e.clientY - y0); return; }
+    if (timer && Math.abs(e.clientY - y0) > 10) { clearTimeout(timer); timer = null; }
+  });
+  b.addEventListener("pointerup", function () { stop(true); });
+  b.addEventListener("pointercancel", function () { stop(false); });
+  /* bloque le défilement de la page pendant un déplacement (iOS) */
+  b.addEventListener("touchmove", function (e) { if (dragging) e.preventDefault(); }, { passive: false });
+  b.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 }
 
 function renderPlan() {
@@ -2434,9 +2649,11 @@ function renderPlan() {
   });
   scr.querySelectorAll("[data-tlb]").forEach(function (b) {
     b.addEventListener("click", function () {
+      if (justDragged) return; /* fin d'un glisser : pas d'ouverture de fiche */
       tlSheet = { uid: b.dataset.tlb, d: +b.dataset.day };
       renderPlan();
     });
+    bindBlockDrag(b);
   });
   scr.querySelectorAll("[data-dnav]").forEach(function (b) {
     b.addEventListener("click", function () {
@@ -3067,16 +3284,17 @@ function importSave(raw) {
 
 function renderInfos() {
   var scr = document.getElementById("scr-infos");
-  var saveStatus = BACKEND === "mem"
-    ? "⚠️ <b>Ce navigateur bloque l'enregistrement.</b> Tes coches seront perdues à la fermeture : exporte une sauvegarde avant de quitter, et réimporte-la à l'ouverture."
-    : "Tes coches sont enregistrées en <b>double copie</b> (navigateur + cookie longue durée), et la plus récente est rechargée au démarrage — elles survivent désormais aux mises à jour de l'appli. Attention : Safari et le navigateur de l'appli Claude restent deux mondes séparés — utilise toujours celui de ton icône d'accueil, ou Exporter / Importer pour transférer.";
+  var saveStatus = BACKEND === "mem" && ART_OK !== true
+    ? "⚠️ <b>Ce navigateur bloque l'enregistrement local.</b> Si « en ligne » n'est pas ✅ ci-dessous, exporte une sauvegarde avant de quitter, et réimporte-la à l'ouverture."
+    : "Tes coches sont enregistrées en <b>triple copie</b> : navigateur + cookie longue durée + <b>en ligne, gravée dans la page elle-même</b> quelques secondes après chaque changement (la page se recharge alors discrètement — c'est le signe que c'est enregistré pour de bon, même si tu fermes tout ou changes d'appareil). La copie la plus récente gagne au démarrage.";
   scr.innerHTML = '<h2 class="screen-title"><span>ℹ️</span>Infos pratiques</h2>' +
 
     '<div class="card"><h3>💾 Sauvegarde</h3>' +
     "<p>" + saveStatus + "</p>" +
     '<p style="font-family:var(--f-data); font-size:12px">Dernière sauvegarde — navigateur ' + (SAVE_LS ? "✅" : "❌") +
     " · cookie longue durée " + (SAVE_CK ? "✅" : "❌") +
-    (SAVE_LS || SAVE_CK ? "" : " — <b>aucun stockage dispo : utilise Exporter !</b>") + "</p>" +
+    " · en ligne (gravée dans la page) " + (ART_OK === true ? "✅" : ART_OK === false ? "—" : "⏳") +
+    (SAVE_LS || SAVE_CK || ART_OK === true ? "" : " — <b>aucun stockage dispo : utilise Exporter !</b>") + "</p>" +
     '<button class="btn" id="btnExport" type="button">⬇️ Exporter</button>' +
     '<button class="btn" id="btnImport" type="button">⬆️ Importer</button>' +
     '<button class="btn" id="btnPrint" type="button">🖨️ Planning (.txt)</button>' +
@@ -3454,7 +3672,7 @@ document.getElementById("imgClose").addEventListener("click", function () {
     sx = e.touches[0].clientX; sy = e.touches[0].clientY;
   }, { passive: true });
   scr.addEventListener("touchend", function (e) {
-    if (planView === "all" || editItem) return;
+    if (planView === "all" || editItem || justDragged) return;
     var t = e.target;
     if (t.closest && (t.closest(".daypick") || t.closest("textarea") || t.closest("input") || t.closest(".ef") || t.closest(".filters"))) return;
     var dx = e.changedTouches[0].clientX - sx;
@@ -3475,6 +3693,23 @@ document.getElementById("imgClose").addEventListener("click", function () {
 var t0 = todayChicago();
 var d0 = DAYS.find(function (d) { return d.date === t0; });
 if (d0) curDay = d0.d;
+/* reprise après un rechargement de sauvegarde en ligne : on revient
+   exactement où on était (onglet, jour, vue, accordéons, scroll) */
+var resumeTab = null;
+try {
+  var rs = sessionStorage.getItem("chi26:resume");
+  if (rs) {
+    sessionStorage.removeItem("chi26:resume");
+    rs = JSON.parse(rs);
+    if (rs.day >= 1 && rs.day <= DAYS.length) curDay = rs.day;
+    if (rs.pv) planView = rs.pv;
+    if (rs.tm) tlMode = rs.tm;
+    if (rs.tw === 0 || rs.tw === 1) tlWeek = rs.tw;
+    if (rs.acc && typeof rs.acc === "object") accOpen = rs.acc;
+    if (rs.tab && document.getElementById("scr-" + rs.tab)) resumeTab = rs.tab;
+    if (rs.sy) setTimeout(function () { window.scrollTo(0, rs.sy); }, 80);
+  }
+} catch (e) {}
 renderHome();
 renderPlan();
 renderPack();
@@ -3485,5 +3720,7 @@ renderPass();
 renderBudget();
 renderInfos();
 refreshRing();
+if (resumeTab) switchTab(resumeTab);
+appReady = true;
 })();
 </script>
