@@ -41,6 +41,7 @@
   --c-soir:   #db2777;
   --c-sport:  #ea580c;
   --c-campus: #a21caf;
+  --c-attrac: #dc2626;
 
   /* budget (palette validée, ordre fixe) */
   --b-paid:  #6b7280;
@@ -91,6 +92,7 @@
     --c-soir:   #ef7fb1;
     --c-sport:  #f0924e;
     --c-campus: #d46bdd;
+    --c-attrac: #f87171;
 
     --b-paid: #8b94a6;
     --b-1: #3987e5;
@@ -128,6 +130,7 @@
   --c-soir:   #ef7fb1;
   --c-sport:  #f0924e;
   --c-campus: #d46bdd;
+  --c-attrac: #f87171;
 
   --b-paid: #8b94a6;
   --b-1: #3987e5;
@@ -1660,24 +1663,42 @@ var DAYS = [
       { h:"18h", c:"air", t:"ICON Park + International Drive", m:"ICON Park Orlando", u:"https://iconparkorlando.com", tt:"🚌 I-Ride Trolley, quelques arrêts", n:"La roue ICON de 122 m domine l'avenue (~30 $ si l'envie te prend, sinon la photo depuis le sol est déjà bien). Autour : Sling Shot, restaurants, boutiques, arcades. Soirée facile après le vol — demain c'est lever tôt. 🍔 Dîner : le food court d'ICON Park ou un des diners de l'avenue, 15–20 $.", pr:"Gratuit" }
     ]},
   { d:9,  date:"2026-09-06", dow:"Dim", lab:"6 sept", e:"🎢", p:2, title:"Epic Universe",
-    tip:"⏰ LE conseil du voyage : être aux portes 45 min avant l'ouverture. Entre 9 h et 10 h tu fais 3 attractions ; à 11 h la même chose prend 3 heures.",
+    tip:"⏰ LE conseil du voyage : être aux portes 45 min avant l'ouverture. Entre 9 h et 10 h tu fais 3 attractions ; à 11 h la même chose prend 3 heures. 🔴 Les blocs rouges sont les attractions elles-mêmes, dans l'ordre conseillé — coche-les au fur et à mesure.",
     items:[
       { h:"7h45", c:"trajet", t:"Départ pour Epic Universe", m:"Universal Epic Universe Orlando", n:"Navette de l'hôtel si elle existe, sinon Uber (~15 $, 12 min). Epic Universe a son propre parking et sa propre entrée, à 3 km au sud des deux autres parcs — ne te trompe pas de destination.", pr:"~15 $" },
       { h:"9h", c:"sport", t:"Super Nintendo World — dès l'ouverture", m:"Universal Epic Universe Orlando", u:"https://www.universalorlando.com/web/en/us/theme-parks/epic-universe", dur:180, n:"🍄 Cours directement à Mario Kart: Bowser's Challenge, puis Donkey Kong Mine-Cart Madness — ce sont les deux plus grosses files du parc, elles montent à 90 min avant midi. Prends le Power-Up Band seulement si les mini-jeux t'intéressent (~40 $, facultatif). Le land entier est un décor jouable : tape les blocs, cherche les pièces." },
       { h:"12h30", c:"soir", t:"Déjeuner + Celestial Park", m:"Universal Epic Universe Orlando", dur:90, n:"Le cœur du parc, entre les quatre mondes : jardins, fontaines chorégraphiées, et <b>Stardust Racers</b>, les montagnes russes doubles à 100 km/h — la file y est plus courte au moment du déjeuner. 🍔 Manger ici : Atlantic (fruits de mer) ou les comptoirs du parc, 18–25 $. Emporte une gourde : les fontaines à eau sont gratuites et il fera 32 °C." },
       { h:"14h30", c:"musee", t:"Ministry of Magic (Harry Potter)", m:"Universal Epic Universe Orlando", dur:150, n:"🪄 Le Paris des années 1920 et le Ministère des Magies : <b>Harry Potter and the Battle at the Ministry</b> est l'attraction la plus impressionnante jamais construite par Universal. Le land ouvre sur une place parisienne entière — prends le temps de regarder les vitrines, tout est jouable ou animé." },
       { h:"17h", c:"musee", t:"Dark Universe + How to Train Your Dragon", m:"Universal Epic Universe Orlando", dur:180, n:"🧟 Dark Universe : le village de Darkmoor, les monstres classiques d'Universal, et <b>Monsters Unchained</b> (secousses fortes, à éviter juste après manger). Puis Isle of Berk et son dragon volant si tu veux redescendre en douceur. Reste jusqu'à la fermeture : les files tombent à 15 min dans la dernière heure et le parc de nuit est un autre spectacle.", pr:"Billet 1 jour" },
-      { h:"21h30", c:"trajet", t:"Retour à l'hôtel", n:"Uber depuis Epic Universe à la fermeture : compte 15–25 $ (tarif majoré à la sortie du parc — attends 15 min à l'écart de la foule, le prix retombe).", pr:"~20 $" }
+      { h:"21h30", c:"trajet", t:"Retour à l'hôtel", n:"Uber depuis Epic Universe à la fermeture : compte 15–25 $ (tarif majoré à la sortie du parc — attends 15 min à l'écart de la foule, le prix retombe).", pr:"~20 $" },
+      { h:"9h15", c:"attrac", t:"🍄 Mario Kart: Bowser's Challenge", dur:50, n:"L'attraction phare du land : casque à réalité augmentée sur les yeux, tu lances vraiment des carapaces pendant que le wagon file sur le circuit. C'est LA file qui explose après 10 h — c'est pour elle que tu es aux portes à l'ouverture." },
+      { h:"10h10", c:"attrac", t:"🦍 Donkey Kong Mine-Cart Madness", dur:50, n:"Le tour de force technique du parc : le wagon a l'air de sauter par-dessus des rails cassés — illusion, la vraie voie est cachée sous le train. Sensations modérées, effet bluffant." },
+      { h:"11h10", c:"attrac", t:"🥚 Yoshi's Adventure", dur:35, n:"Lente, colorée, pensée pour les enfants — mais c'est la seule vue d'ensemble du land, prise d'en haut. À faire seulement si la file est sous 20 min." },
+      { h:"12h45", c:"attrac", t:"☄️ Stardust Racers", dur:45, n:"Deux trains lancés qui se poursuivent et se croisent à 100 km/h, cinq inversions : les meilleures montagnes russes du parc. La file tombe pendant l'heure du déjeuner — c'est le moment." },
+      { h:"14h45", c:"attrac", t:"🪄 Harry Potter and the Battle at the Ministry", dur:75, n:"LE morceau du parc, et probablement la meilleure attraction jamais construite par Universal : les ascenseurs du Ministère, le procès de Dolores Ombrage, des décors et des écrans mélangés sans couture. Compte 60 à 90 min de file en milieu d'après-midi — ça les vaut." },
+      { h:"16h15", c:"attrac", t:"🎪 Le Cirque Arcanus", dur:40, n:"Spectacle-attraction sous chapiteau : bêtes fantastiques et illusions, une vingtaine de minutes assis. Le bon moment pour souffler — et pour sécher si l'orage de 15 h est passé." },
+      { h:"17h15", c:"attrac", t:"🧟 Monsters Unchained: The Frankenstein Experiment", dur:55, n:"Dark ride dans le laboratoire de Victor Frankenstein : secousses fortes, animatroniques impressionnants, ambiance franchement sombre. À ne pas faire juste après avoir mangé." },
+      { h:"18h20", c:"attrac", t:"🐺 Curse of the Werewolf", dur:40, n:"Petites montagnes russes tournantes dans la forêt de Darkmoor : courtes, sans looping. Parfait pour redescendre après Monsters Unchained." },
+      { h:"19h10", c:"attrac", t:"🐉 Hiccup's Wing Gliders", dur:40, n:"Le coaster familial d'Isle of Berk : lancement doux, tu voles suspendu au-dessus du village viking. Dans la dernière heure avant la fermeture, la file tombe à 10 min." }
     ]},
   { d:10, date:"2026-09-07", dow:"Lun", lab:"7 sept", e:"🧙", p:2, title:"Islands of Adventure + Studios",
-    tip:"🚂 Ton billet park-to-park autorise le Hogwarts Express entre les deux parcs — c'est une attraction en soi, et elle ne se prend QU'AVEC ce billet. Fais-la dans les deux sens si tu peux : le film diffusé aux fenêtres est différent à l'aller et au retour.",
+    tip:"🚂 Ton billet park-to-park autorise le Hogwarts Express entre les deux parcs — c'est une attraction en soi, et elle ne se prend QU'AVEC ce billet. Fais-la dans les deux sens si tu peux : le film diffusé aux fenêtres est différent à l'aller et au retour. 🔴 Les blocs rouges sont les attractions à ne pas rater, dans l'ordre.",
     items:[
       { h:"8h15", c:"trajet", t:"Départ pour Islands of Adventure", m:"Universal Islands of Adventure Orlando", n:"Uber (~13 $, 10 min) ou navette hôtel. Entrée par CityWalk : les deux parcs partagent la même esplanade, Islands of Adventure est à droite.", pr:"~13 $" },
       { h:"9h", c:"sport", t:"Hagrid's + VelociCoaster — en premier", m:"Universal Islands of Adventure Orlando", u:"https://www.universalorlando.com/web/en/us/theme-parks/islands-of-adventure", dur:180, n:"🐉 <b>Hagrid's Magical Creatures Motorbike Adventure</b> EN PREMIER, sans discuter : c'est la file la plus longue de toute la Floride (120 min dès 10 h 30, 20 min si tu es là à l'ouverture). Puis <b>VelociCoaster</b>, le meilleur grand huit de l'État — 4 secondes pour atteindre 110 km/h. Ensuite Hogsmeade : la Butterbeer (7 $) est obligatoire, la version frozen est la bonne." },
       { h:"12h30", c:"soir", t:"Déjeuner + Jurassic Park / Marvel", m:"Universal Islands of Adventure Orlando", dur:120, n:"🦖 Trois Broomsticks à Hogsmeade pour l'ambiance (18–22 $), ou Thunder Falls Terrace côté Jurassic Park. Ensuite selon l'envie : The Incredible Hulk Coaster et Spider-Man côté Marvel, Jurassic Park River Adventure pour se rafraîchir (tu ressors trempé, c'est le principe)." },
       { h:"14h30", c:"trajet", t:"🚂 Hogwarts Express → King's Cross", m:"Hogsmeade Station Universal Orlando", dur:45, n:"Départ de la gare de Hogsmeade, arrivée à King's Cross côté Universal Studios. 7 min de trajet, un compartiment, des fenêtres qui racontent une histoire et des ombres dans le couloir. Le passage du mur du quai 9¾ est filmé — regarde derrière toi.", pr:"Inclus park-to-park" },
       { h:"15h15", c:"musee", t:"Diagon Alley + Universal Studios", m:"Universal Studios Florida Orlando", u:"https://www.universalorlando.com/web/en/us/theme-parks/universal-studios-florida", dur:240, n:"🏦 Le Chemin de Traverse est caché derrière un mur de briques de Londres : Gringotts et son dragon crachent du feu toutes les 10 min. <b>Harry Potter and the Escape from Gringotts</b>, puis dans le parc : Revenge of the Mummy, Transformers, The Simpsons Ride, et Villain-Con Minion Blast. Garde de l'énergie : c'est le parc le plus étalé des trois." },
-      { h:"20h", c:"soir", t:"CityWalk + retour", m:"Universal CityWalk Orlando", dur:90, n:"L'esplanade entre les deux parcs : restaurants, musique live, boutiques — et le Universal Studios Store pour le souvenir (le sweat Hogwarts est LE truc à rapporter). Dîner ici, puis Uber pour rentrer. Demain : vol pour Chicago, prépare la valise ce soir.", pr:"Dîner ~20 $" }
+      { h:"20h", c:"soir", t:"CityWalk + retour", m:"Universal CityWalk Orlando", dur:90, n:"L'esplanade entre les deux parcs : restaurants, musique live, boutiques — et le Universal Studios Store pour le souvenir (le sweat Hogwarts est LE truc à rapporter). Dîner ici, puis Uber pour rentrer. Demain : vol pour Chicago, prépare la valise ce soir.", pr:"Dîner ~20 $" },
+      { h:"9h15", c:"attrac", t:"🏍️ Hagrid's Magical Creatures Motorbike Adventure", dur:60, n:"La file la plus longue de Floride, et l'attraction préférée des fans : moto avec side-car, sept lancements, une chute libre en marche arrière dans le noir. Si tu n'en fais qu'une dans ce parc, c'est celle-là — d'où le passage en tout premier." },
+      { h:"10h20", c:"attrac", t:"🦖 VelociCoaster", dur:45, n:"Le meilleur grand huit de l'État : 0 à 110 km/h en 4 secondes, deux lancements, un passage rasant au-dessus de la lagune. Casier obligatoire, rien dans les poches." },
+      { h:"11h10", c:"attrac", t:"🏰 Harry Potter and the Forbidden Journey", dur:45, n:"Sous le château de Poudlard : les couloirs, la salle commune, la Forêt interdite, sur un bras robotisé. Ça remue beaucoup — mal au cœur possible. La file traverse tout le château : ne la saute pas, elle fait partie de l'attraction." },
+      { h:"12h45", c:"attrac", t:"🌊 Jurassic Park River Adventure", dur:40, n:"Descente en barque au milieu des dinosaures, puis chute de 25 m. Tu ressors trempé, c'est le principe — pochette étanche pour le téléphone." },
+      { h:"13h30", c:"attrac", t:"💚 The Incredible Hulk Coaster", dur:40, n:"Lancement de 0 à 65 km/h en deux secondes dans un tube vert, sept inversions. Le classique de 1999, toujours aussi brutal." },
+      { h:"15h30", c:"attrac", t:"🏦 Harry Potter and the Escape from Gringotts", dur:60, n:"Au fond du Chemin de Traverse : mi-coaster mi-dark ride à travers les coffres de la banque, avec Voldemort et Bellatrix. Le hall aux gobelins animés vaut déjà le détour à lui seul." },
+      { h:"16h40", c:"attrac", t:"⚱️ Revenge of the Mummy", dur:40, n:"Dark ride qui bascule en montagnes russes dans le noir, marche arrière comprise, avec un vrai mur de flammes au-dessus de la tête. Court, intense, culte." },
+      { h:"17h30", c:"attrac", t:"🤖 Transformers: The Ride-3D", dur:40, n:"Simulateur 3D très nerveux, la même technologie que Spider-Man mais en plus violent. Rarement plus de 30 min de file." },
+      { h:"18h15", c:"attrac", t:"🎸 Hollywood Rip Ride Rockit", dur:40, n:"Montée verticale à 90°, et tu choisis ta chanson au moment du départ. C'est le grand ruban rouge que tu vois de partout dans le parc." }
     ]},
   { d:11, date:"2026-09-08", dow:"Mar", lab:"8 sept", e:"🕵️", p:3, title:"Retour + gangsters",
     tip:"Si le vol d'Orlando traîne : sacrifier le Crime Tour, garder le Skydeck. Base du soir : Warwick Allerton, 701 N Michigan Ave.",
@@ -2523,7 +2544,7 @@ function escT(s) {
 }
 
 function routeStrip(day) {
-  var steps = dayItems(day).map(function (en) { return en.it; }).filter(function (it) { return it.c !== "cours"; });
+  var steps = dayItems(day).map(function (en) { return en.it; }).filter(function (it) { return it.c !== "cours" && it.c !== "attrac"; });
   if (steps.length < 2) return "";
   var h = '<div class="route-strip" aria-label="Ordre de la journée">';
   steps.forEach(function (it, i) {
@@ -2559,6 +2580,7 @@ var CATS = [
   ["soir",   "Soirées",      "--c-soir"],
   ["sport",  "Sport",        "--c-sport"],
   ["campus", "Orlando",     "--c-campus"],
+  ["attrac", "Attractions",  "--c-attrac"],
   ["cours",  "Kaplan",       "--c-cours"],
   ["trajet", "Trajets",      "--c-trajet"]
 ];
@@ -2616,7 +2638,7 @@ function tlSlots(day) {
       return;
     }
     var c = it.c;
-    var dur = c === "cours" ? 210 : c === "soir" ? 150 : c === "trajet" ? 75 : 105;
+    var dur = c === "cours" ? 210 : c === "soir" ? 150 : c === "trajet" ? 75 : c === "attrac" ? 45 : 105;
     if (i + 1 < slots.length) dur = Math.max(40, Math.min(dur, slots[i + 1].s - o.s - 5));
     o.e = o.s + dur;
   });
