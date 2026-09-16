@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Planning de marathon Marvel du 15 septembre au 1er janvier, chronologie MCU intégrale.">
-<title>Marathon Marvel — 15 septembre → 1er janvier</title>
+<meta name="description" content="Planning de marathon Marvel du 15 septembre au 18 janvier, chronologie MCU intégrale, séance Doomsday à la fin.">
+<title>Marathon Marvel — jusqu'à Doomsday</title>
 <style>
   :root {
     color-scheme: light dark;
@@ -384,6 +384,10 @@
   .day.today .day-num strong,
   .day.today .day-num em { color: var(--accent-ink); }
 
+  /* la séance Doomsday, tout au bout */
+  .day.finale { border-color: var(--accent); border-width: 2px; }
+  .day.finale .day-title { color: var(--accent); }
+
   /* journée sans visionnage */
   .day.rest .day-head { border-bottom: 0; }
   .day.rest .day-title { color: var(--ink-faint); }
@@ -428,6 +432,7 @@
   .chip.warn { color: var(--warn); }
   .chip.crit { color: var(--crit); }
   .chip.rest { color: var(--ink-faint); }
+  .chip.finale { color: var(--accent); border-color: var(--accent); }
   .chip.today { color: var(--accent); border-color: var(--accent); font-weight: 600; }
 
   /* ---------- entries ---------- */
@@ -581,14 +586,15 @@
 <div class="wrap">
 
   <header class="masthead">
-    <p class="eyebrow" id="eyebrow">Chronologie MCU intégrale · 119 entrées · 109 jours</p>
-    <h1>Marathon Marvel<span class="split">en 109 jours</span></h1>
+    <p class="eyebrow" id="eyebrow">Chronologie MCU intégrale · 125 entrées · 126 jours</p>
+    <h1>Marathon Marvel<span class="split">jusqu'à Doomsday</span></h1>
     <p class="standfirst">
-      Du mardi 15 septembre 2026 au vendredi 1<sup>er</sup> janvier 2027, dernier jour inclus.
-      Tout le catalogue, réparti dans l'ordre chronologique que tu as fourni&nbsp;: rien n'est
-      réordonné et une coupure ne tombe jamais au milieu d'un épisode. Les longues saisons
-      s'étalent sur plusieurs dates pour que les journées se ressemblent&nbsp;: sur le
-      parcours intégral, elles tiennent toutes entre 3&nbsp;h&nbsp;20 et 5&nbsp;h&nbsp;50.
+      Le catalogue court du mardi 15 septembre 2026 au dimanche 17 janvier 2027, et le
+      <b>lundi 18 janvier</b> n'a qu'une ligne&nbsp;: <i>Avengers: Doomsday</i>, vu un mois
+      après sa sortie en salle du 18 décembre. Tout est réparti dans l'ordre chronologique que
+      tu as fourni&nbsp;: rien n'est réordonné et une coupure ne tombe jamais au milieu d'un
+      épisode. Les longues saisons s'étalent sur plusieurs dates pour que les journées se
+      ressemblent.
     </p>
   </header>
 
@@ -621,7 +627,7 @@
 
   <noscript>
     <p class="verdict"><span><strong>Le planning se construit en JavaScript.</strong>
-    Sans lui, les 109 journées datées ne s'affichent pas&nbsp;: ouvre cette page dans un
+    Sans lui, les 126 journées datées ne s'affichent pas&nbsp;: ouvre cette page dans un
     navigateur plutôt que dans un aperçu qui n'exécute pas les scripts.</span></p>
   </noscript>
 
@@ -648,9 +654,28 @@
         à voir seulement par curiosité.</li>
       <li><b>The Punisher: One Last Kill</b> n'a pas de durée confirmée&nbsp;: 1&nbsp;h&nbsp;30
         estimée.</li>
-      <li><b>Les dates sont fixes</b>&nbsp;: du mardi 15 septembre 2026 au vendredi
-        1<sup>er</sup> janvier 2027 inclus, soit 109 journées. La journée en cours est
-        surlignée en rouge.</li>
+      <li><b>Les dates sont fixes</b>&nbsp;: du mardi 15 septembre 2026 au dimanche
+        17 janvier 2027 pour le catalogue, plus le lundi 18 janvier pour la séance
+        <i>Doomsday</i> — 126 journées en tout. La journée en cours est surlignée en rouge.</li>
+      <li><b>La séance du 18 janvier</b> est la dernière ligne du planning, seule sur sa date&nbsp;:
+        <i>Avengers: Doomsday</i> (2&nbsp;h&nbsp;45), vu un mois après sa sortie en salle du
+        18 décembre 2026, comme tu l'as demandé. Le catalogue est donc calibré pour être fini
+        la veille.</li>
+      <li><b>Six entrées ajoutées après coup</b>&nbsp;: <i>Spider-Man: Brand New Day</i>
+        (n°120, sorti le 31 juillet 2026), <i>VisionQuest</i> (n°121), les trois animations
+        hors continuité (n°122 à 124) et <i>Avengers: Doomsday</i> (n°125). Elles sont
+        numérotées à la suite&nbsp;: la numérotation d'origine ne bouge pas, et les cases
+        déjà cochées restent valables. La durée du <i>Punisher</i> (n°119) est passée de
+        l'estimation d'une heure trente à ses 44&nbsp;minutes réelles.</li>
+      <li><b>Les animations alternatives</b> (n°122 à 124) sont regroupées à la fin, juste
+        avant la séance&nbsp;: <i>Your Friendly Neighborhood Spider-Man</i> et les deux
+        saisons de <i>X-Men&nbsp;'97</i> ne s'inscrivent pas dans la chronologie principale —
+        la première suit un Peter Parker formé par Norman Osborn, les secondes prolongent la
+        série animée de 1992. Elles sont marquées ⚠️ et n'influent pas sur <i>Doomsday</i>.</li>
+      <li><b>VisionQuest sort pendant le marathon</b>&nbsp;: un épisode par semaine du
+        14 octobre au 2 décembre 2026. Sa place en fin de liste le programme bien après la
+        diffusion du dernier épisode, mais c'est le seul titre du planning à dépendre encore
+        d'un calendrier de diffusion.</li>
       <li><b>Saisons étalées</b>&nbsp;: un bloc de série trop long pour une seule journée est
         réparti sur plusieurs dates, à la coupure d'un épisode — <i>Daredevil, saison 1</i>
         devient « ép. 1 à 6 » un jour et « ép. 7 à 13 » le lendemain. C'est ce qui rend les
@@ -664,8 +689,8 @@
         <i>Films &amp; one-shots</i> — les dates excédentaires deviennent des journées de
         repos, réparties régulièrement sur la période plutôt que reportées à la fin. Une date
         qui ne porterait que quelques minutes est rattachée à sa voisine.</li>
-      <li>Les contenus narratifs supplémentaires hors chronologie officielle Disney+ ne sont pas
-        inclus.</li>
+      <li>Les contenus promotionnels et les récapitulatifs (<i>Marvel Studios: Legends</i> et
+        assimilés) ne sont pas inclus&nbsp;: ils ne racontent rien de neuf.</li>
     </ul>
   </section>
 
@@ -696,7 +721,8 @@
     HORS:    "Hors du temps · multivers",
     E2024:   "Fin 2023 – 2024",
     E2025:   "≈ 2025",
-    RECENT:  "Période récente du MCU"
+    RECENT:  "Période récente du MCU",
+    ANIM:    "Hors du temps · animations alternatives"
   };
 
   // n, glyph, titre, note, minutes, ère, piste (F film/one-shot, D Disney+, L Marvel TV/Netflix)
@@ -819,8 +845,17 @@
     [116,"↩", "Repère : Les Quatre Fantastiques — Premiers pas (n°9)", "Position officielle Disney+. Déjà vu au n°9.", 0, "RECENT", "F", "ref"],
     [117,"📺", "Wonder Man — saison 1", "8 épisodes", 240, "RECENT", "D"],
     [118,"📺", "Daredevil: Born Again — saison 2", "9 épisodes", 432, "RECENT", "D"],
-    [119,"🎞️", "The Punisher: One Last Kill", "Durée non confirmée : 1 h 30 estimée", 90, "RECENT", "F"]
+    [119,"🎞️", "The Punisher: One Last Kill", "Sorti le 12 mai 2026", 44, "RECENT", "F"],
+    [120,"🎬", "Spider-Man: Brand New Day", "Sorti le 31 juillet 2026", 145, "RECENT", "F"],
+    [121,"📺", "VisionQuest", "8 épisodes d'environ 1 h, hebdomadaires à partir du 14 octobre 2026", 480, "RECENT", "D"],
+    [122,"📺", "Your Friendly Neighborhood Spider-Man — S1", "10 épisodes. Chronologie parallèle : Peter y est formé par Norman Osborn.", 280, "ANIM", "D", "alt"],
+    [123,"📺", "X-Men '97 — saison 1", "10 épisodes. Suite directe de la série animée de 1992, hors continuité MCU.", 320, "ANIM", "D", "alt"],
+    [124,"📺", "X-Men '97 — saison 2", "9 épisodes, diffusés du 1er juillet au 12 août 2026.", 288, "ANIM", "D", "alt"],
+    [125,"🎬", "Avengers: Doomsday", "En salle le 18 décembre 2026. Séance prévue un mois plus tard.", 165, "RECENT", "F"]
   ];
+
+  // Dernière entrée de la liste : elle a sa propre date, seule, tout à la fin.
+  var FINALE = 125;
 
   /* Découpage des blocs de séries, par numéro d'entrée : [premier épisode,
      nombre d'épisodes]. Il sert uniquement à étaler un bloc trop long sur
@@ -828,6 +863,7 @@
      milieu de l'un d'eux. Les entrées absentes de cette table (films,
      one-shots, épisodes isolés, The Daily Bugle) restent insécables. */
   var EPISODES = {
+    121: [1, 8], 122: [1, 10], 123: [1, 10], 124: [1, 9],
     7: [1, 8], 8: [1, 10], 22: [1, 7], 24: [8, 9], 26: [17, 6], 30: [2, 4],
     31: [1, 5], 32: [1, 19], 34: [20, 3], 35: [1, 13], 36: [1, 13],
     38: [1, 19], 39: [1, 13], 40: [1, 13], 41: [1, 13], 42: [1, 8],
@@ -842,11 +878,14 @@
     117: [1, 8], 118: [1, 9]
   };
 
-  /* Le planning court du mardi 15 septembre 2026 au vendredi 1er janvier 2027,
-     dernier jour inclus. Les dates sont fixes : c'est un calendrier, pas un
-     compte à rebours qui se réduirait à chaque ouverture de la page. */
+  /* Le planning court du mardi 15 septembre 2026 au lundi 18 janvier 2027,
+     dernier jour inclus. Ce dernier jour n'est pas une journée de rattrapage :
+     c'est la séance d'Avengers: Doomsday, vue un mois après sa sortie en salle
+     du 18 décembre. Le catalogue, lui, doit donc être bouclé le 17 janvier.
+     Les dates sont fixes : c'est un calendrier, pas un compte à rebours qui se
+     réduirait à chaque ouverture de la page. */
   var START = new Date(2026, 8, 15);
-  var END   = new Date(2027, 0, 1);
+  var END   = new Date(2027, 0, 18);
 
   // La plage traverse le passage à l'heure d'hiver : une journée y dure 25 h.
   // Math.round absorbe ce décalage là où une division brute donnerait 108,04.
@@ -878,7 +917,7 @@
       label: "Intégrale",
       hint: "<b>Tout, sans exception.</b> Les productions Marvel Studios et Marvel Television " +
             "réunies, dans l'ordre que tu as établi. Le parcours le plus lourd des trois, " +
-            "et celui qui occupe les 109 jours sans une seule journée creuse."
+            "et celui qui occupe presque toutes les dates sans journée creuse."
     },
     studios: {
       tracks: ["F", "D"],
@@ -894,7 +933,7 @@
       label: "Films & one-shots",
       hint: "<b>Les 38 longs métrages et les 10 one-shots</b>, sans aucune série. Le fil narratif " +
             "principal du MCU, et de très loin le parcours le plus léger sur la période : " +
-            "un film tous les deux jours environ, le reste en repos."
+            "un film tous les trois jours environ, le reste en repos."
     }
   };
 
@@ -972,7 +1011,7 @@
     });
   }
 
-  /* Répartit la liste ordonnée sur les 109 dates, à charge équivalente.
+  /* Répartit la liste ordonnée sur les dates du catalogue, à charge équivalente.
 
      Un bloc de série est déplié en épisodes (voir EPISODES), les épisodes
      sont répartis, puis ceux qui tombent le même jour sont recollés en une
@@ -986,6 +1025,14 @@
      compte moins que le calendrier n'a de dates, les dates excédentaires
      deviennent des journées de repos, étalées régulièrement. */
   function split(list) {
+    // la dernière date est réservée : elle ne porte que la séance Doomsday
+    var finale = null, rest = [];
+    list.forEach(function (it) {
+      if (it[0] === FINALE) { finale = it; } else { rest.push(it); }
+    });
+    if (finale) list = rest;
+
+    var lastDate = DAYS - (finale ? 1 : 0);
     var units = expand(list);
     var total = sumUnits(units);
     var watchable = 0, i, j;
@@ -994,7 +1041,7 @@
       if (units[i].min) watchable++;
     }
 
-    var slots = Math.min(DAYS, watchable);
+    var slots = Math.min(lastDate, watchable);
     var days = [], cur = [], curMin = 0;
 
     for (i = 0; i < units.length; i++) {
@@ -1086,18 +1133,25 @@
     }
 
     // poser ces journées sur le calendrier : la première le 15 septembre, la
-    // dernière le 1er janvier, les autres à intervalle régulier entre les deux.
-    var booked = {}, span = DAYS - 1, k;
+    // dernière le 17 janvier, les autres à intervalle régulier entre les deux.
+    var booked = {}, span = lastDate - 1, k;
     for (k = 0; k < days.length; k++) {
       booked[days.length > 1 ? Math.round((k * span) / (days.length - 1)) : 0] = days[k];
     }
 
     var plan = [];
-    for (i = 0; i < DAYS; i++) {
+    for (i = 0; i < lastDate; i++) {
       var day = booked[i] || { units: [], min: 0 };
       day.date = dateAt(i);
       day.items = collapse(day.units);
       plan.push(day);
+    }
+
+    if (finale) {
+      plan.push({
+        units: [], min: finale[4], date: dateAt(DAYS - 1), finale: true,
+        items: [{ it: finale, from: 0, to: 0, min: finale[4] }]
+      });
     }
 
     return plan;
@@ -1155,8 +1209,8 @@
     return days.reduce(function (s, d) { return s + d.min; }, 0);
   }
 
-  /* Seuils absolus, en temps d'écran réel : sur 109 jours l'objectif tourne
-     autour de 4 h 30, une journée à 7 h est donc déjà une grosse journée. */
+  /* Seuils absolus, en temps d'écran réel : sur quatre mois l'objectif tourne
+     autour de 4 h, une journée à 7 h est donc déjà une grosse journée. */
   function loadClass(min) {
     if (min <= 300) return ["ok", "dans le rythme"];
     if (min <= 420) return ["warn", "chargé"];
@@ -1165,6 +1219,7 @@
   }
 
   function dayTitle(day) {
+    if (day.finale) return "La séance · Avengers: Doomsday";
     if (!day.items.length) return "Repos · rattrapage";
     var keys = [];
     day.items.forEach(function (r) {
@@ -1204,9 +1259,11 @@
 
     daysEl.innerHTML = plan.map(function (day, idx) {
       var rest = !day.items.length;
-      var lc = rest ? ["rest", "repos"] : loadClass(day.min);
+      var lc = day.finale ? ["finale", "la séance"]
+            : rest ? ["rest", "repos"] : loadClass(day.min);
       var today = isToday(day.date);
-      var cls = "day" + (rest ? " rest" : "") + (today ? " today" : "");
+      var cls = "day" + (rest ? " rest" : "") + (day.finale ? " finale" : "") +
+                (today ? " today" : "");
       return '<section class="' + cls + '">' +
         '<div class="day-head">' +
           '<div class="day-num"><span>Jour</span><strong>' + (idx + 1) + '</strong>' +
@@ -1251,28 +1308,28 @@
     var t = hoursOnly(total);
 
     if (avg > 960) {
-      return "<span><strong>Hors d'atteinte, même sur 109 jours.</strong> " + t +
-        " heures à tenir d'ici le 1<sup>er</sup> janvier, soit " + h + " heures d'écran " +
-        "par jour — plus que ta journée éveillée.</span>";
+      return "<span><strong>Hors d'atteinte.</strong> " + t + " heures à tenir avant la " +
+        "séance du 18 janvier, soit " + h + " heures d'écran par jour — plus que ta journée " +
+        "éveillée.</span>";
     }
     if (avg > 660) {
       return "<span><strong>Marathon extrême.</strong> " + h + " heures par jour, tous les " +
-        "jours jusqu'au 1<sup>er</sup> janvier. Tenable en congés, pas en semaine de " +
-        "travail.</span>";
+        "jours jusqu'à la séance. Tenable en congés, pas en semaine de travail.</span>";
     }
     if (avg > 420) {
-      return "<span><strong>Très exigeant.</strong> " + h + " heures par jour pendant " +
-        "109 jours&nbsp;: il faut y consacrer chaque soirée entière, plus les week-ends.</span>";
+      return "<span><strong>Très exigeant.</strong> " + h + " heures par jour pendant quatre " +
+        "mois&nbsp;: il faut y consacrer chaque soirée entière, plus les week-ends.</span>";
     }
-    if (avg > 240) {
-      return "<span><strong>Soutenu, mais tenable.</strong> " + t + " heures réparties " +
-        "jusqu'au 1<sup>er</sup> janvier font " + h + " heures par jour&nbsp;: une longue " +
-        "soirée quotidienne, sans sauter de jour. Chaque journée manquée se rattrape sur " +
-        "les suivantes — trois jours sautés, c'est une soirée double à prévoir.</span>";
+    if (avg > 210) {
+      return "<span><strong>Soutenu, mais tenable.</strong> " + t + " heures étalées sur " +
+        "quatre mois font " + h + " heures par jour&nbsp;: une soirée quotidienne, sans " +
+        "sauter de jour. Chaque journée manquée se rattrape sur les suivantes — trois jours " +
+        "sautés, c'est une soirée double à prévoir. Au bout&nbsp;: <i>Doomsday</i>, le " +
+        "18&nbsp;janvier, un mois après sa sortie.</span>";
     }
-    return "<span><strong>Confortable.</strong> " + h + " heures par jour jusqu'au " +
-      "1<sup>er</sup> janvier, soit " + t + " heures en tout. Les journées sans rien à " +
-      "regarder sont marquées <i>repos</i>&nbsp;: elles servent de rattrapage.</span>";
+    return "<span><strong>Confortable.</strong> " + h + " heures par jour jusqu'à la séance " +
+      "du 18 janvier, soit " + t + " heures en tout. Les journées sans rien à regarder sont " +
+      "marquées <i>repos</i>&nbsp;: elles servent de rattrapage.</span>";
   }
 
   /* Un bloc étalé sur plusieurs dates perd la plage d'épisodes de son titre,
