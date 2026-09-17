@@ -432,6 +432,24 @@
   .chip.warn { color: var(--warn); }
   .chip.crit { color: var(--crit); }
   .chip.rest { color: var(--ink-faint); }
+
+  .day-all {
+    display: block;
+    margin: 6px 0 0 auto;
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--ink-faint);
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    cursor: pointer;
+  }
+  .day-all:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .day-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .chip.finale { color: var(--accent); border-color: var(--accent); }
   .chip.today { color: var(--accent); border-color: var(--accent); font-weight: 600; }
 
@@ -563,6 +581,7 @@
     .day-num em { font-size: 9.5px; letter-spacing: 0; }
     .day-num strong { font-size: 1.5rem; }
     .day-load { grid-column: 2; text-align: left; padding: 0 16px 14px; }
+    .day-all { margin-left: 0; }
     .day-title { padding: 14px 16px 6px 0; }
     ol.entries > li { grid-template-columns: 88px 22px 1fr; }
     .e-idx { padding: 9px 8px; font-size: 11px; gap: 7px; }
@@ -681,9 +700,11 @@
         devient « ép. 1 à 6 » un jour et « ép. 7 à 13 » le lendemain. C'est ce qui rend les
         journées régulières&nbsp;: sans cela, <i>Agents of SHIELD — S2, épisodes 1 à 19</i>
         imposerait à lui seul une journée de 13&nbsp;h&nbsp;37.</li>
-      <li><b>Cases à cocher</b>&nbsp;: une entrée étalée sur plusieurs dates n'a qu'une seule
-        case, répétée. La cocher marque le bloc entier comme vu, et la progression compte
-        alors sa durée complète&nbsp;: coche-la le jour où tu finis le bloc.</li>
+      <li><b>Cases à cocher</b>&nbsp;: <i>tout cocher</i>, en haut à droite de chaque journée,
+        marque la journée entière d'un clic — et la rebascule ensuite. Une entrée étalée sur
+        plusieurs dates n'a qu'une seule case, répétée&nbsp;: la cocher marque le bloc entier
+        comme vu, et la progression compte alors sa durée complète. Tout est enregistré dans
+        ce navigateur, sur cet appareil seulement.</li>
       <li><b>Jours de repos</b>&nbsp;: les films et les one-shots, eux, restent insécables.
         Quand un parcours en compte moins que le calendrier n'a de dates — c'est le cas de
         <i>Films &amp; one-shots</i> — les dates excédentaires deviennent des journées de
@@ -1218,6 +1239,12 @@
     return ["crit", "hors rythme"];
   }
 
+  var lastPlan = [];
+
+  function allSeen(day) {
+    return day.items.length > 0 && day.items.every(function (r) { return seen[r.it[0]]; });
+  }
+
   function dayTitle(day) {
     if (day.finale) return "La séance · Avengers: Doomsday";
     if (!day.items.length) return "Repos · rattrapage";
@@ -1257,6 +1284,8 @@
     var avg = total / DAYS;
     verdictEl.innerHTML = verdict(avg, total);
 
+    lastPlan = plan;
+
     daysEl.innerHTML = plan.map(function (day, idx) {
       var rest = !day.items.length;
       var lc = day.finale ? ["finale", "la séance"]
@@ -1271,11 +1300,28 @@
           '<h2 class="day-title">' + esc(dayTitle(day)) + '</h2>' +
           '<div class="day-load"><b>' + hm(day.min) + '</b>' +
             (today ? '<span class="chip today">aujourd\'hui</span> ' : "") +
-            '<span class="chip ' + lc[0] + '">' + lc[1] + '</span></div>' +
+            '<span class="chip ' + lc[0] + '">' + lc[1] + '</span>' +
+            (rest ? "" : '<button type="button" class="day-all" data-day="' + idx + '">' +
+              (allSeen(day) ? "tout décocher" : "tout cocher") + '</button>') +
+          '</div>' +
         '</div>' +
         (rest ? "" : '<ol class="entries">' + day.items.map(row).join("") + '</ol>') +
       '</section>';
     }).join("");
+
+    daysEl.querySelectorAll(".day-all").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var day = lastPlan[Number(btn.dataset.day)];
+        var marking = !allSeen(day);
+
+        day.items.forEach(function (r) {
+          if (marking) { seen[r.it[0]] = 1; } else { delete seen[r.it[0]]; }
+        });
+
+        save();
+        render();   // une entrée peut s'étaler sur d'autres dates : tout resynchroniser
+      });
+    });
 
     daysEl.querySelectorAll("input[type=checkbox]").forEach(function (box) {
       box.addEventListener("change", function () {
