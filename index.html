@@ -531,6 +531,9 @@
   li.done .e-note { color: var(--ink-faint); }
   li.done .e-title { text-decoration: line-through; text-decoration-thickness: 1px; }
 
+  /* épisodes suivants d'un même bloc : le titre n'est pas répété */
+  li.suite .e-title { font-weight: 500; color: var(--ink-soft); }
+
   li.ref .e-body { font-style: italic; color: var(--ink-faint); }
   li.ref .e-title { font-weight: 500; color: var(--ink-faint); }
 
@@ -700,11 +703,15 @@
         devient « ép. 1 à 6 » un jour et « ép. 7 à 13 » le lendemain. C'est ce qui rend les
         journées régulières&nbsp;: sans cela, <i>Agents of SHIELD — S2, épisodes 1 à 19</i>
         imposerait à lui seul une journée de 13&nbsp;h&nbsp;37.</li>
-      <li><b>Cases à cocher</b>&nbsp;: <i>tout cocher</i>, en haut à droite de chaque journée,
-        marque la journée entière d'un clic — et la rebascule ensuite. Une entrée étalée sur
-        plusieurs dates n'a qu'une seule case, répétée&nbsp;: la cocher marque le bloc entier
-        comme vu, et la progression compte alors sa durée complète. Tout est enregistré dans
-        ce navigateur, sur cet appareil seulement.</li>
+      <li><b>Une case par épisode.</b> Chaque épisode a sa propre ligne, sa durée et sa case&nbsp;:
+        s'arrêter au milieu d'une saison se coche exactement. Le titre du bloc n'est écrit que
+        sur le premier épisode de la journée, les suivants n'affichent que leur numéro.
+        <i>Tout cocher</i>, en haut à droite d'une journée, bascule la journée entière.</li>
+      <li><b>Enregistrement</b>&nbsp;: la progression est stockée sur ton compte, pas dans le
+        navigateur — elle survit à la fermeture de la page et te suit d'un appareil à l'autre.
+        La ligne sous les parcours dit où en est l'enregistrement&nbsp;; si elle passe en
+        orange, c'est que la page tourne hors de ton compte et que seul le stockage local,
+        moins fiable, est disponible.</li>
       <li><b>Jours de repos</b>&nbsp;: les films et les one-shots, eux, restent insécables.
         Quand un parcours en compte moins que le calendrier n'a de dates — c'est le cas de
         <i>Films &amp; one-shots</i> — les dates excédentaires deviennent des journées de
@@ -958,11 +965,25 @@
     }
   };
 
-  var STORE = "marvel-marathon-v1";
+  var STORE = "marvel-marathon-v2";
 
-  // Certains navigateurs refusent le stockage (navigation privée, cookies tiers
-  // bloqués, page dans une iframe cloisonnée). On le teste une fois pour pouvoir
-  // le dire clairement plutôt que de perdre la progression en silence.
+  /* ÉTAT DE PROGRESSION
+     ------------------
+     Une clé par épisode : "35:7" pour l'épisode 7 de l'entrée n°35, et le
+     simple numéro pour ce qui ne se découpe pas (films, one-shots, repères).
+
+     Deux enregistrements en parallèle :
+       - le stockage local, immédiat, qui sert de cache d'affichage ;
+       - la base de l'artifact (capacité « db »), qui est la vraie mémoire.
+     Le stockage local seul ne suffisait pas : dans le lecteur d'artifact la
+     page tourne dans un cadre isolé dont le stockage peut être bloqué ou
+     vidé entre deux visites, et il ne suit de toute façon ni d'un appareil
+     ni d'un navigateur à l'autre. La base, elle, est rattachée au compte :
+     la progression y survit et se synchronise entre appareils. */
+
+  var seen = {};
+  var mode = "all";
+
   var canStore = (function () {
     try {
       window.localStorage.setItem(STORE + ":test", "1");
@@ -971,46 +992,147 @@
     } catch (e) { return false; }
   })();
 
-  var saved = load();
-  var seen = saved.seen;
-  var mode = saved.mode;
+  var db = null;          // référence de document, une fois la capacité prête
+  var dbState = "wait";   // wait · ok · local  (local = pas de base ici)
+  var applying = false;   // garde-fou : ne pas réécrire ce qu'on vient de lire
+  var writing = false;
+  var pendingWrite = false;
 
-  function load() {
-    var empty = { seen: {}, mode: "all" };
-    if (!canStore) return empty;
-    try {
-      var raw = window.localStorage.getItem(STORE);
-      if (!raw) return empty;
-      var data = JSON.parse(raw);
-      // format initial : l'objet entier était la liste des entrées vues
-      if (!data || typeof data !== "object") return empty;
-      if (!data.seen) return { seen: data, mode: "all" };
-      return { seen: data.seen, mode: MODES[data.mode] ? data.mode : "all" };
-    } catch (e) { return empty; }
+  function unitKey(it, ep) {
+    return ep ? it[0] + ":" + ep : String(it[0]);
   }
 
-  function save() {
+  /* Les versions précédentes cochaient un bloc entier sous son seul numéro.
+     On le convertit en épisodes pour ne pas perdre la progression. */
+  function migrate(raw) {
+    var out = {};
+    Object.keys(raw || {}).forEach(function (k) {
+      if (!raw[k]) return;
+      var ep = EPISODES[k];
+      if (/^\d+$/.test(k) && ep && ep[1] > 1) {
+        for (var i = 0; i < ep[1]; i++) { out[k + ":" + (ep[0] + i)] = 1; }
+      } else {
+        out[k] = 1;
+      }
+    });
+    return out;
+  }
+
+  function loadLocal() {
+    if (!canStore) return;
+    try {
+      var raw = window.localStorage.getItem(STORE) ||
+                window.localStorage.getItem("marvel-marathon-v1");
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      if (!data || typeof data !== "object") return;
+      seen = migrate(data.seen || data);
+      if (MODES[data.mode]) mode = data.mode;
+    } catch (e) { /* cache illisible : on repart de zéro */ }
+  }
+
+  function saveLocal() {
     if (!canStore) return;
     try {
       window.localStorage.setItem(STORE, JSON.stringify({ seen: seen, mode: mode }));
     } catch (e) { canStore = false; }
+  }
+
+  // Un seul écrivain à la fois sur le document, et jamais depuis le rendu.
+  function pushDb() {
+    if (!db || applying) return;
+    if (writing) { pendingWrite = true; return; }
+
+    writing = true;
+    db.set({ seen: seen, mode: mode, updatedAt: new Date().toISOString() })
+      .then(function () {
+        writing = false;
+        if (pendingWrite) { pendingWrite = false; pushDb(); }
+      })
+      .catch(function (err) {
+        writing = false;
+        pendingWrite = false;
+        // écriture refusée (droits, quota) : on le dit au lieu de faire croire
+        // que c'est enregistré
+        dbState = "local";
+        saveState(err && err.code);
+      });
+  }
+
+  function save() {
+    saveLocal();
+    pushDb();
     saveState();
   }
 
-  function saveState() {
+  function saveState(code) {
     var el = document.getElementById("saveState");
+    if (!el) return;
     var n = Object.keys(seen).length;
-    if (!canStore) {
-      el.className = "save-state blocked";
-      el.textContent = "⚠ Ce navigateur bloque le stockage local : les cases cochées seront " +
-        "perdues au rechargement.";
+    var vus = n ? n + (n > 1 ? " épisodes cochés" : " épisode coché") : "";
+
+    if (dbState === "ok") {
+      el.className = "save-state";
+      el.innerHTML = (n ? "✓ " + vus + " · enregistré" : "Enregistrement") +
+        " sur ton compte&nbsp;: la progression te suit d'un appareil à l'autre.";
       return;
     }
-    el.className = "save-state";
-    el.textContent = n
-      ? "✓ " + n + (n > 1 ? " entrées cochées, enregistrées" : " entrée cochée, enregistrée") +
-        " sur cet appareil"
-      : "Coche une entrée pour la marquer comme vue : la progression est enregistrée sur cet appareil.";
+
+    if (dbState === "wait") {
+      el.className = "save-state";
+      el.textContent = n ? vus + " · connexion à ton compte…" : "Connexion à ton compte…";
+      return;
+    }
+
+    el.className = "save-state blocked";
+    el.innerHTML = canStore
+      ? "⚠ Enregistrement sur cet appareil seulement" +
+        (code ? " (" + code + ")" : "") + "&nbsp;: ouvre la page depuis ton compte Claude " +
+        "pour que la progression te suive."
+      : "⚠ Ce navigateur bloque tout enregistrement&nbsp;: les cases cochées seront perdues " +
+        "au rechargement.";
+  }
+
+  /* La capacité arrive après le premier rendu, jamais pendant : la page
+     s'affiche sans elle, puis se resynchronise quand la base répond. */
+  function connectDb() {
+    if (!window.claude || !window.claude.use) { dbState = "local"; return saveState(); }
+
+    window.claude.use("db").then(function (store) {
+      if (!store) { dbState = "local"; return saveState(); }
+
+      db = store.doc("progress/state");
+      var first = true;
+
+      db.onSnapshot(function (snap) {
+        var data = snap.exists ? snap.data() : null;
+
+        if (first) {
+          first = false;
+          dbState = "ok";
+
+          // rien en base mais une progression locale : on la remonte
+          if (!data && Object.keys(seen).length) { pushDb(); saveState(); return; }
+        }
+
+        if (!data) { saveState(); return; }
+
+        applying = true;
+        seen = migrate(data.seen);
+        if (MODES[data.mode]) { mode = data.mode; }
+        applying = false;
+
+        saveLocal();
+        syncSeg();
+        render();
+      }, function (err) {
+        dbState = "local";
+        saveState(err && err.code);
+      });
+    }, function () {
+      dbState = "local";
+      saveState();
+    });
   }
 
   function hm(min) {
@@ -1164,14 +1286,15 @@
     for (i = 0; i < lastDate; i++) {
       var day = booked[i] || { units: [], min: 0 };
       day.date = dateAt(i);
-      day.items = collapse(day.units);
+      day.items = day.units;
       plan.push(day);
     }
 
     if (finale) {
+      var seance = [{ it: finale, ep: 0, min: finale[4], key: unitKey(finale, 0) }];
       plan.push({
-        units: [], min: finale[4], date: dateAt(DAYS - 1), finale: true,
-        items: [{ it: finale, from: 0, to: 0, min: finale[4] }]
+        units: seance, items: seance, min: finale[4],
+        date: dateAt(DAYS - 1), finale: true
       });
     }
 
@@ -1188,34 +1311,20 @@
       var ep = EPISODES[it[0]];
 
       if (!ep || ep[1] < 2 || !it[4]) {
-        units.push({ it: it, from: ep ? ep[0] : 0, to: ep ? ep[0] + ep[1] - 1 : 0, min: it[4] });
+        units.push({ it: it, ep: 0, min: it[4], key: unitKey(it, 0) });
         return;
       }
 
       var n = ep[1], base = Math.floor(it[4] / n), extra = it[4] - base * n;
       for (var k = 0; k < n; k++) {
-        units.push({ it: it, from: ep[0] + k, to: ep[0] + k, min: base + (k < extra ? 1 : 0) });
+        var num = ep[0] + k;
+        units.push({
+          it: it, ep: num, min: base + (k < extra ? 1 : 0), key: unitKey(it, num)
+        });
       }
     });
 
     return units;
-  }
-
-  // Recolle les épisodes consécutifs d'un même bloc tombés le même jour.
-  function collapse(units) {
-    var rows = [], last = null;
-
-    units.forEach(function (u) {
-      if (last && last.it === u.it) {
-        last.to = u.to;
-        last.min += u.min;
-        return;
-      }
-      last = { it: u.it, from: u.from, to: u.to, min: u.min };
-      rows.push(last);
-    });
-
-    return rows;
   }
 
   function sumUnits(units) {
@@ -1242,15 +1351,15 @@
   var lastPlan = [];
 
   function allSeen(day) {
-    return day.items.length > 0 && day.items.every(function (r) { return seen[r.it[0]]; });
+    return day.items.length > 0 && day.items.every(function (u) { return seen[u.key]; });
   }
 
   function dayTitle(day) {
     if (day.finale) return "La séance · Avengers: Doomsday";
     if (!day.items.length) return "Repos · rattrapage";
     var keys = [];
-    day.items.forEach(function (r) {
-      if (keys.indexOf(r.it[5]) === -1) keys.push(r.it[5]);
+    day.items.forEach(function (u) {
+      if (keys.indexOf(u.it[5]) === -1) keys.push(u.it[5]);
     });
     if (keys.length === 1) return ERAS[keys[0]];
     return ERAS[keys[0]] + " → " + ERAS[keys[keys.length - 1]];
@@ -1305,7 +1414,9 @@
               (allSeen(day) ? "tout décocher" : "tout cocher") + '</button>') +
           '</div>' +
         '</div>' +
-        (rest ? "" : '<ol class="entries">' + day.items.map(row).join("") + '</ol>') +
+        (rest ? "" : '<ol class="entries">' +
+          day.items.map(function (u, k) { return row(u, day.items[k - 1]); }).join("") +
+        '</ol>') +
       '</section>';
     }).join("");
 
@@ -1314,26 +1425,26 @@
         var day = lastPlan[Number(btn.dataset.day)];
         var marking = !allSeen(day);
 
-        day.items.forEach(function (r) {
-          if (marking) { seen[r.it[0]] = 1; } else { delete seen[r.it[0]]; }
+        day.items.forEach(function (u) {
+          if (marking) { seen[u.key] = 1; } else { delete seen[u.key]; }
         });
 
         save();
-        render();   // une entrée peut s'étaler sur d'autres dates : tout resynchroniser
+        render();
       });
     });
 
     daysEl.querySelectorAll("input[type=checkbox]").forEach(function (box) {
       box.addEventListener("change", function () {
         if (box.checked) { seen[box.value] = 1; } else { delete seen[box.value]; }
+        box.closest("li").classList.toggle("done", box.checked);
 
-        // une entrée étalée sur plusieurs dates apparaît plusieurs fois :
-        // la cocher une fois la marque partout, la progression comptant
-        // toujours l'entrée entière
-        daysEl.querySelectorAll('input[value="' + box.value + '"]').forEach(function (twin) {
-          twin.checked = box.checked;
-          twin.closest("li").classList.toggle("done", box.checked);
-        });
+        // le bouton de la journée doit refléter l'état complet
+        var head = box.closest("section").querySelector(".day-all");
+        if (head) {
+          head.textContent = allSeen(lastPlan[Number(head.dataset.day)])
+            ? "tout décocher" : "tout cocher";
+        }
 
         save();
         progress();
@@ -1378,48 +1489,46 @@
       "marquées <i>repos</i>&nbsp;: elles servent de rattrapage.</span>";
   }
 
-  /* Un bloc étalé sur plusieurs dates perd la plage d'épisodes de son titre,
-     qui décrirait le bloc entier et non la part du jour : « Agents of SHIELD
-     — S1, épisodes 1 à 7 » devient « Agents of SHIELD — S1 · ép. 1 à 4 ». */
-  function partLabel(r) {
-    return r.from === r.to ? "ép. " + r.from : "ép. " + r.from + " à " + r.to;
-  }
-
+  /* Une ligne d'épisode perd la plage du titre, qui décrit le bloc entier :
+     « Agents of SHIELD — S1, épisodes 1 à 7 » devient « Agents of SHIELD
+     — S1 · ép. 3 ». */
   function trimRange(title) {
     return title.replace(/\s*[—,]\s*épisodes?\s+\d+(?:\s*(?:à|et)\s*\d+)?\s*$/i, "");
   }
 
-  function row(r) {
-    var it = r.it, n = it[0], glyph = it[1], note = it[3], flag = it[7];
-    var ep = EPISODES[n];
-    var whole = !ep || ep[1] < 2 || (r.to - r.from + 1) >= ep[1];
-    var title = whole ? it[2] : trimRange(it[2]) + " · " + partLabel(r);
-    var isRef = flag === "ref";
-    var done = !!seen[n];
+  function row(u, prev) {
+    var it = u.it, n = it[0], glyph = it[1], note = it[3], flag = it[7];
+    var suite = prev && prev.it === it;   // même bloc que la ligne du dessus
+    var title = !u.ep ? it[2]
+              : suite ? "ép. " + u.ep
+              : trimRange(it[2]) + " · ép. " + u.ep;
+    var done = !!seen[u.key];
     var cls = [];
-    if (isRef) cls.push("ref");
+    if (flag === "ref") cls.push("ref");
     if (done) cls.push("done");
+    if (suite) cls.push("suite");
 
     return '<li class="' + cls.join(" ") + '">' +
       '<div class="e-idx">' +
-        '<span>' + n + '</span>' +
-        '<input type="checkbox" value="' + n + '"' + (done ? " checked" : "") +
-          ' aria-label="Vu : ' + esc(title) + '">' +
+        '<span>' + (suite ? "" : n) + '</span>' +
+        '<input type="checkbox" value="' + u.key + '"' + (done ? " checked" : "") +
+          ' aria-label="Vu : ' + esc(!u.ep ? it[2] : trimRange(it[2]) + ", épisode " + u.ep) +
+          '">' +
       '</div>' +
-      '<div class="e-glyph" aria-hidden="true">' + glyph + '</div>' +
+      '<div class="e-glyph" aria-hidden="true">' + (suite ? "" : glyph) + '</div>' +
       '<div class="e-body">' +
         '<span class="e-title">' + esc(title) +
-          (flag === "alt" ? '<span class="alt">⚠️ alt</span>' : "") + '</span>' +
-        (whole && note ? '<span class="e-note">' + esc(note) + "</span>" : "") +
+          (!u.ep && flag === "alt" ? '<span class="alt">⚠️ alt</span>' : "") + '</span>' +
+        (!u.ep && note ? '<span class="e-note">' + esc(note) + "</span>" : "") +
       '</div>' +
-      '<div class="e-dur">' + (r.min ? hm(r.min) : "—") + "</div>" +
+      '<div class="e-dur">' + (u.min ? hm(u.min) : "—") + "</div>" +
     "</li>";
   }
 
   function progress() {
-    var list = pick();
-    var total = sum(list) || 1;
-    var done = list.reduce(function (s, it) { return s + (seen[it[0]] ? it[4] : 0); }, 0);
+    var units = expand(pick());
+    var total = sumUnits(units) || 1;
+    var done = units.reduce(function (s, u) { return s + (seen[u.key] ? u.min : 0); }, 0);
     var p = Math.round((done / total) * 100);
     fillEl.style.width = p + "%";
     pctEl.textContent = p + " % · " + hoursOnly(done) + " h vues";
@@ -1448,14 +1557,16 @@
 
   document.getElementById("reset").addEventListener("click", function () {
     if (Object.keys(seen).length &&
-        !window.confirm("Décocher toutes les entrées vues ? Cette action est définitive.")) return;
+        !window.confirm("Décocher tous les épisodes vus ? Cette action est définitive.")) return;
     seen = {};
     save();
     render();
   });
 
+  loadLocal();
   syncSeg();
   render();
+  connectDb();
 })();
 </script>
 </body>
