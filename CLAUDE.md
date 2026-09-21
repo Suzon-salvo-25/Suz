@@ -14,6 +14,9 @@ rapport. **Ne pas y toucher.**
 | Code | `perte-de-poids.html`, branche `claude/programme-perte-poids-u5p9gy` |
 | Application en ligne | https://claude.ai/artifact/3LM1PhEuLuXapTZoGMUeyJ |
 | Harnais de test | `outils/verifie.mjs` |
+| Fiches d'aliments, par domaine | `donnees/aliments/*.json` |
+| Fusion et contrôles | `outils/fusionne-marques.mjs` |
+| Imports en masse | `outils/importe-ciqual.mjs`, `outils/importe-openfoodfacts.mjs` |
 
 ## Publier une nouvelle version
 
@@ -46,10 +49,25 @@ Capacités déclarées, à reconduire à chaque publication :
 Un seul module anonyme. Dans l'ordre : données, stockage, calculs, rendus,
 événements, démarrage.
 
-**Données en dur** : `ALIMENTS` (379 entrées `[nom, kcal, prot, gluc, lip,
+**Données en dur** : `ALIMENTS` (3 332 entrées `[nom, kcal, prot, gluc, lip,
 catégorie, portion_g, libellé]` pour 100 g) et `SPORTS` (`[nom, MET,
 catégorie, type?]`, le type valant `course`, `marche`, `velo` ou `nage` pour
 les disciplines à distance).
+
+Les 379 premières entrées sont tenues à la main. Les suivantes vivent dans
+`donnees/aliments/*.json`, un fichier par domaine, et sont injectées entre
+les deux marqueurs `Marques — complément de recherche (généré)` et
+`fin du complément de recherche`. **Ne pas éditer ce bloc à la main** : il
+est réécrit à chaque fusion. Corriger le JSON, puis relancer.
+
+```bash
+node outils/fusionne-marques.mjs            # contrôle et rapport
+node outils/fusionne-marques.mjs --injecte  # puis réécriture de la base
+```
+
+Les fiches tenues à la main passent avant les imports en masse et gardent
+la place en cas de doublon : elles portent la vraie portion, « 1 œuf »
+plutôt que 100 g.
 
 **Modèle** : `profil/moi` et un document par jour, `jours/AAAA-MM-JJ`,
 contenant poids, heure, tour de taille, eau, repas et séances.
@@ -81,6 +99,14 @@ en parallèle. Le mode est affiché en bas de page.
 - **Ne jamais inventer une valeur nutritionnelle de marque.** Sourcer, ou
   omettre. Contrôle systématique : les calories doivent être proches de
   4×protéines + 4×glucides + 9×lipides, à 20 % près, sauf alcool.
+  `outils/fusionne-marques.mjs` applique ce contrôle et refuse le reste ;
+  il a déjà rattrapé une inversion kJ/kcal et deux protéines aberrantes.
+  Pour l'alcool, l'éthanol apporte 7 kcal/g sans figurer dans les macros :
+  les fiches portent `"alcool": true` et sont jugées sur les grammes
+  d'alcool que l'écart implique.
+- **Le générique vient de Ciqual, la marque vient de l'étiquette.** La table
+  de l'Anses couvre les aliments sans marque, cuissons comprises ; les
+  produits d'enseigne n'y sont pas et relèvent d'Open Food Facts.
 - **Les plats maison se calculent depuis leurs ingrédients**, déjà présents
   dans la base, jamais au jugé.
 - Étiquettes : Maison, Marque, Industriel, Générique, Estimé. La dernière est
@@ -117,15 +143,60 @@ Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la
 plupart des bugs ci-dessus. Un test qui passe sans lui ne prouve rien : les
 trois défauts les plus coûteux n'apparaissaient que sur la version publiée.
 
+## L'accès au web, et ce qu'on fait quand il manque
+
+Ce qui a coûté le plus cher jusqu'ici n'est pas la recherche, c'est son
+accès. Deux limites à connaître avant de lancer quoi que ce soit :
+
+- **Le budget `WebSearch` est compté par session** (200 appels) et **partagé
+  par tous les agents**. Huit agents lancés ensemble l'épuisent en quelques
+  minutes. Prévoir une session neuve, et lancer moins d'agents à la fois.
+- **La politique d'egress peut bloquer les sources.** Lors de la session du
+  21 septembre, `openfoodfacts.org`, `ciqual.anses.fr`, `data.gouv.fr` et
+  les sites d'enseignes répondaient tous 403 au CONNECT. Vérifier d'abord :
+  `curl -sS "$HTTPS_PROXY/__agentproxy/status"`.
+
+**GitHub et les registres de paquets, eux, répondent.** C'est la porte de
+sortie : la table Ciqual y est publiée convertie en JSON, et c'est ainsi
+que les 2 837 aliments génériques sont entrés sans toucher au web.
+
+```bash
+git clone --depth 1 https://github.com/LaurentPortefaix/waistline-ciqual
+node outils/importe-ciqual.mjs waistline-ciqual/waistline_ciqual.json
+```
+
+Un import en masse ne court-circuite aucun contrôle : il écrit un JSON de
+plus dans `donnees/aliments`, qui repasse par la fusion comme les autres.
+
 ## Reste à faire
 
-Compléter la base de marques françaises par recherche web, un domaine par
-agent, en écrivant les résultats dans des fichiers JSON séparés puis en les
-fusionnant avec contrôle de cohérence. Le budget de recherche web est compté
-par session : prévoir une session neuve.
+**Les produits d'enseigne : Carrefour, Lidl et les autres.** C'est la
+demande explicite de Suzon, et c'est le seul manque important qui reste.
+Ces produits ne sont pas dans Ciqual, qui ne connaît pas les marques. Ils
+sont dans Open Food Facts, dont l'export complet se télécharge sur
+https://world.openfoodfacts.org/data. `outils/importe-openfoodfacts.mjs`
+est écrit et attend ce fichier :
 
-Non couvert à ce jour : bières et spiritueux, confiseries (Côte d'Or,
-Toblerone, Kit Kat, Mars, Haribo, Carambar), traiteur de la mer (Labeyrie,
-Coraya, Connétable, Saupiquet), restauration rapide hors McDonald's, pain et
-viennoiserie industrielle, apéritif salé, sauces (Amora, Heinz, Lesieur,
-Maille, Bénédicta), et les œufs.
+```bash
+node outils/importe-openfoodfacts.mjs en.openfoodfacts.org.products.csv.gz \
+     --marques "Carrefour,Lidl" --max 400
+```
+
+Il filtre sur la France, exige les quatre macros, applique Atwater, et
+garde les plus scannés d'abord, un catalogue d'enseigne comptant des
+milliers de références dont on ne mange pas les milliers. **Il n'a jamais
+tourné sur un vrai export** : son entête et son classement des catégories
+sont à vérifier au premier passage.
+
+**Domaines de marques restés incomplets**, faute de budget de recherche :
+Lesieur et Bénédicta en entier, les sauces asiatiques, Domino's, Pizza Hut,
+Starbucks, O'Tacos, les viennoiseries surgelées, Wasa et les biscottes, les
+biscuits apéritifs (Belin, Tuc, Curly, Apéricube), les fruits secs salés,
+olives et cornichons. Un import Open Food Facts bien filtré en couvrirait
+la plus grande partie d'un coup, et plus sûrement qu'une recherche.
+
+**Points signalés, non tranchés** : la crème de cassis porte des valeurs
+pour 100 g et non 100 ml, ce qui la sous-estime d'environ 10 % ; quatre
+portions de pain de mie sont à 30 g par défaut et méritent vérification ;
+l'œuf au plat avec matière grasse vient de l'édition Ciqual 2020, l'Anses
+l'ayant retiré en 2025.
