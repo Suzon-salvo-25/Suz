@@ -4,7 +4,7 @@
  *   node outils/fusionne-marques.mjs --injecte  vérifie puis réécrit la base
  *
  * Les recherches sont faites un domaine à la fois et déposées dans
- * donnees/marques/*.json. Ce script les relit toutes, les contrôle, puis
+ * donnees/aliments/*.json. Ce script les relit toutes, les contrôle, puis
  * régénère le bloc délimité par les deux marqueurs dans perte-de-poids.html.
  *
  * Rien n'entre dans la base sans passer les contrôles : une valeur inventée
@@ -16,7 +16,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DOSSIER = path.join(RACINE, 'donnees', 'marques');
+const DOSSIER = path.join(RACINE, 'donnees', 'aliments');
 const PAGE = path.join(RACINE, 'perte-de-poids.html');
 const DEBUT = '  // --- Marques — complément de recherche (généré) ---';
 const FIN = '  // --- fin du complément de recherche ---';
@@ -34,10 +34,18 @@ const TITRES = {
   'pain-viennoiserie': 'pain et viennoiserie industrielle',
   'aperitif-sale': 'apéritif salé',
   'sauces': 'sauces et condiments',
-  'oeufs': 'œufs'
+  'oeufs': 'œufs',
+  'ciqual': 'table Ciqual de l\'Anses'
 };
 
 const nf = (n) => (Math.round(n * 10) / 10);
+
+/* Même pliage que la recherche de l'application : sans lui, « Oeuf dur » et
+   « Œuf dur » passent pour deux aliments et s'affichent tous les deux. */
+const plie = (s) => s
+  .replace(/Œ/g, 'OE').replace(/œ/g, 'oe').replace(/Æ/g, 'AE').replace(/æ/g, 'ae')
+  .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^a-z0-9]+/g, ' ').trim();
 const estNombre = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 
 /* Noms déjà dans la base, marqueur compris : une fiche en double masquerait
@@ -48,7 +56,7 @@ function nomsExistants(src) {
   const corps = src.slice(a, b);
   const d = corps.indexOf(DEBUT.trim());
   const avant = d === -1 ? corps : corps.slice(0, d);
-  return new Set([...avant.matchAll(/^\s*\["([^"]+)"/gm)].map((m) => m[1].toLowerCase()));
+  return new Set([...avant.matchAll(/^\s*\["([^"]+)"/gm)].map((m) => plie(m[1])));
 }
 
 function controle(fiche, domaine, deja, vus) {
@@ -87,7 +95,7 @@ function controle(fiche, domaine, deja, vus) {
       p.push('Atwater : ' + kcal + ' kcal annoncées contre ' + nf(atwater) + ' calculées');
   }
 
-  const cle = nom.toLowerCase();
+  const cle = plie(nom);
   if (deja.has(cle)) p.push('déjà présent dans la base');
   if (vus.has(cle)) p.push('doublon avec ' + TITRES[vus.get(cle)]);
   else vus.set(cle, domaine);
@@ -107,6 +115,16 @@ const deja = nomsExistants(src);
 const vus = new Map();
 const fichiers = fs.existsSync(DOSSIER)
   ? fs.readdirSync(DOSSIER).filter((f) => f.endsWith('.json')).sort() : [];
+
+/* Ciqual et Open Food Facts arrivent par milliers, avec des portions de
+   100 g faute de mieux. Les fiches tenues à la main portent la vraie
+   portion (« 1 œuf ») : elles passent d'abord, et gardent la place. */
+const EN_MASSE = ['ciqual', 'openfoodfacts'];
+fichiers.sort((a, b) => {
+  const ma = EN_MASSE.includes(a.replace(/\.json$/, '')) ? 1 : 0;
+  const mb = EN_MASSE.includes(b.replace(/\.json$/, '')) ? 1 : 0;
+  return ma - mb || a.localeCompare(b);
+});
 
 if (!fichiers.length) {
   console.error('Aucun fichier dans ' + DOSSIER + ' : rien à fusionner.');
