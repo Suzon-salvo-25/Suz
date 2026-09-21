@@ -182,12 +182,16 @@ button { cursor: pointer; }
   background: var(--panel);
   border: 2px solid var(--line-hard);
   border-radius: 999px;
-  width: 40px; height: 40px;
+  width: 42px; height: 42px;
+  padding: 0;
   display: grid; place-items: center;
-  font-size: 16px;
+  line-height: 0;
   box-shadow: var(--shadow);
   transition: transform .08s ease, box-shadow .08s ease;
 }
+/* Les caractères typographiques ne sont pas centrés dans leur cadratin :
+   des icônes dessinées le sont exactement, dans les deux thèmes. */
+.icon-btn svg { display: block; }
 .icon-btn:hover { transform: translate(1px,1px); box-shadow: 2px 2px 0 var(--line-hard); }
 .icon-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--line-hard); }
 .icon-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
@@ -937,9 +941,18 @@ td .etat.neutre { color: var(--ink-faint); }
       <p class="sub" id="brandSub">Suivi personnel</p>
     </div>
     <div class="mast-tools">
-      <button type="button" class="icon-btn" id="exportBtn" aria-label="Exporter mes données" title="Exporter mes données" hidden>↓</button>
-      <button type="button" class="icon-btn" id="themeBtn" aria-label="Changer de thème" title="Changer de thème">◐</button>
-      <button type="button" class="icon-btn" id="profilBtn" aria-label="Mon profil et réglages" title="Mon profil et réglages" aria-pressed="false">⚙</button>
+      <button type="button" class="icon-btn" id="exportBtn" aria-label="Exporter mes données" title="Exporter mes données" hidden>
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 20h15"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="Changer de thème" title="Changer de thème">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M12 3.6a8.4 8.4 0 0 1 0 16.8z" fill="currentColor"/>
+        </svg>
+      </button>
+      <button type="button" class="icon-btn" id="profilBtn" aria-label="Mon profil et réglages" title="Mon profil et réglages" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7h10M17.7 7h2.8"/><circle cx="15.6" cy="7" r="2.1"/><path d="M3.5 12h4M11.6 12h8.9"/><circle cx="9.5" cy="12" r="2.1"/><path d="M3.5 17h8M15.6 17h4.9"/><circle cx="13.5" cy="17" r="2.1"/></svg>
+      </button>
     </div>
   </header>
 
