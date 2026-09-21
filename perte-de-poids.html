@@ -1830,8 +1830,17 @@ var SPORTS = [
       sport: []
     };
   }
+  /* Les documents livrés par le serveur sont gelés : écrire dans un de leurs
+     objets lève « object is not extensible » et interrompt l'action en cours.
+     On en prend donc une copie libre avant de la ranger dans l'état. */
+  function copieLibre(x) {
+    if (!x || typeof x !== "object") return x;
+    try { return JSON.parse(JSON.stringify(x)); } catch (e) { return null; }
+  }
+
   function normJour(raw, date) {
     var j = jourVide(date);
+    raw = copieLibre(raw);
     if (!raw || typeof raw !== "object") return j;
     j.poids = (typeof raw.poids === "number" && isFinite(raw.poids)) ? raw.poids : null;
     j.heure = (typeof raw.heure === "string" && /^\d{1,2}:\d{2}$/.test(raw.heure)) ? raw.heure : null;
@@ -1847,6 +1856,7 @@ var SPORTS = [
   }
   function normProfil(raw) {
     var p = profilVide();
+    raw = copieLibre(raw);
     if (!raw || typeof raw !== "object") return p;
     ["prenom", "sexe", "debut"].forEach(function (k) { if (typeof raw[k] === "string") p[k] = raw[k]; });
     ["age", "taille", "depart", "objectif", "activite", "rythme", "seances"].forEach(function (k) {
@@ -1854,7 +1864,13 @@ var SPORTS = [
     });
     if (p.sexe !== "h" && p.sexe !== "f") p.sexe = "f";
     ["freq", "perso"].forEach(function (k) {
-      if (raw[k] && typeof raw[k] === "object" && !Array.isArray(raw[k])) p[k] = raw[k];
+      if (raw[k] && typeof raw[k] === "object" && !Array.isArray(raw[k])) {
+        p[k] = {};
+        Object.keys(raw[k]).forEach(function (n) {
+          var v = raw[k][n];
+          if (typeof v === "number" && isFinite(v)) p[k][n] = v;
+        });
+      }
     });
     return p;
   }
@@ -2536,7 +2552,9 @@ var SPORTS = [
 
   function noteUsage(nom) {
     var p = P();
-    if (!p.freq) p.freq = {};
+    if (!p.freq || Object.isFrozen(p.freq) || !Object.isExtensible(p.freq)) {
+      p.freq = Object.assign({}, p.freq || {});
+    }
     p.freq[nom] = (p.freq[nom] || 0) + 1;
     var cles = Object.keys(p.freq);
     if (cles.length > 60) {
@@ -3512,7 +3530,9 @@ var SPORTS = [
     var court = nom.slice(0, 60);
     J().repas[repas].push({ n: court, d: r.detail, k: r.total, p: 0, g: 0, l: 0 });
     var p = P();
-    if (!p.perso) p.perso = {};
+    if (!p.perso || Object.isFrozen(p.perso) || !Object.isExtensible(p.perso)) {
+      p.perso = Object.assign({}, p.perso || {});
+    }
     p.perso[court] = r.total;
     noteUsage(court);
     Store.sauveJour(dateCourante);
@@ -3715,17 +3735,27 @@ var SPORTS = [
     }).join("") + '</optgroup>';
   }).join("");
 
+  // Au premier affichage le profil distant n'est pas encore arrivé : on ouvre
+  // les réglages. Dès qu'il arrive complet, on rejoint l'onglet attendu.
+  var force_reglages = false;
+  var onglet_voulu = "poids";
+
   Store.onChange = function () {
+    if (force_reglages && ongletActif === "profil" && P().taille && P().age) {
+      force_reglages = false;
+      montreOnglet(onglet_voulu);
+    }
     renderTout();
   };
 
   demarrerStockage(function () {
-    var ong = "profil";
+    var ong = "poids";
     try {
       var o = window.localStorage.getItem("suz-forme-onglet");
       if (o && ["profil", "alim", "poids", "sport"].indexOf(o) !== -1) ong = o;
     } catch (e) {}
-    if (!P().taille || !P().age) ong = "profil";
+    onglet_voulu = (ong === "profil") ? "poids" : ong;
+    if (!P().taille || !P().age) { force_reglages = true; ong = "profil"; }
     montreOnglet(ong);
     renderTout();
   });
