@@ -1089,7 +1089,7 @@ td .up { color: var(--crit); font-weight: 700; }
   <section id="panel-sport" role="tabpanel" aria-labelledby="tab-sport" hidden>
 
     <div class="card blue">
-      <header><h2>Ajouter une séance</h2><span class="hint">Calcul par intensité</span></header>
+      <header><h2>Ajouter une séance</h2><span class="hint">Distance, durée, allure</span></header>
       <div class="body">
         <div class="row-inline">
           <div class="field" style="flex:3 1 210px">
@@ -1137,7 +1137,8 @@ td .up { color: var(--crit); font-weight: 700; }
     <h2>À savoir</h2>
     <ul>
       <li><b>Le métabolisme de base</b> vient de la formule de Mifflin-St Jeor, la plus fiable en population générale. C'est une estimation : ton métabolisme réel peut s'en écarter de 10 % environ.</li>
-      <li><b>Les calories du sport</b> se calculent avec les équivalents métaboliques, la méthode de référence. Elles dépendent de ton poids du moment, donc elles baissent naturellement à mesure que tu perds.</li>
+      <li><b>Course, marche, vélo et natation se saisissent comme sur Strava</b> : distance en kilomètres, durée en heures et minutes, allure en minutes par kilomètre. Quand tu donnes la distance, l'allure est calculée depuis ta séance réelle et les calories suivent les équations de l'American College of Sports Medicine, dont dérivent les équivalents métaboliques habituels. Sans distance, choisis ton allure dans la liste.</li>
+      <li><b>Les calories du sport</b> dépendent de ton poids du moment, donc elles baissent naturellement à mesure que tu perds.</li>
       <li><b>Le niveau d'activité du profil ne compte pas les séances de sport.</b> Elles s'ajoutent quand tu les saisis, sinon elles seraient comptées deux fois.</li>
       <li><b>Un kilogramme de masse grasse vaut environ 7 700 kcal.</b> C'est ce qui relie le déficit quotidien au rythme de perte affiché.</li>
       <li><b>La moyenne sur sept jours est la seule lecture honnête du poids.</b> D'un jour à l'autre, ce sont surtout l'eau, le sel et le transit qui bougent, pas la graisse.</li>
@@ -2844,53 +2845,53 @@ var SPORTS = [
   // min/km à pied, km/h à vélo, min/100 m en bassin. [libellé, km/h]
   var ALLURES = {
     course: [
-      ["8:00 /km — footing très lent", 7.5],
-      ["7:30 /km — footing lent", 8.0],
-      ["7:00 /km — endurance tranquille", 8.6],
-      ["6:30 /km — endurance", 9.2],
-      ["6:00 /km — endurance active", 10.0],
+      ["8:00 /km · très lent", 7.5],
+      ["7:30 /km · footing", 8.0],
+      ["7:00 /km · tranquille", 8.6],
+      ["6:30 /km · endurance", 9.2],
+      ["6:00 /km · active", 10.0],
       ["5:45 /km", 10.4],
-      ["5:30 /km — allure soutenue", 10.9],
+      ["5:30 /km · soutenue", 10.9],
       ["5:15 /km", 11.4],
-      ["5:00 /km — allure rapide", 12.0],
+      ["5:00 /km · rapide", 12.0],
       ["4:45 /km", 12.6],
-      ["4:30 /km — seuil", 13.3],
+      ["4:30 /km · seuil", 13.3],
       ["4:15 /km", 14.1],
-      ["4:00 /km — très rapide", 15.0],
+      ["4:00 /km · très rapide", 15.0],
       ["3:45 /km", 16.0],
-      ["3:30 /km — allure de compétition", 17.1],
+      ["3:30 /km · compétition", 17.1],
       ["3:15 /km", 18.5]
     ],
     marche: [
-      ["17:00 /km — flânerie", 3.5],
-      ["15:00 /km — marche tranquille", 4.0],
-      ["13:20 /km — marche normale", 4.5],
-      ["12:00 /km — bon pas", 5.0],
+      ["17:00 /km · flânerie", 3.5],
+      ["15:00 /km · tranquille", 4.0],
+      ["13:20 /km · normale", 4.5],
+      ["12:00 /km · bon pas", 5.0],
       ["11:00 /km", 5.5],
-      ["10:00 /km — marche rapide", 6.0],
-      ["9:15 /km — marche sportive", 6.5],
-      ["8:35 /km — marche athlétique", 7.0]
+      ["10:00 /km · rapide", 6.0],
+      ["9:15 /km · sportive", 6.5],
+      ["8:35 /km · athlétique", 7.0]
     ],
     velo: [
-      ["14 km/h — balade", 14],
-      ["16 km/h — promenade", 16],
-      ["18 km/h — rythme tranquille", 18],
-      ["20 km/h — régulier", 20],
-      ["22 km/h — soutenu", 22],
-      ["24 km/h — rapide", 24],
-      ["26 km/h — très rapide", 26],
+      ["14 km/h · balade", 14],
+      ["16 km/h · promenade", 16],
+      ["18 km/h · tranquille", 18],
+      ["20 km/h · régulier", 20],
+      ["22 km/h · soutenu", 22],
+      ["24 km/h · rapide", 24],
+      ["26 km/h · très rapide", 26],
       ["28 km/h", 28],
-      ["30 km/h — peloton", 30],
-      ["33 km/h — course", 33]
+      ["30 km/h · peloton", 30],
+      ["33 km/h · course", 33]
     ],
     nage: [
-      ["3:00 /100 m — tranquille", 2.0],
+      ["3:00 /100 m · tranquille", 2.0],
       ["2:40 /100 m", 2.25],
-      ["2:20 /100 m — régulier", 2.57],
-      ["2:00 /100 m — soutenu", 3.0],
+      ["2:20 /100 m · régulier", 2.57],
+      ["2:00 /100 m · soutenu", 3.0],
       ["1:50 /100 m", 3.27],
-      ["1:40 /100 m — rapide", 3.6],
-      ["1:30 /100 m — compétition", 4.0]
+      ["1:40 /100 m · rapide", 3.6],
+      ["1:30 /100 m · compétition", 4.0]
     ]
   };
   var ALLURE_DEFAUT = { course: 4, marche: 3, velo: 3, nage: 2 };
