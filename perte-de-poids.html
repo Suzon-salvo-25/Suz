@@ -674,6 +674,50 @@ td .up { color: var(--crit); font-weight: 700; }
 .sync.on .dot { background: var(--ok); }
 .sync.off .dot { background: var(--warn); }
 
+.donut-zone {
+  display: flex; gap: 22px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.donut-zone svg { flex: 0 0 292px; max-width: 100%; height: auto; }
+.donut-zone svg text { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.donut-zone .centre-val { font-family: var(--f-display); font-weight: 800; letter-spacing: -.03em; }
+
+.donut-leg { flex: 1 1 210px; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.donut-leg li {
+  display: grid; grid-template-columns: 14px 1fr auto; gap: 10px; align-items: baseline;
+  border-bottom: 1px solid var(--line); padding-bottom: 8px;
+}
+.donut-leg li:last-child { border-bottom: 0; padding-bottom: 0; }
+.donut-leg .pastille { width: 14px; height: 14px; border: 2px solid var(--line-hard); border-radius: 4px; align-self: center; }
+.donut-leg .nm2 { font-weight: 600; font-size: .9rem; }
+.donut-leg .nm2 small { display: block; font-weight: 400; font-size: .74rem; color: var(--ink-faint); }
+.donut-leg .ch { font-family: var(--f-mono); font-size: .88rem; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.donut-leg .ch b { display: block; font-family: var(--f-display); font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em; }
+
+.sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 18px; }
+.src {
+  border: 2px solid var(--line-hard); border-radius: var(--r-md);
+  background: var(--panel-2); padding: 12px 13px; min-width: 0;
+}
+.src h4 {
+  font-family: var(--f-display); font-weight: 800; font-size: .88rem; margin: 0 0 9px;
+  display: flex; align-items: center; gap: 7px; letter-spacing: -.01em;
+}
+.src h4 i { width: 12px; height: 12px; border: 2px solid var(--line-hard); border-radius: 3px; flex: none; }
+.src ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.src li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: baseline; font-size: .82rem; min-width: 0; }
+.src li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.src li b { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.src .jauge { grid-column: 1 / -1; height: 5px; background: var(--panel); border: 1.5px solid var(--line-hard); border-radius: 99px; overflow: hidden; margin-top: -3px; }
+.src .jauge i { display: block; height: 100%; }
+.src .rien { font-size: .8rem; color: var(--ink-faint); font-style: italic; }
+
+.items .mac {
+  display: block; font-style: normal; font-family: var(--f-mono);
+  font-size: .72rem; letter-spacing: .03em; color: var(--ink-faint); margin-top: 2px;
+}
+.items .mac em { font-style: normal; color: var(--ink-soft); font-weight: 600; }
+
 .verdict-bloc {
   display: flex; gap: 13px; align-items: flex-start;
   border: 2px solid var(--line-hard); border-radius: var(--r-md);
@@ -870,6 +914,8 @@ td .etat.neutre { color: var(--ink-faint); }
   .items .kc { grid-column: 1 / -1; }
   .macro-row { grid-template-columns: 1fr; gap: 4px; }
   .macro-row .mval { text-align: right; }
+  #bilanMacros { display: none; }
+  .donut-zone { gap: 6px; }
   .apercu span { flex: 1 1 calc(50% - 1px); }
   .apercu span:nth-child(2n) { border-right: 0; }
   .apercu span:nth-child(-n+2) { border-bottom: 2px solid var(--line-hard); }
@@ -1012,46 +1058,6 @@ td .etat.neutre { color: var(--ink-faint); }
   <!-- ============ ALIMENTATION ============ -->
   <section id="panel-alim" role="tabpanel" aria-labelledby="tab-alim" hidden>
 
-    <div class="card orange">
-      <header><h2>Énergie du jour</h2><span class="hint" id="alimHint"></span></header>
-      <div class="body">
-        <div class="kcal-gauge">
-          <div class="kcal-head">
-            <span><span class="big" id="kcalMange">0</span> <span class="of" id="kcalCible">kcal</span></span>
-            <span class="of" id="kcalReste"></span>
-          </div>
-          <div class="gauge-track"><span class="gauge-fill" id="kcalFill"></span></div>
-        </div>
-        <div class="macros" id="macroBars"></div>
-        <div id="bilanSem"></div>
-      </div>
-    </div>
-
-    <div class="card plain">
-      <header><h2>Bilan de la journée</h2><span class="hint" id="bilanHint"></span></header>
-      <div class="body">
-        <div id="bilanVerdict"></div>
-        <div class="table-scroll" id="bilanMacros"></div>
-        <ul class="checks" id="bilanChecks"></ul>
-      </div>
-    </div>
-
-    <div class="card blue">
-      <header><h2>Hydratation</h2><span class="hint">1 verre = 250 ml</span></header>
-      <div class="body">
-        <div class="water-top">
-          <span><span class="big" id="eauVal">0 L</span> <span class="of" id="eauCible"></span></span>
-          <span class="of" id="eauReste"></span>
-        </div>
-        <div class="glasses" id="glasses"></div>
-        <div class="water-btns">
-          <button type="button" class="btn sm" data-eau="250">+ Un verre</button>
-          <button type="button" class="btn sm" data-eau="500">+ Une bouteille</button>
-          <button type="button" class="btn sm ghost" data-eau="-250">Retirer un verre</button>
-        </div>
-      </div>
-    </div>
-
     <div class="card plain">
       <header><h2>Ajouter un aliment</h2><span class="hint">Base de <span id="nbAliments">0</span> aliments</span></header>
       <div class="body">
@@ -1140,6 +1146,48 @@ td .etat.neutre { color: var(--ink-faint); }
     <div class="card plain">
       <header><h2>Mes repas</h2><span class="hint" id="repasTotal"></span></header>
       <div class="body tight" id="repasListe"></div>
+    </div>
+
+    <div class="card blue">
+      <header><h2>Hydratation</h2><span class="hint">1 verre = 250 ml</span></header>
+      <div class="body">
+        <div class="water-top">
+          <span><span class="big" id="eauVal">0 L</span> <span class="of" id="eauCible"></span></span>
+          <span class="of" id="eauReste"></span>
+        </div>
+        <div class="glasses" id="glasses"></div>
+        <div class="water-btns">
+          <button type="button" class="btn sm" data-eau="250">+ Un verre</button>
+          <button type="button" class="btn sm" data-eau="500">+ Une bouteille</button>
+          <button type="button" class="btn sm ghost" data-eau="-250">Retirer un verre</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card orange">
+      <header><h2>Énergie du jour</h2><span class="hint" id="alimHint"></span></header>
+      <div class="body">
+        <div class="kcal-gauge">
+          <div class="kcal-head">
+            <span><span class="big" id="kcalMange">0</span> <span class="of" id="kcalCible">kcal</span></span>
+            <span class="of" id="kcalReste"></span>
+          </div>
+          <div class="gauge-track"><span class="gauge-fill" id="kcalFill"></span></div>
+        </div>
+        <div class="macros" id="macroBars"></div>
+        <div id="bilanSem"></div>
+      </div>
+    </div>
+
+    <div class="card plain">
+      <header><h2>Bilan de la journée</h2><span class="hint" id="bilanHint"></span></header>
+      <div class="body">
+        <div id="bilanVerdict"></div>
+        <div class="donut-zone" id="donutZone"></div>
+        <div class="table-scroll" id="bilanMacros"></div>
+        <div id="bilanSources"></div>
+        <ul class="checks" id="bilanChecks"></ul>
+      </div>
     </div>
   </section>
 
@@ -2584,8 +2632,12 @@ var SPORTS = [
         html += '<p class="empty">Rien de noté.</p>';
       } else {
         html += '<ul class="items">' + items.map(function (it, i) {
+          var mac = (it.p || it.g || it.l)
+            ? '<span class="mac">P <em>' + nf(it.p, 0) + ' g</em> · G <em>' + nf(it.g, 0) +
+              ' g</em> · L <em>' + nf(it.l, 0) + ' g</em></span>'
+            : '<span class="mac">composition non détaillée</span>';
           return '<li><span class="nm">' + esc(it.n) + ' ' + badge(it.n) +
-            (it.d ? '<small>' + esc(it.d) + '</small>' : '') + '</span>' +
+            (it.d ? '<small>' + esc(it.d) + '</small>' : '') + mac + '</span>' +
             '<span class="kc">' + ni(it.k) + ' kcal</span>' +
             '<button type="button" class="del" data-del-repas="' + k + '" data-i="' + i + '" aria-label="Retirer ' + esc(it.n) + '">✕</button></li>';
         }).join("") + '</ul>';
@@ -2758,6 +2810,101 @@ var SPORTS = [
     };
   }
 
+  /* Anneau des macronutriments. Trois parts seulement, séparées par un jour
+     de deux degrés, chacune étiquetée directement : la couleur ne porte donc
+     jamais seule l'information. */
+  function dessineAnneau(macros, total) {
+    var zone = document.getElementById("donutZone");
+    if (!total || total <= 0) {
+      zone.innerHTML = '<p class="empty" style="padding:8px 0">Note un aliment pour voir la répartition.</p>';
+      return;
+    }
+    var W = 236, c = W / 2, r = 72, ep = 30, C = 2 * Math.PI * r;
+    var jour = C * (2 / 360);   // séparation entre les parts
+
+    var parts = macros.map(function (m) {
+      return { nom: m.nom, kcal: m.kcal, f: m.kcal / total, couleur: m.couleur };
+    }).filter(function (x) { return x.f > 0; });
+
+    var svg = '<svg viewBox="-46 -4 ' + (W + 92) + ' ' + (W + 8) + '" role="img" aria-label="Répartition des calories : ' +
+      parts.map(function (x) { return x.nom + " " + Math.round(x.f * 100) + " %"; }).join(", ") + '">';
+    svg += '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="none" stroke="currentColor" stroke-opacity=".1" stroke-width="' + ep + '"/>';
+
+    var cumul = 0;
+    parts.forEach(function (x) {
+      var len = Math.max(0, x.f * C - jour);
+      svg += '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="none" stroke="' + x.couleur +
+        '" stroke-width="' + ep + '" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) +
+        '" stroke-dashoffset="' + (-cumul).toFixed(2) + '" transform="rotate(-90 ' + c + ' ' + c + ')"/>';
+      cumul += x.f * C;
+    });
+
+    // étiquettes posées au milieu de chaque part
+    cumul = 0;
+    parts.forEach(function (x) {
+      var mid = (cumul + x.f / 2) * 2 * Math.PI - Math.PI / 2;
+      cumul += x.f;
+      if (x.f < 0.05) return;
+      var rl = r + ep / 2 + 13;
+      var tx = c + Math.cos(mid) * rl, ty = c + Math.sin(mid) * rl;
+      var ancre = Math.abs(Math.cos(mid)) < 0.35 ? "middle" : (Math.cos(mid) > 0 ? "start" : "end");
+      svg += '<text x="' + tx.toFixed(1) + '" y="' + (ty + 4).toFixed(1) +
+        '" text-anchor="' + ancre + '" font-size="13" font-weight="700" fill="' + x.couleur + '">' +
+        Math.round(x.f * 100) + ' %</text>';
+    });
+
+    svg += '<text class="centre-val" x="' + c + '" y="' + (c - 2) + '" text-anchor="middle" font-size="26" fill="currentColor">' + ni(total) + '</text>';
+    svg += '<text x="' + c + '" y="' + (c + 19) + '" text-anchor="middle" font-size="10.5" letter-spacing="1.4" fill="currentColor" fill-opacity=".6">KCAL</text>';
+    svg += '</svg>';
+
+    svg += '<ul class="donut-leg">' + macros.map(function (m) {
+      return '<li><span class="pastille" style="background:' + m.couleur + '"></span>' +
+        '<span class="nm2">' + esc(m.nom) + '<small>' + esc(m.repere) + '</small></span>' +
+        '<span class="ch"><b>' + nf(m.g, 0) + ' g</b>' + ni(m.kcal) + ' kcal</span></li>';
+    }).join("") + '</ul>';
+
+    zone.innerHTML = svg;
+  }
+
+  /* D'où viennent les protéines, les glucides et les lipides de la journée. */
+  function sourcesMacro(date, champMac) {
+    var j = Store.jours[date] || jourVide(date);
+    var liste = [];
+    ["petitdej", "dejeuner", "diner", "collation"].forEach(function (k) {
+      (j.repas[k] || []).forEach(function (it) {
+        var g = it[champMac] || 0;
+        if (g > 0) liste.push({ n: it.n, g: g });
+      });
+    });
+    // un même aliment noté deux fois est regroupé
+    var par = {};
+    liste.forEach(function (x) { par[x.n] = (par[x.n] || 0) + x.g; });
+    return Object.keys(par).map(function (n) { return { n: n, g: par[n] }; })
+      .sort(function (a, b) { return b.g - a.g; });
+  }
+
+  function renderSources(macros) {
+    var champs = { "Protéines": "p", "Glucides": "g", "Lipides": "l" };
+    document.getElementById("bilanSources").innerHTML =
+      '<div class="sources">' + macros.map(function (m) {
+        var src = sourcesMacro(dateCourante, champs[m.nom]);
+        var tot = src.reduce(function (n, x) { return n + x.g; }, 0);
+        var top = src.slice(0, 4);
+        var reste = src.length - top.length;
+        return '<div class="src"><h4><i style="background:' + m.couleur + '"></i>D\'où viennent tes ' + m.nom.toLowerCase() + '</h4>' +
+          (top.length
+            ? '<ol>' + top.map(function (x) {
+                var pc = tot ? x.g / tot * 100 : 0;
+                return '<li><span>' + esc(x.n) + '</span><b>' + nf(x.g, 0) + ' g · ' + nf(pc, 0) + ' %</b>' +
+                  '<span class="jauge"><i style="width:' + clamp(pc, 2, 100) + '%;background:' + m.couleur + '"></i></span></li>';
+              }).join("") +
+              (reste > 0 ? '<li><span style="color:var(--ink-faint)">et ' + reste + ' autre' + (reste > 1 ? 's' : '') + '</span><b></b></li>' : '') +
+              '</ol>'
+            : '<p class="rien">Aucun aliment n\'en apporte aujourd\'hui.</p>') +
+          '</div>';
+      }).join("") + '</div>';
+  }
+
   function renderBilan() {
     var a = analyseJour(dateCourante);
 
@@ -2768,6 +2915,17 @@ var SPORTS = [
       '<div class="verdict-bloc ' + a.verdict + '">' +
       (a.note !== null ? '<span class="note-gros">' + a.note + '</span>' : '') +
       '<div><h3>' + esc(a.titre) + '</h3><p>' + esc(a.resume) + '</p></div></div>';
+
+    var KPG = { "Protéines": 4, "Glucides": 4, "Lipides": 9 };
+    var pourAnneau = a.macros.map(function (m) {
+      var rep = m.nom === "Protéines" ? "cible " + m.cible
+        : m.nom === "Lipides" ? "cible " + m.cible + " des calories"
+        : "pas de cible, c'est le reste";
+      return { nom: m.nom, g: m.g, kcal: m.g * KPG[m.nom], couleur: m.couleur, repere: rep };
+    });
+    var totalMac = pourAnneau.reduce(function (n, m) { return n + m.kcal; }, 0);
+    dessineAnneau(pourAnneau, totalMac);
+    renderSources(a.macros);
 
     var LIB = { ok: "Bon", warn: "Limite", crit: "Hors cible", neutre: "—" };
     document.getElementById("bilanMacros").innerHTML =
