@@ -8,110 +8,109 @@
 <title>Carnet de Forme</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Azeret+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;500;600;700;800;900&family=Azeret+Mono:wght@500;600&display=swap">
 <style>
 :root {
   color-scheme: light;
-
-  --ground:     #faf5ee;
+  --ground:     #fff3e6;
   --panel:      #ffffff;
-  --panel-2:    #f4eee4;
-  --ink:        #17130f;
-  --ink-soft:   #5c534a;
-  --ink-faint:  #8c8177;
-  --line:       #e3d9cb;
-  --line-hard:  #17130f;
+  --panel-2:    #ffe2c9;
+  --ink:        #1a0a05;
+  --ink-soft:   #6b4a38;
+  --ink-faint:  #8a6a56;
+  --line:       #f0c9a8;
+  --line-hard:  #1a0a05;
 
-  --violet:     #4a3aa7;
-  --orange:     #eb6834;
-  --aqua:       #1baf7a;
-  --blue:       #2a78d6;
-  --yellow:     #eda100;
-  --rouge:      #e34948;
+  --violet:     #c4005f;
+  --orange:     #ff7a1a;
+  --aqua:       #f0147a;
+  --blue:       #3b1466;
+  --yellow:     #ffb300;
+  --rouge:      #e0245e;
 
   --on-violet:  #ffffff;
-  --on-orange:  #2a0d00;
-  --on-aqua:    #00251a;
+  --on-orange:  #1a0a05;
+  --on-aqua:    #2a0010;
   --on-blue:    #ffffff;
 
-  --ok:         #1baf7a;
-  --warn:       #a86a00;
-  --crit:       #c5342f;
+  --ok:         #0e8a5f;
+  --warn:       #9c6000;
+  --crit:       #7e0512;
 
-  --shadow:     3px 3px 0 var(--line-hard);
-  --shadow-lg:  5px 5px 0 var(--line-hard);
+  --shadow:     4px 4px 0 var(--line-hard);
+  --shadow-lg:  none;
 
-  --f-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-display: "Anton", "Arial Narrow", "Haettenschweiler", Impact, system-ui, sans-serif;
   --f-body:    "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono:    "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --r-lg: 22px;
-  --r-md: 14px;
-  --r-sm: 9px;
+  --r-lg: 0px;
+  --r-md: 0px;
+  --r-sm: 0px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --ground:    #14120f;
-    --panel:     #1e1b17;
-    --panel-2:   #272219;
-    --ink:       #f7f2ea;
-    --ink-soft:  #bfb5a7;
-    --ink-faint: #8e8579;
-    --line:      #383126;
+    --ground:    #18070e;
+    --panel:     #241019;
+    --panel-2:   #32161f;
+    --ink:       #fff3e6;
+    --ink-soft:  #c9a896;
+    --ink-faint: #9e8271;
+    --line:      #4a2430;
     --line-hard: #000000;
 
-    --violet:    #9085e9;
-    --orange:    #d95926;
-    --aqua:      #199e70;
-    --blue:      #3987e5;
-    --yellow:    #c98500;
-    --rouge:     #e66767;
+    --violet:    #ff5c9e;
+    --orange:    #ffa030;
+    --aqua:      #ff2e86;
+    --blue:      #9d7bff;
+    --yellow:    #ffc24d;
+    --rouge:     #f4566b;
 
-    --on-violet: #0d0a1f;
-    --on-orange: #fff4ee;
-    --on-aqua:   #eafff6;
-    --on-blue:   #f2f8ff;
+    --on-violet: #2a0010;
+    --on-orange: #2a0e00;
+    --on-aqua:   #2a0010;
+    --on-blue:   #140a2e;
 
-    --ok:        #4ec08a;
-    --warn:      #e0a640;
-    --crit:      #ff7a70;
+    --ok:        #3fd69b;
+    --warn:      #ffc24d;
+    --crit:      #f4566b;
 
-    --shadow:    3px 3px 0 #000000;
-    --shadow-lg: 5px 5px 0 #000000;
+    --shadow:    4px 4px 0 var(--line-hard);
+    --shadow-lg: none;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ground:    #14120f;
-  --panel:     #1e1b17;
-  --panel-2:   #272219;
-  --ink:       #f7f2ea;
-  --ink-soft:  #bfb5a7;
-  --ink-faint: #8e8579;
-  --line:      #383126;
+  --ground:    #18070e;
+  --panel:     #241019;
+  --panel-2:   #32161f;
+  --ink:       #fff3e6;
+  --ink-soft:  #c9a896;
+  --ink-faint: #9e8271;
+  --line:      #4a2430;
   --line-hard: #000000;
 
-  --violet:    #9085e9;
-  --orange:    #d95926;
-  --aqua:      #199e70;
-  --blue:      #3987e5;
-  --yellow:    #c98500;
-  --rouge:     #e66767;
+  --violet:    #ff5c9e;
+  --orange:    #ffa030;
+  --aqua:      #ff2e86;
+  --blue:      #9d7bff;
+  --yellow:    #ffc24d;
+  --rouge:     #f4566b;
 
-  --on-violet: #0d0a1f;
-  --on-orange: #fff4ee;
-  --on-aqua:   #eafff6;
-  --on-blue:   #f2f8ff;
+  --on-violet: #2a0010;
+  --on-orange: #2a0e00;
+  --on-aqua:   #2a0010;
+  --on-blue:   #140a2e;
 
-  --ok:        #4ec08a;
-  --warn:      #e0a640;
-  --crit:      #ff7a70;
+  --ok:        #3fd69b;
+  --warn:      #ffc24d;
+  --crit:      #f4566b;
 
-  --shadow:    3px 3px 0 #000000;
-  --shadow-lg: 5px 5px 0 #000000;
+  --shadow:    4px 4px 0 var(--line-hard);
+  --shadow-lg: none;
 }
 
 * { box-sizing: border-box; }
@@ -956,6 +955,168 @@ td .etat.neutre { color: var(--ink-faint); }
   .tabs, .icon-btn, .btn, .del, .water-btns, .today-nav { display: none !important; }
   .card, .today { box-shadow: none; break-inside: avoid; }
   body { background: #fff; }
+}
+
+/* ==================================================================
+   TRAITEMENT ÉDITORIAL — blocs de couleur pleine largeur, typographie
+   display condensée, arêtes franches. L'été : orange dominant, rose
+   en contrepoint, violet profond comme ancre froide.
+   ================================================================== */
+
+/* Les bandes débordent du conteneur jusqu'aux bords de la fenêtre.
+   « clip » plutôt que « hidden » : il ne crée pas de conteneur de
+   défilement et ne casse donc pas les éléments collants. */
+html { overflow-x: clip; }
+
+.wrap { max-width: 1040px; }
+
+/* Une bande pleine largeur reprend, en marge négative, ce que le
+   conteneur lui avait donné en padding, puis le rend en padding. */
+.bande {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: max(var(--biseau, 28px), calc(50vw - 50% + 20px));
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .005em;
+  line-height: .92;
+}
+
+/* ---------- bandeau de titre ---------- */
+
+.masthead {
+  --biseau: clamp(26px, 6vw, 84px);
+  margin-inline: calc(50% - 50vw);
+  padding-inline: max(var(--biseau), calc(50vw - 50% + 20px));
+  padding-block: 24px 40px;
+  margin-bottom: 22px;
+  background: var(--orange);
+  color: var(--on-orange);
+  align-items: center;
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--biseau)) 100%, var(--biseau) 100%);
+}
+.brand h1 {
+  font-size: clamp(2.7rem, 13vw, 8.4rem);
+  line-height: .84;
+  letter-spacing: -.01em;
+}
+.brand .sub {
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: inherit;
+  opacity: .75;
+  margin-top: 10px;
+}
+.icon-btn {
+  border-width: 3px;
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--ink);
+}
+.icon-btn[aria-pressed="true"] { background: var(--blue); color: var(--on-blue); }
+
+/* ---------- onglets ---------- */
+
+.tabs { gap: 0; margin-bottom: 22px; border: 3px solid var(--line-hard); }
+.tab {
+  border: 0;
+  border-right: 3px solid var(--line-hard);
+  box-shadow: none;
+  background: var(--panel);
+  font-family: var(--f-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  font-size: clamp(.82rem, 2.7vw, 1.05rem);
+  padding: 13px 4px 11px;
+}
+.tab:last-child { border-right: 0; }
+.tab:hover, .tab[aria-selected="true"] { transform: none; box-shadow: none; }
+.tab:hover { background: var(--panel-2); }
+.tab[data-c="violet"][aria-selected="true"],
+.tab[data-c="orange"][aria-selected="true"] { background: var(--orange); color: var(--on-orange); }
+.tab[data-c="aqua"][aria-selected="true"]   { background: var(--aqua);   color: var(--on-aqua); }
+.tab[data-c="blue"][aria-selected="true"]   { background: var(--blue);   color: var(--on-blue); }
+
+/* ---------- bandeau du jour ---------- */
+
+.today { border-width: 3px; margin-bottom: 22px; }
+.today-nav { border-bottom-width: 3px; background: var(--panel-2); }
+.today-nav .date {
+  font-family: var(--f-display); font-weight: 400;
+  text-transform: uppercase; letter-spacing: .02em;
+  font-size: clamp(.9rem, 3vw, 1.15rem);
+}
+.nav-btn { border-width: 3px; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; }
+.today-tiles { gap: 3px; }
+.tile .val { font-size: clamp(1.7rem, 7vw, 2.7rem); letter-spacing: -.02em; white-space: nowrap; }
+.tile .val u, .stat .big u, .kcal-head .big u { margin-left: 6px; font-size: .42em; }
+.tile .lab { letter-spacing: .14em; }
+
+/* ---------- cartes ---------- */
+
+.card { border-width: 3px; margin-bottom: 22px; }
+.card > header {
+  --biseau: clamp(18px, 3.4vw, 40px);
+  border-bottom-width: 3px;
+  padding-block: 14px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, var(--biseau) 100%, 0 calc(100% - var(--biseau)));
+}
+.card > header h2 { font-size: clamp(1.1rem, 3.6vw, 1.6rem); }
+.card > header .hint { letter-spacing: .14em; font-size: 10.5px; }
+.card.plain > header { background: var(--orange); color: var(--on-orange); }
+.today-nav { background: var(--orange); color: var(--on-orange); }
+.nav-btn { background: var(--panel); }
+
+/* ---------- chiffres mis en scène ---------- */
+
+.stat { border-width: 3px; }
+.stat .big { font-family: var(--f-display); font-weight: 400; font-size: clamp(1.9rem, 6.2vw, 2.7rem); letter-spacing: -.02em; }
+.kcal-head .big, .water-top .big { font-family: var(--f-display); font-weight: 400; font-size: clamp(2.7rem, 11vw, 4.4rem); letter-spacing: -.03em; line-height: .88; }
+.verdict-bloc { border-width: 3px; }
+.verdict-bloc .note-gros { font-size: clamp(2.5rem, 9vw, 3.8rem); }
+.gauge-track, .bar-track { border-width: 3px; border-radius: 0; }
+.gauge-fill, .bar-fill { border-radius: 0; }
+.gauge-track { height: 26px; }
+.bar-track { height: 16px; }
+
+/* ---------- commandes ---------- */
+
+.btn {
+  border-width: 3px;
+  font-family: var(--f-display); font-weight: 400;
+  text-transform: uppercase; letter-spacing: .03em;
+  font-size: 1rem; padding: 11px 18px;
+}
+.btn.sm { font-size: .88rem; padding: 7px 13px; }
+.seg-choice button { border-width: 3px; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: .02em; }
+input[type="text"], input[type="number"], input[type="date"], input[type="time"], select { border-width: 3px; }
+.results { border-width: 3px; }
+.chip-food { border-width: 3px; border-radius: 0; }
+.alert, .ia-fiche, .src, .diag, .apercu, .ecart-line { border-width: 3px; }
+.glass { border-width: 3px; border-radius: 0; }
+.parcours-rail { border-width: 3px; border-radius: 0; }
+.parcours-fait { border-radius: 0; }
+.pm b { font-size: 1rem; }
+.toast { border-width: 3px; border-radius: 0; box-shadow: var(--shadow); }
+.tag { border-radius: 0; }
+.swatch, .donut-leg .pastille { border-radius: 0; }
+.wb .col { border-width: 3px; border-radius: 0; }
+.wb .col i { border-radius: 0; }
+
+/* ---------- pied ---------- */
+
+.foot { border-top-width: 3px; }
+.foot h2 { font-size: 1.15rem; }
+
+@media (max-width: 540px) {
+  .masthead { padding-block: 18px 30px; }
+  .tile:last-child:nth-child(odd) { grid-column: span 2; }
+  .tabs { border-width: 2px; }
+  .tab { border-right-width: 2px; }
 }
 </style>
 </head>

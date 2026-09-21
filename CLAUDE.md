@@ -123,14 +123,43 @@ en parallèle. Le mode est affiché en bas de page.
 Interface en français, tutoiement. Pas de tiret cadratin. Les messages disent
 quoi faire, pas seulement ce qui cloche.
 
-Palette validée pour les déficiences de la vision des couleurs dans les deux
-thèmes : bleu `#2a78d6`, orange `#eb6834`, aqua `#1baf7a` en clair ;
-`#3987e5`, `#d95926`, `#199e70` en sombre. Ne pas changer sans revalider.
+Direction visuelle : éditoriale et franche, dans l'esprit d'un portfolio
+brutaliste. Blocs de couleur pleine largeur, biseaux en `clip-path`,
+typographie display condensée en capitales, arêtes vives (rayons à 0),
+bordures de 3 px, ombres portées réservées aux commandes. L'été : orange
+dominant, rose en contrepoint, violet profond comme ancre froide, fond crème.
 
-Typographie : Bricolage Grotesque (titres), Figtree (texte), Azeret Mono
-(chiffres). Tout token de couleur est défini sur `:root` nu, puis redéfini
-sous `@media (prefers-color-scheme: dark)` avec la garde
+Palette validée pour les déficiences de la vision des couleurs (simulation
+protanopie, deutéranopie, tritanopie, écart CIEDE2000 ≥ 14 entre chaque
+paire des trois macronutriments, dans les deux thèmes) :
+
+| Rôle | Clair | Sombre |
+|---|---|---|
+| Orange, glucides, surfaces principales | `#ff7a1a` | `#ffa030` |
+| Rose, lipides (`--aqua`) | `#f0147a` | `#ff2e86` |
+| Violet profond, protéines, focus, eau (`--blue`) | `#3b1466` | `#9d7bff` |
+| Rose fort, en-têtes à texte blanc (`--violet`) | `#c4005f` | `#ff5c9e` |
+| États ok / limite / hors cible | `#0e8a5f` / `#9c6000` / `#7e0512` | `#3fd69b` / `#ffc24d` / `#f4566b` |
+
+Elle fait mieux que la précédente, qui était faible en protanopie (13,2) et
+tritanopie (11,1). **Ne pas changer sans revalider** :
+`python3 outils/valide-palette.py` refait la mesure, mettre à jour les
+valeurs qu'il teste en même temps que celles du CSS. Sur l'orange, le texte est noir : le blanc n'y atteint que 2,6:1.
+
+Les tokens gardent leurs anciens noms (`--blue`, `--aqua`, `--violet`) parce
+que le JavaScript les référence pour les macronutriments : les renommer
+casserait le bilan. Leur rôle est celui du tableau, pas celui du nom.
+
+Typographie : Anton (display, un seul poids, toujours en capitales),
+Figtree (texte), Azeret Mono (chiffres tabulaires et étiquettes). Tout token
+de couleur est défini sur `:root` nu, puis redéfini sous
+`@media (prefers-color-scheme: dark)` avec la garde
 `:root:not([data-theme="light"])` et sous `:root[data-theme="dark"]`.
+
+Les bandes pleine largeur sortent du conteneur par
+`margin-inline: calc(50% - 50vw)` et `html { overflow-x: clip }` : « clip »
+et non « hidden », qui créerait un conteneur de défilement. Le harnais
+vérifie qu'aucune largeur ne dépasse la fenêtre, à 390 et 1000 px.
 
 ## Vérifier avant de publier
 
