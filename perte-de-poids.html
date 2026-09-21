@@ -674,6 +674,27 @@ td .up { color: var(--crit); font-weight: 700; }
 .sync.on .dot { background: var(--ok); }
 .sync.off .dot { background: var(--warn); }
 
+.diag {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2px;
+  background: var(--line-hard);
+  border: 2px solid var(--line-hard);
+  border-radius: var(--r-md);
+  margin: 0;
+  overflow: hidden;
+}
+.diag div { background: var(--panel-2); padding: 10px 12px; min-width: 0; }
+.diag dt {
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px;
+}
+.diag dd {
+  margin: 0; font-family: var(--f-mono); font-size: .8rem; font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.diag dd.mauvais { color: var(--crit); }
+
 .lien {
   background: none; border: 0; padding: 6px 0 0;
   color: var(--ink-soft); font-size: .82rem;
@@ -940,7 +961,8 @@ td .up { color: var(--crit); font-weight: 700; }
     <div class="card plain">
       <header><h2>Mes données</h2></header>
       <div class="body">
-        <p class="prose" style="margin-bottom:13px">Tout est enregistré automatiquement. Cette action efface définitivement le profil et tous les jours enregistrés.</p>
+        <dl class="diag" id="diagBloc"></dl>
+        <p class="prose" style="margin:14px 0 13px">Tout est enregistré automatiquement. Cette action efface définitivement le profil et tous les jours enregistrés.</p>
         <button type="button" class="btn ghost" id="wipeBtn">Tout effacer</button>
       </div>
     </div>
@@ -1208,6 +1230,34 @@ td .up { color: var(--crit); font-weight: 700; }
 <script>
 (function () {
   "use strict";
+
+  /* Une erreur non rattrapée interrompt le script et laisse des boutons
+     inertes, sans rien afficher. On la montre. */
+  var dejaSignale = false;
+  function signaleErreur(source, err) {
+    var msg = err && err.message ? err.message : String(err);
+    try { console.error("[Carnet]", source, err); } catch (e) {}
+    if (dejaSignale) return;
+    dejaSignale = true;
+    var d = document.createElement("div");
+    d.setAttribute("role", "alert");
+    d.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:200;background:#b3261e;" +
+      "color:#fff;border-radius:12px;padding:12px 14px;font:600 13px/1.4 system-ui,sans-serif;" +
+      "box-shadow:0 6px 24px rgba(0,0,0,.35)";
+    d.textContent = "Un défaut technique bloque cette action : " + msg +
+      " — signale-le et recharge la page.";
+    d.addEventListener("click", function () { d.remove(); dejaSignale = false; });
+    (document.body || document.documentElement).appendChild(d);
+  }
+  window.addEventListener("error", function (e) { signaleErreur("erreur", e.error || e.message); });
+  window.addEventListener("unhandledrejection", function (e) { signaleErreur("promesse", e.reason); });
+
+  function protege(nom, fn) {
+    return function () {
+      try { return fn.apply(this, arguments); }
+      catch (err) { signaleErreur(nom, err); }
+    };
+  }
 
 /* ================= BASE ALIMENTS (valeurs pour 100 g, sauf mention) =================
    [nom, kcal, protéines g, glucides g, lipides g, catégorie, portion type g, nom portion] */
@@ -1819,12 +1869,19 @@ var SPORTS = [
   };
 
   var queues = {};
+  var enEcriture = {};
+  var diag = { dernier: "aucune écriture", erreurs: 0, derniereErreur: "" };
   function enfile(cle, fn) {
     queues[cle] = (queues[cle] || Promise.resolve()).then(fn).catch(function (e) {
-      console.warn("Écriture refusée :", cle, e && e.code ? e.code : e);
+      var code = (e && e.code) ? e.code : String(e && e.message ? e.message : e);
+      console.warn("Écriture refusée :", cle, code);
+      diag.erreurs++;
+      diag.derniereErreur = cle + " → " + code;
+      diag.dernier = "échec sur " + cle;
       if (typeof toast === "function") {
-        toast("Enregistrement refusé par le serveur. Ta saisie reste affichée mais n'est pas sauvegardée.", true);
+        toast("Serveur : " + code + ". La saisie est gardée sur cet appareil.", true);
       }
+      if (typeof majDiag === "function") majDiag();
     });
     return queues[cle];
   }
@@ -1843,22 +1900,31 @@ var SPORTS = [
     } catch (e) { return false; }
   }
 
+  // Le navigateur garde toujours une copie : si l'écriture distante échoue
+  // ou n'est pas disponible, rien n'est perdu au rechargement.
   Store.sauveProfil = function () {
+    lsEcrire();
     if (Store.mode === "cloud" && Store.db) {
       var copie = JSON.parse(JSON.stringify(Store.profil));
       enfile("profil", function () { return Store.db.doc("profil/moi").set(copie); });
-    } else {
-      if (!lsEcrire()) majSync("bloque");
     }
   };
   Store.sauveJour = function (date) {
     var j = Store.jours[date];
     if (!j) return;
+    lsEcrire();
     if (Store.mode === "cloud" && Store.db) {
       var copie = JSON.parse(JSON.stringify(j));
-      enfile("jour:" + date, function () { return Store.db.doc("jours/" + date).set(copie); });
-    } else {
-      if (!lsEcrire()) majSync("bloque");
+      enEcriture[date] = (enEcriture[date] || 0) + 1;
+      enfile("jour:" + date, function () {
+        return Store.db.doc("jours/" + date).set(copie).then(function () {
+          enEcriture[date]--;
+          diag.dernier = "jour " + date + " enregistré";
+        }, function (e) {
+          enEcriture[date]--;
+          throw e;
+        });
+      });
     }
   };
   Store.jour = function (date) {
@@ -1918,17 +1984,28 @@ var SPORTS = [
       majSync("cloud");
 
       db.doc("profil/moi").onSnapshot(function (snap) {
-        if (snap.exists) { Store.profil = normProfil(snap.data()); Store.onChange("profil"); }
-      }, function () { Store.mode = "local"; majSync("local"); });
+        if (snap.exists) { Store.profil = normProfil(snap.data()); lsEcrire(); Store.onChange("profil"); }
+      }, function (e) {
+        diag.erreurs++; diag.derniereErreur = (e && e.code) || "inconnue";
+        Store.mode = "local"; majSync("local");
+      });
 
       db.collection("jours").onSnapshot(function (snap) {
         var vus = {};
-        snap.docs.forEach(function (d) { vus[d.id] = true; Store.jours[d.id] = normJour(d.data(), d.id); });
-        Object.keys(Store.jours).forEach(function (d) {
-          if (!vus[d] && !aDesDonnees(Store.jours[d])) delete Store.jours[d];
+        snap.docs.forEach(function (d) {
+          vus[d.id] = true;
+          if (enEcriture[d.id] > 0) return;   // une écriture à nous est en vol
+          Store.jours[d.id] = normJour(d.data(), d.id);
         });
+        Object.keys(Store.jours).forEach(function (d) {
+          if (!vus[d] && !enEcriture[d] && !aDesDonnees(Store.jours[d])) delete Store.jours[d];
+        });
+        lsEcrire();
         Store.onChange("jours");
-      }, function () { Store.mode = "local"; majSync("local"); });
+      }, function (e) {
+        diag.erreurs++; diag.derniereErreur = (e && e.code) || "inconnue";
+        Store.mode = "local"; majSync("local");
+      });
     }).catch(function () {});
   }
 
@@ -3197,6 +3274,7 @@ var SPORTS = [
     renderPoids();
     renderSport();
     majSportKcal();
+    majDiag();
   }
 
   function montreOnglet(nom) {
@@ -3256,6 +3334,29 @@ var SPORTS = [
   });
   document.getElementById("sexeF").addEventListener("click", function () { P().sexe = "f"; hydrateProfil(); majProfilDepuisForm(); });
   document.getElementById("sexeH").addEventListener("click", function () { P().sexe = "h"; hydrateProfil(); majProfilDepuisForm(); });
+
+  function majDiag() {
+    var el = document.getElementById("diagBloc");
+    if (!el) return;
+    var nJours = Object.keys(Store.jours).filter(function (d) { return aDesDonnees(Store.jours[d]); }).length;
+    var nAli = Object.keys(Store.jours).reduce(function (n, d) {
+      var j = Store.jours[d];
+      return n + ["petitdej", "dejeuner", "diner", "collation"].reduce(function (m, k) {
+        return m + (j.repas[k] ? j.repas[k].length : 0);
+      }, 0);
+    }, 0);
+    var lignes = [
+      ["Enregistrement", Store.mode === "cloud" ? "compte Claude + appareil" : "cet appareil seulement", false],
+      ["Jours enregistrés", ni(nJours), false],
+      ["Aliments notés", ni(nAli), false],
+      ["Dernière écriture", diag.dernier, false],
+      ["Écritures refusées", ni(diag.erreurs), diag.erreurs > 0],
+      ["Dernier refus", diag.derniereErreur || "aucun", !!diag.derniereErreur]
+    ];
+    el.innerHTML = lignes.map(function (l) {
+      return '<div><dt>' + esc(l[0]) + '</dt><dd' + (l[2] ? ' class="mauvais"' : '') + '>' + esc(String(l[1])) + '</dd></div>';
+    }).join("");
+  }
 
   document.getElementById("profilBtn").addEventListener("click", function () {
     montreOnglet(ongletActif === "profil" ? "poids" : "profil");
@@ -3340,8 +3441,8 @@ var SPORTS = [
     });
     noteUsage(nom);
     Store.sauveJour(dateCourante);
-    renderAlim(); renderFavoris(); renderBandeau();
-    toast(nom + " ajouté · " + ni(kcal) + " kcal");
+    renderAlim(); renderFavoris(); renderBandeau(); majDiag();
+    confirmeAjout(nom, document.getElementById("foodRepas").value, kcal);
   });
 
   document.getElementById("pickQte").addEventListener("input", majPickKcal);
@@ -3350,7 +3451,7 @@ var SPORTS = [
     majPickKcal();
   });
   document.getElementById("pickCancel").addEventListener("click", fermePicker);
-  document.getElementById("pickAdd").addEventListener("click", function () {
+  document.getElementById("pickAdd").addEventListener("click", protege("ajout portion", function () {
     if (selection === null) return;
     var a = ALIMENTS[selection];
     var g = pickGrammes();
@@ -3367,9 +3468,10 @@ var SPORTS = [
     noteUsage(a[0]);
     Store.sauveJour(dateCourante);
     fermePicker();
-    renderAlim(); renderFavoris(); renderBandeau();
-    toast(a[0] + " ajouté au " + REPAS_NOMS[repas].toLowerCase() + " · " + ni(Math.round(a[1] * f)) + " kcal");
-  });
+    renderAlim(); renderFavoris(); renderBandeau(); majDiag();
+    confirmeAjout(a[0], repas, Math.round(a[1] * f));
+ 
+  }));
 
   function libreCalcul() {
     var kcal = champ("libreKcal");
@@ -3418,11 +3520,23 @@ var SPORTS = [
     document.getElementById("libreKcal").value = "";
     document.getElementById("libreQte").value = "";
     majLibreApercu();
-    renderAlim(); renderFavoris(); renderBandeau();
-    toast(court + " ajouté au " + REPAS_NOMS[repas].toLowerCase() + " · " + ni(r.total) + " kcal");
+    renderAlim(); renderFavoris(); renderBandeau(); majDiag();
+    confirmeAjout(court, repas, r.total);
   }
 
-  document.getElementById("libreAdd").addEventListener("click", ajouteLibre);
+  // On vérifie que la ligne est bien présente avant d'annoncer le succès :
+  // un ajout qui ne s'affiche pas doit se voir, pas passer pour réussi.
+  function confirmeAjout(nom, repas, kcal) {
+    var present = (J().repas[repas] || []).some(function (x) { return x.n === nom; });
+    var affiche = document.getElementById("repasListe").textContent.indexOf(nom) !== -1;
+    if (present && affiche) {
+      toast(nom + " ajouté au " + REPAS_NOMS[repas].toLowerCase() + " · " + ni(kcal) + " kcal");
+    } else {
+      toast("L'ajout n'a pas abouti (" + (present ? "affichage" : "enregistrement") + "). Signale-le.", true);
+    }
+  }
+
+  document.getElementById("libreAdd").addEventListener("click", protege("ajout libre", ajouteLibre));
   ["libreNom", "libreKcal", "libreQte"].forEach(function (id) {
     document.getElementById(id).addEventListener("keydown", function (e) {
       if (e.key === "Enter") { e.preventDefault(); ajouteLibre(); }
@@ -3438,7 +3552,7 @@ var SPORTS = [
   });
 
   /* --- poids --- */
-  document.getElementById("poidsSave").addEventListener("click", function () {
+  document.getElementById("poidsSave").addEventListener("click", protege("pesée", function () {
     var v = champ("poidsInput");
     if (!isFinite(v) || v < 25 || v > 350) {
       toast("Saisis un poids compris entre 25 et 350 kg.", true);
@@ -3453,7 +3567,8 @@ var SPORTS = [
     Store.sauveJour(dateCourante);
     renderTout();
     toast("Pesée enregistrée : " + nf(j.poids, 1) + " kg" + (j.heure ? " à " + hhmm(minutesDe(j.heure)) : ""));
-  });
+ 
+  }));
   document.getElementById("poidsDel").addEventListener("click", function () {
     var j = J();
     if (j.poids === null) return;
@@ -3500,7 +3615,7 @@ var SPORTS = [
   document.getElementById("sportDuree").addEventListener("input", majSportKcal);
   document.getElementById("sportDist").addEventListener("input", majSportKcal);
   document.getElementById("sportAllure").addEventListener("input", majSportKcal);
-  document.getElementById("sportAdd").addEventListener("click", function () {
+  document.getElementById("sportAdd").addEventListener("click", protege("ajout séance", function () {
     var poids = poidsA(dateCourante);
     var idx = +document.getElementById("sportSel").value;
     var min = parseDuree(document.getElementById("sportDuree").value);
@@ -3522,7 +3637,8 @@ var SPORTS = [
     Store.sauveJour(dateCourante);
     renderSport(); renderBandeau(); renderAlim();
     toast(e.n + " enregistré · " + fmtDuree(e.m) + " · " + ni(e.k) + " kcal");
-  });
+ 
+  }));
   document.getElementById("sportListe").addEventListener("click", function (e) {
     var b = e.target.closest("[data-del-sport]");
     if (!b) return;
