@@ -377,6 +377,10 @@
     white-space: nowrap;
   }
 
+  /* journée où l'on reprend */
+  .day.resume { box-shadow: inset 4px 0 0 var(--cosmic); }
+  .day.resume .day-title { color: var(--cosmic); }
+
   /* journée du jour */
   .day.today { border-color: var(--accent); }
   .day.today .day-num { background: var(--accent); border-right-color: var(--accent); }
@@ -451,6 +455,7 @@
   .day-all:hover { color: var(--ink); border-color: var(--ink-faint); }
   .day-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .chip.finale { color: var(--accent); border-color: var(--accent); }
+  .chip.resume { color: var(--cosmic); border-color: var(--cosmic); font-weight: 600; }
   .chip.today { color: var(--accent); border-color: var(--accent); font-weight: 600; }
 
   /* ---------- entries ---------- */
@@ -631,6 +636,7 @@
       <span id="pct">0 %</span>
       <span class="progress-track"><span class="progress-fill" id="fill"></span></span>
     </div>
+    <button type="button" class="ghost" id="resume">Reprendre</button>
     <button type="button" class="ghost" id="reset">Réinitialiser</button>
     <span class="save-state" id="saveState"></span>
   </div>
@@ -676,6 +682,10 @@
         à voir seulement par curiosité.</li>
       <li><b>The Punisher: One Last Kill</b> n'a pas de durée confirmée&nbsp;: 1&nbsp;h&nbsp;30
         estimée.</li>
+      <li><b>À l'ouverture, la page se place toute seule</b> sur la première journée non
+        terminée — soulignée de bleu et marquée <i>à reprendre</i> — au lieu de te laisser
+        faire défiler 126 dates. Le bouton <i>Reprendre</i>, en haut, y ramène à tout moment.
+        Une première visite, elle, s'ouvre normalement en haut de page.</li>
       <li><b>Les dates sont fixes</b>&nbsp;: du mardi 15 septembre 2026 au dimanche
         17 janvier 2027 pour le catalogue, plus le lundi 18 janvier pour la séance
         <i>Doomsday</i> — 126 journées en tout. La journée en cours est surlignée en rouge.</li>
@@ -1372,6 +1382,45 @@
   }
 
   var lastPlan = [];
+  var jumped = false;        // on ne replace la vue qu'une fois par visite
+  var userScrolled = false;
+
+  window.addEventListener("scroll", function () {
+    // notre propre saut déclenche aussi l'événement : il pose « jumped »
+    // avant, donc ce drapeau ne sert qu'aux défilements de l'utilisateur
+    if (!jumped) userScrolled = true;
+  }, { passive: true });
+
+  /* Première journée non terminée : c'est là qu'on reprend, qu'on soit en
+     retard sur le calendrier ou en avance. Tout coché : la séance finale. */
+  function resumeIndex(plan) {
+    for (var i = 0; i < plan.length; i++) {
+      if (plan[i].items.length && !allSeen(plan[i])) return i;
+    }
+    return plan.length - 1;
+  }
+
+  function jumpTo(idx, smooth) {
+    var el = daysEl.querySelectorAll("section.day")[idx];
+    if (!el) return;
+    var top = el.getBoundingClientRect().top + window.pageYOffset - 12;
+    var calm = window.matchMedia &&
+               window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (smooth && !calm) { window.scrollTo({ top: top, behavior: "smooth" }); }
+    else { window.scrollTo(0, top); }
+  }
+
+  /* Le saut d'arrivée n'a lieu qu'une fois, et seulement s'il rend service :
+     jamais sur une première visite sans rien de coché — l'en-tête a encore
+     quelque chose à dire — ni si la page a été ouverte sur une ancre, ni si
+     l'utilisateur a déjà commencé à faire défiler de son côté. */
+  function maybeJump(idx) {
+    if (jumped || userScrolled || window.location.hash) return;
+    if (!Object.keys(seen).length) return;
+    jumped = true;
+    jumpTo(idx, false);
+  }
 
   function allSeen(day) {
     return day.items.length > 0 && day.items.every(function (u) { return seen[u.key]; });
@@ -1417,6 +1466,7 @@
     verdictEl.innerHTML = verdict(avg, total);
 
     lastPlan = plan;
+    var resumeIdx = resumeIndex(plan);
 
     daysEl.innerHTML = plan.map(function (day, idx) {
       var rest = !day.items.length;
@@ -1424,13 +1474,14 @@
             : rest ? ["rest", "repos"] : loadClass(day.min);
       var today = isToday(day.date);
       var cls = "day" + (rest ? " rest" : "") + (day.finale ? " finale" : "") +
-                (today ? " today" : "");
-      return '<section class="' + cls + '">' +
+                (today ? " today" : "") + (idx === resumeIdx ? " resume" : "");
+      return '<section class="' + cls + '" id="jour' + (idx + 1) + '">' +
         '<div class="day-head">' +
           '<div class="day-num"><span>Jour</span><strong>' + (idx + 1) + '</strong>' +
             '<em>' + esc(fmtDate(day.date)) + '</em></div>' +
           '<h2 class="day-title">' + esc(dayTitle(day)) + '</h2>' +
           '<div class="day-load"><b>' + hm(day.min) + '</b>' +
+            (idx === resumeIdx ? '<span class="chip resume">à reprendre</span> ' : "") +
             (today ? '<span class="chip today">aujourd\'hui</span> ' : "") +
             '<span class="chip ' + lc[0] + '">' + lc[1] + '</span>' +
             (rest ? "" : '<button type="button" class="day-all" data-day="' + idx + '">' +
@@ -1476,6 +1527,7 @@
 
     progress();
     saveState();
+    maybeJump(resumeIdx);
   }
 
   function cell(label, value, unit) {
@@ -1576,6 +1628,11 @@
       save();
       render();
     });
+  });
+
+  document.getElementById("resume").addEventListener("click", function () {
+    jumped = true;
+    jumpTo(resumeIndex(lastPlan), true);
   });
 
   document.getElementById("reset").addEventListener("click", function () {
