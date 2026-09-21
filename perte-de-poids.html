@@ -674,6 +674,25 @@ td .up { color: var(--crit); font-weight: 700; }
 .sync.on .dot { background: var(--ok); }
 .sync.off .dot { background: var(--warn); }
 
+.apercu {
+  display: flex; flex-wrap: wrap; gap: 0;
+  border: 2px solid var(--line-hard); border-radius: var(--r-md);
+  background: var(--panel-2); margin-top: 13px; overflow: hidden;
+}
+.apercu span {
+  flex: 1 1 96px; min-width: 0;
+  padding: 9px 12px;
+  border-right: 2px solid var(--line-hard);
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.apercu span:last-child { border-right: 0; }
+.apercu b {
+  display: block; font-family: var(--f-display); font-weight: 800;
+  font-size: 1.05rem; letter-spacing: -.02em; color: var(--ink);
+  margin-bottom: 2px; font-variant-numeric: tabular-nums;
+}
+
 .retour-bar {
   display: flex; align-items: center; gap: 12px;
   margin-bottom: 16px;
@@ -1077,12 +1096,21 @@ td .up { color: var(--crit); font-weight: 700; }
             <label for="sportSel">Activité</label>
             <select id="sportSel"></select>
           </div>
-          <div class="field" style="flex:1 1 110px">
-            <label for="sportMin">Durée (min)</label>
-            <input type="number" id="sportMin" min="1" max="600" step="5" inputmode="numeric" value="30">
+          <div class="field" id="sportAllureBloc" style="flex:2 1 190px" hidden>
+            <label for="sportAllure">Allure</label>
+            <select id="sportAllure"></select>
+          </div>
+          <div class="field" id="sportDistBloc" style="flex:0 1 130px" hidden>
+            <label for="sportDist">Distance (km)</label>
+            <input type="number" id="sportDist" min="0" max="500" step="0.01" inputmode="decimal" placeholder="8,42">
+          </div>
+          <div class="field" style="flex:0 1 130px">
+            <label for="sportDuree">Durée</label>
+            <input type="text" id="sportDuree" inputmode="numeric" placeholder="45:00" value="45:00">
           </div>
           <button type="button" class="btn go" id="sportAdd">Ajouter <span class="num" id="sportKcal">0</span> kcal</button>
         </div>
+        <div id="sportApercu"></div>
         <p class="sub-note" style="margin-top:9px;color:var(--ink-faint);font-size:.78rem" id="sportBase"></p>
       </div>
     </div>
@@ -1562,17 +1590,13 @@ var ALIMENTS = [
 /* ================= BASE ACTIVITÉS (MET) =================
    [nom, MET, catégorie]  ->  kcal = MET x poids(kg) x heures */
 var SPORTS = [
-  ["Marche lente (4 km/h)", 3.0, "cardio"],
-  ["Marche rapide (6 km/h)", 5.0, "cardio"],
-  ["Randonnée", 6.0, "cardio"],
-  ["Course à pied (8 km/h)", 8.3, "cardio"],
-  ["Course à pied (10 km/h)", 10.0, "cardio"],
-  ["Course à pied (12 km/h)", 12.5, "cardio"],
-  ["Vélo loisir (16 km/h)", 6.0, "cardio"],
-  ["Vélo soutenu (25 km/h)", 10.0, "cardio"],
+  ["Course à pied", 9.8, "cardio", "course"],
+  ["Trail", 10.5, "cardio", "course"],
+  ["Marche", 4.3, "cardio", "marche"],
+  ["Randonnée", 6.0, "cardio", "marche"],
+  ["Vélo", 8.0, "cardio", "velo"],
   ["Vélo d'appartement", 7.0, "cardio"],
-  ["Natation loisir", 6.0, "cardio"],
-  ["Natation soutenue", 9.8, "cardio"],
+  ["Natation", 7.0, "cardio", "nage"],
   ["Rameur", 7.0, "cardio"],
   ["Elliptique", 5.0, "cardio"],
   ["Corde à sauter", 12.3, "cardio"],
@@ -2767,24 +2791,198 @@ var SPORTS = [
 
   /* ==================== ONGLET SPORT ==================== */
 
-  function metSel() {
-    var v = document.getElementById("sportSel").value;
-    var s = SPORTS[+v];
-    return s ? s[1] : 0;
+  /* --- unités Strava : distance en kilomètres, durée en h:mm:ss, allure en min/km --- */
+
+  function parseDuree(txt) {
+    txt = String(txt || "").trim().replace(",", ".");
+    if (!txt) return 0;
+    if (/^\d+(\.\d+)?$/.test(txt)) return parseFloat(txt);           // minutes seules
+    var m = /^(?:(\d+):)?(\d{1,2}):(\d{1,2})$/.exec(txt);
+    if (!m) return 0;
+    var h = m[1] ? +m[1] : 0;
+    return h * 60 + (+m[2]) + (+m[3]) / 60;
   }
-  function kcalSeance(met, minutes, poids) {
-    if (!poids) return 0;
-    return Math.round(met * poids * (minutes / 60));
+  function fmtDuree(min) {
+    var tot = Math.round(min * 60);
+    var h = Math.floor(tot / 3600), r = tot % 3600;
+    var mm = Math.floor(r / 60), ss = r % 60;
+    return h ? h + ":" + String(mm).padStart(2, "0") + ":" + String(ss).padStart(2, "0")
+             : mm + ":" + String(ss).padStart(2, "0");
   }
+  function fmtAllure(minParKm) {
+    if (!isFinite(minParKm) || minParKm <= 0) return "—";
+    var tot = Math.round(minParKm * 60);
+    return Math.floor(tot / 60) + ":" + String(tot % 60).padStart(2, "0");
+  }
+  function fmtKm(km) { return nf(km, 2) + " km"; }
+
+  // Équations de l'American College of Sports Medicine : la consommation
+  // d'oxygène dépend de la vitesse réelle, pas d'une catégorie choisie à la main.
+  function kcalParVitesse(type, kmh, poids, minutes) {
+    var vmin = kmh * 1000 / 60;
+    var vo2;
+    if (type === "course") vo2 = (kmh < 6 ? 0.1 : 0.2) * vmin + 3.5;
+    else if (type === "marche") vo2 = 0.1 * vmin + 3.5;
+    else return null;
+    return vo2 * poids / 1000 * 5 * minutes;
+  }
+  function metVelo(kmh) {
+    if (kmh < 16) return 4.0;
+    if (kmh < 19) return 6.8;
+    if (kmh < 22) return 8.0;
+    if (kmh < 25) return 10.0;
+    if (kmh < 30) return 12.0;
+    return 15.8;
+  }
+  function typeSport(i) { return SPORTS[i] && SPORTS[i][3] ? SPORTS[i][3] : null; }
+  function typeParNom(nom) {
+    for (var i = 0; i < SPORTS.length; i++) if (SPORTS[i][0] === nom) return SPORTS[i][3] || null;
+    return null;
+  }
+
+  // Allures proposées, dans l'unité que Strava affiche pour chaque sport :
+  // min/km à pied, km/h à vélo, min/100 m en bassin. [libellé, km/h]
+  var ALLURES = {
+    course: [
+      ["8:00 /km — footing très lent", 7.5],
+      ["7:30 /km — footing lent", 8.0],
+      ["7:00 /km — endurance tranquille", 8.6],
+      ["6:30 /km — endurance", 9.2],
+      ["6:00 /km — endurance active", 10.0],
+      ["5:45 /km", 10.4],
+      ["5:30 /km — allure soutenue", 10.9],
+      ["5:15 /km", 11.4],
+      ["5:00 /km — allure rapide", 12.0],
+      ["4:45 /km", 12.6],
+      ["4:30 /km — seuil", 13.3],
+      ["4:15 /km", 14.1],
+      ["4:00 /km — très rapide", 15.0],
+      ["3:45 /km", 16.0],
+      ["3:30 /km — allure de compétition", 17.1],
+      ["3:15 /km", 18.5]
+    ],
+    marche: [
+      ["17:00 /km — flânerie", 3.5],
+      ["15:00 /km — marche tranquille", 4.0],
+      ["13:20 /km — marche normale", 4.5],
+      ["12:00 /km — bon pas", 5.0],
+      ["11:00 /km", 5.5],
+      ["10:00 /km — marche rapide", 6.0],
+      ["9:15 /km — marche sportive", 6.5],
+      ["8:35 /km — marche athlétique", 7.0]
+    ],
+    velo: [
+      ["14 km/h — balade", 14],
+      ["16 km/h — promenade", 16],
+      ["18 km/h — rythme tranquille", 18],
+      ["20 km/h — régulier", 20],
+      ["22 km/h — soutenu", 22],
+      ["24 km/h — rapide", 24],
+      ["26 km/h — très rapide", 26],
+      ["28 km/h", 28],
+      ["30 km/h — peloton", 30],
+      ["33 km/h — course", 33]
+    ],
+    nage: [
+      ["3:00 /100 m — tranquille", 2.0],
+      ["2:40 /100 m", 2.25],
+      ["2:20 /100 m — régulier", 2.57],
+      ["2:00 /100 m — soutenu", 3.0],
+      ["1:50 /100 m", 3.27],
+      ["1:40 /100 m — rapide", 3.6],
+      ["1:30 /100 m — compétition", 4.0]
+    ]
+  };
+  var ALLURE_DEFAUT = { course: 4, marche: 3, velo: 3, nage: 2 };
+
+  function metNage(kmh) {
+    if (kmh < 2.1) return 5.8;
+    if (kmh < 2.4) return 7.0;
+    if (kmh < 2.8) return 8.3;
+    if (kmh < 3.2) return 9.8;
+    if (kmh < 3.5) return 11.0;
+    if (kmh < 3.8) return 12.5;
+    return 13.8;
+  }
+
+  function uniteAllure(type, kmh) {
+    if (!kmh || kmh <= 0) return "—";
+    if (type === "velo") return nf(kmh, 1) + " km/h";
+    if (type === "nage") return fmtAllure(60 / kmh / 10) + " /100 m";
+    return fmtAllure(60 / kmh) + " /km";
+  }
+
+  function calcSeance(i, minutes, poids, km, kmhChoisi) {
+    var sp = SPORTS[i];
+    if (!sp || !poids || minutes <= 0) return { kcal: 0, met: sp ? sp[1] : 0, kmh: null, mesure: false };
+    var type = typeSport(i);
+    var mesure = !!(type && km > 0);
+    var kmh = mesure ? km / (minutes / 60) : (type ? kmhChoisi : null);
+    if (type && kmh > 0) {
+      if (type === "course" || type === "marche") {
+        var k = kcalParVitesse(type, kmh, poids, minutes);
+        return { kcal: Math.round(k), met: +(k / minutes * 60 / poids).toFixed(1), kmh: kmh, mesure: mesure };
+      }
+      var mt = type === "velo" ? metVelo(kmh) : metNage(kmh);
+      return { kcal: Math.round(mt * poids * minutes / 60), met: mt, kmh: kmh, mesure: mesure };
+    }
+    return { kcal: Math.round(sp[1] * poids * minutes / 60), met: sp[1], kmh: null, mesure: false };
+  }
+
+  var typePrecedent = null;
+
+  function remplitAllures(type) {
+    var sel = document.getElementById("sportAllure");
+    if (!type || !ALLURES[type]) { sel.innerHTML = ""; return; }
+    if (typePrecedent === type) return;
+    typePrecedent = type;
+    sel.innerHTML = ALLURES[type].map(function (a, k) {
+      return '<option value="' + a[1] + '">' + esc(a[0]) + '</option>';
+    }).join("");
+    sel.selectedIndex = ALLURE_DEFAUT[type] || 0;
+  }
+
   function majSportKcal() {
     var poids = poidsA(dateCourante);
-    var min = parseFloat(document.getElementById("sportMin").value) || 0;
-    var k = kcalSeance(metSel(), min, poids);
-    document.getElementById("sportKcal").textContent = ni(k);
-    document.getElementById("sportAdd").disabled = !poids || !min;
-    document.getElementById("sportBase").textContent = poids
-      ? "Calcul basé sur " + nf(poids, 1) + " kg. La dépense baisse à mesure que tu perds du poids."
-      : "Renseigne ton poids dans l'onglet Mon profil pour estimer les calories.";
+    var i = +document.getElementById("sportSel").value;
+    var type = typeSport(i);
+    var min = parseDuree(document.getElementById("sportDuree").value);
+    var km = parseFloat(String(document.getElementById("sportDist").value).replace(",", ".")) || 0;
+
+    document.getElementById("sportDistBloc").hidden = !type;
+    document.getElementById("sportAllureBloc").hidden = !type;
+    remplitAllures(type);
+    var selA = document.getElementById("sportAllure");
+    var kmhChoisi = type ? (parseFloat(selA.value) || 0) : 0;
+    selA.disabled = !!(type && km > 0);
+
+    var r = calcSeance(i, min, poids, type ? km : 0, kmhChoisi);
+
+    document.getElementById("sportKcal").textContent = ni(r.kcal);
+    document.getElementById("sportAdd").disabled = !poids || min <= 0;
+
+    var ap = document.getElementById("sportApercu");
+    if (min > 0 && type && r.kmh) {
+      var kmAff = r.mesure ? km : r.kmh * min / 60;
+      ap.innerHTML = '<div class="apercu">' +
+        '<span><b>' + fmtKm(kmAff) + '</b>' + (r.mesure ? "distance" : "distance estimée") + '</span>' +
+        '<span><b>' + fmtDuree(min) + '</b>durée</span>' +
+        '<span><b>' + uniteAllure(type, r.kmh) + '</b>' + (r.mesure ? "allure mesurée" : "allure choisie") + '</span>' +
+        '<span><b>' + ni(r.kcal) + ' kcal</b>dépense</span></div>';
+    } else if (min > 0) {
+      ap.innerHTML = '<div class="apercu"><span><b>' + fmtDuree(min) + '</b>durée</span>' +
+        '<span><b>' + ni(r.kcal) + ' kcal</b>dépense</span></div>';
+    } else {
+      ap.innerHTML = "";
+    }
+
+    document.getElementById("sportBase").textContent = !poids
+      ? "Renseigne ton poids dans les réglages pour estimer les calories."
+      : (r.mesure
+        ? "Allure calculée depuis ta distance et ta durée, appliquée à " + nf(poids, 1) + " kg selon les équations de l'ACSM."
+        : (type
+          ? "Allure prise dans la liste. Saisis la distance et elle sera calculée depuis ta séance réelle."
+          : "Calcul basé sur " + nf(poids, 1) + " kg. La dépense baisse à mesure que tu perds du poids."));
   }
 
   function renderSport() {
@@ -2793,27 +2991,35 @@ var SPORTS = [
     var total = kcalSportJour(dateCourante);
     var minTot = j.sport.reduce(function (s, x) { return s + (x.m || 0); }, 0);
 
+    var kmJour = j.sport.reduce(function (s, x) { return s + (x.d || 0); }, 0);
     document.getElementById("sportJourTotal").textContent =
-      j.sport.length ? ni(total) + " kcal · " + minTot + " min" : "Aucune séance";
+      j.sport.length ? ni(total) + " kcal · " + fmtDuree(minTot) + (kmJour > 0 ? " · " + nf(kmJour, 1) + " km" : "") : "Aucune séance";
 
     document.getElementById("sportListe").innerHTML = j.sport.length
       ? j.sport.map(function (x, i) {
-          return '<li><span class="nm">' + esc(x.n) + '<small>' + x.m + ' min · intensité ' + nf(x.met, 1) + ' MET</small></span>' +
+          var t = typeParNom(x.n);
+          var bits = [];
+          if (x.d > 0) bits.push(fmtKm(x.d) + (x.est ? " estimés" : ""));
+          bits.push(fmtDuree(x.m));
+          if (x.d > 0 && x.m > 0) bits.push(uniteAllure(t, x.d / (x.m / 60)));
+          else bits.push("intensité " + nf(x.met, 1) + " MET");
+          return '<li><span class="nm">' + esc(x.n) + '<small>' + esc(bits.join(" · ")) + '</small></span>' +
             '<span class="kc">' + ni(x.k) + ' kcal</span>' +
             '<button type="button" class="del" data-del-sport="' + i + '" aria-label="Retirer ' + esc(x.n) + '">✕</button></li>';
         }).join("")
       : '<li style="grid-template-columns:1fr"><p class="empty" style="padding:0">Rien de noté pour ce jour. Même trente minutes de marche comptent.</p></li>';
 
     var lundi = lundiDe(dateCourante);
-    var jours = [], maxK = 0, semK = 0, semMin = 0, semN = 0;
+    var jours = [], maxK = 0, semK = 0, semMin = 0, semN = 0, semKm = 0;
     for (var i = 0; i < 7; i++) {
       var d = addDays(lundi, i);
       var jj = Store.jours[d];
       var k = jj ? (jj.sport || []).reduce(function (s, x) { return s + (x.k || 0); }, 0) : 0;
       var m = jj ? (jj.sport || []).reduce(function (s, x) { return s + (x.m || 0); }, 0) : 0;
+      var km = jj ? (jj.sport || []).reduce(function (s, x) { return s + (x.d || 0); }, 0) : 0;
       var n = jj ? (jj.sport || []).length : 0;
       jours.push({ d: d, k: k, m: m, n: n });
-      semK += k; semMin += m; semN += n;
+      semK += k; semMin += m; semN += n; semKm += km;
       if (k > maxK) maxK = k;
     }
 
@@ -2822,9 +3028,11 @@ var SPORTS = [
     document.getElementById("sportSemLabel").textContent = "Semaine du " + dateCourte(lundi);
     document.getElementById("sportStats").innerHTML = [
       ['Calories brûlées', ni(semK), "kcal", "Sur les sept jours de la semaine."],
-      ['Temps actif', semMin >= 60 ? nf(semMin / 60, 1) : ni(semMin), semMin >= 60 ? "h" : "min", "L'Organisation mondiale de la santé recommande 150 min par semaine."],
+      ['Temps actif', semMin > 0 ? fmtDuree(semMin) : "—", "", "L'Organisation mondiale de la santé recommande 2 h 30 par semaine."],
       ['Séances', ni(semN), objSeances ? "/ " + objSeances : "", objSeances ? (semN >= objSeances ? "Objectif hebdomadaire atteint." : "Encore " + (objSeances - semN) + (objSeances - semN > 1 ? " séances." : " séance.")) : "Fixe un objectif dans ton profil."],
-      ['Moyenne par séance', semN ? ni(semK / semN) : "—", semN ? "kcal" : "", semN ? "Sur " + semN + (semN > 1 ? " séances." : " séance.") : "Aucune séance cette semaine."]
+      ['Moyenne par séance', semN ? ni(semK / semN) : "—", semN ? "kcal" : "", semN ? "Sur " + semN + (semN > 1 ? " séances." : " séance.") : "Aucune séance cette semaine."],
+      ['Distance parcourue', semKm > 0 ? nf(semKm, 1) : "—", semKm > 0 ? "km" : "",
+        semKm > 0 ? "Course, marche, vélo et natation confondus." : "Renseigne une distance sur tes sorties."]
     ].map(function (c) {
       return '<div class="stat"><span class="lab">' + esc(c[0]) + '</span>' +
         '<div class="big">' + c[1] + (c[2] ? '<u>' + esc(c[2]) + '</u>' : '') + '</div>' +
@@ -3099,14 +3307,23 @@ var SPORTS = [
 
   /* --- sport --- */
   document.getElementById("sportSel").addEventListener("change", majSportKcal);
-  document.getElementById("sportMin").addEventListener("input", majSportKcal);
+  document.getElementById("sportDuree").addEventListener("input", majSportKcal);
+  document.getElementById("sportDist").addEventListener("input", majSportKcal);
+  document.getElementById("sportAllure").addEventListener("change", majSportKcal);
   document.getElementById("sportAdd").addEventListener("click", function () {
     var poids = poidsA(dateCourante);
-    var min = parseFloat(document.getElementById("sportMin").value) || 0;
-    if (!poids || min <= 0) return;
     var idx = +document.getElementById("sportSel").value;
-    var s = SPORTS[idx];
-    J().sport.push({ n: s[0], m: Math.round(min), met: s[1], k: kcalSeance(s[1], min, poids) });
+    var min = parseDuree(document.getElementById("sportDuree").value);
+    if (!poids || min <= 0) return;
+    var type = typeSport(idx);
+    var km = type ? (parseFloat(String(document.getElementById("sportDist").value).replace(",", ".")) || 0) : 0;
+    var kmhChoisi = type ? (parseFloat(document.getElementById("sportAllure").value) || 0) : 0;
+    var r = calcSeance(idx, min, poids, km, kmhChoisi);
+    var e = { n: SPORTS[idx][0], m: Math.round(min * 100) / 100, met: r.met, k: r.kcal };
+    var kmFinal = r.mesure ? km : (r.kmh ? r.kmh * min / 60 : 0);
+    if (kmFinal > 0) { e.d = Math.round(kmFinal * 100) / 100; e.est = r.mesure ? 0 : 1; }
+    J().sport.push(e);
+    document.getElementById("sportDist").value = "";
     Store.sauveJour(dateCourante);
     renderSport(); renderBandeau(); renderAlim();
   });
