@@ -674,6 +674,30 @@ td .up { color: var(--crit); font-weight: 700; }
 .sync.on .dot { background: var(--ok); }
 .sync.off .dot { background: var(--warn); }
 
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 14px);
+  background: var(--ink);
+  color: var(--ground);
+  border: 2px solid var(--line-hard);
+  border-radius: 14px;
+  padding: 11px 18px;
+  font-weight: 700;
+  font-size: .88rem;
+  line-height: 1.35;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 50;
+  max-width: min(420px, calc(100vw - 32px));
+  text-align: center;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast.bad { background: var(--crit); color: #fff; }
+
 .apercu {
   display: flex; flex-wrap: wrap; gap: 0;
   border: 2px solid var(--line-hard); border-radius: var(--r-md);
@@ -853,11 +877,11 @@ td .up { color: var(--crit); font-weight: 700; }
           </div>
           <div class="field">
             <label for="pDepart">Poids de départ (kg)</label>
-            <input type="number" id="pDepart" min="30" max="300" step="0.1" inputmode="decimal" placeholder="75">
+            <input type="text" id="pDepart" inputmode="decimal" autocomplete="off" placeholder="75,0">
           </div>
           <div class="field">
             <label for="pObjectif">Poids visé (kg)</label>
-            <input type="number" id="pObjectif" min="30" max="300" step="0.1" inputmode="decimal" placeholder="66">
+            <input type="text" id="pObjectif" inputmode="decimal" autocomplete="off" placeholder="66,0">
           </div>
           <div class="field">
             <label for="pDebut">Date de début</label>
@@ -987,7 +1011,7 @@ td .up { color: var(--crit); font-weight: 700; }
               <div class="row-inline" style="margin-top:10px">
                 <div class="field" style="flex:1 1 110px">
                   <label for="pickQte">Quantité</label>
-                  <input type="number" id="pickQte" min="1" max="3000" step="1" inputmode="numeric" value="100">
+                  <input type="text" id="pickQte" inputmode="decimal" autocomplete="off" value="100">
                 </div>
                 <div class="field" style="flex:1 1 130px">
                   <label for="pickUnite">Unité</label>
@@ -1003,16 +1027,28 @@ td .up { color: var(--crit); font-weight: 700; }
         <details style="margin-top:14px">
           <summary style="cursor:pointer;font-size:.86rem;color:var(--ink-soft)">Mon aliment n'est pas dans la liste</summary>
           <div class="row-inline" style="margin-top:11px">
-            <div class="field" style="flex:2 1 170px">
+            <div class="field" style="flex:2 1 180px">
               <label for="libreNom">Nom</label>
-              <input type="text" id="libreNom" placeholder="Gratin de mamie">
+              <input type="text" id="libreNom" autocomplete="off" placeholder="Compote pomme vanille">
             </div>
             <div class="field" style="flex:1 1 110px">
               <label for="libreKcal">Calories</label>
-              <input type="number" id="libreKcal" min="0" max="5000" step="5" inputmode="numeric" placeholder="350">
+              <input type="text" id="libreKcal" inputmode="decimal" autocomplete="off" placeholder="51">
             </div>
-            <button type="button" class="btn" id="libreAdd">Ajouter</button>
+            <div class="field" style="flex:2 1 175px">
+              <label for="libreBase">Ces calories sont</label>
+              <select id="libreBase">
+                <option value="portion">pour la portion mangée</option>
+                <option value="100">pour 100 g ou 100 ml</option>
+              </select>
+            </div>
+            <div class="field" id="libreQteBloc" style="flex:1 1 110px" hidden>
+              <label for="libreQte">Quantité (g ou ml)</label>
+              <input type="text" id="libreQte" inputmode="decimal" autocomplete="off" placeholder="100">
+            </div>
+            <button type="button" class="btn go" id="libreAdd">Ajouter</button>
           </div>
+          <p class="sub-note" style="margin-top:8px;color:var(--ink-faint);font-size:.78rem" id="libreApercu"></p>
         </details>
       </div>
     </div>
@@ -1032,7 +1068,7 @@ td .up { color: var(--crit); font-weight: 700; }
         <div class="row-inline">
           <div class="field" style="flex:1 1 140px">
             <label for="poidsInput">Poids du jour (kg)</label>
-            <input type="number" id="poidsInput" min="30" max="300" step="0.1" inputmode="decimal" placeholder="—">
+            <input type="text" id="poidsInput" inputmode="decimal" autocomplete="off" placeholder="75,9">
           </div>
           <div class="field" style="flex:0 1 148px">
             <label for="poidsHeure">Heure</label>
@@ -1044,7 +1080,7 @@ td .up { color: var(--crit); font-weight: 700; }
         <div class="row-inline" style="margin-top:12px">
           <div class="field" style="flex:1 1 150px">
             <label for="tailleInput">Tour de taille (cm), facultatif</label>
-            <input type="number" id="tailleInput" min="40" max="200" step="0.5" inputmode="decimal" placeholder="—">
+            <input type="text" id="tailleInput" inputmode="decimal" autocomplete="off" placeholder="85,5">
           </div>
           <button type="button" class="btn sm" id="tailleSave">Enregistrer</button>
         </div>
@@ -1102,7 +1138,7 @@ td .up { color: var(--crit); font-weight: 700; }
           </div>
           <div class="field" id="sportDistBloc" style="flex:0 1 130px" hidden>
             <label for="sportDist">Distance (km)</label>
-            <input type="number" id="sportDist" min="0" max="500" step="0.01" inputmode="decimal" placeholder="8,42">
+            <input type="text" id="sportDist" inputmode="decimal" autocomplete="off" placeholder="8,42">
           </div>
           <div class="field" style="flex:0 1 130px">
             <label for="sportDuree">Durée</label>
@@ -1130,6 +1166,8 @@ td .up { color: var(--crit); font-weight: 700; }
   </section>
 
   </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <div class="sync" id="syncBar"><span class="dot"></span><span id="syncTxt">Chargement…</span></div>
 
@@ -1686,6 +1724,26 @@ var SPORTS = [
   }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
+  // Un clavier français produit une virgule décimale, qu'un champ numérique
+  // du navigateur refuse en renvoyant une chaîne vide. On lit donc du texte.
+  function nombre(x) {
+    if (x === null || x === undefined) return NaN;
+    var t = String(x).trim().replace(/\s|\u00a0|\u202f/g, "").replace(",", ".");
+    if (!t || !/^-?\d*\.?\d+$/.test(t)) return NaN;
+    return parseFloat(t);
+  }
+  function champ(id) { return nombre(document.getElementById(id).value); }
+
+  var toastTimer = null;
+  function toast(msg, mauvais) {
+    var el = document.getElementById("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.className = "toast on" + (mauvais ? " bad" : "");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.className = "toast"; }, 2600);
+  }
+
   var AUJ = ymd(new Date());
 
   /* ==================== STOCKAGE ==================== */
@@ -1750,6 +1808,9 @@ var SPORTS = [
   function enfile(cle, fn) {
     queues[cle] = (queues[cle] || Promise.resolve()).then(fn).catch(function (e) {
       console.warn("Écriture refusée :", cle, e && e.code ? e.code : e);
+      if (typeof toast === "function") {
+        toast("Enregistrement refusé par le serveur. Ta saisie reste affichée mais n'est pas sauvegardée.", true);
+      }
     });
     return queues[cle];
   }
@@ -2425,7 +2486,8 @@ var SPORTS = [
   function pickGrammes() {
     if (selection === null) return 0;
     var a = ALIMENTS[selection];
-    var q = parseFloat(document.getElementById("pickQte").value) || 0;
+    var q = champ("pickQte");
+    if (!isFinite(q) || q <= 0) return 0;
     return document.getElementById("pickUnite").value === "p" ? q * a[6] : q;
   }
   function majPickKcal() {
@@ -2948,7 +3010,8 @@ var SPORTS = [
     var i = +document.getElementById("sportSel").value;
     var type = typeSport(i);
     var min = parseDuree(document.getElementById("sportDuree").value);
-    var km = parseFloat(String(document.getElementById("sportDist").value).replace(",", ".")) || 0;
+    var km = champ("sportDist");
+    if (!isFinite(km) || km < 0) km = 0;
 
     document.getElementById("sportDistBloc").hidden = !type;
     document.getElementById("sportAllureBloc").hidden = !type;
@@ -3082,7 +3145,7 @@ var SPORTS = [
   function majProfilDepuisForm() {
     var p = P();
     function num(id) {
-      var v = parseFloat(document.getElementById(id).value);
+      var v = champ(id);
       return isFinite(v) ? v : null;
     }
     p.prenom = document.getElementById("pPrenom").value.slice(0, 40);
@@ -3205,6 +3268,7 @@ var SPORTS = [
     noteUsage(nom);
     Store.sauveJour(dateCourante);
     renderAlim(); renderFavoris(); renderBandeau();
+    toast(nom + " ajouté · " + ni(kcal) + " kcal");
   });
 
   document.getElementById("pickQte").addEventListener("input", majPickKcal);
@@ -3217,10 +3281,10 @@ var SPORTS = [
     if (selection === null) return;
     var a = ALIMENTS[selection];
     var g = pickGrammes();
-    if (g <= 0) return;
+    if (g <= 0) { toast("Indique une quantité pour l'ajouter.", true); return; }
     var f = g / 100;
     var unite = document.getElementById("pickUnite").value;
-    var q = parseFloat(document.getElementById("pickQte").value) || 0;
+    var q = champ("pickQte");
     var repas = document.getElementById("foodRepas").value;
     J().repas[repas].push({
       n: a[0],
@@ -3231,26 +3295,65 @@ var SPORTS = [
     Store.sauveJour(dateCourante);
     fermePicker();
     renderAlim(); renderFavoris(); renderBandeau();
+    toast(a[0] + " ajouté au " + REPAS_NOMS[repas].toLowerCase() + " · " + ni(Math.round(a[1] * f)) + " kcal");
   });
 
-  document.getElementById("libreAdd").addEventListener("click", function () {
+  function libreCalcul() {
+    var kcal = champ("libreKcal");
+    var par100 = document.getElementById("libreBase").value === "100";
+    document.getElementById("libreQteBloc").hidden = !par100;
+    if (!isFinite(kcal) || kcal < 0) return null;
+    if (!par100) return { total: Math.round(kcal), detail: "saisie libre" };
+    var q = champ("libreQte");
+    if (!isFinite(q) || q <= 0) return null;
+    return { total: Math.round(kcal * q / 100), detail: ni(q) + " g · " + ni(kcal) + " kcal / 100 g" };
+  }
+
+  function majLibreApercu() {
+    var r = libreCalcul();
+    var kcalSaisi = isFinite(champ("libreKcal"));
+    document.getElementById("libreApercu").textContent = r
+      ? "Sera ajouté : " + ni(r.total) + " kcal."
+      : (kcalSaisi && document.getElementById("libreBase").value === "100"
+        ? "Indique aussi la quantité mangée, en grammes ou en millilitres."
+        : "");
+  }
+
+  ["libreKcal", "libreQte"].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", majLibreApercu);
+  });
+  document.getElementById("libreBase").addEventListener("change", majLibreApercu);
+
+  function ajouteLibre() {
     var nom = document.getElementById("libreNom").value.trim();
-    var kcal = parseFloat(document.getElementById("libreKcal").value);
-    if (!nom || !isFinite(kcal) || kcal < 0) {
-      window.alert("Indique un nom et un nombre de calories pour l'ajouter.");
+    if (!nom) { toast("Donne un nom à cet aliment.", true); document.getElementById("libreNom").focus(); return; }
+    var r = libreCalcul();
+    if (!r) {
+      toast("Indique un nombre de calories, et la quantité si tu pars des valeurs pour 100 g.", true);
+      document.getElementById("libreKcal").focus();
       return;
     }
     var repas = document.getElementById("foodRepas").value;
     var court = nom.slice(0, 60);
-    J().repas[repas].push({ n: court, d: "saisie libre", k: Math.round(kcal), p: 0, g: 0, l: 0 });
+    J().repas[repas].push({ n: court, d: r.detail, k: r.total, p: 0, g: 0, l: 0 });
     var p = P();
     if (!p.perso) p.perso = {};
-    p.perso[court] = Math.round(kcal);
+    p.perso[court] = r.total;
     noteUsage(court);
     Store.sauveJour(dateCourante);
     document.getElementById("libreNom").value = "";
     document.getElementById("libreKcal").value = "";
+    document.getElementById("libreQte").value = "";
+    majLibreApercu();
     renderAlim(); renderFavoris(); renderBandeau();
+    toast(court + " ajouté au " + REPAS_NOMS[repas].toLowerCase() + " · " + ni(r.total) + " kcal");
+  }
+
+  document.getElementById("libreAdd").addEventListener("click", ajouteLibre);
+  ["libreNom", "libreKcal", "libreQte"].forEach(function (id) {
+    document.getElementById(id).addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); ajouteLibre(); }
+    });
   });
 
   document.getElementById("repasListe").addEventListener("click", function (e) {
@@ -3263,9 +3366,10 @@ var SPORTS = [
 
   /* --- poids --- */
   document.getElementById("poidsSave").addEventListener("click", function () {
-    var v = parseFloat(document.getElementById("poidsInput").value);
+    var v = champ("poidsInput");
     if (!isFinite(v) || v < 25 || v > 350) {
-      window.alert("Saisis un poids compris entre 25 et 350 kg.");
+      toast("Saisis un poids compris entre 25 et 350 kg.", true);
+      document.getElementById("poidsInput").focus();
       return;
     }
     var j = J();
@@ -3275,6 +3379,7 @@ var SPORTS = [
     if (!P().depart) { P().depart = j.poids; Store.sauveProfil(); hydrateProfil(); }
     Store.sauveJour(dateCourante);
     renderTout();
+    toast("Pesée enregistrée : " + nf(j.poids, 1) + " kg" + (j.heure ? " à " + hhmm(minutesDe(j.heure)) : ""));
   });
   document.getElementById("poidsDel").addEventListener("click", function () {
     var j = J();
@@ -3286,18 +3391,19 @@ var SPORTS = [
   });
 
   document.getElementById("tailleSave").addEventListener("click", function () {
-    var v = parseFloat(document.getElementById("tailleInput").value);
+    var v = champ("tailleInput");
     var j = J();
-    if (document.getElementById("tailleInput").value === "") {
+    if (document.getElementById("tailleInput").value.trim() === "") {
       j.tour = null;
     } else if (!isFinite(v) || v < 40 || v > 200) {
-      window.alert("Saisis un tour de taille compris entre 40 et 200 cm.");
+      toast("Saisis un tour de taille compris entre 40 et 200 cm.", true);
       return;
     } else {
       j.tour = Math.round(v * 10) / 10;
     }
     Store.sauveJour(dateCourante);
     renderTout();
+    toast(j.tour === null ? "Tour de taille effacé" : "Tour de taille enregistré : " + nf(j.tour, 1) + " cm");
   });
   document.getElementById("tailleInput").addEventListener("keydown", function (e) {
     if (e.key === "Enter") { e.preventDefault(); document.getElementById("tailleSave").click(); }
@@ -3317,7 +3423,8 @@ var SPORTS = [
     var min = parseDuree(document.getElementById("sportDuree").value);
     if (!poids || min <= 0) return;
     var type = typeSport(idx);
-    var km = type ? (parseFloat(String(document.getElementById("sportDist").value).replace(",", ".")) || 0) : 0;
+    var km = 0;
+    if (type) { km = champ("sportDist"); if (!isFinite(km) || km < 0) km = 0; }
     var kmhChoisi = type ? (parseFloat(document.getElementById("sportAllure").value) || 0) : 0;
     var r = calcSeance(idx, min, poids, km, kmhChoisi);
     var e = { n: SPORTS[idx][0], m: Math.round(min * 100) / 100, met: r.met, k: r.kcal };
@@ -3327,6 +3434,7 @@ var SPORTS = [
     document.getElementById("sportDist").value = "";
     Store.sauveJour(dateCourante);
     renderSport(); renderBandeau(); renderAlim();
+    toast(e.n + " enregistré · " + fmtDuree(e.m) + " · " + ni(e.k) + " kcal");
   });
   document.getElementById("sportListe").addEventListener("click", function (e) {
     var b = e.target.closest("[data-del-sport]");
