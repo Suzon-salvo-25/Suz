@@ -116,6 +116,11 @@
 
 * { box-sizing: border-box; }
 
+/* Sans cette règle, tout élément auquel on donne un display explicite
+   (grille des onglets, bouton d'export, bloc des favoris) reste visible
+   malgré l'attribut hidden. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--ground);
@@ -171,7 +176,7 @@ button { cursor: pointer; }
   margin: 7px 0 0;
 }
 
-.mast-tools { display: flex; gap: 8px; align-items: center; }
+.mast-tools { display: flex; gap: 8px; align-items: center; margin-left: auto; }
 
 .icon-btn {
   background: var(--panel);
@@ -186,6 +191,7 @@ button { cursor: pointer; }
 .icon-btn:hover { transform: translate(1px,1px); box-shadow: 2px 2px 0 var(--line-hard); }
 .icon-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--line-hard); }
 .icon-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.icon-btn[aria-pressed="true"] { background: var(--violet); color: var(--on-violet); }
 
 /* ---------- bandeau du jour ---------- */
 
@@ -233,15 +239,17 @@ button { cursor: pointer; }
 
 .today-tiles {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 2px;
+  background: var(--line-hard);
+  margin: 0;
 }
 
 .tile {
   padding: 13px 12px;
-  border-right: 2px solid var(--line-hard);
+  background: var(--panel);
   min-width: 0;
 }
-.tile:last-child { border-right: 0; }
 
 .tile .lab {
   font-family: var(--f-mono);
@@ -271,7 +279,7 @@ button { cursor: pointer; }
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 20px;
 }
@@ -355,7 +363,7 @@ button { cursor: pointer; }
 
 .field .sub-note { font-size: .74rem; color: var(--ink-faint); line-height: 1.35; }
 
-input[type="text"], input[type="number"], input[type="date"], select {
+input[type="text"], input[type="number"], input[type="date"], input[type="time"], select {
   background: var(--panel-2);
   border: 2px solid var(--line-hard);
   border-radius: var(--r-sm);
@@ -553,7 +561,26 @@ input[type="range"] { width: 100%; accent-color: var(--orange); }
 .chip-food b { font-family: var(--f-mono); font-weight: 500; font-size: .76rem; opacity: .65; }
 .chip-food span.t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.results .rb { font-size: .74rem; color: var(--ink-faint); }
+.tag {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  vertical-align: 1px;
+  white-space: nowrap;
+  flex: none;
+}
+.tag.maison     { color: var(--aqua); }
+.tag.marque     { color: var(--violet); }
+.tag.industriel { color: var(--warn); }
+.tag.generique  { color: var(--ink-faint); }
+
+.results .rn { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.results .rn i { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- eau ---------- */
 
@@ -647,6 +674,55 @@ td .up { color: var(--crit); font-weight: 700; }
 .sync.on .dot { background: var(--ok); }
 .sync.off .dot { background: var(--warn); }
 
+.retour-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.retour-t {
+  font-family: var(--f-display); font-weight: 800; font-size: 1.05rem;
+  letter-spacing: -.02em;
+}
+
+/* ---------- barre de parcours ---------- */
+.parcours { padding: 2px 0; }
+.parcours-rail {
+  position: relative;
+  height: 24px;
+  background: var(--panel-2);
+  border: 2px solid var(--line-hard);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.parcours-fait { display: block; height: 100%; background: var(--blue); border-radius: 999px; transition: width .35s ease; }
+.parcours-haut, .parcours-bas { position: relative; height: 40px; }
+.pm {
+  position: absolute; transform: translateX(-50%); text-align: center; white-space: nowrap;
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+}
+.pm b { display: block; font-family: var(--f-display); font-weight: 800; font-size: .92rem; letter-spacing: -.02em; }
+.pm::after { content: ""; position: absolute; left: 50%; margin-left: -1.5px; width: 3px; height: 10px; background: currentColor; }
+.parcours-haut .pm { top: 0; color: var(--blue); }
+.parcours-haut .pm::after { top: 100%; }
+.parcours-bas .pm { bottom: 0; color: var(--orange); }
+.parcours-bas .pm::after { bottom: 100%; }
+.parcours-ends { display: flex; justify-content: space-between; gap: 10px; font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin-top: 8px; }
+.parcours-ends span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+.ecart-line {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border: 2px solid var(--line-hard); border-radius: var(--r-md);
+  background: var(--panel-2); padding: 11px 14px; margin-top: 16px;
+  font-size: .89rem;
+}
+.ecart-line .pastille {
+  font-family: var(--f-display); font-weight: 800; font-size: 1.15rem;
+  letter-spacing: -.02em; padding: 2px 10px; border-radius: 999px;
+  border: 2px solid var(--line-hard);
+}
+.ecart-line .pastille.avance { background: var(--aqua); color: var(--on-aqua); }
+.ecart-line .pastille.retard { background: var(--orange); color: var(--on-orange); }
+.ecart-line .pastille.pile { background: var(--panel); color: var(--ink); }
+
 .prose { font-size: .87rem; color: var(--ink-soft); line-height: 1.55; max-width: 66ch; }
 .prose b { color: var(--ink); font-weight: 700; }
 .prose p { margin: 0 0 9px; }
@@ -666,22 +742,15 @@ td .up { color: var(--crit); font-weight: 700; }
 
 @media (max-width: 760px) {
   .today-tiles { grid-template-columns: repeat(3, 1fr); }
-  .tile:nth-child(3) { border-right: 0; }
-  .tile:nth-child(n+4) { border-top: 2px solid var(--line-hard); }
-  .tile:nth-child(4) { border-right: 2px solid var(--line-hard); }
   .macro-row { grid-template-columns: 84px 1fr auto; }
 }
 
 @media (max-width: 540px) {
   body { font-size: 15px; }
-  .tabs { grid-template-columns: repeat(2, 1fr); }
-  .tab { flex-direction: row; justify-content: center; gap: 7px; padding: 10px 8px; }
+  .tabs { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .tab { flex-direction: column; gap: 3px; padding: 9px 3px 8px; font-size: .74rem; letter-spacing: -.02em; }
+  .tab .ico { font-size: 1.05rem; }
   .today-tiles { grid-template-columns: repeat(2, 1fr); }
-  .tile { border-right: 2px solid var(--line-hard); border-top: 2px solid var(--line-hard); }
-  .tile:nth-child(2n) { border-right: 0; }
-  .tile:nth-child(-n+2) { border-top: 0; }
-  .tile:nth-child(3) { border-right: 2px solid var(--line-hard); }
-  .tile:nth-child(5) { grid-column: 1 / -1; border-right: 0; }
   .items li { grid-template-columns: 1fr auto; row-gap: 4px; }
   .items .del { grid-column: 2; grid-row: 1; }
   .items .kc { grid-column: 1 / -1; }
@@ -705,7 +774,9 @@ td .up { color: var(--crit); font-weight: 700; }
       <p class="sub" id="brandSub">Suivi personnel</p>
     </div>
     <div class="mast-tools">
+      <button type="button" class="icon-btn" id="exportBtn" aria-label="Exporter mes données" title="Exporter mes données" hidden>↓</button>
       <button type="button" class="icon-btn" id="themeBtn" aria-label="Changer de thème" title="Changer de thème">◐</button>
+      <button type="button" class="icon-btn" id="profilBtn" aria-label="Mon profil et réglages" title="Mon profil et réglages" aria-pressed="false">⚙</button>
     </div>
   </header>
 
@@ -721,8 +792,7 @@ td .up { color: var(--crit); font-weight: 700; }
   </div>
 
   <!-- ===== onglets ===== -->
-  <nav class="tabs" role="tablist" aria-label="Sections du carnet">
-    <button type="button" class="tab" role="tab" data-tab="profil" data-c="violet" aria-selected="false" aria-controls="panel-profil" id="tab-profil"><span class="ico" aria-hidden="true">🪪</span><span class="txt">Mon profil</span></button>
+  <nav class="tabs" id="tabsNav" role="tablist" aria-label="Sections du carnet">
     <button type="button" class="tab" role="tab" data-tab="alim" data-c="orange" aria-selected="false" aria-controls="panel-alim" id="tab-alim"><span class="ico" aria-hidden="true">🍽️</span><span class="txt">Alimentation</span></button>
     <button type="button" class="tab" role="tab" data-tab="poids" data-c="aqua" aria-selected="false" aria-controls="panel-poids" id="tab-poids"><span class="ico" aria-hidden="true">⚖️</span><span class="txt">Mon poids</span></button>
     <button type="button" class="tab" role="tab" data-tab="sport" data-c="blue" aria-selected="false" aria-controls="panel-sport" id="tab-sport"><span class="ico" aria-hidden="true">🏃</span><span class="txt">Sport</span></button>
@@ -731,7 +801,12 @@ td .up { color: var(--crit); font-weight: 700; }
   <main>
 
   <!-- ============ PROFIL ============ -->
-  <section id="panel-profil" role="tabpanel" aria-labelledby="tab-profil" hidden>
+  <section id="panel-profil" role="region" aria-label="Mon profil et réglages" hidden>
+
+    <div class="retour-bar">
+      <button type="button" class="btn ghost sm" id="retourBtn">‹ Retour au carnet</button>
+      <span class="retour-t">Profil &amp; réglages</span>
+    </div>
 
     <div class="card violet">
       <header><h2>Mes informations</h2><span class="hint">Base de tous les calculs</span></header>
@@ -830,6 +905,7 @@ td .up { color: var(--crit); font-weight: 700; }
           <div class="gauge-track"><span class="gauge-fill" id="kcalFill"></span></div>
         </div>
         <div class="macros" id="macroBars"></div>
+        <div id="bilanSem"></div>
       </div>
     </div>
 
@@ -866,6 +942,16 @@ td .up { color: var(--crit); font-weight: 700; }
         <div class="field" id="favorisBloc" hidden style="margin-bottom:14px">
           <label>Mes aliments fréquents</label>
           <div class="chips" id="favoris"></div>
+        </div>
+
+        <div class="field" style="margin-bottom:12px">
+          <label id="lblFiltre">Type de produit</label>
+          <div class="seg-choice" role="group" aria-labelledby="lblFiltre">
+            <button type="button" data-filtre="tout" aria-pressed="true">Tout</button>
+            <button type="button" data-filtre="maison" aria-pressed="false">Maison</button>
+            <button type="button" data-filtre="marque" aria-pressed="false">Marques</button>
+            <button type="button" data-filtre="industriel" aria-pressed="false">Industriel</button>
+          </div>
         </div>
 
         <div class="field search-wrap">
@@ -925,13 +1011,35 @@ td .up { color: var(--crit); font-weight: 700; }
       <header><h2>Ma pesée</h2><span class="hint">À jeun, le matin</span></header>
       <div class="body">
         <div class="row-inline">
-          <div class="field" style="flex:1 1 150px">
+          <div class="field" style="flex:1 1 140px">
             <label for="poidsInput">Poids du jour (kg)</label>
             <input type="number" id="poidsInput" min="30" max="300" step="0.1" inputmode="decimal" placeholder="—">
+          </div>
+          <div class="field" style="flex:0 1 148px">
+            <label for="poidsHeure">Heure</label>
+            <input type="time" id="poidsHeure">
           </div>
           <button type="button" class="btn go" id="poidsSave">Enregistrer</button>
           <button type="button" class="btn ghost sm" id="poidsDel">Effacer</button>
         </div>
+        <div class="row-inline" style="margin-top:12px">
+          <div class="field" style="flex:1 1 150px">
+            <label for="tailleInput">Tour de taille (cm), facultatif</label>
+            <input type="number" id="tailleInput" min="40" max="200" step="0.5" inputmode="decimal" placeholder="—">
+          </div>
+          <button type="button" class="btn sm" id="tailleSave">Enregistrer</button>
+        </div>
+        <p class="sub-note" style="margin-top:9px;color:var(--ink-faint);font-size:.78rem">
+          Note l'heure : une pesée du soir dépasse souvent celle du matin de un à deux kilogrammes,
+          uniquement à cause des repas et des boissons de la journée. À heure constante, la courbe dit la vérité.</p>
+      </div>
+    </div>
+
+    <div class="card aqua">
+      <header><h2>Mon parcours</h2><span class="hint" id="parcoursHint"></span></header>
+      <div class="body">
+        <div class="parcours" id="parcours"></div>
+        <div id="ecartJour"></div>
       </div>
     </div>
 
@@ -948,6 +1056,7 @@ td .up { color: var(--crit); font-weight: 700; }
           <div class="tipbox" id="chartTip"></div>
         </div>
         <ul class="legend" id="chartLegend"></ul>
+        <div id="chartNote"></div>
       </div>
     </div>
 
@@ -1005,6 +1114,11 @@ td .up { color: var(--crit); font-weight: 700; }
       <li><b>Un kilogramme de masse grasse vaut environ 7 700 kcal.</b> C'est ce qui relie le déficit quotidien au rythme de perte affiché.</li>
       <li><b>La moyenne sur sept jours est la seule lecture honnête du poids.</b> D'un jour à l'autre, ce sont surtout l'eau, le sel et le transit qui bougent, pas la graisse.</li>
       <li><b>Les valeurs des aliments sont des ordres de grandeur</b> pour des portions courantes. Une recette maison peut s'en écarter nettement.</li>
+      <li><b>Chaque aliment porte une étiquette.</b> <i>Maison</i> désigne un plat calculé à partir de ses
+        ingrédients réels ; <i>Marque</i>, un produit du commerce identifié ; <i>Industriel</i>, une version
+        toute prête sans marque précise. L'écart est loin d'être anecdotique : une purée maison au beurre
+        dépasse de moitié la purée en flocons préparée à l'eau.</li>
+      <li><b>Les produits de marque viennent de bases nutritionnelles publiques</b> et des étiquettes des fabricants. Les recettes changent : en cas de doute, l'emballage que tu as en main fait foi. Tu peux toujours ajouter ta propre version avec la saisie libre.</li>
       <li>Ce carnet est un outil de suivi, pas un avis médical. En cas de pathologie, de grossesse ou de traitement, demande l'avis d'un professionnel de santé.</li>
     </ul>
   </section>
@@ -1039,7 +1153,7 @@ var ALIMENTS = [
   ["Prune", 46, 0.7, 11, 0.3, "fruit", 60, "1 prune"],
   ["Citron", 29, 1.1, 9, 0.3, "fruit", 60, "1 citron"],
   ["Datte séchée", 282, 2.5, 75, 0.4, "fruit", 25, "3 dattes"],
-  ["Compote sans sucre", 50, 0.3, 12, 0.1, "fruit", 100, "1 gourde"],
+  ["Compote sans sucre (du commerce)", 50, 0.3, 12, 0.1, "fruit", 100, "1 gourde"],
 
   // --- Légumes ---
   ["Carotte", 41, 0.9, 10, 0.2, "legume", 80, "1 carotte"],
@@ -1059,7 +1173,7 @@ var ALIMENTS = [
   ["Petit pois", 81, 5.4, 14, 0.4, "legume", 150, "1 portion"],
   ["Betterave cuite", 43, 1.6, 10, 0.2, "legume", 100, "1 portion"],
   ["Chou de Bruxelles", 43, 3.4, 9, 0.3, "legume", 150, "1 portion"],
-  ["Ratatouille", 65, 1.3, 6, 4, "legume", 200, "1 assiette"],
+  ["Ratatouille (en conserve)", 65, 1.3, 6, 4, "legume", 200, "1 assiette"],
 
   // --- Féculents & céréales ---
   ["Riz blanc cuit", 130, 2.7, 28, 0.3, "feculent", 150, "1 portion"],
@@ -1067,7 +1181,7 @@ var ALIMENTS = [
   ["Pâtes cuites", 131, 5, 25, 1.1, "feculent", 200, "1 assiette"],
   ["Pâtes complètes cuites", 124, 5.3, 25, 1.4, "feculent", 200, "1 assiette"],
   ["Pomme de terre cuite", 87, 2, 20, 0.1, "feculent", 200, "2 pommes de terre"],
-  ["Purée de pommes de terre", 88, 2, 14, 2.8, "feculent", 200, "1 portion"],
+  ["Purée en flocons préparée (industrielle)", 88, 2, 14, 2.8, "feculent", 200, "1 portion"],
   ["Frites", 312, 3.4, 41, 15, "feculent", 150, "1 portion"],
   ["Semoule cuite", 112, 3.8, 23, 0.2, "feculent", 150, "1 portion"],
   ["Quinoa cuit", 120, 4.4, 21, 1.9, "feculent", 150, "1 portion"],
@@ -1163,29 +1277,29 @@ var ALIMENTS = [
   ["Huile d'olive", 899, 0, 0, 100, "gras", 10, "1 c. à soupe"],
   ["Huile de colza", 900, 0, 0, 100, "gras", 10, "1 c. à soupe"],
   ["Mayonnaise", 710, 1.1, 1.5, 78, "gras", 15, "1 c. à soupe"],
-  ["Vinaigrette", 450, 0.5, 5, 47, "gras", 15, "1 c. à soupe"],
+  ["Vinaigrette (du commerce)", 450, 0.5, 5, 47, "gras", 15, "1 c. à soupe"],
   ["Ketchup", 112, 1.2, 25, 0.2, "gras", 15, "1 c. à soupe"],
   ["Beurre de cacahuète", 600, 25, 12, 50, "gras", 20, "1 c. à soupe"],
 
   // --- Plats préparés ---
-  ["Pizza margherita", 250, 11, 30, 9, "plat", 300, "1 pizza"],
-  ["Lasagnes", 132, 7, 12, 6, "plat", 350, "1 part"],
-  ["Hachis parmentier", 120, 6, 12, 5, "plat", 350, "1 part"],
-  ["Couscous", 140, 8, 17, 4.5, "plat", 350, "1 assiette"],
-  ["Quiche lorraine", 290, 11, 22, 18, "plat", 150, "1 part"],
-  ["Sandwich jambon-beurre", 250, 10, 30, 10, "plat", 200, "1 sandwich"],
-  ["Salade César", 175, 11, 7, 12, "plat", 250, "1 portion"],
+  ["Pizza margherita (surgelée)", 250, 11, 30, 9, "plat", 300, "1 pizza"],
+  ["Lasagnes (plat du commerce)", 132, 7, 12, 6, "plat", 350, "1 part"],
+  ["Hachis parmentier (plat du commerce)", 120, 6, 12, 5, "plat", 350, "1 part"],
+  ["Couscous (plat du commerce)", 140, 8, 17, 4.5, "plat", 350, "1 assiette"],
+  ["Quiche lorraine (du commerce)", 290, 11, 22, 18, "plat", 150, "1 part"],
+  ["Sandwich jambon-beurre (du commerce)", 250, 10, 30, 10, "plat", 200, "1 sandwich"],
+  ["Salade César (du commerce)", 175, 11, 7, 12, "plat", 250, "1 portion"],
   ["Sushi (assortiment)", 145, 6, 26, 1.5, "plat", 200, "10 pièces"],
-  ["Burger classique", 255, 13, 27, 11, "plat", 220, "1 burger"],
+  ["Burger (du commerce)", 255, 13, 27, 11, "plat", 220, "1 burger"],
   ["Kebab", 215, 12, 20, 10, "plat", 350, "1 kebab"],
-  ["Soupe de légumes", 35, 1.2, 6, 0.8, "plat", 300, "1 bol"],
-  ["Omelette 2 œufs", 154, 11, 0.7, 12, "plat", 120, "1 omelette"],
-  ["Gratin dauphinois", 165, 3.5, 14, 11, "plat", 200, "1 part"],
-  ["Riz cantonais", 145, 6, 20, 4.5, "plat", 300, "1 assiette"],
-  ["Nouilles sautées", 160, 5, 22, 6, "plat", 300, "1 assiette"],
-  ["Crêpe salée", 195, 7, 22, 8.5, "plat", 150, "1 crêpe"],
-  ["Pâtes bolognaise", 150, 7.5, 18, 5, "plat", 350, "1 assiette"],
-  ["Poulet-riz-légumes", 130, 11, 14, 3, "plat", 400, "1 assiette"],
+  ["Soupe de légumes (du commerce)", 35, 1.2, 6, 0.8, "plat", 300, "1 bol"],
+  ["Omelette nature maison", 154, 11, 0.7, 12, "plat", 120, "1 omelette"],
+  ["Gratin dauphinois (surgelé)", 165, 3.5, 14, 11, "plat", 200, "1 part"],
+  ["Riz cantonais (plat du commerce)", 145, 6, 20, 4.5, "plat", 300, "1 assiette"],
+  ["Nouilles sautées (plat du commerce)", 160, 5, 22, 6, "plat", 300, "1 assiette"],
+  ["Crêpe salée (du commerce)", 195, 7, 22, 8.5, "plat", 150, "1 crêpe"],
+  ["Pâtes bolognaise (plat du commerce)", 150, 7.5, 18, 5, "plat", 350, "1 assiette"],
+  ["Assiette poulet, riz et légumes", 130, 11, 14, 3, "plat", 400, "1 assiette"],
 
   // --- Sucreries & snacks ---
   ["Chocolat noir 70%", 570, 9, 33, 42, "sucre", 20, "2 carrés"],
@@ -1201,8 +1315,8 @@ var ALIMENTS = [
   ["Chips", 545, 6, 50, 34, "sucre", 30, "1 poignée"],
   ["Barre chocolatée", 480, 6, 60, 22, "sucre", 45, "1 barre"],
   ["Croissant aux amandes", 450, 9, 42, 27, "sucre", 90, "1 pièce"],
-  ["Tarte aux pommes", 265, 3, 35, 12, "sucre", 120, "1 part"],
-  ["Gâteau au chocolat", 400, 6, 45, 21, "sucre", 100, "1 part"],
+  ["Tarte aux pommes (pâtissier)", 265, 3, 35, 12, "sucre", 120, "1 part"],
+  ["Gâteau au chocolat (pâtissier)", 400, 6, 45, 21, "sucre", 100, "1 part"],
   ["Madeleine", 440, 6, 52, 22, "sucre", 25, "1 madeleine"],
   ["Pop-corn sucré", 430, 6, 78, 11, "sucre", 30, "1 bol"],
 
@@ -1216,11 +1330,233 @@ var ALIMENTS = [
   ["Soda light", 0.3, 0, 0, 0, "boisson", 330, "1 canette"],
   ["Bière", 43, 0.5, 3.5, 0, "boisson", 250, "1 demi"],
   ["Vin rouge", 85, 0.1, 2.6, 0, "boisson", 125, "1 verre"],
-  ["Smoothie", 60, 0.8, 13, 0.3, "boisson", 250, "1 verre"],
+  ["Smoothie (du commerce)", 60, 0.8, 13, 0.3, "boisson", 250, "1 verre"],
   ["Lait végétal (amande)", 24, 0.5, 3, 1.1, "boisson", 250, "1 verre"],
   ["Boisson énergisante", 45, 0, 11, 0, "boisson", 250, "1 canette"],
   ["Chocolat chaud", 80, 3.4, 11, 2.5, "boisson", 250, "1 tasse"],
-  ["Whey (1 dose)", 380, 78, 8, 5, "boisson", 30, "1 dose"]
+  ["Whey protéine en poudre", 380, 78, 8, 5, "boisson", 30, "1 dose"],
+
+  // --- Marques — produits laitiers et desserts ---
+  ["Activia nature (Danone)", 62, 3.4, 4.4, 3.4, "laitier", 125, "1 pot"],
+  ["Boursin ail et fines herbes (Boursin)", 404, 8, 3, 40, "laitier", 30, "1 portion"],
+  ["Calin fromage blanc nature 0% (Yoplait)", 61, 6.5, 7.8, 0.5, "laitier", 100, "1 pot"],
+  ["Calin fromage blanc nature 3,2% (Yoplait)", 82, 5.7, 6.6, 3.2, "laitier", 100, "1 pot"],
+  ["Camembert (Président)", 269, 20, 0, 21, "laitier", 30, "1 portion"],
+  ["Caprice des Dieux (Caprice des Dieux)", 345, 16.4, 0.1, 31, "laitier", 30, "1 portion"],
+  ["Chavroux fromage de chèvre (Chavroux)", 173, 9.8, 3, 12.9, "laitier", 30, "1 portion"],
+  ["Crème fraîche épaisse entière 30% (Elle & Vire)", 292, 2.3, 3.1, 30, "laitier", 30, "1 cuillère à soupe"],
+  ["Crème légère épaisse 15% (Bridélice)", 170, 2.5, 6, 15, "laitier", 30, "1 cuillère à soupe"],
+  ["Danio nature 0% (Danone)", 54, 9.8, 3.4, 0.1, "laitier", 150, "1 pot"],
+  ["Grandlait demi-écrémé (Candia)", 46, 3.2, 4.8, 1.6, "laitier", 200, "1 grand verre"],
+  ["Kiri portion (Bel)", 332, 9, 2, 32, "laitier", 18, "1 portion"],
+  ["La Laitière yaourt nature (Nestlé)", 66, 3.2, 3.7, 3.8, "laitier", 125, "1 pot"],
+  ["La Vache qui rit portion (Bel)", 260, 9.5, 6, 22, "laitier", 18, "1 portion"],
+  ["Lait demi-écrémé (Lactel)", 42, 3.2, 4.8, 1.2, "laitier", 200, "1 grand verre"],
+  ["Mini Babybel (Bel)", 293, 21.5, 0, 23, "laitier", 20, "1 portion"],
+  ["Perle de Lait nature (Yoplait)", 120, 2.9, 4.8, 9.9, "laitier", 125, "1 pot"],
+  ["Petit Gervais aux fruits (Danone)", 107, 7, 14, 3, "laitier", 50, "1 pot"],
+  ["Petits Filous chocolat (Yoplait)", 119, 3.5, 14.6, 4.9, "laitier", 50, "1 pot"],
+  ["Philadelphia nature (Philadelphia)", 220, 5.5, 4, 21.5, "laitier", 30, "1 portion"],
+  ["Roquefort AOP (Société)", 365, 19, 0.8, 31.7, "laitier", 30, "1 portion"],
+  ["Saint Môret nature (Saint Môret)", 207, 8.3, 3.5, 17.8, "laitier", 30, "1 portion"],
+  ["Silhouette lait écrémé (Candia)", 32, 3.3, 4.8, 0, "laitier", 200, "1 grand verre"],
+  ["Skyr nature (Danone)", 57, 10, 3.9, 0.2, "laitier", 150, "1 pot"],
+  ["Taillefine yaourt nature 0% (Danone)", 46, 4.7, 6.3, 0.1, "laitier", 125, "1 pot"],
+  ["Vache à boire banane goyave (Michel et Augustin)", 73, 3.2, 12, 1.3, "laitier", 250, "1 verre"],
+  ["Velouté nature (Danone)", 76, 4.5, 6.6, 3.5, "laitier", 125, "1 pot"],
+  ["Yaos yaourt à la grecque nature (Nestlé)", 104, 2.9, 3.4, 8.4, "laitier", 150, "1 pot"],
+  ["Yaourt nature bio (Les 2 Vaches)", 69, 4.2, 5.2, 3.5, "laitier", 115, "1 pot"],
+  ["Yaourt nature bio (Vrai)", 45, 3.9, 3.6, 1.7, "laitier", 125, "1 pot"],
+  ["Yaourt nature bio 0% (Vrai)", 40, 4.5, 5.3, 0.1, "laitier", 125, "1 pot"],
+
+  // --- Marques — biscuits, chocolat, confiserie ---
+  ["Belvita petit déjeuner (LU)", 441, 7.5, 67, 14.5, "sucre", 50, "1 sachet (4 biscuits)"],
+  ["Biscuit fourré goût chocolat (BN)", 491, 6.2, 66.5, 21.6, "sucre", 25, "2 biscuits"],
+  ["Biscuit sésame (Gerblé)", 487, 11.8, 55.2, 23.1, "sucre", 25, "3 biscuits"],
+  ["Chocolat au lait (Milka)", 530, 6.6, 58.5, 29.5, "sucre", 25, "4 carrés"],
+  ["Confiture d'abricots (Bonne Maman)", 241, 0.5, 59, 0.1, "sucre", 20, "1 c. à soupe"],
+  ["Confiture de fraises (Bonne Maman)", 241, 0.4, 59, 0.1, "sucre", 20, "1 c. à soupe"],
+  ["Danette caramel (Danone)", 121, 3.2, 20.9, 2.7, "sucre", 125, "1 pot"],
+  ["Danette chocolat (Danone)", 135, 4, 22.3, 3.4, "sucre", 125, "1 pot"],
+  ["Danette saveur vanille (Danone)", 111, 3.2, 17.9, 3, "sucre", 125, "1 pot"],
+  ["Danette vanille sur lit de caramel (Danone)", 131, 2.9, 23, 3, "sucre", 125, "1 pot"],
+  ["Excellence 70% cacao (Lindt)", 566, 9.5, 34, 41, "sucre", 20, "2 carrés"],
+  ["Galettes au bon beurre (St Michel)", 470, 6.8, 74.1, 16.4, "sucre", 20, "3 galettes"],
+  ["Granola chocolat au lait (LU)", 499, 6, 63, 24, "sucre", 33, "2 biscuits"],
+  ["Kinder Bueno (Ferrero)", 572, 8.6, 49.5, 37.3, "sucre", 43, "1 barre"],
+  ["La Laitière petit pot de crème au chocolat (Nestlé)", 178, 4.7, 18.6, 8.9, "sucre", 100, "1 pot"],
+  ["Lindor lait (Lindt)", 617, 4.6, 43, 47, "sucre", 12, "1 boule"],
+  ["Madeleines longues (St Michel)", 458, 5.3, 55, 24, "sucre", 26, "2 madeleines"],
+  ["Mikado chocolat au lait (LU)", 477, 7.7, 67, 19, "sucre", 20, "une poignée de bâtonnets"],
+  ["Napolitain l'Original (LU)", 428, 4.2, 58, 20, "sucre", 30, "1 part"],
+  ["Nutella (Ferrero)", 539, 6.3, 57.5, 30.9, "sucre", 20, "1 c. à soupe"],
+  ["Pépito chocolat au lait (LU)", 490, 7.3, 65, 22, "sucre", 20, "2 biscuits"],
+  ["Petit Écolier chocolat au lait (LU)", 500, 6.5, 65, 24, "sucre", 25, "2 biscuits"],
+  ["Petites madeleines pur beurre (Bonne Maman)", 437, 5.5, 56, 22, "sucre", 25, "1 madeleine"],
+  ["Pim's orange (LU)", 384, 4, 71.2, 8.8, "sucre", 25, "2 biscuits"],
+  ["Prince chocolat (LU)", 465, 6.3, 69, 17, "sucre", 25, "2 biscuits"],
+  ["Tuc original (LU)", 465, 8.1, 65, 19, "sucre", 25, "une dizaine de crackers"],
+  ["Véritable Petit Beurre (LU)", 435, 7.9, 72.5, 12, "sucre", 25, "3 biscuits"],
+
+  // --- Marques — céréales du petit-déjeuner ---
+  ["Céréales Lion (Nestlé)", 415, 7.2, 76.9, 7.7, "feculent", 40, "1 bol"],
+  ["Céréales Nesquik (Nestlé)", 379, 7.3, 79.1, 3.8, "feculent", 40, "1 bol"],
+  ["Cheerios miel (Nestlé)", 391, 7.8, 78.6, 5, "feculent", 40, "1 bol"],
+  ["Chocapic (Nestlé)", 383, 8, 71, 5.8, "feculent", 40, "1 bol"],
+  ["Coquillettes crues (Panzani)", 365, 13, 72, 2, "feculent", 100, "1 portion de pâtes crues"],
+  ["Corn Flakes (Kellogg's)", 389, 7, 86.2, 0.7, "feculent", 40, "1 bol"],
+  ["Country Crisp (Jordans)", 447, 9.6, 58.7, 21.2, "feculent", 45, "1 bol"],
+  ["Croustillant chocolat noir et noisettes (Bjorg)", 445, 10, 59, 17, "feculent", 45, "1 bol"],
+  ["Extra pépites chocolat au lait (Kellogg's)", 493, 7, 60, 24, "feculent", 40, "1 bol"],
+  ["Extra pépites chocolat noir et noisettes (Kellogg's)", 497, 8, 57, 25, "feculent", 40, "1 bol"],
+  ["Fitness nature (Nestlé)", 363, 8, 79.8, 1.3, "feculent", 40, "1 bol"],
+  ["Flocons d'avoine (Quaker)", 356, 11, 60, 8, "feculent", 40, "1 portion"],
+  ["Frosties (Kellogg's)", 375, 4.5, 87, 0.6, "feculent", 40, "1 bol"],
+  ["Gnocchi à poêler (Lustucru)", 186, 5.1, 34.9, 2.9, "feculent", 140, "1/2 sachet de 280 g"],
+  ["Gnocchi à poêler extra fromage (Lustucru)", 230, 8.3, 30, 8.1, "feculent", 140, "1/2 sachet de 280 g"],
+  ["Spaghetti n°5 blé complet crus (Barilla)", 350, 13, 65.7, 2.5, "feculent", 100, "1 portion de pâtes crues"],
+  ["Spaghetti n°5 crus (Barilla)", 359, 12.5, 71.2, 2, "feculent", 100, "1 portion de pâtes crues"],
+  ["Special K Original (Kellogg's)", 374, 15, 75, 1.5, "feculent", 40, "1 bol"],
+  ["Tortellini ricotta épinards (Giovanni Rana)", 261, 9.5, 36, 8.2, "feculent", 125, "1/2 sachet de 250 g"],
+  ["Trésor chocolat au lait (Kellogg's)", 441, 7.1, 69, 14, "feculent", 40, "1 bol"],
+
+  // --- Marques — charcuterie, volaille, viandes ---
+  ["Bacon fumé grandes tranches (Herta)", 208, 16, 0, 16, "viande", 25, "1 tranche"],
+  ["Bâton de Berger saucisson sec (Justin Bridou)", 467, 28, 3.3, 38, "viande", 30, "6 rondelles"],
+  ["Blanc de poulet (Fleury Michon)", 115, 22, 1, 2.5, "viande", 35, "1 tranche"],
+  ["Blanc de poulet -25% de sel (Fleury Michon)", 110, 22, 1, 2, "viande", 35, "1 tranche"],
+  ["Blanc de poulet aux fines herbes (Fleury Michon)", 108, 21, 1.5, 2, "viande", 35, "1 tranche"],
+  ["Cordon bleu de poulet (Le Gaulois)", 231, 15, 15, 12, "viande", 100, "1 cordon bleu"],
+  ["Escalope de poulet (Le Gaulois)", 106, 24, 0.1, 1, "viande", 120, "1 escalope"],
+  ["Jambon cru grandes tranches (Aoste)", 249, 30, 0, 14, "viande", 27, "1 tranche"],
+  ["Jambon cru tranches fines sel réduit (Aoste)", 212, 30, 0, 10, "viande", 17, "1 tranche"],
+  ["Jambon Le Bon Paris (Herta)", 105, 21, 0, 2.3, "viande", 40, "1 tranche"],
+  ["Jambon Le Supérieur (Fleury Michon)", 115, 21, 0.8, 3, "viande", 40, "1 tranche"],
+  ["Jambon supérieur à l'étouffée (Madrange)", 106, 20, 0.5, 2.7, "viande", 40, "1 tranche"],
+  ["Jambon Tendre Noix à la broche (Herta)", 111, 21, 0.5, 3, "viande", 40, "1 tranche"],
+  ["Knacki Original 100% pur porc (Herta)", 260, 12, 1.2, 23, "viande", 70, "2 saucisses"],
+  ["Lardons fumés (Herta)", 248, 17, 0, 20, "viande", 50, "1/4 de barquette"],
+  ["Saucisses de Strasbourg fumées bio (Herta)", 275, 13.5, 1.3, 24, "viande", 70, "2 saucisses"],
+  ["Saucisson sec pur porc Le Classique (Cochonou)", 416, 24, 3.5, 34, "viande", 30, "6 rondelles"],
+  ["Steak haché pur bœuf 15% MG (Charal)", 207, 18, 0, 15, "viande", 125, "1 steak"],
+  ["Steak haché pur bœuf 5% MG (Charal)", 125, 20, 0, 5, "viande", 100, "1 steak"],
+
+  // --- Marques — poissons et produits de la mer ---
+  ["Filets de maquereaux moutarde à l'ancienne (Petit Navire)", 211, 15.2, 1, 17, "poisson", 169, "1 boîte"],
+  ["Thon blanc au naturel (Petit Navire)", 87, 20, 0, 0.8, "poisson", 95, "1 boîte égouttée"],
+  ["Thon entier au naturel (Petit Navire)", 109, 25, 0, 1, "poisson", 95, "1 boîte égouttée"],
+
+  // --- Marques — plats préparés, pizzas, soupes ---
+  ["Bâtonnets de poisson panés Croustibat (Findus)", 196, 13, 16, 8.7, "plat", 120, "4 bâtonnets"],
+  ["Bâtonnets de surimi (Fleury Michon)", 97, 8.3, 8.8, 3.2, "plat", 68, "4 bâtonnets"],
+  ["Bâtonnets de surimi moelleux (Fleury Michon)", 115, 8, 10.5, 4.5, "plat", 80, "4 bâtonnets"],
+  ["Cassoulet (William Saurin)", 111, 7.6, 8.9, 5, "plat", 420, "1/2 boîte de 840 g"],
+  ["Croquettes de poisson ail et fines herbes (Findus)", 200, 9.5, 19, 10, "plat", 100, "1 portion"],
+  ["Délices de surimi (Fleury Michon)", 111, 8.8, 8.7, 4.5, "plat", 100, "1 portion"],
+  ["Hachis parmentier (Marie)", 132, 6, 9.4, 8.2, "plat", 300, "1 barquette"],
+  ["Hachis parmentier surgelé (Picard)", 102, 7.6, 7.7, 4.5, "plat", 300, "1 assiette"],
+  ["Lasagnes à la bolognaise (Marie)", 124, 4.5, 11.8, 6.5, "plat", 300, "1 barquette"],
+  ["PastaBox fusilli à la carbonara (Sodebo)", 190, 8, 20, 9, "plat", 300, "1 box"],
+  ["Pizza 4 fromages surgelée (Buitoni)", 233, 12, 24, 9.3, "plat", 330, "1 pizza"],
+  ["Pizza bolognaise Four à Pierre (Buitoni)", 208, 9.3, 24.8, 7.6, "plat", 330, "1 pizza"],
+  ["PurSoup' velouté de tomates (Liebig)", 38, 0.6, 7.2, 0.7, "plat", 250, "1 bol"],
+  ["Raviolis pur bœuf en boîte (Panzani)", 88, 3.8, 12.6, 2.3, "plat", 400, "1/2 boîte de 800 g"],
+  ["Raviolis pur bœuf en boîte (Zapetti)", 84, 3.7, 12, 2.1, "plat", 400, "1 boîte"],
+  ["Soupe liquide poule vermicelles (Knorr)", 25, 1.5, 2.5, 0.9, "plat", 250, "1 bol"],
+
+  // --- Marques — légumes en conserve ---
+  ["Épinards hachés à la crème fraîche surgelés (Picard)", 49, 2, 2.8, 3, "legume", 200, "1 portion"],
+  ["Haricots verts extra-fins en conserve (Bonduelle)", 25, 1.6, 2.8, 0.2, "legume", 200, "1 portion"],
+  ["Petits pois et carottes en conserve (Bonduelle)", 45, 2.9, 7.2, 0.5, "legume", 200, "1 portion"],
+  ["Ratatouille cuisinée à la provençale (Cassegrain)", 83, 1.5, 5.9, 5.1, "legume", 185, "1 boîte"],
+
+  // --- Marques — huiles et sauces ---
+  ["Pesto alla Genovese (Barilla)", 482, 4.7, 9.8, 46, "gras", 45, "1 portion"],
+  ["Sauce bolognaise (Panzani)", 80, 4.8, 6.8, 3.1, "gras", 140, "1/3 de pot de 425 g"],
+
+  // --- Restauration rapide en France ---
+  ["Croque McDo (McDonald's)", 272, 15, 28, 10, "fastfood", 95, "1 croque"],
+  ["Grande frite (McDonald's)", 298, 3.3, 36, 16, "fastfood", 158, "1 grande frite"],
+  ["Moyenne frite (McDonald's)", 298, 3.3, 36, 16, "fastfood", 114, "1 moyenne frite"],
+  ["Petite frite (McDonald's)", 298, 3.3, 36, 16, "fastfood", 80, "1 petite frite"],
+  ["Royal Cheese (McDonald's)", 266, 14.7, 20.2, 14.4, "fastfood", 197, "1 burger"],
+
+  // --- Marques — boissons ---
+  ["Actimel nature (Danone)", 71, 2.8, 10.5, 1.6, "boisson", 100, "1 flacon"],
+  ["Alpro Amande sans sucres", 13, 0.4, 0, 1.1, "boisson", 200, "1 verre"],
+  ["Alpro Avoine Original", 44, 0.3, 6.8, 1.5, "boisson", 200, "1 verre"],
+  ["Alpro Soja Original", 39, 3, 2.5, 1.8, "boisson", 200, "1 verre"],
+  ["Alpro Soja sans sucres", 33, 3.3, 0, 1.8, "boisson", 200, "1 verre"],
+  ["Badoit (eau gazeuse)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Boisson amande sans sucres (Bjorg)", 25, 0.7, 1.6, 1.7, "boisson", 200, "1 verre"],
+  ["Capri-Sun Multivitamines", 34, 0, 8.1, 0, "boisson", 200, "1 poche"],
+  ["Coca-Cola classique", 42, 0, 10.6, 0, "boisson", 330, "1 canette"],
+  ["Coca-Cola Light", 0.4, 0, 0.1, 0, "boisson", 330, "1 canette"],
+  ["Coca-Cola Zero", 0.3, 0, 0, 0, "boisson", 330, "1 canette"],
+  ["Contrex (eau minérale)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Cristaline (eau de source)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Danao orange mangue", 51, 0.7, 11.8, 0.1, "boisson", 200, "1 verre"],
+  ["Evian (eau minérale)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Fanta Orange", 39, 0, 9.6, 0, "boisson", 330, "1 canette"],
+  ["Gatorade", 24, 0, 5.9, 0, "boisson", 500, "1 bouteille"],
+  ["Hépar (eau minérale)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Ice Tea pêche (Lipton)", 13, 0, 3.1, 0, "boisson", 330, "1 canette"],
+  ["Jus d'orange avec pulpe (Innocent)", 44, 0.7, 9.7, 0, "boisson", 200, "1 verre"],
+  ["Jus d'orange sans pulpe (Innocent)", 36, 0.7, 7.8, 0, "boisson", 200, "1 verre"],
+  ["Minute Maid Pomme", 45, 0.1, 10.7, 0, "boisson", 330, "1 canette"],
+  ["Monster Energy Original", 47, 0, 12, 0, "boisson", 500, "1 canette"],
+  ["Oasis Tropical", 33, 0.1, 7.9, 0, "boisson", 330, "1 canette"],
+  ["Orangina", 42, 0.1, 10.1, 0, "boisson", 330, "1 canette"],
+  ["Pepsi", 44, 0, 11, 0, "boisson", 330, "1 canette"],
+  ["Pepsi Max", 0.5, 0, 0.1, 0, "boisson", 330, "1 canette"],
+  ["Perrier (eau gazeuse)", 0, 0, 0, 0, "boisson", 330, "1 bouteille"],
+  ["Powerade", 18, 0, 4.1, 0, "boisson", 500, "1 bouteille"],
+  ["Red Bull", 46, 0, 11, 0, "boisson", 250, "1 canette"],
+  ["San Pellegrino (eau gazeuse)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Schweppes Agrum'", 24, 0, 5.8, 0, "boisson", 330, "1 canette"],
+  ["Schweppes Indian Tonic", 34, 0, 8.9, 0, "boisson", 330, "1 canette"],
+  ["Sprite", 33, 0, 7.9, 0, "boisson", 330, "1 canette"],
+  ["Tropicana pur jus d'orange sans pulpe", 43, 0.8, 8.9, 0, "boisson", 200, "1 verre"],
+  ["Vittel (eau minérale)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Volvic (eau minérale)", 0, 0, 0, 0, "boisson", 500, "1 bouteille"],
+  ["Yop fraise (Yoplait)", 79, 2.8, 13.6, 1.3, "boisson", 180, "1 bouteille"],
+
+  // --- Ingrédients de base pour les recettes maison ---
+  ["Farine de blé", 364, 10, 73, 1, "feculent", 30, "3 c. à soupe"],
+  ["Pâte brisée", 370, 6, 40, 20, "feculent", 80, "1 fond de tarte"],
+  ["Pâte feuilletée", 403, 6, 38, 25, "feculent", 80, "1 fond de tarte"],
+  ["Moutarde", 150, 8, 5, 11, "gras", 10, "1 c. à café"],
+  ["Lait de coco", 197, 2, 3, 20, "gras", 50, "1/4 de boîte"],
+
+  // --- Plats maison, calculés à partir de leurs ingrédients ---
+  ["Purée de pommes de terre maison", 121, 2.1, 16.5, 5.3, "plat", 200, "1 portion"],
+  ["Soupe de légumes maison", 49, 1, 8.1, 1.7, "plat", 300, "1 bol"],
+  ["Velouté de tomates maison", 48, 0.9, 3.5, 3.6, "plat", 300, "1 bol"],
+  ["Ratatouille maison", 67, 1, 4.6, 5.2, "plat", 250, "1 assiette"],
+  ["Gratin dauphinois maison", 108, 3.3, 14.8, 4.1, "plat", 200, "1 part"],
+  ["Gratin de courgettes maison", 116, 5.3, 2.6, 9.6, "plat", 250, "1 part"],
+  ["Lasagnes maison", 155, 8.6, 8.7, 9.6, "plat", 350, "1 part"],
+  ["Hachis parmentier maison", 132, 7.7, 11.1, 6.2, "plat", 350, "1 part"],
+  ["Pâtes bolognaise maison", 124, 7.2, 15, 3.7, "plat", 350, "1 assiette"],
+  ["Riz cantonais maison", 148, 6.2, 19.4, 4.8, "plat", 300, "1 assiette"],
+  ["Chili con carne maison", 102, 8.7, 8.3, 3.6, "plat", 300, "1 assiette"],
+  ["Curry de pois chiches maison", 117, 3.8, 10.5, 6.8, "plat", 300, "1 assiette"],
+  ["Couscous maison", 112, 7.5, 14, 2.8, "plat", 350, "1 assiette"],
+  ["Tajine de poulet maison", 94, 9.2, 5.8, 4, "plat", 350, "1 assiette"],
+  ["Quiche lorraine maison", 262, 10.1, 14.6, 18, "plat", 150, "1 part"],
+  ["Pizza maison", 216, 7.5, 23.2, 9.6, "plat", 300, "1 pizza"],
+  ["Salade composée maison", 80, 5.5, 2.5, 5.6, "plat", 300, "1 saladier"],
+  ["Omelette au fromage maison", 209, 14.1, 0.7, 16.9, "plat", 150, "1 omelette"],
+  ["Sandwich jambon-beurre maison", 275, 11.5, 31.8, 10.9, "plat", 180, "1 sandwich"],
+  ["Crêpes maison", 173, 5.9, 22.8, 5.9, "sucre", 70, "1 crêpe"],
+  ["Pancakes maison", 231, 6.1, 33.3, 7.4, "sucre", 60, "2 pancakes"],
+  ["Gâteau au chocolat maison", 448, 6.7, 40.9, 27.4, "sucre", 90, "1 part"],
+  ["Cookies maison", 470, 5.8, 51.2, 25.5, "sucre", 35, "1 cookie"],
+  ["Tarte aux pommes maison", 217, 2, 29.7, 10.2, "sucre", 120, "1 part"],
+  ["Riz au lait maison", 122, 2.7, 25.6, 0.7, "sucre", 150, "1 pot"],
+  ["Compote de pommes maison sans sucre", 52, 0.3, 14, 0.2, "fruit", 120, "1 portion"],
+  ["Smoothie maison banane-fraise", 59, 1.4, 12.9, 0.9, "boisson", 250, "1 verre"],
+  ["Vinaigrette maison", 652, 0.2, 0.1, 72.3, "gras", 15, "1 c. à soupe"]
 ];
 
 /* ================= BASE ACTIVITÉS (MET) =================
@@ -1342,7 +1678,7 @@ var SPORTS = [
   }
   function jourVide(date) {
     return {
-      date: date, poids: null, eau: 0,
+      date: date, poids: null, heure: null, tour: null, eau: 0,
       repas: { petitdej: [], dejeuner: [], diner: [], collation: [] },
       sport: []
     };
@@ -1351,6 +1687,8 @@ var SPORTS = [
     var j = jourVide(date);
     if (!raw || typeof raw !== "object") return j;
     j.poids = (typeof raw.poids === "number" && isFinite(raw.poids)) ? raw.poids : null;
+    j.heure = (typeof raw.heure === "string" && /^\d{1,2}:\d{2}$/.test(raw.heure)) ? raw.heure : null;
+    j.tour = (typeof raw.tour === "number" && isFinite(raw.tour)) ? raw.tour : null;
     j.eau = (typeof raw.eau === "number" && isFinite(raw.eau)) ? Math.max(0, raw.eau) : 0;
     if (raw.repas && typeof raw.repas === "object") {
       ["petitdej", "dejeuner", "diner", "collation"].forEach(function (k) {
@@ -1466,6 +1804,13 @@ var SPORTS = [
     pret();
 
     if (!window.claude || typeof window.claude.use !== "function") return;
+
+    window.claude.use("downloads").then(function (d) {
+      if (!d) return;
+      telechargement = d;
+      document.getElementById("exportBtn").hidden = false;
+    }).catch(function () {});
+
     window.claude.use("db").then(function (db) {
       if (!db) return;
       Store.db = db;
@@ -1489,7 +1834,7 @@ var SPORTS = [
 
   function aDesDonnees(j) {
     if (!j) return false;
-    if (j.poids !== null || j.eau > 0 || (j.sport && j.sport.length)) return true;
+    if (j.poids !== null || j.tour !== null || j.eau > 0 || (j.sport && j.sport.length)) return true;
     return ["petitdej", "dejeuner", "diner", "collation"].some(function (k) {
       return j.repas[k] && j.repas[k].length;
     });
@@ -1527,6 +1872,121 @@ var SPORTS = [
     }
     return n ? s / n : null;
   }
+  var RE_NON_MARQUE = /\((du commerce|plat du commerce|industrielle?|surgel[ée]e?|en conserve|en flocons|p[âa]tissier)\)\s*$/i;
+  function typeAliment(nom) {
+    if (/\bmaison\b/i.test(nom)) return "maison";
+    if (RE_NON_MARQUE.test(nom)) return "industriel";
+    if (/\([^)]+\)\s*$/.test(nom)) return "marque";
+    return "generique";
+  }
+  var TYPE_LIB = { maison: "Maison", marque: "Marque", industriel: "Industriel", generique: "Générique" };
+  function badge(nom) {
+    var t = typeAliment(nom);
+    return '<span class="tag ' + t + '">' + TYPE_LIB[t] + '</span>';
+  }
+
+  function minutesDe(h) {
+    var m = /^(\d{1,2}):(\d{2})$/.exec(h || "");
+    if (!m) return null;
+    var v = (+m[1]) * 60 + (+m[2]);
+    return (v >= 0 && v < 1440) ? v : null;
+  }
+  function hhmm(min) {
+    if (min === null || min === undefined) return "—";
+    var h = Math.floor(min / 60), m = Math.round(min % 60);
+    return h + " h" + (m ? " " + String(m).padStart(2, "0") : "");
+  }
+  function heureMaintenant() {
+    var d = new Date();
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  function heuresPesees() {
+    return Object.keys(Store.jours).filter(function (d) {
+      return typeof Store.jours[d].poids === "number" && minutesDe(Store.jours[d].heure) !== null;
+    }).map(function (d) { return minutesDe(Store.jours[d].heure); });
+  }
+  function heureHabituelle() {
+    var h = heuresPesees();
+    if (h.length < 2) return null;
+    h.sort(function (a, b) { return a - b; });
+    return h[Math.floor(h.length / 2)];
+  }
+
+  function serie() {
+    var n = 0, d = AUJ;
+    if (!aDesDonnees(Store.jours[AUJ])) d = addDays(AUJ, -1);
+    while (aDesDonnees(Store.jours[d]) && n < 3650) { n++; d = addDays(d, -1); }
+    return n;
+  }
+
+  function bilanSemaine(date) {
+    var lundi = lundiDe(date), cum = 0, n = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(lundi, i);
+      if (d > AUJ) break;
+      var t = totauxRepas(d);
+      if (t.kcal <= 0) continue;
+      var dep = depenseBase(poidsA(d));
+      if (!dep) continue;
+      cum += (dep + kcalSportJour(d)) - t.kcal;
+      n++;
+    }
+    return { cum: cum, n: n };
+  }
+
+  function cibleProteines() {
+    var p = P();
+    var ref = p.objectif || poidsA(AUJ);
+    if (!ref) return null;
+    return Math.round(ref * 1.6);
+  }
+
+  // Dépense réellement observée : ce que disent tes apports et ton poids,
+  // et non la formule. C'est la mesure qui corrige l'estimation théorique.
+  function depenseReelle() {
+    var l = pesees();
+    if (l.length < 6) return null;
+    var fin = l[l.length - 1].date;
+    var borne = addDays(fin, -27);
+    var iDeb = -1;
+    for (var i = 0; i < l.length; i++) { if (l[i].date >= borne) { iDeb = i; break; } }
+    if (iDeb === -1 || iDeb > l.length - 5) return null;
+    var jours = diffJours(l[iDeb].date, fin);
+    if (jours < 13) return null;
+    var mDeb = moyenne7(l, Math.min(iDeb + 3, l.length - 1));
+    var mFin = moyenne7(l, l.length - 1);
+    if (mDeb === null || mFin === null) return null;
+    var totalIn = 0, nJours = 0;
+    for (var d = l[iDeb].date; d <= fin; d = addDays(d, 1)) {
+      var t = totauxRepas(d);
+      if (t.kcal > 500) { totalIn += t.kcal; nJours++; }
+    }
+    if (nJours < 10 || nJours / (jours + 1) < 0.55) return null;
+    var apport = totalIn / nJours;
+    var delta = mFin - mDeb;
+    return {
+      tdee: Math.round(apport - delta * 7700 / jours),
+      jours: jours, nJours: nJours,
+      apport: Math.round(apport), delta: delta
+    };
+  }
+
+  function plateau() {
+    var l = pesees();
+    if (l.length < 8) return null;
+    var fin = l[l.length - 1].date;
+    if (diffJours(fin, AUJ) > 4) return null;
+    var borne = addDays(fin, -13);
+    var iRef = -1;
+    for (var i = l.length - 1; i >= 0; i--) { if (l[i].date <= borne) { iRef = i; break; } }
+    if (iRef === -1) return null;
+    var a = moyenne7(l, iRef), b = moyenne7(l, l.length - 1);
+    if (a === null || b === null) return null;
+    var j = diffJours(l[iRef].date, fin);
+    if (j < 12) return null;
+    return { delta: b - a, jours: j };
+  }
+
   function metabolismeBase(poids) {
     var p = P();
     if (!p.age || !p.taille || !poids) return null;
@@ -1565,10 +2025,10 @@ var SPORTS = [
   }
   function eauCible(date) {
     var poids = poidsA(date);
-    var base = poids ? Math.round(poids * 35 / 100) * 100 : 1800;
+    var base = poids ? Math.round(poids * 30 / 100) * 100 : 1800;
     base = Math.max(1500, base);
     var minSport = (Store.jours[date] && Store.jours[date].sport || []).reduce(function (s, x) { return s + (x.m || 0); }, 0);
-    return base + Math.round(minSport / 60 * 500 / 100) * 100;
+    return Math.min(4000, base + Math.round(minSport / 60 * 400 / 100) * 100);
   }
   function imc(poids) {
     var t = P().taille;
@@ -1629,7 +2089,7 @@ var SPORTS = [
     }
     document.getElementById("dateLabel").textContent = libelle;
     document.getElementById("nextDay").disabled = dateCourante >= AUJ;
-    document.getElementById("todayBtn").disabled = dateCourante === AUJ;
+    document.getElementById("todayBtn").hidden = (dateCourante === AUJ);
 
     var t = totauxRepas(dateCourante);
     var brule = kcalSportJour(dateCourante);
@@ -1646,6 +2106,8 @@ var SPORTS = [
       ["Eau", j ? nf((j.eau || 0) / 1000, 1) : "0,0", "L", ""],
       ["Poids", poids ? nf(poids, 1) : "—", poids ? "kg" : "non pesé", ""]
     ];
+    var st = serie();
+    if (st > 1) tiles.push(["Série", ni(st), st > 1 ? "jours d'affilée" : "jour", "pos"]);
     document.getElementById("todayTiles").innerHTML = tiles.map(function (x) {
       return '<div class="tile"><dt class="lab">' + x[0] + '</dt>' +
         '<dd class="val ' + x[3] + '" style="margin:0">' + x[1] + (x[2] ? '<u>' + esc(x[2]) + '</u>' : '') + '</dd></div>';
@@ -1695,9 +2157,13 @@ var SPORTS = [
     cartes.push(['Dépense quotidienne', dep ? ni(dep) : "—", "kcal", "Métabolisme × activité courante, sport non compris."]);
     cartes.push(['Objectif calorique', cible ? ni(cible) : "—", "kcal", "Déficit de " + ni(def) + " kcal par jour. Les séances de sport s'y ajoutent."]);
     cartes.push(['Indice de masse corporelle', v ? nf(v, 1) : "—", "", categorieImc(v)]);
-    cartes.push(['Eau recommandée', actuel ? nf(eauCible(AUJ) / 1000, 1) : "—", "L", "Environ 35 ml par kilogramme, plus 0,5 L par heure de sport."]);
+    cartes.push(['Eau recommandée', actuel ? nf(eauCible(AUJ) / 1000, 1) : "—", "L", "Environ 30 ml par kilogramme de boissons, plus 0,4 L par heure de sport."]);
     cartes.push(['Arrivée estimée', cd ? dateCourte(cd) : "—", "",
       cd ? (cd === AUJ ? "C'est atteint." : "Au rythme de " + nf(p.rythme, 2) + " kg par semaine, soit " + Math.ceil(diffJours(AUJ, cd) / 7) + " semaines.") : "Il manque des informations."]);
+    var dr = depenseReelle();
+    cartes.push(['Dépense réelle mesurée', dr ? ni(dr.tdee) : "—", dr ? "kcal" : "",
+      dr ? "Calculée sur " + dr.jours + " jours à partir de tes apports et de ton poids. C'est la valeur à croire, pas la formule."
+         : "Disponible après deux semaines de pesées et de repas notés."]);
     cartes.push(['Rythme réellement observé', reel === null ? "—" : nf(Math.abs(reel), 2), reel === null ? "" : "kg/sem",
       reel === null ? "Disponible après une dizaine de jours de pesées." : (reel < 0 ? "Tu perds plus vite que prévu." : reel > 0.05 ? "Tu prends du poids sur la période." : "Le poids stagne.")]);
 
@@ -1726,6 +2192,22 @@ var SPORTS = [
       }
       if (reel !== null && reel > 0.05) {
         al.push(["warn", "📈", "<b>Sur la période mesurée, la tendance est à la hausse</b> de " + nf(reel, 2) + " kg par semaine. Vérifie les portions saisies avant de baisser encore les calories."]);
+      }
+      if (dr && dep) {
+        var ecart = dr.tdee - dep;
+        if (Math.abs(ecart) >= 150) {
+          al.push([Math.abs(ecart) >= 350 ? "crit" : "warn", "🔬",
+            "<b>Ta dépense réelle s'écarte de " + ni(Math.abs(ecart)) + " kcal de l'estimation théorique.</b> " +
+            "La formule annonce " + ni(dep) + " kcal, tes chiffres en donnent " + ni(dr.tdee) + ". " +
+            (ecart < 0
+              ? "Deux causes possibles : ton métabolisme est plus bas que la moyenne, ou les portions saisies sont sous-estimées. Pèse tes aliments une semaine pour trancher."
+              : "Tant mieux : tu peux viser " + ni(dr.tdee - def) + " kcal par jour au lieu de " + ni(cible) + " pour le même rythme.")]);
+        }
+      }
+      var cp = cibleProteines();
+      if (cp) {
+        al.push(["", "🥩", "<b>Vise environ " + cp + " g de protéines par jour</b>, soit 1,6 g par kilogramme de ton poids visé. " +
+          "C'est le levier le plus efficace pour que la perte vienne de la graisse et non du muscle, et cela cale la faim."]);
       }
     }
     document.getElementById("profilAlertes").innerHTML = al.map(function (a) {
@@ -1767,14 +2249,32 @@ var SPORTS = [
       ? (t.kcal > cible ? ni(t.kcal - cible) + " kcal au-dessus" : ni(cible - t.kcal) + " kcal disponibles")
       : "";
 
+    var cibleP = cibleProteines();
     document.getElementById("macroBars").innerHTML = MACROS.map(function (m) {
       var g = t[m[1]];
       var part = t.kcal ? (g * m[2]) / t.kcal * 100 : 0;
+      var suffixe = nf(g, 0) + ' g · ' + nf(part, 0) + ' %';
+      if (m[1] === "pro" && cibleP) suffixe = nf(g, 0) + ' / ' + cibleP + ' g';
       return '<div class="macro-row">' +
         '<span class="mlab"><span class="swatch" style="background:' + m[3] + '"></span>' + m[0] + '</span>' +
-        '<span class="bar-track"><span class="bar-fill" style="width:' + clamp(part, 0, 100) + '%;background:' + m[3] + '"></span></span>' +
-        '<span class="mval">' + nf(g, 0) + ' g · ' + nf(part, 0) + ' %</span></div>';
+        '<span class="bar-track"><span class="bar-fill" style="width:' +
+          clamp(m[1] === "pro" && cibleP ? g / cibleP * 100 : part, 0, 100) + '%;background:' + m[3] + '"></span></span>' +
+        '<span class="mval">' + suffixe + '</span></div>';
     }).join("");
+
+    var bs = bilanSemaine(dateCourante);
+    var bsEl = document.getElementById("bilanSem");
+    if (bs.n >= 1) {
+      var kg = bs.cum / 7700;
+      bsEl.innerHTML = '<div class="alert" style="margin-top:15px"><span class="em" aria-hidden="true">📆</span><div>' +
+        '<b>Semaine en cours : ' + (bs.cum >= 0 ? "déficit" : "excédent") + ' de ' + ni(Math.abs(bs.cum)) + ' kcal</b>' +
+        ' sur ' + bs.n + (bs.n > 1 ? " jours renseignés" : " jour renseigné") + '.<br>' +
+        '<span style="color:var(--ink-soft)">Soit l\'équivalent de ' + nf(Math.abs(kg), 2) + ' kg de masse grasse ' +
+        (bs.cum >= 0 ? "en moins" : "en plus") + '. C\'est ce cumul qui fait la perte, pas la performance d\'une seule journée.</span>' +
+        '</div></div>';
+    } else {
+      bsEl.innerHTML = "";
+    }
 
     var j = J();
     var ec = eauCible(dateCourante);
@@ -1804,7 +2304,8 @@ var SPORTS = [
         html += '<p class="empty">Rien de noté.</p>';
       } else {
         html += '<ul class="items">' + items.map(function (it, i) {
-          return '<li><span class="nm">' + esc(it.n) + (it.d ? '<small>' + esc(it.d) + '</small>' : '') + '</span>' +
+          return '<li><span class="nm">' + esc(it.n) + ' ' + badge(it.n) +
+            (it.d ? '<small>' + esc(it.d) + '</small>' : '') + '</span>' +
             '<span class="kc">' + ni(it.k) + ' kcal</span>' +
             '<button type="button" class="del" data-del-repas="' + k + '" data-i="' + i + '" aria-label="Retirer ' + esc(it.n) + '">✕</button></li>';
         }).join("") + '</ul>';
@@ -1820,12 +2321,15 @@ var SPORTS = [
   }
   var ALIM_PLIE = ALIMENTS.map(function (a) { return plie(a[0]); });
 
+  var filtreType = "tout";
+
   function chercheAliments(q) {
     var mots = plie(q).trim().split(/\s+/).filter(Boolean);
     if (!mots.length || mots.join("").length < 2) return [];
     var freq = P().freq || {};
     var res = [];
     for (var i = 0; i < ALIM_PLIE.length; i++) {
+      if (filtreType !== "tout" && typeAliment(ALIMENTS[i][0]) !== filtreType) continue;
       var n = ALIM_PLIE[i];
       var ok = true, pos = 0;
       for (var m = 0; m < mots.length; m++) {
@@ -1848,7 +2352,7 @@ var SPORTS = [
     document.getElementById("foodResults").innerHTML = res.map(function (r) {
       var a = ALIMENTS[r.i];
       return '<li><button type="button" data-food="' + r.i + '">' +
-        '<span class="rn">' + esc(a[0]) + '</span>' +
+        '<span class="rn">' + badge(a[0]) + '<i>' + esc(a[0]) + '</i></span>' +
         '<span class="rk">' + a[1] + ' kcal / 100 g</span></button></li>';
     }).join("");
   }
@@ -1917,16 +2421,22 @@ var SPORTS = [
     var j = Store.jours[dateCourante];
     var inp = document.getElementById("poidsInput");
     if (document.activeElement !== inp) inp.value = (j && typeof j.poids === "number") ? j.poids : "";
+    var hin = document.getElementById("poidsHeure");
+    if (document.activeElement !== hin) {
+      hin.value = (j && j.heure) ? j.heure : (dateCourante === AUJ ? heureMaintenant() : "");
+    }
+    var tin = document.getElementById("tailleInput");
+    if (document.activeElement !== tin) tin.value = (j && typeof j.tour === "number") ? j.tour : "";
 
     var l = pesees();
     var p = P();
     var actuel = l.length ? l[l.length - 1].kg : p.depart;
     var depart = p.depart || (l.length ? l[0].kg : null);
 
-    var moy = null, moyPrec = null;
-    if (l.length) moy = moyenne7(l, l.length - 1);
-    var refDate = l.length ? addDays(l[l.length - 1].date, -7) : null;
-    if (refDate) {
+    var moy = l.length ? moyenne7(l, l.length - 1) : null;
+    var moyPrec = null;
+    if (l.length) {
+      var refDate = addDays(l[l.length - 1].date, -7);
       for (var i = l.length - 1; i >= 0; i--) {
         if (l[i].date <= refDate) { moyPrec = moyenne7(l, i); break; }
       }
@@ -1934,20 +2444,39 @@ var SPORTS = [
     var varSem = (moy !== null && moyPrec !== null) ? moy - moyPrec : null;
     var varTot = (actuel !== null && depart !== null) ? actuel - depart : null;
     var reste = (actuel !== null && p.objectif) ? actuel - p.objectif : null;
+    var hHab = heureHabituelle();
 
-    function signe(v, dec, unite) {
+    var tours = Object.keys(Store.jours).filter(function (d) {
+      return typeof Store.jours[d].tour === "number";
+    }).sort();
+    var tourAct = tours.length ? Store.jours[tours[tours.length - 1]].tour : null;
+    var tourVar = tours.length > 1 ? tourAct - Store.jours[tours[0]].tour : null;
+
+    function signe(v, dec) {
       if (v === null) return "—";
-      var s = v > 0 ? "+" : v < 0 ? "−" : "";
-      return s + nf(Math.abs(v), dec) + (unite ? "" : "");
+      return (v > 0 ? "+" : v < 0 ? "−" : "") + nf(Math.abs(v), dec);
     }
 
     var cartes = [
-      ['Poids actuel', actuel === null ? "—" : nf(actuel, 1), "kg", l.length ? "Relevé le " + dateCourte(l[l.length - 1].date) + "." : "Aucune pesée enregistrée.", actuel === null ? "" : "hero"],
+      ['Poids actuel', actuel === null ? "—" : nf(actuel, 1), "kg",
+        l.length ? ("Relevé le " + dateCourte(l[l.length - 1].date) +
+          (Store.jours[l[l.length - 1].date].heure ? " à " + hhmm(minutesDe(Store.jours[l[l.length - 1].date].heure)) : "") + ".")
+          : "Aucune pesée enregistrée.", actuel === null ? "" : "hero"],
       ['Moyenne 7 jours', moy === null ? "—" : nf(moy, 1), "kg", "La lecture à retenir, bien plus que le chiffre du jour."],
-      ['Sur la semaine', signe(varSem, 2), varSem === null ? "" : "kg", varSem === null ? "Deux semaines de pesées sont nécessaires." : (varSem < 0 ? "En baisse, c'est la bonne direction." : varSem > 0 ? "En hausse sur sept jours." : "Stable.")],
-      ['Depuis le départ', signe(varTot, 1), varTot === null ? "" : "kg", depart === null ? "Renseigne un poids de départ." : "Départ à " + nf(depart, 1) + " kg."],
-      ['Reste à perdre', reste === null ? "—" : (reste <= 0 ? "0" : nf(reste, 1)), "kg", p.objectif ? "Objectif : " + nf(p.objectif, 1) + " kg." : "Aucun objectif fixé."],
-      ['Pesées enregistrées', l.length ? ni(l.length) : "0", "", l.length > 1 ? "Sur " + (diffJours(l[0].date, l[l.length - 1].date) + 1) + " jours." : "Pèse-toi chaque matin, à jeun."]
+      ['Sur la semaine', signe(varSem, 2), varSem === null ? "" : "kg",
+        varSem === null ? "Deux semaines de pesées sont nécessaires."
+          : (varSem < 0 ? "En baisse, c'est la bonne direction." : varSem > 0 ? "En hausse sur sept jours." : "Stable.")],
+      ['Depuis le départ', signe(varTot, 1), varTot === null ? "" : "kg",
+        depart === null ? "Renseigne un poids de départ." : "Départ à " + nf(depart, 1) + " kg."],
+      ['Reste à perdre', reste === null ? "—" : (reste <= 0 ? "0" : nf(reste, 1)), "kg",
+        p.objectif ? "Objectif : " + nf(p.objectif, 1) + " kg." : "Aucun objectif fixé."],
+      ['Heure habituelle', hHab === null ? "—" : hhmm(hHab), "",
+        hHab === null ? "Note l'heure de tes pesées pour fiabiliser la courbe." : "Médiane de tes pesées horodatées."],
+      ['Tour de taille', tourAct === null ? "—" : nf(tourAct, 1), tourAct === null ? "" : "cm",
+        tourAct === null ? "Facultatif, mais c'est le meilleur complément du poids."
+          : (tourVar === null ? "Première mesure enregistrée." : signe(tourVar, 1) + " cm depuis la première mesure.")],
+      ['Pesées enregistrées', l.length ? ni(l.length) : "0", "",
+        l.length > 1 ? "Sur " + (diffJours(l[0].date, l[l.length - 1].date) + 1) + " jours." : "Pèse-toi chaque matin, à jeun."]
     ];
     document.getElementById("poidsStats").innerHTML = cartes.map(function (c) {
       return '<div class="stat ' + (c[4] || "") + '"><span class="lab">' + esc(c[0]) + '</span>' +
@@ -1955,8 +2484,90 @@ var SPORTS = [
         (c[3] ? '<div class="note">' + esc(c[3]) + '</div>' : '') + '</div>';
     }).join("");
 
+    renderParcours(l, moy);
     dessineCourbe(l);
     renderSemaines(l);
+    renderNoteCourbe(l, hHab);
+  }
+
+  /* --- barre de parcours : départ, position réelle, position prévue, objectif --- */
+  function renderParcours(l, moy) {
+    var p = P();
+    var box = document.getElementById("parcours");
+    var ec = document.getElementById("ecartJour");
+    var depart = p.depart, obj = p.objectif;
+    var reel = moy !== null ? moy : (l.length ? l[l.length - 1].kg : depart);
+    var prevu = poidsPlanifie(AUJ);
+
+    if (!depart || !obj || reel === null || depart <= obj) {
+      box.innerHTML = '<p class="empty" style="padding:6px 0">Renseigne un poids de départ et un poids visé dans les réglages pour voir ton parcours.</p>';
+      ec.innerHTML = "";
+      document.getElementById("parcoursHint").textContent = "";
+      return;
+    }
+
+    var total = depart - obj;
+    function pos(kg) { return clamp((depart - kg) / total * 100, 0, 100); }
+    var pReel = pos(reel);
+    var pPrevu = prevu === null ? null : pos(prevu);
+
+    function ancre(v) { return clamp(v, 7, 93).toFixed(1); }
+    box.innerHTML =
+      '<div class="parcours-haut"><span class="pm" style="left:' + ancre(pReel) + '%">toi<b>' + nf(reel, 1) + ' kg</b></span></div>' +
+      '<div class="parcours-rail"><span class="parcours-fait" style="width:' + pReel.toFixed(1) + '%"></span></div>' +
+      '<div class="parcours-bas">' + (pPrevu !== null
+        ? '<span class="pm" style="left:' + ancre(pPrevu) + '%">prévu<b>' + nf(prevu, 1) + ' kg</b></span>' : '') + '</div>' +
+      '<div class="parcours-ends"><span>Départ ' + nf(depart, 1) + ' kg</span>' +
+      '<span>' + nf(pReel, 0) + ' % du chemin</span>' +
+      '<span>Objectif ' + nf(obj, 1) + ' kg</span></div>';
+
+    document.getElementById("parcoursHint").textContent = nf(Math.max(0, reel - obj), 1) + " kg restants";
+
+    if (prevu === null) { ec.innerHTML = ""; return; }
+    var d = reel - prevu;
+    var cls = Math.abs(d) < 0.3 ? "pile" : (d < 0 ? "avance" : "retard");
+    var mot = cls === "pile" ? "Pile sur la trajectoire"
+      : d < 0 ? "En avance sur la trajectoire" : "En retard sur la trajectoire";
+    var detail = cls === "pile"
+      ? "Tu es exactement là où ton rythme visé te plaçait aujourd'hui."
+      : d < 0
+        ? "Tu es " + nf(Math.abs(d), 1) + " kg sous la courbe prévue. Tu peux tenir ce rythme ou relâcher un peu le déficit."
+        : "Tu es " + nf(d, 1) + " kg au-dessus de la courbe prévue. Cela se rattrape sans durcir le déficit : allonge simplement l'échéance.";
+    ec.innerHTML = '<div class="ecart-line"><span class="pastille ' + cls + '">' +
+      (d > 0 ? "+" : d < 0 ? "−" : "") + nf(Math.abs(d), 1) + ' kg</span>' +
+      '<div style="flex:1 1 200px;min-width:0"><b>' + mot + '</b><br>' +
+      '<span style="color:var(--ink-soft)">Prévu aujourd\'hui : ' + nf(prevu, 1) + ' kg · toi : ' + nf(reel, 1) + ' kg. ' + esc(detail) + '</span></div></div>';
+  }
+
+  function renderNoteCourbe(l, hHab) {
+    var box = document.getElementById("chartNote");
+    if (!box) return;
+    var msgs = [];
+    if (hHab !== null) {
+      var hors = 0;
+      l.forEach(function (e) {
+        var m = minutesDe(Store.jours[e.date].heure);
+        if (m !== null && Math.abs(m - hHab) > 120) hors++;
+      });
+      if (hors) {
+        msgs.push(["warn", "🕐", "<b>" + hors + (hors > 1 ? " pesées ont été faites" : " pesée a été faite") +
+          " à plus de deux heures de ton heure habituelle</b> (" + hhmm(hHab) + "). Ces points-là sont cerclés d'orange sur la courbe : " +
+          "l'écart qu'ils montrent vient en partie de l'heure, pas de la graisse."]);
+      }
+    }
+    var pl = plateau();
+    if (pl && Math.abs(pl.delta) < 0.25) {
+      msgs.push(["warn", "🧱", "<b>Ton poids stagne depuis " + pl.jours + " jours</b> (" + signeTxt(pl.delta) +
+        " kg sur la moyenne lissée). C'est normal et fréquent. Avant de couper davantage, vérifie tes portions pendant une semaine : " +
+        "le plus souvent, l'apport réel a glissé sans qu'on s'en rende compte."]);
+    }
+    box.innerHTML = msgs.map(function (a) {
+      return '<div class="alert ' + a[0] + '" style="margin:0 17px 16px"><span class="em" aria-hidden="true">' + a[1] + '</span><div>' + a[2] + '</div></div>';
+    }).join("");
+  }
+
+  function signeTxt(v) {
+    return (v > 0 ? "+" : v < 0 ? "−" : "") + nf(Math.abs(v), 2);
   }
 
   var chartPts = [];
@@ -1966,19 +2577,21 @@ var SPORTS = [
     var legend = document.getElementById("chartLegend");
     chartPts = [];
 
-    if (l.length < 2) {
-      holder.innerHTML = '<p class="empty" style="padding:26px 12px;text-align:center">' +
-        (l.length ? "Encore une pesée et la courbe apparaît." : "Enregistre ta première pesée pour lancer la courbe.") + '</p>';
+    if (!l.length) {
+      holder.innerHTML = '<p class="empty" style="padding:30px 12px;text-align:center">' +
+        'Enregistre ta première pesée : la courbe démarre dès le premier point.</p>';
       legend.innerHTML = "";
       return;
     }
 
-    var W = 720, H = 300, padL = 46, padR = 76, padT = 20, padB = 36;
+    var W = 720, H = 300, padL = 46, padR = 82, padT = 22, padB = 36;
     var pw = W - padL - padR, ph = H - padT - padB;
     var p = P();
+    var hHab = heureHabituelle();
 
     var d0 = l[0].date, d1 = l[l.length - 1].date;
     if (AUJ > d1) d1 = AUJ;
+    if (diffJours(d0, d1) < 7) d0 = addDays(d1, -7);
     var span = Math.max(1, diffJours(d0, d1));
 
     var vals = l.map(function (e) { return e.kg; });
@@ -1989,27 +2602,30 @@ var SPORTS = [
       if (tv !== null) { trajKg.push([td, tv]); vals.push(tv); }
     }
     var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-    if (mx - mn < 2) { var c = (mx + mn) / 2; mn = c - 1; mx = c + 1; }
-    var marge = (mx - mn) * 0.12;
+    if (mx - mn < 1.5) { var c = (mx + mn) / 2; mn = c - 0.75; mx = c + 0.75; }
+    var marge = (mx - mn) * 0.14;
     mn -= marge; mx += marge;
 
     function X(date) { return padL + clamp(diffJours(d0, date) / span, 0, 1) * pw; }
     function Y(kg) { return padT + (mx - kg) / (mx - mn) * ph; }
 
-    var s = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Courbe de poids, ' + l.length + ' pesées, de ' + nf(l[0].kg, 1) + ' à ' + nf(l[l.length - 1].kg, 1) + ' kilogrammes">';
+    var s = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Courbe de poids, ' +
+      l.length + ' pesée(s), de ' + nf(l[0].kg, 1) + ' à ' + nf(l[l.length - 1].kg, 1) + ' kilogrammes">';
 
-    var nTicks = 4;
-    for (var i = 0; i <= nTicks; i++) {
-      var kg = mn + (mx - mn) * i / nTicks, y = Y(kg);
-      s += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="currentColor" stroke-opacity=".13" stroke-width="1"/>';
+    for (var i = 0; i <= 4; i++) {
+      var kg = mn + (mx - mn) * i / 4, y = Y(kg);
+      s += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) +
+        '" stroke="currentColor" stroke-opacity=".13" stroke-width="1"/>';
       s += '<text x="' + (padL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="currentColor" fill-opacity=".55">' + nf(kg, 1) + '</text>';
     }
 
-    var nx = Math.min(5, l.length);
+    var nx = 5;
     for (var k = 0; k < nx; k++) {
-      var dd = addDays(d0, Math.round(span * k / (nx - 1 || 1)));
+      var dd = addDays(d0, Math.round(span * k / (nx - 1)));
       var x = X(dd);
-      s += '<text x="' + x.toFixed(1) + '" y="' + (H - 12) + '" text-anchor="' + (k === 0 ? "start" : k === nx - 1 ? "end" : "middle") + '" font-size="11" fill="currentColor" fill-opacity=".55">' + dateCourte(dd) + '</text>';
+      s += '<text x="' + x.toFixed(1) + '" y="' + (H - 12) + '" text-anchor="' +
+        (k === 0 ? "start" : k === nx - 1 ? "end" : "middle") +
+        '" font-size="11" fill="currentColor" fill-opacity=".55">' + dateCourte(dd) + '</text>';
     }
 
     if (trajKg.length > 1) {
@@ -2025,16 +2641,36 @@ var SPORTS = [
     if (moyPts.length > 1) {
       s += '<polyline fill="none" stroke="var(--blue)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="' +
         moyPts.map(function (q) { return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '"/>';
-      var last = moyPts[moyPts.length - 1];
-      s += '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="5" fill="var(--blue)" stroke="var(--panel)" stroke-width="2"/>';
-      s += '<text x="' + (last[0] + 10).toFixed(1) + '" y="' + (last[1] + 4).toFixed(1) + '" font-size="12" font-weight="600" fill="var(--blue)">' + nf(last[3], 1) + ' kg</text>';
     }
 
+    // points relevés ; cerclés d'orange si l'heure s'écarte de l'habitude
     l.forEach(function (e) {
       var x = X(e.date), y = Y(e.kg);
-      chartPts.push({ x: x, y: y, date: e.date, kg: e.kg });
-      s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.2" fill="currentColor" fill-opacity=".38" stroke="var(--panel)" stroke-width="1.5"/>';
+      var m = minutesDe(Store.jours[e.date].heure);
+      var atypique = (hHab !== null && m !== null && Math.abs(m - hHab) > 120);
+      chartPts.push({ x: x, y: y, date: e.date, kg: e.kg, h: m, atypique: atypique });
+      s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (atypique ? 4.4 : 3.2) +
+        '" fill="currentColor" fill-opacity="' + (atypique ? ".18" : ".38") + '" stroke="' +
+        (atypique ? "var(--warn)" : "var(--panel)") + '" stroke-width="' + (atypique ? "2" : "1.5") + '"/>';
     });
+
+    // repères d'aujourd'hui : où tu devrais être, où tu es
+    var reelAuj = moyPts.length ? moyPts[moyPts.length - 1][3] : l[l.length - 1].kg;
+    var xAuj = X(l[l.length - 1].date);
+    var prevuAuj = poidsPlanifie(l[l.length - 1].date);
+    if (prevuAuj !== null && trajKg.length > 1) {
+      var yR = Y(reelAuj), yP = Y(prevuAuj);
+      if (Math.abs(yR - yP) > 6) {
+        s += '<line x1="' + xAuj.toFixed(1) + '" y1="' + yR.toFixed(1) + '" x2="' + xAuj.toFixed(1) + '" y2="' + yP.toFixed(1) +
+          '" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="3 3"/>';
+      }
+      s += '<circle cx="' + xAuj.toFixed(1) + '" cy="' + yP.toFixed(1) + '" r="4.5" fill="var(--orange)" stroke="var(--panel)" stroke-width="2"/>';
+      s += '<text x="' + (xAuj + 9).toFixed(1) + '" y="' + (yP + 4).toFixed(1) +
+        '" font-size="11" font-weight="600" fill="var(--orange)">' + nf(prevuAuj, 1) + '</text>';
+    }
+    s += '<circle cx="' + xAuj.toFixed(1) + '" cy="' + Y(reelAuj).toFixed(1) + '" r="5.5" fill="var(--blue)" stroke="var(--panel)" stroke-width="2"/>';
+    s += '<text x="' + (xAuj + 10).toFixed(1) + '" y="' + (Y(reelAuj) + 4).toFixed(1) +
+      '" font-size="12" font-weight="700" fill="var(--blue)">' + nf(reelAuj, 1) + ' kg</text>';
 
     s += '<line id="cross" x1="0" y1="' + padT + '" x2="0" y2="' + (padT + ph) + '" stroke="currentColor" stroke-opacity=".35" stroke-width="1.5" style="display:none"/>';
     s += '<circle id="crossDot" r="6" fill="none" stroke="var(--ink)" stroke-width="2.5" style="display:none"/>';
@@ -2044,9 +2680,12 @@ var SPORTS = [
     holder.innerHTML = s;
 
     legend.innerHTML =
-      '<li><span class="key" style="border-top-color:var(--blue)"></span> Moyenne sur 7 jours</li>' +
+      (moyPts.length > 1 ? '<li><span class="key" style="border-top-color:var(--blue)"></span> Où j\'en suis — moyenne sur 7 jours</li>'
+                         : '<li><span class="key dot" style="color:var(--blue);border-color:var(--blue)"></span> Où j\'en suis</li>') +
+      (trajKg.length > 1 ? '<li><span class="key" style="border-top-color:var(--orange);border-top-style:dashed"></span> Où je devrais en être</li>' : '') +
       '<li><span class="key dot" style="color:var(--ink-faint)"></span> Pesée du jour</li>' +
-      (trajKg.length > 1 ? '<li><span class="key" style="border-top-color:var(--orange);border-top-style:dashed"></span> Trajectoire visée</li>' : '');
+      (chartPts.some(function (q) { return q.atypique; })
+        ? '<li><span class="key dot" style="color:var(--warn);border-color:var(--warn)"></span> Pesée à une heure inhabituelle</li>' : '');
 
     brancheSurvol();
   }
@@ -2078,7 +2717,9 @@ var SPORTS = [
       var br = box.getBoundingClientRect();
       var px = (best.x / sc) + (r.left - br.left);
       var py = (best.y / sc) + (r.top - br.top);
-      tip.innerHTML = '<b>' + nf(best.kg, 1) + ' kg</b><br>' + dateCourte(best.date);
+      tip.innerHTML = '<b>' + nf(best.kg, 1) + ' kg</b><br>' + dateCourte(best.date) +
+        (best.h !== null && best.h !== undefined ? ' · ' + hhmm(best.h) : '') +
+        (best.atypique ? '<br><span style="opacity:.75">heure inhabituelle</span>' : '');
       tip.classList.add("on");
       var tw = tip.offsetWidth || 90;
       tip.style.left = clamp(px - tw / 2, 4, br.width - tw - 4) + "px";
@@ -2217,10 +2858,14 @@ var SPORTS = [
     ongletActif = nom;
     ["profil", "alim", "poids", "sport"].forEach(function (k) {
       document.getElementById("panel-" + k).hidden = (k !== nom);
-      var t = document.getElementById("tab-" + k);
-      t.setAttribute("aria-selected", String(k === nom));
     });
+    ["alim", "poids", "sport"].forEach(function (k) {
+      document.getElementById("tab-" + k).setAttribute("aria-selected", String(k === nom));
+    });
+    document.getElementById("tabsNav").hidden = (nom === "profil");
+    document.getElementById("profilBtn").setAttribute("aria-pressed", String(nom === "profil"));
     try { window.localStorage.setItem("suz-forme-onglet", nom); } catch (e) {}
+    if (nom === "poids") dessineCourbe(pesees());
   }
 
   /* ==================== ÉVÉNEMENTS ==================== */
@@ -2266,6 +2911,15 @@ var SPORTS = [
   });
   document.getElementById("sexeF").addEventListener("click", function () { P().sexe = "f"; hydrateProfil(); majProfilDepuisForm(); });
   document.getElementById("sexeH").addEventListener("click", function () { P().sexe = "h"; hydrateProfil(); majProfilDepuisForm(); });
+
+  document.getElementById("profilBtn").addEventListener("click", function () {
+    montreOnglet(ongletActif === "profil" ? "poids" : "profil");
+    window.scrollTo(0, 0);
+  });
+  document.getElementById("retourBtn").addEventListener("click", function () {
+    montreOnglet("poids");
+    window.scrollTo(0, 0);
+  });
 
   document.getElementById("wipeBtn").addEventListener("click", function () {
     if (!window.confirm("Effacer définitivement ton profil et tous les jours enregistrés ? Cette action est irréversible.")) return;
@@ -2317,6 +2971,16 @@ var SPORTS = [
     var b = e.target.closest("[data-food]");
     if (b) ouvrePicker(+b.dataset.food);
   });
+  document.querySelectorAll("[data-filtre]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      filtreType = b.dataset.filtre;
+      document.querySelectorAll("[data-filtre]").forEach(function (o) {
+        o.setAttribute("aria-pressed", String(o.dataset.filtre === filtreType));
+      });
+      renderResultats(document.getElementById("foodSearch").value);
+    });
+  });
+
   document.getElementById("favoris").addEventListener("click", function (e) {
     var b = e.target.closest("[data-fav]");
     if (!b) return;
@@ -2397,6 +3061,8 @@ var SPORTS = [
     }
     var j = J();
     j.poids = Math.round(v * 10) / 10;
+    var h = document.getElementById("poidsHeure").value;
+    j.heure = /^\d{1,2}:\d{2}$/.test(h) ? h : null;
     if (!P().depart) { P().depart = j.poids; Store.sauveProfil(); hydrateProfil(); }
     Store.sauveJour(dateCourante);
     renderTout();
@@ -2405,8 +3071,27 @@ var SPORTS = [
     var j = J();
     if (j.poids === null) return;
     j.poids = null;
+    j.heure = null;
     Store.sauveJour(dateCourante);
     renderTout();
+  });
+
+  document.getElementById("tailleSave").addEventListener("click", function () {
+    var v = parseFloat(document.getElementById("tailleInput").value);
+    var j = J();
+    if (document.getElementById("tailleInput").value === "") {
+      j.tour = null;
+    } else if (!isFinite(v) || v < 40 || v > 200) {
+      window.alert("Saisis un tour de taille compris entre 40 et 200 cm.");
+      return;
+    } else {
+      j.tour = Math.round(v * 10) / 10;
+    }
+    Store.sauveJour(dateCourante);
+    renderTout();
+  });
+  document.getElementById("tailleInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); document.getElementById("tailleSave").click(); }
   });
   document.getElementById("poidsInput").addEventListener("keydown", function (e) {
     if (e.key === "Enter") { e.preventDefault(); document.getElementById("poidsSave").click(); }
@@ -2431,6 +3116,37 @@ var SPORTS = [
     J().sport.splice(+b.dataset.delSport, 1);
     Store.sauveJour(dateCourante);
     renderSport(); renderBandeau(); renderAlim();
+  });
+
+  /* --- export --- */
+  var telechargement = null;
+
+  function construitCsv() {
+    var lignes = [["date", "heure", "poids_kg", "tour_taille_cm", "eau_ml",
+                   "kcal_mange", "proteines_g", "glucides_g", "lipides_g",
+                   "kcal_sport", "minutes_sport", "objectif_kcal"].join(";")];
+    Object.keys(Store.jours).sort().forEach(function (d) {
+      var j = Store.jours[d];
+      if (!aDesDonnees(j)) return;
+      var t = totauxRepas(d);
+      var mins = (j.sport || []).reduce(function (a, x) { return a + (x.m || 0); }, 0);
+      var c = objectifKcal(d);
+      lignes.push([d, j.heure || "", j.poids === null ? "" : nf(j.poids, 1),
+        j.tour === null ? "" : nf(j.tour, 1), j.eau || 0,
+        Math.round(t.kcal), nf(t.pro, 1), nf(t.glu, 1), nf(t.lip, 1),
+        Math.round(kcalSportJour(d)), mins, c === null ? "" : c].join(";"));
+    });
+    return "\ufeff" + lignes.join("\r\n");
+  }
+
+  document.getElementById("exportBtn").addEventListener("click", function () {
+    if (!telechargement) return;
+    telechargement.save({
+      filename: "carnet-de-forme-" + AUJ + ".csv",
+      data: construitCsv()
+    }).catch(function () {
+      window.alert("L'export n'a pas pu être lancé. Réessaie depuis un navigateur.");
+    });
   });
 
   /* --- thème --- */
