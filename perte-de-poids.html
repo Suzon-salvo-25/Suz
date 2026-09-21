@@ -1942,6 +1942,8 @@ var SPORTS = [
 
   var queues = {};
   var enEcriture = {};
+  var enEcritureProfil = 0;
+  var profilEdite = 0;   // horodatage de la dernière frappe dans les réglages
   var diag = { dernier: "aucune écriture", erreurs: 0, derniereErreur: "" };
   function enfile(cle, fn) {
     queues[cle] = (queues[cle] || Promise.resolve()).then(fn).catch(function (e) {
@@ -1978,7 +1980,16 @@ var SPORTS = [
     lsEcrire();
     if (Store.mode === "cloud" && Store.db) {
       var copie = JSON.parse(JSON.stringify(Store.profil));
-      enfile("profil", function () { return Store.db.doc("profil/moi").set(copie); });
+      enEcritureProfil++;
+      enfile("profil", function () {
+        return Store.db.doc("profil/moi").set(copie).then(function () {
+          enEcritureProfil--;
+          diag.dernier = "profil enregistré";
+        }, function (e) {
+          enEcritureProfil--;
+          throw e;
+        });
+      });
     }
   };
   Store.sauveJour = function (date) {
@@ -2056,7 +2067,22 @@ var SPORTS = [
       majSync("cloud");
 
       db.doc("profil/moi").onSnapshot(function (snap) {
-        if (snap.exists) { Store.profil = normProfil(snap.data()); lsEcrire(); Store.onChange("profil"); }
+        if (!snap.exists) return;
+        // Une saisie partie ou toute fraîche prime sur la version du serveur :
+        // sinon le formulaire se vide sous les doigts.
+        if (enEcritureProfil > 0 || Date.now() - profilEdite < 4000) return;
+        var distant = normProfil(snap.data());
+        var local = Store.profil;
+        // Si le serveur renvoie un profil plus pauvre que celui gardé sur
+        // l'appareil, c'est une écriture perdue : on garde le local et on le
+        // renvoie, plutôt que d'effacer ce qui a été saisi.
+        var remplis = function (x) {
+          return ["age", "taille", "depart", "objectif"].filter(function (k) { return x[k]; }).length;
+        };
+        if (remplis(local) > remplis(distant)) { Store.sauveProfil(); return; }
+        Store.profil = distant;
+        lsEcrire();
+        Store.onChange("profil");
       }, function (e) {
         diag.erreurs++; diag.derniereErreur = (e && e.code) || "inconnue";
         Store.mode = "local"; majSync("local");
@@ -2366,6 +2392,9 @@ var SPORTS = [
   /* ==================== ONGLET PROFIL ==================== */
 
   function hydrateProfil() {
+    // Ne jamais réécrire le formulaire pendant que l'utilisatrice y travaille
+    // ou qu'un enregistrement est en route.
+    if (enEcritureProfil > 0 || Date.now() - profilEdite < 4000) return;
     var p = P();
     function set(id, val) {
       var el = document.getElementById(id);
@@ -2374,8 +2403,8 @@ var SPORTS = [
     set("pPrenom", p.prenom);
     set("pAge", p.age);
     set("pTaille", p.taille);
-    set("pDepart", p.depart);
-    set("pObjectif", p.objectif);
+    set("pDepart", p.depart === null ? "" : nf(p.depart, 1));
+    set("pObjectif", p.objectif === null ? "" : nf(p.objectif, 1));
     set("pDebut", p.debut);
     set("pSeances", p.seances);
     set("pActivite", String(p.activite));
@@ -2863,13 +2892,13 @@ var SPORTS = [
   function renderPoids() {
     var j = Store.jours[dateCourante];
     var inp = document.getElementById("poidsInput");
-    if (document.activeElement !== inp) inp.value = (j && typeof j.poids === "number") ? j.poids : "";
+    if (document.activeElement !== inp) inp.value = (j && typeof j.poids === "number") ? nf(j.poids, 1) : "";
     var hin = document.getElementById("poidsHeure");
     if (document.activeElement !== hin) {
       hin.value = (j && j.heure) ? j.heure : (dateCourante === AUJ ? heureMaintenant() : "");
     }
     var tin = document.getElementById("tailleInput");
-    if (document.activeElement !== tin) tin.value = (j && typeof j.tour === "number") ? j.tour : "";
+    if (document.activeElement !== tin) tin.value = (j && typeof j.tour === "number") ? nf(j.tour, 1) : "";
 
     var l = pesees();
     var p = P();
@@ -3581,22 +3610,33 @@ var SPORTS = [
     renderAlim();
     renderPoids();
     majSportKcal();
+    majDiag();
   }
 
   var tProfil = null;
   function profilChange() {
+    profilEdite = Date.now();
     clearTimeout(tProfil);
-    tProfil = setTimeout(majProfilDepuisForm, 280);
+    tProfil = setTimeout(majProfilDepuisForm, 450);
+  }
+  // Quitter un champ enregistre sans attendre le délai
+  function flushProfil() {
+    clearTimeout(tProfil);
+    majProfilDepuisForm();
   }
 
   ["pPrenom", "pAge", "pTaille", "pDepart", "pObjectif", "pDebut", "pSeances"].forEach(function (id) {
-    document.getElementById(id).addEventListener("input", profilChange);
+    var el = document.getElementById(id);
+    el.addEventListener("input", profilChange);
+    el.addEventListener("change", flushProfil);
+    el.addEventListener("blur", flushProfil);
   });
   document.getElementById("pActivite").addEventListener("change", majProfilDepuisForm);
   document.getElementById("pRythme").addEventListener("input", function () {
     document.getElementById("rythmeVal").textContent = nf(parseFloat(this.value), 2);
     profilChange();
   });
+  document.getElementById("pRythme").addEventListener("change", flushProfil);
   document.getElementById("sexeF").addEventListener("click", function () { P().sexe = "f"; hydrateProfil(); majProfilDepuisForm(); });
   document.getElementById("sexeH").addEventListener("click", function () { P().sexe = "h"; hydrateProfil(); majProfilDepuisForm(); });
 
@@ -3624,10 +3664,13 @@ var SPORTS = [
   }
 
   document.getElementById("profilBtn").addEventListener("click", function () {
+    if (ongletActif === "profil") flushProfil();
     montreOnglet(ongletActif === "profil" ? "poids" : "profil");
     window.scrollTo(0, 0);
   });
   document.getElementById("retourBtn").addEventListener("click", function () {
+    flushProfil();
+    toast("Profil enregistré");
     montreOnglet("poids");
     window.scrollTo(0, 0);
   });
