@@ -535,6 +535,26 @@ input[type="range"] { width: 100%; accent-color: var(--orange); }
 .results .rn { font-weight: 600; font-size: .9rem; }
 .results .rk { font-family: var(--f-mono); font-size: .78rem; color: var(--ink-faint); white-space: nowrap; }
 
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip-food {
+  background: var(--panel-2);
+  border: 2px solid var(--line-hard);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: .84rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+}
+.chip-food:hover { background: var(--orange); color: var(--on-orange); }
+.chip-food:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.chip-food b { font-family: var(--f-mono); font-weight: 500; font-size: .76rem; opacity: .65; }
+.chip-food span.t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.results .rb { font-size: .74rem; color: var(--ink-faint); }
+
 /* ---------- eau ---------- */
 
 .water-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -843,6 +863,11 @@ td .up { color: var(--crit); font-weight: 700; }
             </select>
           </div>
         </div>
+        <div class="field" id="favorisBloc" hidden style="margin-bottom:14px">
+          <label>Mes aliments fréquents</label>
+          <div class="chips" id="favoris"></div>
+        </div>
+
         <div class="field search-wrap">
           <label for="foodSearch">Chercher un aliment</label>
           <input type="text" id="foodSearch" autocomplete="off" placeholder="poulet, riz, yaourt, pomme…">
@@ -1311,7 +1336,8 @@ var SPORTS = [
     return {
       prenom: "", sexe: "f", age: null, taille: null,
       depart: null, objectif: null, debut: AUJ,
-      activite: 1.375, rythme: 0.5, seances: 3
+      activite: 1.375, rythme: 0.5, seances: 3,
+      freq: {}, perso: {}
     };
   }
   function jourVide(date) {
@@ -1342,6 +1368,9 @@ var SPORTS = [
       if (typeof raw[k] === "number" && isFinite(raw[k])) p[k] = raw[k];
     });
     if (p.sexe !== "h" && p.sexe !== "f") p.sexe = "f";
+    ["freq", "perso"].forEach(function (k) {
+      if (raw[k] && typeof raw[k] === "object" && !Array.isArray(raw[k])) p[k] = raw[k];
+    });
     return p;
   }
 
@@ -1786,26 +1815,69 @@ var SPORTS = [
     document.getElementById("repasTotal").textContent = ni(t.kcal) + " kcal au total";
   }
 
+  function plie(x) {
+    return String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+  var ALIM_PLIE = ALIMENTS.map(function (a) { return plie(a[0]); });
+
   function chercheAliments(q) {
-    q = q.trim().toLowerCase();
-    if (q.length < 2) return [];
-    var mots = q.split(/\s+/);
-    return ALIMENTS.filter(function (a) {
-      var n = a[0].toLowerCase();
-      return mots.every(function (m) { return n.indexOf(m) !== -1; });
-    }).sort(function (a, b) {
-      var ia = a[0].toLowerCase().indexOf(mots[0]), ib = b[0].toLowerCase().indexOf(mots[0]);
-      if (ia !== ib) return ia - ib;
-      return a[0].length - b[0].length;
-    }).slice(0, 12);
+    var mots = plie(q).trim().split(/\s+/).filter(Boolean);
+    if (!mots.length || mots.join("").length < 2) return [];
+    var freq = P().freq || {};
+    var res = [];
+    for (var i = 0; i < ALIM_PLIE.length; i++) {
+      var n = ALIM_PLIE[i];
+      var ok = true, pos = 0;
+      for (var m = 0; m < mots.length; m++) {
+        var k = n.indexOf(mots[m]);
+        if (k === -1) { ok = false; break; }
+        if (m === 0) pos = k;
+      }
+      if (ok) res.push({ i: i, pos: pos, len: n.length, f: freq[ALIMENTS[i][0]] || 0 });
+    }
+    res.sort(function (a, b) {
+      if (a.f !== b.f) return b.f - a.f;
+      if (a.pos !== b.pos) return a.pos - b.pos;
+      return a.len - b.len;
+    });
+    return res.slice(0, 15);
   }
 
   function renderResultats(q) {
     var res = chercheAliments(q);
-    document.getElementById("foodResults").innerHTML = res.map(function (a, i) {
-      return '<li><button type="button" data-food="' + ALIMENTS.indexOf(a) + '">' +
+    document.getElementById("foodResults").innerHTML = res.map(function (r) {
+      var a = ALIMENTS[r.i];
+      return '<li><button type="button" data-food="' + r.i + '">' +
         '<span class="rn">' + esc(a[0]) + '</span>' +
         '<span class="rk">' + a[1] + ' kcal / 100 g</span></button></li>';
+    }).join("");
+  }
+
+  function noteUsage(nom) {
+    var p = P();
+    if (!p.freq) p.freq = {};
+    p.freq[nom] = (p.freq[nom] || 0) + 1;
+    var cles = Object.keys(p.freq);
+    if (cles.length > 60) {
+      cles.sort(function (a, b) { return p.freq[a] - p.freq[b]; });
+      cles.slice(0, cles.length - 60).forEach(function (k) { delete p.freq[k]; });
+    }
+    Store.sauveProfil();
+  }
+
+  function renderFavoris() {
+    var p = P();
+    var freq = p.freq || {};
+    var noms = Object.keys(freq).sort(function (a, b) { return freq[b] - freq[a]; }).slice(0, 10);
+    var bloc = document.getElementById("favorisBloc");
+    if (!noms.length) { bloc.hidden = true; return; }
+    bloc.hidden = false;
+    document.getElementById("favoris").innerHTML = noms.map(function (n) {
+      var i = ALIMENTS.findIndex(function (a) { return a[0] === n; });
+      var kcal = i !== -1 ? Math.round(ALIMENTS[i][1] * ALIMENTS[i][6] / 100) : (p.perso && p.perso[n]);
+      if (kcal === undefined || kcal === null) return "";
+      return '<button type="button" class="chip-food" data-fav="' + esc(n) + '">' +
+        '<span class="t">' + esc(n) + '</span><b>' + ni(kcal) + '</b></button>';
     }).join("");
   }
 
@@ -2135,6 +2207,7 @@ var SPORTS = [
     hydrateProfil();
     renderProfil();
     renderAlim();
+    renderFavoris();
     renderPoids();
     renderSport();
     majSportKcal();
@@ -2244,6 +2317,23 @@ var SPORTS = [
     var b = e.target.closest("[data-food]");
     if (b) ouvrePicker(+b.dataset.food);
   });
+  document.getElementById("favoris").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-fav]");
+    if (!b) return;
+    var nom = b.dataset.fav;
+    var i = ALIMENTS.findIndex(function (a) { return a[0] === nom; });
+    if (i !== -1) { ouvrePicker(i); return; }
+    var p = P();
+    var kcal = p.perso && p.perso[nom];
+    if (kcal === undefined) return;
+    J().repas[document.getElementById("foodRepas").value].push({
+      n: nom, d: "saisie libre", k: kcal, p: 0, g: 0, l: 0
+    });
+    noteUsage(nom);
+    Store.sauveJour(dateCourante);
+    renderAlim(); renderFavoris(); renderBandeau();
+  });
+
   document.getElementById("pickQte").addEventListener("input", majPickKcal);
   document.getElementById("pickUnite").addEventListener("change", function () {
     document.getElementById("pickQte").value = this.value === "p" ? 1 : 100;
@@ -2264,9 +2354,10 @@ var SPORTS = [
       d: unite === "p" ? nf(q, q % 1 ? 1 : 0) + " × " + a[7] + " (" + ni(g) + " g)" : ni(g) + " g",
       k: Math.round(a[1] * f), p: +(a[2] * f).toFixed(1), g: +(a[3] * f).toFixed(1), l: +(a[4] * f).toFixed(1)
     });
+    noteUsage(a[0]);
     Store.sauveJour(dateCourante);
     fermePicker();
-    renderAlim(); renderBandeau();
+    renderAlim(); renderFavoris(); renderBandeau();
   });
 
   document.getElementById("libreAdd").addEventListener("click", function () {
@@ -2277,11 +2368,16 @@ var SPORTS = [
       return;
     }
     var repas = document.getElementById("foodRepas").value;
-    J().repas[repas].push({ n: nom.slice(0, 60), d: "saisie libre", k: Math.round(kcal), p: 0, g: 0, l: 0 });
+    var court = nom.slice(0, 60);
+    J().repas[repas].push({ n: court, d: "saisie libre", k: Math.round(kcal), p: 0, g: 0, l: 0 });
+    var p = P();
+    if (!p.perso) p.perso = {};
+    p.perso[court] = Math.round(kcal);
+    noteUsage(court);
     Store.sauveJour(dateCourante);
     document.getElementById("libreNom").value = "";
     document.getElementById("libreKcal").value = "";
-    renderAlim(); renderBandeau();
+    renderAlim(); renderFavoris(); renderBandeau();
   });
 
   document.getElementById("repasListe").addEventListener("click", function (e) {
