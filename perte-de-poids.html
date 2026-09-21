@@ -674,6 +674,15 @@ td .up { color: var(--crit); font-weight: 700; }
 .sync.on .dot { background: var(--ok); }
 .sync.off .dot { background: var(--warn); }
 
+.lien {
+  background: none; border: 0; padding: 6px 0 0;
+  color: var(--ink-soft); font-size: .82rem;
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+}
+.lien:hover { color: var(--ink); }
+.lien:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+
 .toast {
   position: fixed;
   left: 50%;
@@ -799,6 +808,9 @@ td .up { color: var(--crit); font-weight: 700; }
   .items .kc { grid-column: 1 / -1; }
   .macro-row { grid-template-columns: 1fr; gap: 4px; }
   .macro-row .mval { text-align: right; }
+  .apercu span { flex: 1 1 calc(50% - 1px); }
+  .apercu span:nth-child(2n) { border-right: 0; }
+  .apercu span:nth-child(-n+2) { border-bottom: 2px solid var(--line-hard); }
 }
 
 @media print {
@@ -1132,13 +1144,14 @@ td .up { color: var(--crit); font-weight: 700; }
             <label for="sportSel">Activité</label>
             <select id="sportSel"></select>
           </div>
-          <div class="field" id="sportAllureBloc" style="flex:2 1 190px" hidden>
-            <label for="sportAllure">Allure</label>
-            <select id="sportAllure"></select>
-          </div>
-          <div class="field" id="sportDistBloc" style="flex:0 1 130px" hidden>
-            <label for="sportDist">Distance (km)</label>
+          <div class="field" id="sportDistBloc" style="flex:0 1 140px" hidden>
+            <label for="sportDist" id="sportDistLab">Distance (km)</label>
             <input type="text" id="sportDist" inputmode="decimal" autocomplete="off" placeholder="8,42">
+          </div>
+          <div class="field" id="sportAllureBloc" style="flex:1 1 160px" hidden>
+            <label for="sportAllure" id="sportAllureLab">Allure</label>
+            <input type="text" id="sportAllure" list="allureListe" inputmode="decimal" autocomplete="off">
+            <datalist id="allureListe"></datalist>
           </div>
           <div class="field" style="flex:0 1 130px">
             <label for="sportDuree">Durée</label>
@@ -1146,6 +1159,7 @@ td .up { color: var(--crit); font-weight: 700; }
           </div>
           <button type="button" class="btn go" id="sportAdd">Ajouter <span class="num" id="sportKcal">0</span> kcal</button>
         </div>
+        <button type="button" class="lien" id="basculeAllure" hidden></button>
         <div id="sportApercu"></div>
         <p class="sub-note" style="margin-top:9px;color:var(--ink-faint);font-size:.78rem" id="sportBase"></p>
       </div>
@@ -2898,6 +2912,10 @@ var SPORTS = [
     return 15.8;
   }
   function typeSport(i) { return SPORTS[i] && SPORTS[i][3] ? SPORTS[i][3] : null; }
+  function uniteDistance(type) { return type === "nage" ? "m" : "km"; }
+  function distEnKm(type, v) { return type === "nage" ? v / 1000 : v; }
+  function distAffichee(type, km) { return type === "nage" ? km * 1000 : km; }
+
   function typeParNom(nom) {
     for (var i = 0; i < SPORTS.length; i++) if (SPORTS[i][0] === nom) return SPORTS[i][3] || null;
     return null;
@@ -2909,30 +2927,30 @@ var SPORTS = [
     course: [
       ["8:00 /km · très lent", 7.5],
       ["7:30 /km · footing", 8.0],
-      ["7:00 /km · tranquille", 8.6],
-      ["6:30 /km · endurance", 9.2],
+      ["7:00 /km · tranquille", 8.5714],
+      ["6:30 /km · endurance", 9.2308],
       ["6:00 /km · active", 10.0],
-      ["5:45 /km", 10.4],
-      ["5:30 /km · soutenue", 10.9],
-      ["5:15 /km", 11.4],
+      ["5:45 /km", 10.4348],
+      ["5:30 /km · soutenue", 10.9091],
+      ["5:15 /km", 11.4286],
       ["5:00 /km · rapide", 12.0],
-      ["4:45 /km", 12.6],
-      ["4:30 /km · seuil", 13.3],
-      ["4:15 /km", 14.1],
+      ["4:45 /km", 12.6316],
+      ["4:30 /km · seuil", 13.3333],
+      ["4:15 /km", 14.1176],
       ["4:00 /km · très rapide", 15.0],
       ["3:45 /km", 16.0],
-      ["3:30 /km · compétition", 17.1],
-      ["3:15 /km", 18.5]
+      ["3:30 /km · compétition", 17.1429],
+      ["3:15 /km", 18.4615],
     ],
     marche: [
-      ["17:00 /km · flânerie", 3.5],
+      ["17:00 /km · flânerie", 3.5294],
       ["15:00 /km · tranquille", 4.0],
       ["13:20 /km · normale", 4.5],
       ["12:00 /km · bon pas", 5.0],
-      ["11:00 /km", 5.5],
+      ["11:00 /km", 5.4545],
       ["10:00 /km · rapide", 6.0],
-      ["9:15 /km · sportive", 6.5],
-      ["8:35 /km · athlétique", 7.0]
+      ["9:15 /km · sportive", 6.4865],
+      ["8:35 /km · athlétique", 6.9903],
     ],
     velo: [
       ["14 km/h · balade", 14],
@@ -2944,18 +2962,19 @@ var SPORTS = [
       ["26 km/h · très rapide", 26],
       ["28 km/h", 28],
       ["30 km/h · peloton", 30],
-      ["33 km/h · course", 33]
+      ["33 km/h · course", 33],
     ],
     nage: [
       ["3:00 /100 m · tranquille", 2.0],
       ["2:40 /100 m", 2.25],
-      ["2:20 /100 m · régulier", 2.57],
+      ["2:20 /100 m · régulier", 2.5714],
       ["2:00 /100 m · soutenu", 3.0],
-      ["1:50 /100 m", 3.27],
+      ["1:50 /100 m", 3.2727],
       ["1:40 /100 m · rapide", 3.6],
-      ["1:30 /100 m · compétition", 4.0]
+      ["1:30 /100 m · compétition", 4.0],
     ]
   };
+;
   var ALLURE_DEFAUT = { course: 4, marche: 3, velo: 3, nage: 2 };
 
   function metNage(kmh) {
@@ -2966,6 +2985,34 @@ var SPORTS = [
     if (kmh < 3.5) return 11.0;
     if (kmh < 3.8) return 12.5;
     return 13.8;
+  }
+
+  // L'allure se tape librement : 5:22 au kilomètre, 24,5 km/h à vélo,
+  // 1:52 aux cent mètres. Les crans ne sont plus que des suggestions.
+  function allureTexte(type, kmh) {
+    if (!kmh || kmh <= 0) return "";
+    if (type === "velo") return nf(kmh, kmh % 1 ? 1 : 0);
+    if (type === "nage") return fmtAllure(6 / kmh);
+    return fmtAllure(60 / kmh);
+  }
+  function parseAllure(type, txt) {
+    txt = String(txt || "").trim();
+    if (!txt) return 0;
+    if (type === "velo") {
+      var v = nombre(txt);
+      return (isFinite(v) && v > 0 && v < 100) ? v : 0;
+    }
+    var m = /^(\d{1,3})\s*[:'’.]\s*(\d{1,2})$/.exec(txt);
+    var minutes;
+    if (m) minutes = (+m[1]) + (+m[2]) / 60;
+    else { var d = nombre(txt); minutes = isFinite(d) ? d : 0; }
+    if (minutes <= 0 || minutes > 120) return 0;
+    return type === "nage" ? 6 / minutes : 60 / minutes;
+  }
+  function uniteAllureLabel(type) {
+    return type === "velo" ? "Vitesse (km/h)"
+      : type === "nage" ? "Allure (min/100 m)"
+      : "Allure (min/km)";
   }
 
   function uniteAllure(type, kmh) {
@@ -2993,16 +3040,21 @@ var SPORTS = [
   }
 
   var typePrecedent = null;
+  var modeAllure = false;
 
   function remplitAllures(type) {
-    var sel = document.getElementById("sportAllure");
-    if (!type || !ALLURES[type]) { sel.innerHTML = ""; return; }
+    var inp = document.getElementById("sportAllure");
+    var liste = document.getElementById("allureListe");
+    if (!type || !ALLURES[type]) { liste.innerHTML = ""; return; }
     if (typePrecedent === type) return;
     typePrecedent = type;
-    sel.innerHTML = ALLURES[type].map(function (a, k) {
-      return '<option value="' + a[1] + '">' + esc(a[0]) + '</option>';
+    liste.innerHTML = ALLURES[type].map(function (a) {
+      var v = allureTexte(type, a[1]);
+      var desc = a[0].indexOf("·") !== -1 ? a[0].split("·")[1].trim() : "";
+      return '<option value="' + esc(v) + '"' + (desc ? ' label="' + esc(v + " · " + desc) + '"' : '') + '></option>';
     }).join("");
-    sel.selectedIndex = ALLURE_DEFAUT[type] || 0;
+    inp.value = allureTexte(type, ALLURES[type][ALLURE_DEFAUT[type] || 0][1]);
+    inp.placeholder = type === "velo" ? "24,5" : type === "nage" ? "2:00" : "5:30";
   }
 
   function majSportKcal() {
@@ -3010,26 +3062,41 @@ var SPORTS = [
     var i = +document.getElementById("sportSel").value;
     var type = typeSport(i);
     var min = parseDuree(document.getElementById("sportDuree").value);
-    var km = champ("sportDist");
-    if (!isFinite(km) || km < 0) km = 0;
 
-    document.getElementById("sportDistBloc").hidden = !type;
-    document.getElementById("sportAllureBloc").hidden = !type;
+    var saisie = champ("sportDist");
+    if (!isFinite(saisie) || saisie < 0) saisie = 0;
+    var km = type ? distEnKm(type, saisie) : 0;
+    if (modeAllure) km = 0;
+
+    document.getElementById("sportDistBloc").hidden = !type || modeAllure;
+    document.getElementById("sportAllureBloc").hidden = !type || !modeAllure;
+    var bascule = document.getElementById("basculeAllure");
+    bascule.hidden = !type;
+    bascule.textContent = modeAllure
+      ? "J'ai la distance, revenir à la saisie précise"
+      : "Je ne connais pas la distance";
+
+    if (type) {
+      document.getElementById("sportDistLab").textContent = "Distance (" + uniteDistance(type) + ")";
+      document.getElementById("sportDist").placeholder = type === "nage" ? "1500" : "8,42";
+      document.getElementById("sportAllureLab").textContent = uniteAllureLabel(type);
+    }
+
     remplitAllures(type);
-    var selA = document.getElementById("sportAllure");
-    var kmhChoisi = type ? (parseFloat(selA.value) || 0) : 0;
-    selA.disabled = !!(type && km > 0);
+    var kmhChoisi = (type && modeAllure) ? parseAllure(type, document.getElementById("sportAllure").value) : 0;
+    var allureLisible = !(type && modeAllure) || kmhChoisi > 0;
 
-    var r = calcSeance(i, min, poids, type ? km : 0, kmhChoisi);
+    var r = calcSeance(i, min, poids, km, kmhChoisi);
 
     document.getElementById("sportKcal").textContent = ni(r.kcal);
-    document.getElementById("sportAdd").disabled = !poids || min <= 0;
+    document.getElementById("sportAdd").disabled = !poids || min <= 0 || !allureLisible;
 
     var ap = document.getElementById("sportApercu");
     if (min > 0 && type && r.kmh) {
       var kmAff = r.mesure ? km : r.kmh * min / 60;
       ap.innerHTML = '<div class="apercu">' +
-        '<span><b>' + fmtKm(kmAff) + '</b>' + (r.mesure ? "distance" : "distance estimée") + '</span>' +
+        '<span><b>' + (type === "nage" ? ni(kmAff * 1000) + " m" : fmtKm(kmAff)) + '</b>' +
+          (r.mesure ? "distance" : "distance estimée") + '</span>' +
         '<span><b>' + fmtDuree(min) + '</b>durée</span>' +
         '<span><b>' + uniteAllure(type, r.kmh) + '</b>' + (r.mesure ? "allure mesurée" : "allure choisie") + '</span>' +
         '<span><b>' + ni(r.kcal) + ' kcal</b>dépense</span></div>';
@@ -3043,9 +3110,15 @@ var SPORTS = [
     document.getElementById("sportBase").textContent = !poids
       ? "Renseigne ton poids dans les réglages pour estimer les calories."
       : (r.mesure
-        ? "Allure calculée depuis ta distance et ta durée, appliquée à " + nf(poids, 1) + " kg selon les équations de l'ACSM."
+        ? "Allure calculée depuis ta séance réelle, appliquée à " + nf(poids, 1) + " kg selon les équations de l'ACSM."
         : (type
-          ? "Allure prise dans la liste. Saisis la distance et elle sera calculée depuis ta séance réelle."
+          ? (modeAllure
+            ? (allureLisible
+              ? "Estimation depuis l'allure saisie. La distance donne un résultat bien plus juste."
+              : (type === "velo" ? "Saisis une vitesse en kilomètres par heure, par exemple 24,5."
+                 : "Saisis une allure au format minutes deux-points secondes, par exemple " +
+                   (type === "nage" ? "1:52 aux cent mètres." : "5:22 au kilomètre.")))
+            : "Reprends les chiffres de ta montre ou de Strava : distance et durée suffisent, l'allure en découle.")
           : "Calcul basé sur " + nf(poids, 1) + " kg. La dépense baisse à mesure que tu perds du poids."));
   }
 
@@ -3063,7 +3136,7 @@ var SPORTS = [
       ? j.sport.map(function (x, i) {
           var t = typeParNom(x.n);
           var bits = [];
-          if (x.d > 0) bits.push(fmtKm(x.d) + (x.est ? " estimés" : ""));
+          if (x.d > 0) bits.push((t === "nage" ? ni(x.d * 1000) + " m" : fmtKm(x.d)) + (x.est ? " estimés" : ""));
           bits.push(fmtDuree(x.m));
           if (x.d > 0 && x.m > 0) bits.push(uniteAllure(t, x.d / (x.m / 60)));
           else bits.push("intensité " + nf(x.met, 1) + " MET");
@@ -3413,10 +3486,20 @@ var SPORTS = [
   });
 
   /* --- sport --- */
-  document.getElementById("sportSel").addEventListener("change", majSportKcal);
+  document.getElementById("sportSel").addEventListener("change", function () {
+    modeAllure = false;
+    document.getElementById("sportDist").value = "";
+    majSportKcal();
+  });
+  document.getElementById("basculeAllure").addEventListener("click", function () {
+    modeAllure = !modeAllure;
+    if (modeAllure) document.getElementById("sportDist").value = "";
+    majSportKcal();
+    document.getElementById(modeAllure ? "sportAllure" : "sportDist").focus();
+  });
   document.getElementById("sportDuree").addEventListener("input", majSportKcal);
   document.getElementById("sportDist").addEventListener("input", majSportKcal);
-  document.getElementById("sportAllure").addEventListener("change", majSportKcal);
+  document.getElementById("sportAllure").addEventListener("input", majSportKcal);
   document.getElementById("sportAdd").addEventListener("click", function () {
     var poids = poidsA(dateCourante);
     var idx = +document.getElementById("sportSel").value;
@@ -3424,8 +3507,12 @@ var SPORTS = [
     if (!poids || min <= 0) return;
     var type = typeSport(idx);
     var km = 0;
-    if (type) { km = champ("sportDist"); if (!isFinite(km) || km < 0) km = 0; }
-    var kmhChoisi = type ? (parseFloat(document.getElementById("sportAllure").value) || 0) : 0;
+    if (type && !modeAllure) {
+      var saisi = champ("sportDist");
+      if (isFinite(saisi) && saisi > 0) km = distEnKm(type, saisi);
+    }
+    var kmhChoisi = (type && modeAllure) ? parseAllure(type, document.getElementById("sportAllure").value) : 0;
+    if (type && modeAllure && kmhChoisi <= 0) { toast("Allure non comprise. Exemple : 5:22 au kilomètre.", true); return; }
     var r = calcSeance(idx, min, poids, km, kmhChoisi);
     var e = { n: SPORTS[idx][0], m: Math.round(min * 100) / 100, met: r.met, k: r.kcal };
     var kmFinal = r.mesure ? km : (r.kmh ? r.kmh * min / 60 : 0);
