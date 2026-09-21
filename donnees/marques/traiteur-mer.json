@@ -1,0 +1,93 @@
+[
+  {
+    "nom": "Saumon fumé Atlantique de Norvège (Labeyrie)",
+    "kcal": 198, "prot": 23, "gluc": 0.5, "lip": 8.7,
+    "cat": "poisson", "portion_g": 35, "portion_lib": "1 tranche",
+    "source": "https://fr.openfoodfacts.org/produit/3033610071136/saumon-atlantique-de-norvege-fume-4-tranches-labeyrie",
+    "note": "Barquette de 140 g, 4 tranches d'environ 35 g"
+  },
+  {
+    "nom": "Truite fumée (Labeyrie)",
+    "kcal": 156, "prot": 22, "gluc": 0.5, "lip": 7.3,
+    "cat": "poisson", "portion_g": 30, "portion_lib": "1 tranche",
+    "source": "https://fr.openfoodfacts.org/produit/3033610053910/truite-de-mer-labeyrie",
+    "note": "Barquette de 120 g, 4 tranches d'environ 30 g"
+  },
+  {
+    "nom": "Bâtonnets de surimi L'Original (Coraya)",
+    "kcal": 112, "prot": 8.2, "gluc": 10, "lip": 4.2,
+    "cat": "poisson", "portion_g": 45, "portion_lib": "1 sachet de 3 bâtonnets",
+    "source": "https://fr.openfoodfacts.org/produit/3276170011185/batonnets-de-surimi-coraya-l-original",
+    "note": "Sachet de 3 bâtonnets de 15 g (pack 12 sachets, 540 g)"
+  },
+  {
+    "nom": "Surimi râpé de la mer (Coraya)",
+    "kcal": 98, "prot": 9, "gluc": 9.5, "lip": 2.5,
+    "cat": "poisson", "portion_g": 50, "portion_lib": "1 portion",
+    "source": "https://fr.openfoodfacts.org/produit/3276170012113/rape-de-la-mer-coraya",
+    "note": "Format râpé (miettes), sachet de 360 g"
+  },
+  {
+    "nom": "Thon entier au naturel égoutté (Connétable)",
+    "kcal": 122, "prot": 26, "gluc": 0, "lip": 2,
+    "cat": "poisson", "portion_g": 112, "portion_lib": "1 boîte égouttée",
+    "source": "https://fr.openfoodfacts.org/produit/3263670399516/thon-entier-naturel-connetable",
+    "note": "Boîte de 160 g, 112 g égouttés"
+  },
+  {
+    "nom": "Thon blanc à l'huile d'olive égoutté (Connétable)",
+    "kcal": 196, "prot": 29.4, "gluc": 0, "lip": 8.7,
+    "cat": "poisson", "portion_g": 104, "portion_lib": "1 boîte égouttée",
+    "source": "https://fr.openfoodfacts.org/produit/3263670041422/thon-blanc-huile-olive-v-e-connetable",
+    "note": "Thon blanc germon, boîte de 160 g, 104 g égouttés"
+  },
+  {
+    "nom": "Filets de sardines à l'huile d'olive égouttés (Connétable)",
+    "kcal": 200, "prot": 23, "gluc": 0, "lip": 12,
+    "cat": "poisson", "portion_g": 70, "portion_lib": "1 boîte égouttée",
+    "source": "https://connetable.com/produit/sardines-sans-peau-et-sans-aretes-a-lhuile-dolive-vierge-extra/",
+    "note": "Sardines sans peau ni arêtes, boîte de 100 à 115 g, environ 70 g égouttés"
+  },
+  {
+    "nom": "Filets de thon au naturel égouttés (Saupiquet)",
+    "kcal": 124, "prot": 28, "gluc": 0, "lip": 1.3,
+    "cat": "poisson", "portion_g": 81, "portion_lib": "1 boîte égouttée",
+    "source": "https://www.saupiquet.com/produits/filets-de-thon-au-naturel-2/",
+    "note": "Boîte de 81 g net égoutté"
+  },
+  {
+    "nom": "Thon entier au naturel égoutté (Saupiquet)",
+    "kcal": 116, "prot": 27.1, "gluc": 0, "lip": 0.9,
+    "cat": "poisson", "portion_g": 112, "portion_lib": "1 boîte égouttée",
+    "source": "https://fr.openfoodfacts.org/produit/3165950216424/thon-entier-au-naturel-saupiquet",
+    "note": "Boîte de 160 g, 112 g égouttés"
+  },
+  {
+    "nom": "Filets de sardines à l'huile d'olive égouttés (Petit Navire)",
+    "kcal": 223, "prot": 22, "gluc": 0.5, "lip": 15,
+    "cat": "poisson", "portion_g": 67, "portion_lib": "1 boîte égouttée",
+    "source": "https://fr.openfoodfacts.org/produit/3019080010509/filets-de-sardines-a-l-huile-d-olive-vierge-extra-petit-navire",
+    "note": "Boîte de 95 g, environ 66,5 g de poisson"
+  },
+  {
+    "nom": "Filets de maquereaux au vin blanc (Petit Navire)",
+    "kcal": 154, "prot": 13, "gluc": 0.7, "lip": 11,
+    "cat": "poisson", "portion_g": 175, "portion_lib": "1 boîte",
+    "source": "https://petitnavire.fr/fr/produit/filets-de-maquereaux-au-vin-blanc-aromates",
+    "note": "Valeurs pour 100 g de produit tel qu'en boîte, marinade comprise"
+  },
+  {
+    "nom": "Thon entier à l'huile d'olive égoutté (Petit Navire)",
+    "kcal": 180, "prot": 27, "gluc": 1.2, "lip": 8.1,
+    "cat": "poisson", "portion_g": 112, "portion_lib": "1 boîte égouttée",
+    "source": "https://fr.openfoodfacts.org/produit/3019081236083/thon-entier-huile-olive-vierge-extra-petit-navire",
+    "note": "Huile d'olive vierge extra, 112 g égouttés"
+  },
+  {
+    "nom": "Salade Thon à la Mexicaine (Petit Navire)",
+    "kcal": 105, "prot": 8.6, "gluc": 8.7, "lip": 3.2,
+    "cat": "poisson", "portion_g": 220, "portion_lib": "1 barquette",
+    "source": "https://fr.openfoodfacts.org/produit/3019080021505/salade-a-la-mexicaine-petit-navire",
+    "note": "Barquette repas de 220 g, Nutri-Score A"
+  }
+]
