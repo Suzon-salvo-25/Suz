@@ -674,6 +674,47 @@ td .up { color: var(--crit); font-weight: 700; }
 .sync.on .dot { background: var(--ok); }
 .sync.off .dot { background: var(--warn); }
 
+.verdict-bloc {
+  display: flex; gap: 13px; align-items: flex-start;
+  border: 2px solid var(--line-hard); border-radius: var(--r-md);
+  padding: 13px 15px; margin-bottom: 16px;
+}
+.verdict-bloc .note-gros {
+  font-family: var(--f-display); font-weight: 800; font-size: 1.9rem;
+  line-height: 1; letter-spacing: -.03em; flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.verdict-bloc h3 { font-size: 1rem; margin-bottom: 3px; }
+.verdict-bloc p { margin: 0; font-size: .88rem; line-height: 1.45; color: var(--ink-soft); }
+.verdict-bloc.ok    { background: color-mix(in srgb, var(--ok) 16%, var(--panel)); }
+.verdict-bloc.moyen { background: color-mix(in srgb, var(--yellow) 20%, var(--panel)); }
+.verdict-bloc.crit  { background: color-mix(in srgb, var(--rouge) 18%, var(--panel)); }
+.verdict-bloc.neutre { background: var(--panel-2); }
+
+.checks { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.checks li {
+  display: grid; grid-template-columns: auto 1fr; gap: 10px;
+  align-items: baseline; font-size: .87rem; line-height: 1.45;
+}
+.checks .puce {
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  border: 1.5px solid currentColor; border-radius: 3px; padding: 2px 6px; white-space: nowrap;
+  align-self: start; margin-top: 1px;
+}
+.checks .puce.ok { color: var(--ok); }
+.checks .puce.warn { color: var(--warn); }
+.checks .puce.crit { color: var(--crit); }
+.checks .puce.neutre { color: var(--ink-faint); }
+.checks b { font-weight: 700; }
+.checks span.txt { color: var(--ink-soft); }
+.checks span.txt b { color: var(--ink); }
+
+td .etat { font-family: var(--f-mono); font-size: 9px; letter-spacing: .09em; text-transform: uppercase; }
+td .etat.ok { color: var(--ok); }
+td .etat.warn { color: var(--warn); }
+td .etat.crit { color: var(--crit); }
+td .etat.neutre { color: var(--ink-faint); }
+
 .diag {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -986,6 +1027,15 @@ td .up { color: var(--crit); font-weight: 700; }
       </div>
     </div>
 
+    <div class="card plain">
+      <header><h2>Bilan de la journée</h2><span class="hint" id="bilanHint"></span></header>
+      <div class="body">
+        <div id="bilanVerdict"></div>
+        <div class="table-scroll" id="bilanMacros"></div>
+        <ul class="checks" id="bilanChecks"></ul>
+      </div>
+    </div>
+
     <div class="card blue">
       <header><h2>Hydratation</h2><span class="hint">1 verre = 250 ml</span></header>
       <div class="body">
@@ -1217,6 +1267,12 @@ td .up { color: var(--crit); font-weight: 700; }
       <li><b>Un kilogramme de masse grasse vaut environ 7 700 kcal.</b> C'est ce qui relie le déficit quotidien au rythme de perte affiché.</li>
       <li><b>La moyenne sur sept jours est la seule lecture honnête du poids.</b> D'un jour à l'autre, ce sont surtout l'eau, le sel et le transit qui bougent, pas la graisse.</li>
       <li><b>Les valeurs des aliments sont des ordres de grandeur</b> pour des portions courantes. Une recette maison peut s'en écarter nettement.</li>
+      <li><b>Le bilan de la journée note quatre repères</b> : les calories, qui pèsent le plus lourd,
+        les protéines, les lipides et l'hydratation. Les pourcentages portent sur les calories apportées
+        par chaque macronutriment, pas sur le poids des aliments. Les repères retenus sont 1,6 g de
+        protéines par kilogramme du poids visé et 20 à 40 % des calories sous forme de lipides.
+        Tant que la journée n'est pas notée en entier, rien n'est jugé : un petit-déjeuner seul
+        ne dit rien d'une journée.</li>
       <li><b>Chaque aliment porte une étiquette.</b> <i>Maison</i> désigne un plat calculé à partir de ses
         ingrédients réels ; <i>Marque</i>, un produit du commerce identifié ; <i>Industriel</i>, une version
         toute prête sans marque précise. L'écart est loin d'être anecdotique : une purée maison au beurre
@@ -2455,6 +2511,8 @@ var SPORTS = [
         '<span class="mval">' + suffixe + '</span></div>';
     }).join("");
 
+    renderBilan();
+
     var bs = bilanSemaine(dateCourante);
     var bsEl = document.getElementById("bilanSem");
     if (bs.n >= 1) {
@@ -2515,6 +2573,195 @@ var SPORTS = [
   var ALIM_PLIE = ALIMENTS.map(function (a) { return plie(a[0]); });
 
   var filtreType = "tout";
+
+  /* ==================== BILAN DE LA JOURNÉE ====================
+     Les repères retenus : 1,6 g de protéines par kilogramme du poids visé,
+     un plancher de 0,8 g de lipides par kilogramme pour l'équilibre hormonal,
+     et un apport calorique tenu à un dixième près de l'objectif. Les
+     pourcentages se rapportent aux calories, pas au poids des aliments. */
+
+  function analyseJour(date) {
+    var t = totauxRepas(date);
+    var cible = objectifKcal(date);
+    var poids = poidsA(date);
+    var j = Store.jours[date] || jourVide(date);
+
+    var kcalMacros = 4 * t.pro + 4 * t.glu + 9 * t.lip;
+    var nonDetaille = Math.max(0, t.kcal - kcalMacros);
+    var base = kcalMacros;
+    function part(g, kpg) { return base > 0 ? g * kpg / base * 100 : null; }
+
+    var cibleP = cibleProteines();
+    var plancherLip = poids ? Math.round(poids * 0.5) : null;  // seuil hormonal
+    var pctLip = part(t.lip, 9);
+    var complet = !(cible && t.kcal < cible * 0.6);
+
+    // Tant que la journée n'est pas notée en entier, seuls les totaux ont un
+    // sens : juger les macronutriments sur un petit-déjeuner n'apprend rien.
+    function etatSi(e) { return complet ? e : "neutre"; }
+
+    var macros = [
+      { nom: "Protéines", g: t.pro, pct: part(t.pro, 4), cible: cibleP ? cibleP + " g" : "—",
+        etat: !cibleP ? "neutre" : etatSi(
+          t.pro >= cibleP * 0.9 ? "ok" : t.pro >= cibleP * 0.7 ? "warn" : "crit"),
+        couleur: "var(--blue)" },
+      { nom: "Glucides", g: t.glu, pct: part(t.glu, 4), cible: "le reste",
+        etat: "neutre", couleur: "var(--orange)" },
+      { nom: "Lipides", g: t.lip, pct: pctLip, cible: "20 à 40 %",
+        etat: pctLip === null ? "neutre" : etatSi(
+          (pctLip >= 20 && pctLip <= 40) ? "ok"
+          : (pctLip >= 15 && pctLip <= 45) ? "warn" : "crit"),
+        couleur: "var(--aqua)" }
+    ];
+
+    var criteres = [];
+
+    if (cible) {
+      var ecart = t.kcal - cible;
+      var rel = Math.abs(ecart) / cible;
+      criteres.push({
+        cle: "calories", poids: 3,
+        etat: !complet ? "neutre" : rel <= 0.1 ? "ok" : rel <= 0.2 ? "warn" : "crit",
+        titre: "Calories",
+        txt: !complet
+          ? "Journée encore incomplète : <b>" + ni(t.kcal) + " kcal</b> sur " + ni(cible) + " visées."
+          : (rel <= 0.1
+            ? "<b>" + ni(t.kcal) + " kcal</b> sur " + ni(cible) + " visées, dans la cible."
+            : "<b>" + ni(Math.abs(ecart)) + " kcal " + (ecart > 0 ? "au-dessus" : "en dessous") +
+              "</b> de l'objectif de " + ni(cible) + ". " +
+              (ecart > 0
+                ? "Un dépassement ponctuel ne casse rien, c'est le cumul de la semaine qui décide."
+                : "Descendre nettement sous l'objectif fatigue et fait souvent craquer le lendemain."))
+      });
+    }
+
+    if (cibleP) {
+      criteres.push({
+        cle: "proteines", poids: 2, etat: macros[0].etat, titre: "Protéines",
+        txt: "<b>" + nf(t.pro, 0) + " g</b> sur " + cibleP + " g visés" +
+          (macros[0].pct !== null ? ", soit " + nf(macros[0].pct, 0) + " % de tes calories" : "") + ". " +
+          (!complet ? "À juger en fin de journée."
+           : macros[0].etat === "ok" ? "C'est le levier qui protège ton muscle pendant la perte."
+           : macros[0].etat === "warn" ? "Un peu juste : un yaourt grec, des œufs ou du blanc de volaille comblent l'écart."
+           : "Nettement trop bas. Sans protéines, une partie de ce que tu perds est du muscle.")
+      });
+    }
+
+    if (pctLip !== null) {
+      criteres.push({
+        cle: "lipides", poids: 1, etat: macros[2].etat, titre: "Lipides",
+        txt: "<b>" + nf(t.lip, 0) + " g</b>, soit <b>" + nf(pctLip, 0) + " %</b> de tes calories. " +
+          (!complet ? "À juger en fin de journée."
+           : pctLip >= 20 && pctLip <= 40
+             ? ((plancherLip && t.lip < plancherLip)
+               ? "Part correcte, mais en valeur absolue tu restes sous " + plancherLip + " g. Sur la durée, c'est bas pour l'équilibre hormonal."
+               : "Dans la bonne fourchette, celle de 20 à 40 % des calories.")
+           : pctLip < 20
+             ? "Trop bas. Les graisses ne sont pas l'ennemi : elles portent les vitamines A, D, E et K et soutiennent l'équilibre hormonal."
+             : "Part élevée. Rien de grave en soi, mais cela laisse peu de place aux protéines et aux féculents à calories égales.")
+      });
+    }
+
+    var ec = eauCible(date);
+    criteres.push({
+      cle: "eau", poids: 1,
+      etat: (j.eau === 0 || !complet) ? "neutre" : j.eau >= ec ? "ok" : j.eau >= ec * 0.7 ? "warn" : "crit",
+      titre: "Hydratation",
+      txt: j.eau === 0
+        ? "Rien de noté aujourd'hui."
+        : "<b>" + nf(j.eau / 1000, 1) + " L</b> sur " + nf(ec / 1000, 1) + " L visés. " +
+          (!complet ? "Journée en cours." :
+           j.eau >= ec ? "Objectif atteint." : "La soif se confond souvent avec la faim en fin de journée.")
+    });
+
+    var kSport = kcalSportJour(date);
+    if (kSport > 0) {
+      criteres.push({
+        cle: "sport", poids: 0, etat: "ok", titre: "Activité",
+        txt: "<b>" + ni(kSport) + " kcal</b> dépensés en séance, déjà ajoutés à ton objectif du jour."
+      });
+    }
+
+    // Note pondérée : les calories pèsent trois fois plus que l'hydratation,
+    // les protéines deux fois. Le sport est un bonus, il n'entre pas au calcul.
+    var note = null;
+    if (cible && complet) {
+      var pts = criteres.filter(function (c) { return c.etat !== "neutre" && c.poids > 0; });
+      var somme = pts.reduce(function (n, c) { return n + c.poids; }, 0);
+      if (somme > 0) {
+        var gagnes = pts.reduce(function (n, c) {
+          return n + c.poids * (c.etat === "ok" ? 1 : c.etat === "warn" ? 0.5 : 0);
+        }, 0);
+        note = Math.round(gagnes / somme * 20);
+      }
+    }
+
+    var pire = criteres.filter(function (c) { return c.etat === "crit" && c.poids > 0; })
+                       .sort(function (a, b) { return b.poids - a.poids; })[0];
+
+    var verdict, titre, resume;
+    if (!cible) {
+      verdict = "neutre"; titre = "Profil incomplet";
+      resume = "Renseigne ton âge, ta taille et ton poids dans les réglages : sans eux, aucun objectif ne peut être calculé.";
+    } else if (!complet) {
+      verdict = "neutre"; titre = "Journée en cours";
+      resume = "Il manque probablement des repas. Le bilan devient fiable une fois la journée notée en entier.";
+    } else if (note >= 18 && !pire) {
+      verdict = "ok"; titre = "Très bonne journée";
+      resume = "Calories tenues, protéines au rendez-vous, lipides dans la fourchette. C'est ce rythme-là, répété, qui fait la différence sur un mois.";
+    } else if (note >= 14 && !(pire && pire.poids >= 2)) {
+      verdict = "ok"; titre = "Bonne journée";
+      resume = "L'essentiel est tenu" + (pire ? ", sauf un point : " + pire.titre.toLowerCase() + "." : ". Les points ci-dessous se corrigent sans effort particulier.");
+    } else if (note >= 10) {
+      verdict = "moyen"; titre = "Journée correcte";
+      resume = pire
+        ? "Un repère est nettement hors cible : " + pire.titre.toLowerCase() + ". Le reste tient la route."
+        : "Plusieurs repères sont à la limite. Rien de grave, mais il y a de la marge.";
+    } else {
+      verdict = "crit"; titre = "Journée à revoir";
+      resume = "Plusieurs repères sont hors cible. Une journée isolée ne compromet rien : regarde plutôt le cumul de la semaine, en bas de cette page.";
+    }
+
+    return {
+      verdict: verdict, titre: titre, resume: resume, note: note,
+      macros: macros, criteres: criteres, complet: complet,
+      nonDetaille: nonDetaille, total: t.kcal
+    };
+  }
+
+  function renderBilan() {
+    var a = analyseJour(dateCourante);
+
+    document.getElementById("bilanHint").textContent =
+      a.note !== null ? a.note + " / 20" : "";
+
+    document.getElementById("bilanVerdict").innerHTML =
+      '<div class="verdict-bloc ' + a.verdict + '">' +
+      (a.note !== null ? '<span class="note-gros">' + a.note + '</span>' : '') +
+      '<div><h3>' + esc(a.titre) + '</h3><p>' + esc(a.resume) + '</p></div></div>';
+
+    var LIB = { ok: "Bon", warn: "Limite", crit: "Hors cible", neutre: "—" };
+    document.getElementById("bilanMacros").innerHTML =
+      '<table><thead><tr><th>Macronutriment</th><th>Quantité</th><th>Part des calories</th><th>Repère</th><th>État</th></tr></thead><tbody>' +
+      a.macros.map(function (m) {
+        return '<tr><td><span class="swatch" style="background:' + m.couleur + ';display:inline-block;margin-right:7px;vertical-align:-1px"></span>' + m.nom + '</td>' +
+          '<td class="n">' + nf(m.g, 0) + ' g</td>' +
+          '<td class="n">' + (m.pct === null ? "—" : nf(m.pct, 0) + " %") + '</td>' +
+          '<td class="n">' + esc(m.cible) + '</td>' +
+          '<td><span class="etat ' + m.etat + '">' + LIB[m.etat] + '</span></td></tr>';
+      }).join("") + '</tbody></table>';
+
+    var checks = a.criteres.map(function (c) {
+      return '<li><span class="puce ' + c.etat + '">' + LIB[c.etat] + '</span>' +
+        '<span class="txt"><b>' + esc(c.titre) + '.</b> ' + c.txt + '</span></li>';
+    });
+    if (a.nonDetaille > 0 && a.total > 0 && a.nonDetaille / a.total > 0.12) {
+      checks.push('<li><span class="puce neutre">Note</span><span class="txt">' +
+        '<b>' + ni(a.nonDetaille) + ' kcal</b> viennent de saisies libres, sans détail des macronutriments. ' +
+        'Les parts ci-dessus ne portent donc que sur le reste.</span></li>');
+    }
+    document.getElementById("bilanChecks").innerHTML = checks.join("");
+  }
 
   function chercheAliments(q) {
     var mots = plie(q).trim().split(/\s+/).filter(Boolean);
