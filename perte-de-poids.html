@@ -582,6 +582,7 @@ input[type="range"] { width: 100%; accent-color: var(--orange); }
 .tag.marque     { color: var(--violet); }
 .tag.industriel { color: var(--warn); }
 .tag.generique  { color: var(--ink-faint); }
+.tag.estime     { color: var(--warn); border-style: dashed; }
 
 .results .rn { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
 .results .rn i { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -783,6 +784,32 @@ td .etat.neutre { color: var(--ink-faint); }
   overflow-wrap: anywhere;
 }
 .diag dd.mauvais { color: var(--crit); }
+
+.ia-etat {
+  flex: 1 1 200px; min-width: 0;
+  font-size: .8rem; line-height: 1.4; color: var(--ink-soft);
+}
+.ia-etat.mauvais { color: var(--crit); }
+.ia-etat.ok { color: var(--ok); }
+
+.ia-fiche {
+  border: 2px solid var(--line-hard); border-radius: var(--r-md);
+  background: var(--panel-2); padding: 12px 14px; margin-top: 11px;
+}
+.ia-fiche h4 { font-family: var(--f-display); font-weight: 800; font-size: .92rem; margin: 0 0 4px; }
+.ia-fiche .chiffres {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0 0;
+  font-family: var(--f-mono); font-size: .8rem; font-variant-numeric: tabular-nums; color: var(--ink-soft);
+}
+.ia-fiche .chiffres b { color: var(--ink); }
+.ia-fiche .note-ia { font-size: .79rem; color: var(--ink-faint); margin: 7px 0 0; line-height: 1.45; }
+.ia-fiche .conf {
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  border: 1.5px solid currentColor; border-radius: 3px; padding: 2px 6px; margin-left: 7px; vertical-align: 2px;
+}
+.ia-fiche .conf.haute { color: var(--ok); }
+.ia-fiche .conf.moyenne { color: var(--warn); }
+.ia-fiche .conf.basse { color: var(--crit); }
 
 .lien {
   background: none; border: 0; padding: 6px 0 0;
@@ -1104,6 +1131,7 @@ td .etat.neutre { color: var(--ink-faint); }
           <label for="foodSearch">Chercher un aliment</label>
           <input type="text" id="foodSearch" autocomplete="off" placeholder="poulet, riz, yaourt, pomme…">
           <ul class="results" id="foodResults"></ul>
+          <div id="rienTrouve"></div>
         </div>
 
         <div id="foodPick" hidden style="margin-top:14px">
@@ -1151,6 +1179,11 @@ td .etat.neutre { color: var(--ink-faint); }
             </div>
             <button type="button" class="btn go" id="libreAdd">Ajouter</button>
           </div>
+          <div class="row-inline" style="margin-top:10px">
+            <button type="button" class="btn ghost sm" id="chercheIA" hidden>✦ Trouver les valeurs</button>
+            <span class="ia-etat" id="iaEtat"></span>
+          </div>
+          <div id="iaFiche"></div>
           <p class="sub-note" style="margin-top:8px;color:var(--ink-faint);font-size:.78rem" id="libreApercu"></p>
         </details>
       </div>
@@ -1336,8 +1369,13 @@ td .etat.neutre { color: var(--ink-faint); }
         ne dit rien d'une journée.</li>
       <li><b>Chaque aliment porte une étiquette.</b> <i>Maison</i> désigne un plat calculé à partir de ses
         ingrédients réels ; <i>Marque</i>, un produit du commerce identifié ; <i>Industriel</i>, une version
-        toute prête sans marque précise. L'écart est loin d'être anecdotique : une purée maison au beurre
+        toute prête sans marque précise ; <i>Estimé</i>, des valeurs proposées par Claude et non
+        vérifiées sur un emballage. L'écart est loin d'être anecdotique : une purée maison au beurre
         dépasse de moitié la purée en flocons préparée à l'eau.</li>
+      <li><b>Un aliment absent de la base peut être demandé à Claude.</b> Il répond de mémoire, sans
+        consulter internet : la page n'a pas accès au réseau. Chaque fiche porte donc un niveau de
+        confiance, et les valeurs sont à recouper avec l'emballage quand tu l'as sous la main. Chaque
+        demande consomme un peu de ton forfait Claude et t'est demandée la première fois.</li>
       <li><b>Les produits de marque viennent de bases nutritionnelles publiques</b> et des étiquettes des fabricants. Les recettes changent : en cas de doute, l'emballage que tu as en main fait foi. Tu peux toujours ajouter ta propre version avec la saisie libre.</li>
       <li>Ce carnet est un outil de suivi, pas un avis médical. En cas de pathologie, de grossesse ou de traitement, demande l'avis d'un professionnel de santé.</li>
     </ul>
@@ -2115,6 +2153,12 @@ var SPORTS = [
 
     if (!window.claude || typeof window.claude.use !== "function") return;
 
+    window.claude.use("sample").then(function (sp) {
+      if (!sp) return;
+      Claude_sample = sp;
+      document.getElementById("chercheIA").hidden = false;
+    }).catch(function () {});
+
     window.claude.use("downloads").then(function (d) {
       if (!d) return;
       telechargement = d;
@@ -2215,10 +2259,18 @@ var SPORTS = [
     if (/\([^)]+\)\s*$/.test(nom)) return "marque";
     return "generique";
   }
-  var TYPE_LIB = { maison: "Maison", marque: "Marque", industriel: "Industriel", generique: "Générique" };
+  var TYPE_LIB = { maison: "Maison", marque: "Marque", industriel: "Industriel",
+                   generique: "Générique", estime: "Estimé" };
   function badge(nom) {
     var t = typeAliment(nom);
     return '<span class="tag ' + t + '">' + TYPE_LIB[t] + '</span>';
+  }
+  // Un aliment dont les valeurs viennent de Claude porte sa propre étiquette :
+  // il n'a pas la même fiabilité qu'une entrée de la base.
+  function badgeItem(it) {
+    return it && it.ia
+      ? '<span class="tag estime" title="Valeurs proposées par Claude, non vérifiées">Estimé</span>'
+      : badge(it.n);
   }
 
   function minutesDe(h) {
@@ -2649,7 +2701,7 @@ var SPORTS = [
             ? '<span class="mac">P <em>' + nf(it.p, 0) + ' g</em> · G <em>' + nf(it.g, 0) +
               ' g</em> · L <em>' + nf(it.l, 0) + ' g</em></span>'
             : '<span class="mac">composition non détaillée</span>';
-          return '<li><span class="nm">' + esc(it.n) + ' ' + badge(it.n) +
+          return '<li><span class="nm">' + esc(it.n) + ' ' + badgeItem(it) +
             (it.d ? '<small>' + esc(it.d) + '</small>' : '') + mac + '</span>' +
             '<span class="kc">' + ni(it.k) + ' kcal</span>' +
             '<button type="button" class="del" data-del-repas="' + k + '" data-i="' + i + '" aria-label="Retirer ' + esc(it.n) + '">✕</button></li>';
@@ -2989,6 +3041,19 @@ var SPORTS = [
 
   function renderResultats(q) {
     var res = chercheAliments(q);
+    var vide = document.getElementById("rienTrouve");
+    var saisi = String(q || "").trim();
+    if (!res.length && saisi.length >= 3 && Claude_sample) {
+      vide.innerHTML = '<div class="alert" style="margin-top:9px"><span class="em" aria-hidden="true">✦</span>' +
+        '<div><b>Rien dans la base pour « ' + esc(saisi) + ' ».</b><br>' +
+        '<span style="color:var(--ink-soft)">Claude peut proposer les valeurs de mémoire, à vérifier ensuite sur l\'emballage.</span><br>' +
+        '<button type="button" class="btn go sm" style="margin-top:9px" data-demander="' + esc(saisi) + '">✦ Demander les valeurs</button></div></div>';
+    } else if (!res.length && saisi.length >= 3) {
+      vide.innerHTML = '<p class="empty" style="padding:9px 0">Rien pour « ' + esc(saisi) +
+        ' ». Utilise « Mon aliment n\'est pas dans la liste » juste en dessous.</p>';
+    } else {
+      vide.innerHTML = "";
+    }
     document.getElementById("foodResults").innerHTML = res.map(function (r) {
       var a = ALIMENTS[r.i];
       return '<li><button type="button" data-food="' + r.i + '">' +
@@ -3952,15 +4017,151 @@ var SPORTS = [
  
   }));
 
+  /* ==================== DEMANDER LES VALEURS À CLAUDE ====================
+     La page ne peut pas interroger un site : son réseau est fermé. Elle
+     interroge Claude, qui répond de mémoire. Ce sont donc des estimations,
+     signalées comme telles, avec un niveau de confiance. */
+
+  var Claude_sample = null;
+  var trouve = null;          // dernière fiche validée
+  var rechercheEnCours = false;
+
+  var MSG_IA = {
+    not_granted: "Tu n'as pas autorisé cette page à utiliser Claude.",
+    sampling_disabled: "Claude n'est pas disponible sur ce compte.",
+    not_declared: "Fonction indisponible sur cette version de la page.",
+    capability_disabled: "Fonction indisponible dans cette vue.",
+    capability_removed: "Fonction indisponible dans cette vue.",
+    rate_limited: "Trop de demandes d'affilée. Réessaie dans un moment.",
+    session_expired: "Session expirée : reconnecte-toi à ton compte Claude.",
+    refused: "Claude n'a pas voulu répondre à cette demande. Reformule le nom.",
+    empty_completion: "Aucune réponse. Essaie un nom plus précis.",
+    invalid_json: "Réponse incompréhensible. Réessaie.",
+    prompt_too_large: "Nom trop long.",
+    invalid_request: "Demande mal formée.",
+    cancelled: "",
+    upstream_error: "Le service n'a pas répondu. Réessaie dans un instant."
+  };
+
+  function iaDit(txt, classe) {
+    var el = document.getElementById("iaEtat");
+    el.className = "ia-etat" + (classe ? " " + classe : "");
+    el.textContent = txt || "";
+  }
+
+  function promptAliment(nom) {
+    return "Tu sers de base de données nutritionnelle pour un carnet de suivi français.\n\n" +
+      "Aliment ou produit : \"" + nom + "\"\n\n" +
+      "Réponds uniquement par un objet JSON de cette forme exacte :\n" +
+      '{"nom":"Nom lisible (Marque)","kcal":250,"proteines":12.5,"glucides":30.1,"lipides":9.2,' +
+      '"portion_g":100,"portion_nom":"1 portion","confiance":"haute","note":"une phrase"}\n\n' +
+      "Règles :\n" +
+      "- kcal, proteines, glucides et lipides sont POUR 100 g, ou pour 100 ml s'il s'agit d'une boisson. Des nombres, pas des chaînes.\n" +
+      "- Les calories doivent être cohérentes avec 4 x proteines + 4 x glucides + 9 x lipides, à 15 % près, sauf boisson alcoolisée.\n" +
+      "- portion_g : le poids en grammes d'une portion courante telle qu'elle se vend ou se sert en France. portion_nom la décrit brièvement : \"1 pot\", \"1 tranche\", \"1 canette\".\n" +
+      "- Prends la recette ou le produit tel qu'il est vendu en France.\n" +
+      "- confiance : \"haute\" si tu connais précisément ce produit, \"moyenne\" si tu estimes d'après un produit voisin, \"basse\" si le nom est vague ou inconnu.\n" +
+      "- note : une phrase courte en français disant sur quoi tu t'appuies, ou ce qui reste incertain.\n" +
+      "- N'invente pas une marque qui n'existe pas. Si le nom est ambigu, prends l'interprétation la plus courante et dis-le dans note.";
+  }
+
+  function afficheFiche(d) {
+    var conf = (d.confiance === "haute" || d.confiance === "moyenne") ? d.confiance : "basse";
+    var LIBC = { haute: "Fiable", moyenne: "Estimé", basse: "Incertain" };
+    document.getElementById("iaFiche").innerHTML =
+      '<div class="ia-fiche"><h4>' + esc(d.nom) + '<span class="conf ' + conf + '">' + LIBC[conf] + '</span></h4>' +
+      '<div class="chiffres">' +
+        '<span><b>' + ni(d.kcal) + '</b> kcal / 100 g</span>' +
+        '<span>P <b>' + nf(d.proteines, 1) + '</b> g</span>' +
+        '<span>G <b>' + nf(d.glucides, 1) + '</b> g</span>' +
+        '<span>L <b>' + nf(d.lipides, 1) + '</b> g</span>' +
+        '<span>portion <b>' + ni(d.portion_g) + '</b> g</span>' +
+      '</div>' +
+      (d.note ? '<p class="note-ia">' + esc(d.note) + '</p>' : '') +
+      '<p class="note-ia">Valeurs de mémoire, non vérifiées sur l\'emballage. Corrige-les si ton produit diffère, puis ajoute.</p>' +
+      '</div>';
+  }
+
+  function nombreSur(x) {
+    var v = typeof x === "number" ? x : nombre(x);
+    return isFinite(v) && v >= 0 ? v : null;
+  }
+
+  async function chercheValeurs(nom) {
+    if (rechercheEnCours || !Claude_sample) return;
+    nom = String(nom || "").trim();
+    if (nom.length < 2) { iaDit("Écris d'abord le nom de l'aliment.", "mauvais"); return; }
+
+    rechercheEnCours = true;
+    var btn = document.getElementById("chercheIA");
+    btn.disabled = true;
+    iaDit("Recherche en cours…");
+    document.getElementById("iaFiche").innerHTML = "";
+
+    try {
+      var d = await Claude_sample.json(promptAliment(nom), { modelTier: "default" });
+      var kcal = nombreSur(d && d.kcal);
+      var pr = nombreSur(d && d.proteines), gl = nombreSur(d && d.glucides), li = nombreSur(d && d.lipides);
+      var pg = nombreSur(d && d.portion_g);
+      if (kcal === null || pr === null || gl === null || li === null) {
+        iaDit("Réponse incomplète. Réessaie avec un nom plus précis.", "mauvais");
+        return;
+      }
+      if (kcal > 950 || Math.max(pr, gl, li) > 100) {
+        iaDit("Valeurs aberrantes renvoyées. Saisis-les à la main.", "mauvais");
+        return;
+      }
+      var calc = 4 * pr + 4 * gl + 9 * li;
+      var incoherent = Math.abs(calc - kcal) > Math.max(40, 0.3 * Math.max(kcal, 1));
+
+      var propre = (typeof d.nom === "string" && d.nom.trim()) ? d.nom.trim().slice(0, 60) : nom;
+      trouve = { nom: propre, kcal: kcal, p: pr, g: gl, l: li };
+
+      document.getElementById("libreNom").value = propre;
+      document.getElementById("libreKcal").value = nf(kcal, 0);
+      document.getElementById("libreBase").value = "100";
+      document.getElementById("libreQte").value = (pg && pg >= 1) ? nf(pg, 0) : "100";
+      majLibreApercu();
+      afficheFiche({ nom: propre, kcal: kcal, proteines: pr, glucides: gl, lipides: li,
+                     portion_g: (pg && pg >= 1) ? pg : 100,
+                     confiance: incoherent ? "basse" : d.confiance,
+                     note: incoherent
+                       ? "Attention : les calories annoncées ne collent pas aux macronutriments. À vérifier."
+                       : (typeof d.note === "string" ? d.note.slice(0, 220) : "") });
+      iaDit("Valeurs proposées. Ajuste la quantité, puis ajoute.", "ok");
+    } catch (e) {
+      var code = (e && e.code) || "upstream_error";
+      if (code === "not_granted" || code === "sampling_disabled" || code === "not_declared" ||
+          code === "capability_disabled" || code === "capability_removed") {
+        btn.hidden = true;
+        document.getElementById("rienTrouve").innerHTML = "";
+      }
+      var m = MSG_IA[code] || MSG_IA.upstream_error;
+      if (m) iaDit(m, "mauvais");
+    } finally {
+      rechercheEnCours = false;
+      btn.disabled = false;
+    }
+  }
+
   function libreCalcul() {
     var kcal = champ("libreKcal");
     var par100 = document.getElementById("libreBase").value === "100";
     document.getElementById("libreQteBloc").hidden = !par100;
     if (!isFinite(kcal) || kcal < 0) return null;
-    if (!par100) return { total: Math.round(kcal), detail: "saisie libre" };
+    var nom = document.getElementById("libreNom").value.trim();
+    var fiche = (trouve && plie(trouve.nom) === plie(nom)) ? trouve : null;
+    if (!par100) return { total: Math.round(kcal), detail: "saisie libre", p: 0, g: 0, l: 0 };
     var q = champ("libreQte");
     if (!isFinite(q) || q <= 0) return null;
-    return { total: Math.round(kcal * q / 100), detail: ni(q) + " g · " + ni(kcal) + " kcal / 100 g" };
+    var f = q / 100;
+    return {
+      total: Math.round(kcal * f),
+      detail: ni(q) + " g · " + ni(kcal) + " kcal / 100 g",
+      p: fiche ? +(fiche.p * f).toFixed(1) : 0,
+      g: fiche ? +(fiche.g * f).toFixed(1) : 0,
+      l: fiche ? +(fiche.l * f).toFixed(1) : 0
+    };
   }
 
   function majLibreApercu() {
@@ -3976,6 +4177,30 @@ var SPORTS = [
   ["libreKcal", "libreQte"].forEach(function (id) {
     document.getElementById(id).addEventListener("input", majLibreApercu);
   });
+  document.getElementById("libreNom").addEventListener("input", function () {
+    if (trouve && plie(trouve.nom) !== plie(this.value.trim())) {
+      trouve = null;
+      document.getElementById("iaFiche").innerHTML = "";
+      iaDit("");
+    }
+    majLibreApercu();
+  });
+  document.getElementById("chercheIA").addEventListener("click", function () {
+    chercheValeurs(document.getElementById("libreNom").value);
+  });
+  document.getElementById("rienTrouve").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-demander]");
+    if (!b) return;
+    var nom = b.dataset.demander;
+    var det = document.querySelector("#panel-alim details");
+    if (det) det.open = true;
+    document.getElementById("libreNom").value = nom;
+    document.getElementById("foodSearch").value = "";
+    document.getElementById("foodResults").innerHTML = "";
+    document.getElementById("rienTrouve").innerHTML = "";
+    document.getElementById("chercheIA").scrollIntoView({ block: "center" });
+    chercheValeurs(nom);
+  });
   document.getElementById("libreBase").addEventListener("change", majLibreApercu);
 
   function ajouteLibre() {
@@ -3989,7 +4214,9 @@ var SPORTS = [
     }
     var repas = document.getElementById("foodRepas").value;
     var court = nom.slice(0, 60);
-    J().repas[repas].push({ n: court, d: r.detail, k: r.total, p: 0, g: 0, l: 0 });
+    var ligne = { n: court, d: r.detail, k: r.total, p: r.p || 0, g: r.g || 0, l: r.l || 0 };
+    if (trouve && plie(trouve.nom) === plie(court)) ligne.ia = 1;
+    J().repas[repas].push(ligne);
     var p = P();
     if (!p.perso || Object.isFrozen(p.perso) || !Object.isExtensible(p.perso)) {
       p.perso = Object.assign({}, p.perso || {});
@@ -4000,6 +4227,9 @@ var SPORTS = [
     document.getElementById("libreNom").value = "";
     document.getElementById("libreKcal").value = "";
     document.getElementById("libreQte").value = "";
+    document.getElementById("iaFiche").innerHTML = "";
+    iaDit("");
+    trouve = null;
     majLibreApercu();
     renderAlim(); renderFavoris(); renderBandeau(); majDiag();
     confirmeAjout(court, repas, r.total);
