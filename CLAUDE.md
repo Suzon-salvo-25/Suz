@@ -94,6 +94,22 @@ projection est bornée à l'objectif, et ce qui est annoncé devient la *date*
 plate, le retard calculé part à des années, on le dit au lieu d'afficher un
 nombre de jours absurde.
 
+**Corriger, pas supprimer et refaire.** Chaque ligne de repas porte un bouton
+« Modifier » qui ouvre un formulaire à sa place : nom, calories, protéines,
+glucides, lipides. Quand le nom correspond à un aliment de `ALIMENTS`, un
+champ quantité apparaît et recalcule les quatre valeurs. C'est pour cela que
+les lignes gardent `gr`, leur quantité en grammes. Les valeurs en cours de
+saisie vivent dans l'objet `edition`, **jamais dans le DOM seul** : une
+rediffusion du serveur redessine la liste à tout moment, et des champs non
+sauvegardés seraient perdus. Une modification à la main retire l'étiquette
+« Estimé » : ce ne sont plus les chiffres de Claude.
+
+**Les valeurs trouvées par Claude sont modifiables.** La saisie libre porte
+ses propres champs de macronutriments, et `libreCalcul()` les lit. Avant, les
+macros venaient d'une fiche figée, retrouvée par comparaison du nom :
+renommer l'aliment ou corriger une valeur faisait silencieusement retomber la
+composition à zéro.
+
 **Modèle** : `profil/moi` et un document par jour, `jours/AAAA-MM-JJ`,
 contenant poids, heure, tour de taille, eau, repas et séances. Le profil
 porte aussi `debut` et `fin`, les deux bornes de la trajectoire.

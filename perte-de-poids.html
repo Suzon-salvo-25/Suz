@@ -950,7 +950,6 @@ td .etat.neutre { color: var(--ink-faint); }
   .tab { flex-direction: column; gap: 3px; padding: 9px 3px 8px; font-size: .74rem; letter-spacing: -.02em; }
   .today-tiles { grid-template-columns: repeat(2, 1fr); }
   .items li { grid-template-columns: 1fr auto; row-gap: 4px; }
-  .items .del { grid-column: 2; grid-row: 1; }
   .items .kc { grid-column: 1 / -1; }
   .macro-row { grid-template-columns: 1fr; gap: 4px; }
   .macro-row .mval { text-align: right; }
@@ -1251,6 +1250,33 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 .foot h2 { font-size: 1.1rem; }
 .foot li { font-size: .86rem; }
 
+/* ---------- modifier une ligne ---------- */
+
+.items li { grid-template-columns: 1fr auto auto; }
+.items .actions { display: flex; align-items: center; gap: 4px; }
+.lien-edit {
+  background: none; border: 0; padding: 4px 8px;
+  color: var(--ink-faint); font-family: var(--f-body); font-weight: 600; font-size: .8rem;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;
+  border-radius: 999px;
+}
+.lien-edit:hover { color: var(--ink); background: var(--panel-2); text-decoration: none; }
+.lien-edit:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.del { border: 1px solid var(--line); border-radius: 50%; color: var(--ink-faint); }
+.del:hover { border-color: var(--crit); color: var(--crit); background: var(--panel-2); }
+
+.items li.edition { display: block; padding: 0; background: var(--panel-2); }
+.edit-bloc { padding: 14px 16px; }
+.edit-bloc .field > label { font-size: 10px; }
+
+@media (max-width: 540px) {
+  .items li { grid-template-columns: 1fr auto; row-gap: 6px; }
+  .items .actions { grid-column: 2; grid-row: 1; }
+  .items .kc { grid-column: 1 / -1; }
+  .items li.edition { display: block; }
+  .edit-bloc { padding: 12px 13px; }
+}
+
 /* ---------- illustrations ---------- */
 
 .illu, .illu-mini, .deco { background-repeat: no-repeat; background-position: center; background-size: contain; }
@@ -1497,8 +1523,25 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
               <label for="libreQte">Quantité (g ou ml)</label>
               <input type="text" id="libreQte" inputmode="decimal" autocomplete="off" placeholder="100">
             </div>
+          </div>
+          <div class="row-inline" style="margin-top:10px">
+            <div class="field" style="flex:1 1 90px">
+              <label for="libreProt">Protéines (g)</label>
+              <input type="text" id="libreProt" inputmode="decimal" autocomplete="off" placeholder="0">
+            </div>
+            <div class="field" style="flex:1 1 90px">
+              <label for="libreGluc">Glucides (g)</label>
+              <input type="text" id="libreGluc" inputmode="decimal" autocomplete="off" placeholder="0">
+            </div>
+            <div class="field" style="flex:1 1 90px">
+              <label for="libreLip">Lipides (g)</label>
+              <input type="text" id="libreLip" inputmode="decimal" autocomplete="off" placeholder="0">
+            </div>
             <button type="button" class="btn go" id="libreAdd">Ajouter</button>
           </div>
+          <p class="sub-note" style="margin-top:6px;color:var(--ink-faint);font-size:.78rem">
+            Les macronutriments suivent la même base que les calories : pour 100 g, ou pour la portion.
+            Laisse-les vides si tu ne les connais pas.</p>
           <div class="row-inline" style="margin-top:10px">
             <button type="button" class="btn ghost sm" id="chercheIA" hidden>Trouver les valeurs</button>
             <span class="ia-etat" id="iaEtat"></span>
@@ -6023,6 +6066,7 @@ var SPORTS = [
         html += '<p class="empty"><span class="illu-mini st-ourson" aria-hidden="true"></span>Rien de noté.</p>';
       } else {
         html += '<ul class="items">' + items.map(function (it, i) {
+          if (edition && edition.repas === k && edition.i === i) return ligneEdition();
           var mac = (it.p || it.g || it.l)
             ? '<span class="mac">P <em>' + nf(it.p, 0) + ' g</em> · G <em>' + nf(it.g, 0) +
               ' g</em> · L <em>' + nf(it.l, 0) + ' g</em></span>'
@@ -6030,13 +6074,81 @@ var SPORTS = [
           return '<li><span class="nm">' + esc(it.n) + ' ' + badgeItem(it) +
             (it.d ? '<small>' + esc(it.d) + '</small>' : '') + mac + '</span>' +
             '<span class="kc">' + ni(it.k) + ' kcal</span>' +
-            '<button type="button" class="del" data-del-repas="' + k + '" data-i="' + i + '" aria-label="Retirer ' + esc(it.n) + '">✕</button></li>';
+            '<span class="actions">' +
+            '<button type="button" class="lien-edit" data-edit-repas="' + k + '" data-i="' + i + '">Modifier</button>' +
+            '<button type="button" class="del" data-del-repas="' + k + '" data-i="' + i + '" aria-label="Retirer ' + esc(it.n) + '">✕</button>' +
+            '</span></li>';
         }).join("") + '</ul>';
       }
       html += '</div>';
     });
     document.getElementById("repasListe").innerHTML = html;
     document.getElementById("repasTotal").textContent = ni(t.kcal) + " kcal au total";
+  }
+
+  /* ==================== MODIFIER UNE LIGNE ====================
+     Corriger une portion ne doit pas passer par « supprimer puis rajouter ».
+     Les valeurs en cours de modification vivent dans `edition`, pas dans le
+     DOM : une rediffusion du serveur redessine la liste à tout moment, et une
+     saisie gardée dans les champs serait perdue. */
+
+  var edition = null;
+
+  function ouvreEdition(k, i) {
+    var it = (J().repas[k] || [])[i];
+    if (!it) return;
+    edition = {
+      repas: k, i: i,
+      nom: it.n, kcal: it.k, p: it.p || 0, g: it.g || 0, l: it.l || 0,
+      gr: it.gr || null,
+      base: ALIMENTS.findIndex(function (a) { return a[0] === it.n; })
+    };
+    renderAlim();
+    var el = document.getElementById("editNom");
+    if (el) el.focus();
+  }
+
+  function fermeEdition() { edition = null; renderAlim(); }
+
+  // Pour un aliment de la base, changer la quantité recalcule tout le reste.
+  function editDepuisQuantite() {
+    if (!edition || edition.base === -1 || !edition.gr) return;
+    var a = ALIMENTS[edition.base], f = edition.gr / 100;
+    edition.kcal = Math.round(a[1] * f);
+    edition.p = +(a[2] * f).toFixed(1);
+    edition.g = +(a[3] * f).toFixed(1);
+    edition.l = +(a[4] * f).toFixed(1);
+  }
+
+  function ligneEdition() {
+    var e = edition;
+    var champNum = function (id, lab, val) {
+      return '<div class="field" style="flex:1 1 76px"><label for="' + id + '">' + lab + '</label>' +
+        '<input type="text" id="' + id + '" inputmode="decimal" autocomplete="off" value="' +
+        esc(String(val).replace(".", ",")) + '"></div>';
+    };
+    return '<li class="edition"><div class="edit-bloc">' +
+      '<div class="row-inline">' +
+        '<div class="field" style="flex:3 1 190px"><label for="editNom">Nom</label>' +
+        '<input type="text" id="editNom" autocomplete="off" value="' + esc(e.nom) + '"></div>' +
+        (e.base !== -1
+          ? '<div class="field" style="flex:1 1 110px"><label for="editQte">Quantité (g)</label>' +
+            '<input type="text" id="editQte" inputmode="decimal" autocomplete="off" value="' +
+            esc(e.gr === null ? "" : String(e.gr)) + '"></div>'
+          : '') +
+      '</div>' +
+      '<div class="row-inline" style="margin-top:9px">' +
+        champNum("editKcal", "Calories", e.kcal) +
+        champNum("editProt", "Protéines (g)", e.p) +
+        champNum("editGluc", "Glucides (g)", e.g) +
+        champNum("editLip", "Lipides (g)", e.l) +
+      '</div>' +
+      '<div class="row-inline" style="margin-top:11px">' +
+        '<button type="button" class="btn go sm" data-edit-ok="1">Enregistrer</button>' +
+        '<button type="button" class="btn ghost sm" data-edit-annule="1">Annuler</button>' +
+        (e.base !== -1 ? '<span class="sub-note" style="flex:1 1 160px">La quantité recalcule les valeurs.</span>' : '') +
+      '</div>' +
+      '</div></li>';
   }
 
   function plie(x) {
@@ -7476,12 +7588,15 @@ var SPORTS = [
   });
 
   document.getElementById("prevDay").addEventListener("click", function () {
+    edition = null;
     dateCourante = addDays(dateCourante, -1); renderTout();
   });
   document.getElementById("nextDay").addEventListener("click", function () {
+    edition = null;
     if (dateCourante < AUJ) { dateCourante = addDays(dateCourante, 1); renderTout(); }
   });
   document.getElementById("todayBtn").addEventListener("click", function () {
+    edition = null;
     dateCourante = AUJ; renderTout();
   });
 
@@ -7560,7 +7675,8 @@ var SPORTS = [
     J().repas[repas].push({
       n: a[0],
       d: unite === "p" ? nf(q, q % 1 ? 1 : 0) + " × " + a[7] + " (" + ni(g) + " g)" : ni(g) + " g",
-      k: Math.round(a[1] * f), p: +(a[2] * f).toFixed(1), g: +(a[3] * f).toFixed(1), l: +(a[4] * f).toFixed(1)
+      k: Math.round(a[1] * f), p: +(a[2] * f).toFixed(1), g: +(a[3] * f).toFixed(1), l: +(a[4] * f).toFixed(1),
+      gr: Math.round(g)
     });
     noteUsage(a[0]);
     Store.sauveJour(dateCourante);
@@ -7576,6 +7692,10 @@ var SPORTS = [
      signalées comme telles, avec un niveau de confiance. */
 
   var Claude_sample = null;
+  /* Vrai tant que les valeurs affichées sont celles que Claude a proposées.
+     Dès que Suzon en corrige une, ce sont les siennes, et l'étiquette
+     « Estimé » n'a plus lieu d'être. */
+  var valeursIA = false;
   var trouve = null;          // dernière fiche validée
   var rechercheEnCours = false;
 
@@ -7674,6 +7794,10 @@ var SPORTS = [
       document.getElementById("libreKcal").value = nf(kcal, 0);
       document.getElementById("libreBase").value = "100";
       document.getElementById("libreQte").value = (pg && pg >= 1) ? nf(pg, 0) : "100";
+      document.getElementById("libreProt").value = nf(pr, 1);
+      document.getElementById("libreGluc").value = nf(gl, 1);
+      document.getElementById("libreLip").value = nf(li, 1);
+      valeursIA = true;
       majLibreApercu();
       afficheFiche({ nom: propre, kcal: kcal, proteines: pr, glucides: gl, lipides: li,
                      portion_g: (pg && pg >= 1) ? pg : 100,
@@ -7681,7 +7805,7 @@ var SPORTS = [
                      note: incoherent
                        ? "Attention : les calories annoncées ne collent pas aux macronutriments. À vérifier."
                        : (typeof d.note === "string" ? d.note.slice(0, 220) : "") });
-      iaDit("Valeurs proposées. Ajuste la quantité, puis ajoute.", "ok");
+      iaDit("Valeurs proposées. Corrige ce que tu veux, puis ajoute.", "ok");
     } catch (e) {
       var code = (e && e.code) || "upstream_error";
       if (code === "not_granted" || code === "sampling_disabled" || code === "not_declared" ||
@@ -7702,18 +7826,22 @@ var SPORTS = [
     var par100 = document.getElementById("libreBase").value === "100";
     document.getElementById("libreQteBloc").hidden = !par100;
     if (!isFinite(kcal) || kcal < 0) return null;
-    var nom = document.getElementById("libreNom").value.trim();
-    var fiche = (trouve && plie(trouve.nom) === plie(nom)) ? trouve : null;
-    if (!par100) return { total: Math.round(kcal), detail: "saisie libre", p: 0, g: 0, l: 0 };
+    /* Les macros se lisent dans leurs champs, pas dans la fiche renvoyée par
+       Claude : sans cela, renommer l'aliment ou corriger une valeur faisait
+       silencieusement retomber la composition à zéro. */
+    var mac = function (id) { var v = champ(id); return isFinite(v) && v >= 0 ? v : 0; };
+    var pr = mac("libreProt"), gl = mac("libreGluc"), li = mac("libreLip");
+    if (!par100) {
+      return { total: Math.round(kcal), detail: "saisie libre",
+               p: +pr.toFixed(1), g: +gl.toFixed(1), l: +li.toFixed(1), gr: null };
+    }
     var q = champ("libreQte");
     if (!isFinite(q) || q <= 0) return null;
     var f = q / 100;
     return {
       total: Math.round(kcal * f),
       detail: ni(q) + " g · " + ni(kcal) + " kcal / 100 g",
-      p: fiche ? +(fiche.p * f).toFixed(1) : 0,
-      g: fiche ? +(fiche.g * f).toFixed(1) : 0,
-      l: fiche ? +(fiche.l * f).toFixed(1) : 0
+      p: +(pr * f).toFixed(1), g: +(gl * f).toFixed(1), l: +(li * f).toFixed(1), gr: q
     };
   }
 
@@ -7727,17 +7855,10 @@ var SPORTS = [
         : "");
   }
 
-  ["libreKcal", "libreQte"].forEach(function (id) {
-    document.getElementById(id).addEventListener("input", majLibreApercu);
+  ["libreKcal", "libreQte", "libreProt", "libreGluc", "libreLip"].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", function () { valeursIA = false; majLibreApercu(); });
   });
-  document.getElementById("libreNom").addEventListener("input", function () {
-    if (trouve && plie(trouve.nom) !== plie(this.value.trim())) {
-      trouve = null;
-      document.getElementById("iaFiche").innerHTML = "";
-      iaDit("");
-    }
-    majLibreApercu();
-  });
+  document.getElementById("libreNom").addEventListener("input", majLibreApercu);
   document.getElementById("chercheIA").addEventListener("click", function () {
     chercheValeurs(document.getElementById("libreNom").value);
   });
@@ -7768,7 +7889,8 @@ var SPORTS = [
     var repas = document.getElementById("foodRepas").value;
     var court = nom.slice(0, 60);
     var ligne = { n: court, d: r.detail, k: r.total, p: r.p || 0, g: r.g || 0, l: r.l || 0 };
-    if (trouve && plie(trouve.nom) === plie(court)) ligne.ia = 1;
+    if (r.gr) ligne.gr = Math.round(r.gr);
+    if (valeursIA) ligne.ia = 1;
     J().repas[repas].push(ligne);
     var p = P();
     if (!p.perso || Object.isFrozen(p.perso) || !Object.isExtensible(p.perso)) {
@@ -7780,9 +7902,10 @@ var SPORTS = [
     document.getElementById("libreNom").value = "";
     document.getElementById("libreKcal").value = "";
     document.getElementById("libreQte").value = "";
+    ["libreProt", "libreGluc", "libreLip"].forEach(function (id) { document.getElementById(id).value = ""; });
     document.getElementById("iaFiche").innerHTML = "";
     iaDit("");
-    trouve = null;
+    trouve = null; valeursIA = false;
     majLibreApercu();
     renderAlim(); renderFavoris(); renderBandeau(); majDiag();
     confirmeAjout(court, repas, r.total);
@@ -7807,12 +7930,62 @@ var SPORTS = [
     });
   });
 
-  document.getElementById("repasListe").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-del-repas]");
-    if (!b) return;
-    J().repas[b.dataset.delRepas].splice(+b.dataset.i, 1);
+  document.getElementById("repasListe").addEventListener("click", protege("ligne de repas", function (e) {
+    var sup = e.target.closest("[data-del-repas]");
+    if (sup) {
+      edition = null;
+      J().repas[sup.dataset.delRepas].splice(+sup.dataset.i, 1);
+      Store.sauveJour(dateCourante);
+      renderAlim(); renderBandeau(); majDiag();
+      return;
+    }
+    var mod = e.target.closest("[data-edit-repas]");
+    if (mod) { ouvreEdition(mod.dataset.editRepas, +mod.dataset.i); return; }
+    if (e.target.closest("[data-edit-annule]")) { fermeEdition(); return; }
+    if (!e.target.closest("[data-edit-ok]") || !edition) return;
+
+    var it = (J().repas[edition.repas] || [])[edition.i];
+    if (!it) { fermeEdition(); return; }
+    var nom = document.getElementById("editNom").value.trim();
+    var kcal = champ("editKcal");
+    if (!nom) { toast("Donne un nom à cet aliment.", true); return; }
+    if (!isFinite(kcal) || kcal < 0) { toast("Indique un nombre de calories.", true); return; }
+    var lu = function (id) { var v = champ(id); return isFinite(v) && v >= 0 ? +v.toFixed(1) : 0; };
+    it.n = nom.slice(0, 60);
+    it.k = Math.round(kcal);
+    it.p = lu("editProt"); it.g = lu("editGluc"); it.l = lu("editLip");
+    var q = document.getElementById("editQte");
+    if (q) {
+      var v = nombre(q.value);
+      if (isFinite(v) && v > 0) { it.gr = Math.round(v); it.d = ni(it.gr) + " g"; }
+    }
+    // Les valeurs viennent d'être revues à la main : elles ne sont plus estimées.
+    delete it.ia;
     Store.sauveJour(dateCourante);
-    renderAlim(); renderBandeau();
+    edition = null;
+    renderAlim(); renderBandeau(); majDiag();
+    toast(it.n + " modifié · " + ni(it.k) + " kcal");
+  }));
+
+  // La quantité pilote les valeurs, et l'inverse délie la quantité.
+  document.getElementById("repasListe").addEventListener("input", function (e) {
+    if (!edition) return;
+    var id = e.target.id;
+    if (id === "editQte") {
+      var v = nombre(e.target.value);
+      edition.gr = (isFinite(v) && v > 0) ? v : null;
+      if (edition.gr === null || edition.base === -1) return;
+      editDepuisQuantite();
+      var maj = { editKcal: edition.kcal, editProt: edition.p, editGluc: edition.g, editLip: edition.l };
+      Object.keys(maj).forEach(function (c) {
+        var el = document.getElementById(c);
+        if (el) el.value = String(maj[c]).replace(".", ",");
+      });
+    } else if (id === "editNom") { edition.nom = e.target.value; }
+    else if (id === "editKcal") { edition.kcal = e.target.value; }
+    else if (id === "editProt") { edition.p = e.target.value; }
+    else if (id === "editGluc") { edition.g = e.target.value; }
+    else if (id === "editLip") { edition.l = e.target.value; }
   });
 
   /* --- poids --- */
