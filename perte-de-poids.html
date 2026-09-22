@@ -12,104 +12,118 @@
 <style>
 :root {
   color-scheme: light;
-  --ground:     #fff3e6;
+  --ground:     #fff8f2;
   --panel:      #ffffff;
-  --panel-2:    #ffe2c9;
-  --ink:        #1a0a05;
-  --ink-soft:   #6b4a38;
-  --ink-faint:  #8a6a56;
-  --line:       #f0c9a8;
-  --line-hard:  #1a0a05;
+  --panel-2:    #ffeadb;
+  --ink:        #3d1f14;
+  --ink-soft:   #7a5546;
+  --ink-faint:  #876656;
+  --line:       #f3d5c2;
+  --line-hard:  #4a2418;
 
-  --violet:     #c4005f;
-  --orange:     #ff7a1a;
-  --aqua:       #f0147a;
-  --blue:       #3b1466;
-  --yellow:     #ffb300;
-  --rouge:      #e0245e;
+  /* surfaces douces : les grandes zones, où la couleur doit reposer l'œil */
+  --peche:      #ffb27a;
+  --rose-doux:  #ffc2d6;
+  --lavande:    #d9c8f0;
 
-  --on-violet:  #ffffff;
-  --on-orange:  #1a0a05;
-  --on-aqua:    #2a0010;
+  /* couleurs de données, plus franches : barres, anneau, badges */
+  --violet:     #a8286a;
+  --orange:     #ff9a4a;
+  --aqua:       #e8337f;
+  --blue:       #6a3d8f;
+  --yellow:     #ffc861;
+  --rouge:      #ff7590;
+
+  --on-violet:  #3d1f14;
+  --on-orange:  #3d1f14;
+  --on-aqua:    #3d1f14;
   --on-blue:    #ffffff;
 
   --ok:         #0e8a5f;
   --warn:       #9c6000;
   --crit:       #7e0512;
 
-  --shadow:     4px 4px 0 var(--line-hard);
+  --shadow:     3px 3px 0 var(--line-hard);
   --shadow-lg:  none;
 
   --f-display: "Anton", "Arial Narrow", "Haettenschweiler", Impact, system-ui, sans-serif;
   --f-body:    "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono:    "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --r-lg: 0px;
-  --r-md: 0px;
-  --r-sm: 0px;
+  --r-lg: 14px;
+  --r-md: 10px;
+  --r-sm: 8px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --ground:    #18070e;
-    --panel:     #241019;
-    --panel-2:   #32161f;
-    --ink:       #fff3e6;
-    --ink-soft:  #c9a896;
-    --ink-faint: #9e8271;
-    --line:      #4a2430;
-    --line-hard: #000000;
+    --ground:    #2a1a22;
+    --panel:     #35232c;
+    --panel-2:   #402a34;
+    --ink:       #fff1e8;
+    --ink-soft:  #d1b5a8;
+    --ink-faint: #a8897a;
+    --line:      #5a3a46;
+    --line-hard: #1a0d12;
 
-    --violet:    #ff5c9e;
-    --orange:    #ffa030;
-    --aqua:      #ff2e86;
-    --blue:      #9d7bff;
+    --peche:     #d98c5c;
+    --rose-doux: #d47a9c;
+    --lavande:   #9a82c4;
+
+    --violet:    #ff8fbf;
+    --orange:    #ffb070;
+    --aqua:      #ff3d90;
+    --blue:      #bfa8e8;
     --yellow:    #ffc24d;
-    --rouge:     #f4566b;
+    --rouge:     #ff7fa0;
 
-    --on-violet: #2a0010;
-    --on-orange: #2a0e00;
-    --on-aqua:   #2a0010;
-    --on-blue:   #140a2e;
+    --on-violet: #2a1a22;
+    --on-orange: #2a1a22;
+    --on-aqua:   #2a1a22;
+    --on-blue:   #2a1a22;
 
     --ok:        #3fd69b;
     --warn:      #ffc24d;
     --crit:      #f4566b;
 
-    --shadow:    4px 4px 0 var(--line-hard);
+    --shadow:    3px 3px 0 var(--line-hard);
     --shadow-lg: none;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ground:    #18070e;
-  --panel:     #241019;
-  --panel-2:   #32161f;
-  --ink:       #fff3e6;
-  --ink-soft:  #c9a896;
-  --ink-faint: #9e8271;
-  --line:      #4a2430;
-  --line-hard: #000000;
+  --ground:    #2a1a22;
+  --panel:     #35232c;
+  --panel-2:   #402a34;
+  --ink:       #fff1e8;
+  --ink-soft:  #d1b5a8;
+  --ink-faint: #a8897a;
+  --line:      #5a3a46;
+  --line-hard: #1a0d12;
 
-  --violet:    #ff5c9e;
-  --orange:    #ffa030;
-  --aqua:      #ff2e86;
-  --blue:      #9d7bff;
+  --peche:     #d98c5c;
+  --rose-doux: #d47a9c;
+  --lavande:   #9a82c4;
+
+  --violet:    #ff8fbf;
+  --orange:    #ffb070;
+  --aqua:      #ff3d90;
+  --blue:      #bfa8e8;
   --yellow:    #ffc24d;
-  --rouge:     #f4566b;
+  --rouge:     #ff7fa0;
 
-  --on-violet: #2a0010;
-  --on-orange: #2a0e00;
-  --on-aqua:   #2a0010;
-  --on-blue:   #140a2e;
+  --on-violet: #2a1a22;
+  --on-orange: #2a1a22;
+  --on-aqua:   #2a1a22;
+  --on-blue:   #2a1a22;
 
   --ok:        #3fd69b;
   --warn:      #ffc24d;
   --crit:      #f4566b;
 
-  --shadow:    4px 4px 0 var(--line-hard);
+  --shadow:    3px 3px 0 var(--line-hard);
   --shadow-lg: none;
 }
 
@@ -993,13 +1007,14 @@ h1, h2, h3, h4 {
   padding-inline: max(var(--biseau), calc(50vw - 50% + 20px));
   padding-block: 24px 40px;
   margin-bottom: 22px;
-  background: var(--orange);
-  color: var(--on-orange);
+  background: var(--peche);
+  color: var(--ink);
   align-items: center;
+  position: relative;
   clip-path: polygon(0 0, 100% 0, calc(100% - var(--biseau)) 100%, var(--biseau) 100%);
 }
 .brand h1 {
-  font-size: clamp(2.7rem, 13vw, 8.4rem);
+  font-size: clamp(2.7rem, 11vw, 7rem);
   line-height: .84;
   letter-spacing: -.01em;
 }
@@ -1011,7 +1026,7 @@ h1, h2, h3, h4 {
   margin-top: 10px;
 }
 .icon-btn {
-  border-width: 3px;
+  border-width: 2px;
   border-radius: 0;
   background: var(--panel);
   color: var(--ink);
@@ -1020,10 +1035,10 @@ h1, h2, h3, h4 {
 
 /* ---------- onglets ---------- */
 
-.tabs { gap: 0; margin-bottom: 22px; border: 3px solid var(--line-hard); }
+.tabs { gap: 0; margin-bottom: 22px; border: 2px solid var(--line-hard); }
 .tab {
   border: 0;
-  border-right: 3px solid var(--line-hard);
+  border-right: 2px solid var(--line-hard);
   box-shadow: none;
   background: var(--panel);
   font-family: var(--f-display);
@@ -1036,21 +1051,22 @@ h1, h2, h3, h4 {
 .tab:last-child { border-right: 0; }
 .tab:hover, .tab[aria-selected="true"] { transform: none; box-shadow: none; }
 .tab:hover { background: var(--panel-2); }
+.tab[aria-selected="true"] { color: var(--ink); }
 .tab[data-c="violet"][aria-selected="true"],
-.tab[data-c="orange"][aria-selected="true"] { background: var(--orange); color: var(--on-orange); }
-.tab[data-c="aqua"][aria-selected="true"]   { background: var(--aqua);   color: var(--on-aqua); }
-.tab[data-c="blue"][aria-selected="true"]   { background: var(--blue);   color: var(--on-blue); }
+.tab[data-c="orange"][aria-selected="true"] { background: var(--peche); }
+.tab[data-c="aqua"][aria-selected="true"]   { background: var(--rose-doux); }
+.tab[data-c="blue"][aria-selected="true"]   { background: var(--lavande); }
 
 /* ---------- bandeau du jour ---------- */
 
-.today { border-width: 3px; margin-bottom: 22px; }
-.today-nav { border-bottom-width: 3px; background: var(--panel-2); }
+.today { border-width: 2px; margin-bottom: 22px; }
+.today-nav { border-bottom-width: 2px; background: var(--panel-2); }
 .today-nav .date {
   font-family: var(--f-display); font-weight: 400;
   text-transform: uppercase; letter-spacing: .02em;
   font-size: clamp(.9rem, 3vw, 1.15rem);
 }
-.nav-btn { border-width: 3px; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; }
+.nav-btn { border-width: 2px; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; }
 .today-tiles { gap: 3px; }
 .tile .val { font-size: clamp(1.7rem, 7vw, 2.7rem); letter-spacing: -.02em; white-space: nowrap; }
 .tile .val u, .stat .big u, .kcal-head .big u { margin-left: 6px; font-size: .42em; }
@@ -1058,27 +1074,35 @@ h1, h2, h3, h4 {
 
 /* ---------- cartes ---------- */
 
-.card { border-width: 3px; margin-bottom: 22px; }
+.card { border-width: 2px; margin-bottom: 22px; }
 .card > header {
   --biseau: clamp(18px, 3.4vw, 40px);
-  border-bottom-width: 3px;
+  border-bottom-width: 2px;
   padding-block: 14px;
   clip-path: polygon(0 0, 100% 0, 100% 100%, var(--biseau) 100%, 0 calc(100% - var(--biseau)));
 }
 .card > header h2 { font-size: clamp(1.1rem, 3.6vw, 1.6rem); }
 .card > header .hint { letter-spacing: .14em; font-size: 10.5px; }
-.card.plain > header { background: var(--orange); color: var(--on-orange); }
-.today-nav { background: var(--orange); color: var(--on-orange); }
+/* Les en-têtes portent les surfaces douces, jamais les couleurs de données :
+   une grande zone en rose vif fatigue, la même en rose poudré invite. */
+.card > header { color: var(--ink); gap: 12px; }
+.card > header h2 { flex: 1 1 auto; }
+.card.plain > header, .card.orange > header { background: var(--peche);     color: var(--ink); }
+.card.aqua > header, .card.violet > header  { background: var(--rose-doux); color: var(--ink); }
+.card.blue > header                          { background: var(--lavande);   color: var(--ink); }
+.today-nav { background: var(--peche); color: var(--ink); }
+.stat.hero { background: var(--peche); color: var(--ink); }
+.stat.hero .lab, .stat.hero .note, .stat.hero .big u { color: inherit; opacity: .8; }
 .nav-btn { background: var(--panel); }
 
 /* ---------- chiffres mis en scène ---------- */
 
-.stat { border-width: 3px; }
+.stat { border-width: 2px; }
 .stat .big { font-family: var(--f-display); font-weight: 400; font-size: clamp(1.9rem, 6.2vw, 2.7rem); letter-spacing: -.02em; }
 .kcal-head .big, .water-top .big { font-family: var(--f-display); font-weight: 400; font-size: clamp(2.7rem, 11vw, 4.4rem); letter-spacing: -.03em; line-height: .88; }
-.verdict-bloc { border-width: 3px; }
+.verdict-bloc { border-width: 2px; }
 .verdict-bloc .note-gros { font-size: clamp(2.5rem, 9vw, 3.8rem); }
-.gauge-track, .bar-track { border-width: 3px; border-radius: 0; }
+.gauge-track, .bar-track { border-width: 2px; border-radius: 0; }
 .gauge-fill, .bar-fill { border-radius: 0; }
 .gauge-track { height: 26px; }
 .bar-track { height: 16px; }
@@ -1086,41 +1110,197 @@ h1, h2, h3, h4 {
 /* ---------- commandes ---------- */
 
 .btn {
-  border-width: 3px;
+  border-width: 2px;
   font-family: var(--f-display); font-weight: 400;
   text-transform: uppercase; letter-spacing: .03em;
   font-size: 1rem; padding: 11px 18px;
 }
 .btn.sm { font-size: .88rem; padding: 7px 13px; }
-.seg-choice button { border-width: 3px; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: .02em; }
-input[type="text"], input[type="number"], input[type="date"], input[type="time"], select { border-width: 3px; }
-.results { border-width: 3px; }
-.chip-food { border-width: 3px; border-radius: 0; }
-.alert, .ia-fiche, .src, .diag, .apercu, .ecart-line { border-width: 3px; }
-.glass { border-width: 3px; border-radius: 0; }
-.parcours-rail { border-width: 3px; border-radius: 0; }
+.seg-choice button { border-width: 2px; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: .02em; }
+input[type="text"], input[type="number"], input[type="date"], input[type="time"], select { border-width: 2px; }
+.results { border-width: 2px; }
+.chip-food { border-width: 2px; border-radius: 0; }
+.alert, .ia-fiche, .src, .diag, .apercu, .ecart-line { border-width: 2px; }
+.glass { border-width: 2px; border-radius: 0; }
+.parcours-rail { border-width: 2px; border-radius: 0; }
 .parcours-fait { border-radius: 0; }
 .pm b { font-size: 1rem; }
-.toast { border-width: 3px; border-radius: 0; box-shadow: var(--shadow); }
+.toast { border-width: 2px; border-radius: 0; box-shadow: var(--shadow); }
 .tag { border-radius: 0; }
 .swatch, .donut-leg .pastille { border-radius: 0; }
-.wb .col { border-width: 3px; border-radius: 0; }
+.wb .col { border-width: 2px; border-radius: 0; }
 .wb .col i { border-radius: 0; }
 
 /* ---------- pied ---------- */
 
-.foot { border-top-width: 3px; }
+.foot { border-top-width: 2px; }
 .foot h2 { font-size: 1.15rem; }
+
+/* ---------- illustrations ---------- */
+
+.illu { width: 46px; height: 46px; flex: none; }
+.illu-mini { width: 30px; height: 30px; vertical-align: -9px; margin-right: 9px; }
+.empty { display: flex; align-items: center; gap: 0; }
+
+.masthead > .brand, .masthead > .mast-tools { position: relative; z-index: 1; }
+.deco { position: absolute; z-index: 0; pointer-events: none; }
+.deco-soleil { width: clamp(110px, 15vw, 180px); height: clamp(110px, 15vw, 180px); right: clamp(14px, 3%, 48px); top: 50%; transform: translateY(-54%); }
+.masthead > .mast-tools { margin-right: clamp(120px, 15vw, 200px); }
+.deco-etoile { width: clamp(44px, 6vw, 72px); height: clamp(44px, 6vw, 72px); right: clamp(30px, 8%, 120px); bottom: 6px; transform: rotate(-14deg); }
+.deco-fleur  { width: clamp(40px, 5vw, 64px); height: clamp(40px, 5vw, 64px); left: 42%; top: 10px; transform: rotate(12deg); }
+
+@keyframes flotte { from { translate: 0 0; } to { translate: 0 -6px; } }
+.deco-soleil { animation: flotte 4.5s ease-in-out infinite alternate; }
+.deco-etoile { animation: flotte 3.8s ease-in-out .6s infinite alternate; }
+.deco-fleur  { animation: flotte 5.2s ease-in-out 1.1s infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .deco { animation: none; } }
+
+@media (max-width: 540px) {
+  .illu { width: 38px; height: 38px; }
+  .brand h1 { font-size: 13vw; }
+  .deco-soleil { width: 88px; height: 88px; right: 10px; top: 8px; transform: none; }
+  .deco-etoile { width: 40px; height: 40px; right: 14px; bottom: 4px; }
+  .masthead > .mast-tools { margin-right: 0; }
+  .deco-fleur { display: none; }
+}
 
 @media (max-width: 540px) {
   .masthead { padding-block: 18px 30px; }
   .tile:last-child:nth-child(odd) { grid-column: span 2; }
-  .tabs { border-width: 2px; }
-  .tab { border-right-width: 2px; }
+  
 }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+
+<symbol id="i-soleil" viewBox="0 0 100 100">
+  <g fill="#ffb84d">
+    <rect x="46" y="2" width="8" height="16" rx="4"/><rect x="46" y="82" width="8" height="16" rx="4"/>
+    <rect x="2" y="46" width="16" height="8" rx="4"/><rect x="82" y="46" width="16" height="8" rx="4"/>
+    <rect x="46" y="2" width="8" height="16" rx="4" transform="rotate(45 50 50)"/><rect x="46" y="82" width="8" height="16" rx="4" transform="rotate(45 50 50)"/>
+    <rect x="2" y="46" width="16" height="8" rx="4" transform="rotate(45 50 50)"/><rect x="82" y="46" width="16" height="8" rx="4" transform="rotate(45 50 50)"/>
+  </g>
+  <circle cx="50" cy="50" r="27" fill="#ffc861"/>
+  <circle cx="50" cy="50" r="21" fill="#ffd98a"/>
+  <circle cx="42" cy="47" r="2.4" fill="#5a2e1f"/><circle cx="58" cy="47" r="2.4" fill="#5a2e1f"/>
+  <path d="M42 55 Q50 62 58 55" fill="none" stroke="#5a2e1f" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="36" cy="54" r="3.5" fill="#ff9aa8" opacity=".7"/><circle cx="64" cy="54" r="3.5" fill="#ff9aa8" opacity=".7"/>
+</symbol>
+
+<symbol id="i-meduse" viewBox="0 0 100 100">
+  <path d="M18 50 C18 26 32 12 50 12 C68 12 82 26 82 50 Z" fill="#ffa3c2"/>
+  <path d="M18 50 Q34 44 50 50 Q66 56 82 50 L82 54 Q66 60 50 54 Q34 48 18 54 Z" fill="#ff7bac"/>
+  <circle cx="36" cy="30" r="5" fill="#fff" opacity=".7"/><circle cx="52" cy="24" r="3" fill="#fff" opacity=".6"/>
+  <g fill="none" stroke="#ff7bac" stroke-width="3.2" stroke-linecap="round">
+    <path d="M30 56 Q26 68 32 78 Q36 86 30 94"/><path d="M42 58 Q46 70 40 80 Q36 88 42 96"/>
+    <path d="M58 58 Q54 70 60 80 Q64 88 58 96"/><path d="M70 56 Q74 68 68 78 Q64 86 70 94"/>
+  </g>
+  <circle cx="43" cy="40" r="2.2" fill="#5a2e1f"/><circle cx="57" cy="40" r="2.2" fill="#5a2e1f"/>
+  <path d="M46 46 Q50 49 54 46" fill="none" stroke="#5a2e1f" stroke-width="2" stroke-linecap="round"/>
+</symbol>
+
+<symbol id="i-tortue" viewBox="0 0 100 100">
+  <ellipse cx="50" cy="62" rx="16" ry="9" fill="#ff8fab" transform="rotate(-25 50 62)" opacity=".0"/>
+  <g fill="#ff9aa8">
+    <ellipse cx="22" cy="42" rx="11" ry="6" transform="rotate(-30 22 42)"/><ellipse cx="78" cy="42" rx="11" ry="6" transform="rotate(30 78 42)"/>
+    <ellipse cx="24" cy="70" rx="11" ry="6" transform="rotate(30 24 70)"/><ellipse cx="76" cy="70" rx="11" ry="6" transform="rotate(-30 76 70)"/>
+    <ellipse cx="50" cy="26" rx="10" ry="9"/><path d="M46 80 L50 90 L54 80 Z"/>
+  </g>
+  <ellipse cx="50" cy="56" rx="27" ry="25" fill="#ffb27a"/>
+  <ellipse cx="50" cy="56" rx="20" ry="18" fill="#ff9a4a" opacity=".9"/>
+  <g fill="#ffd9bf" opacity=".9">
+    <circle cx="50" cy="52" r="6"/><circle cx="38" cy="46" r="4"/><circle cx="62" cy="46" r="4"/>
+    <circle cx="38" cy="64" r="4"/><circle cx="62" cy="64" r="4"/><circle cx="50" cy="70" r="3.5"/>
+  </g>
+  <circle cx="46" cy="24" r="1.9" fill="#5a2e1f"/><circle cx="54" cy="24" r="1.9" fill="#5a2e1f"/>
+  <path d="M47 29 Q50 31 53 29" fill="none" stroke="#5a2e1f" stroke-width="1.8" stroke-linecap="round"/>
+</symbol>
+
+<symbol id="i-pasteque" viewBox="0 0 100 100">
+  <path d="M8 40 A42 42 0 0 0 92 40 Z" fill="#a4dbb0"/>
+  <path d="M14 40 A36 36 0 0 0 86 40 Z" fill="#e6f5e8"/>
+  <path d="M18 40 A32 32 0 0 0 82 40 Z" fill="#ff6f91"/>
+  <g fill="#5a2e1f">
+    <ellipse cx="38" cy="50" rx="2.2" ry="3.4" transform="rotate(20 38 50)"/><ellipse cx="52" cy="56" rx="2.2" ry="3.4"/>
+    <ellipse cx="64" cy="49" rx="2.2" ry="3.4" transform="rotate(-20 64 49)"/><ellipse cx="46" cy="44" rx="2" ry="3" transform="rotate(10 46 44)"/>
+  </g>
+  <circle cx="30" cy="48" r="3" fill="#fff" opacity=".5"/>
+</symbol>
+
+<symbol id="i-orange" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="42" fill="#ff9a4a"/>
+  <circle cx="50" cy="50" r="36" fill="#ffe1c2"/>
+  <circle cx="50" cy="50" r="32" fill="#ffb86b"/>
+  <g stroke="#ffe1c2" stroke-width="3.5" stroke-linecap="round">
+    <path d="M50 18 L50 82"/><path d="M18 50 L82 50"/><path d="M27 27 L73 73"/><path d="M73 27 L27 73"/>
+  </g>
+  <circle cx="50" cy="50" r="4" fill="#ffe1c2"/>
+  <circle cx="36" cy="34" r="4" fill="#fff" opacity=".45"/>
+</symbol>
+
+<symbol id="i-etoile" viewBox="0 0 100 100">
+  <path d="M50 6 L60 38 L94 38 L67 58 L77 92 L50 72 L23 92 L33 58 L6 38 L40 38 Z" fill="#ff8fab" stroke="#ff8fab" stroke-width="10" stroke-linejoin="round"/>
+  <g fill="#ffd0dc">
+    <circle cx="50" cy="26" r="2.6"/><circle cx="50" cy="40" r="2.6"/><circle cx="72" cy="46" r="2.6"/><circle cx="62" cy="52" r="2.6"/>
+    <circle cx="28" cy="46" r="2.6"/><circle cx="38" cy="52" r="2.6"/><circle cx="41" cy="70" r="2.6"/><circle cx="59" cy="70" r="2.6"/>
+  </g>
+  <circle cx="45" cy="55" r="2" fill="#5a2e1f"/><circle cx="55" cy="55" r="2" fill="#5a2e1f"/>
+  <path d="M46 61 Q50 64 54 61" fill="none" stroke="#5a2e1f" stroke-width="1.8" stroke-linecap="round"/>
+</symbol>
+
+<symbol id="i-fraise" viewBox="0 0 100 100">
+  <path d="M50 92 C28 80 16 62 18 42 C20 30 32 26 50 30 C68 26 80 30 82 42 C84 62 72 80 50 92 Z" fill="#ff5c7a"/>
+  <path d="M50 92 C34 80 24 64 26 46 C34 40 42 40 50 44 C58 40 66 40 74 46 C76 64 66 80 50 92 Z" fill="#ff7590" opacity=".8"/>
+  <g fill="#ffd9bf">
+    <ellipse cx="38" cy="50" rx="2" ry="3"/><ellipse cx="50" cy="56" rx="2" ry="3"/><ellipse cx="62" cy="50" rx="2" ry="3"/>
+    <ellipse cx="44" cy="68" rx="2" ry="3"/><ellipse cx="56" cy="68" rx="2" ry="3"/><ellipse cx="50" cy="80" rx="2" ry="3"/>
+  </g>
+  <g fill="#a4dbb0">
+    <path d="M50 30 Q40 20 30 26 Q42 30 50 30 Z"/><path d="M50 30 Q60 20 70 26 Q58 30 50 30 Z"/>
+    <path d="M50 30 Q46 18 50 12 Q54 18 50 30 Z"/><path d="M50 30 Q36 30 34 36 Q46 36 50 30 Z"/><path d="M50 30 Q64 30 66 36 Q54 36 50 30 Z"/>
+  </g>
+</symbol>
+
+<symbol id="i-fleur" viewBox="0 0 100 100">
+  <g fill="#ffb3cc">
+    <ellipse cx="50" cy="26" rx="13" ry="20"/><ellipse cx="50" cy="74" rx="13" ry="20"/>
+    <ellipse cx="26" cy="50" rx="20" ry="13"/><ellipse cx="74" cy="50" rx="20" ry="13"/>
+  </g>
+  <g fill="#ffc9db">
+    <ellipse cx="33" cy="33" rx="13" ry="18" transform="rotate(-45 33 33)"/><ellipse cx="67" cy="33" rx="13" ry="18" transform="rotate(45 67 33)"/>
+    <ellipse cx="33" cy="67" rx="13" ry="18" transform="rotate(45 33 67)"/><ellipse cx="67" cy="67" rx="13" ry="18" transform="rotate(-45 67 67)"/>
+  </g>
+  <circle cx="50" cy="50" r="13" fill="#ffb84d"/><circle cx="50" cy="50" r="8" fill="#ffd98a"/>
+  <circle cx="46" cy="46" r="2" fill="#fff" opacity=".6"/>
+</symbol>
+
+<symbol id="i-coquillage" viewBox="0 0 100 100">
+  <path d="M50 88 L12 42 A44 44 0 0 1 88 42 Z" fill="#ffcfd9"/>
+  <g fill="none" stroke="#ff9ab6" stroke-width="3" stroke-linecap="round">
+    <path d="M50 86 L22 46"/><path d="M50 86 L34 36"/><path d="M50 86 L50 30"/><path d="M50 86 L66 36"/><path d="M50 86 L78 46"/>
+  </g>
+  <path d="M12 42 A44 44 0 0 1 88 42" fill="none" stroke="#ff9ab6" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="50" cy="88" r="6" fill="#ff8fab"/>
+  <circle cx="40" cy="48" r="3" fill="#fff" opacity=".6"/>
+</symbol>
+
+<symbol id="i-ourson" viewBox="0 0 100 100">
+  <g fill="#ffb27a" opacity=".92">
+    <circle cx="30" cy="26" r="11"/><circle cx="70" cy="26" r="11"/>
+    <circle cx="50" cy="36" r="22"/>
+    <rect x="30" y="50" width="40" height="38" rx="16"/>
+    <ellipse cx="22" cy="62" rx="8" ry="12" transform="rotate(20 22 62)"/><ellipse cx="78" cy="62" rx="8" ry="12" transform="rotate(-20 78 62)"/>
+    <ellipse cx="38" cy="90" rx="9" ry="7"/><ellipse cx="62" cy="90" rx="9" ry="7"/>
+  </g>
+  <ellipse cx="50" cy="44" rx="9" ry="6" fill="#ffd9bf"/>
+  <circle cx="42" cy="34" r="2.2" fill="#5a2e1f"/><circle cx="58" cy="34" r="2.2" fill="#5a2e1f"/>
+  <ellipse cx="50" cy="42" rx="2.6" ry="1.8" fill="#5a2e1f"/>
+  <ellipse cx="50" cy="66" rx="10" ry="8" fill="#ffd9bf" opacity=".7"/>
+  <circle cx="36" cy="22" r="4" fill="#fff" opacity=".45"/>
+</symbol>
+
+</defs></svg>
 <div class="wrap">
 
   <header class="masthead">
@@ -1128,6 +1308,9 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
       <h1>Carnet de Forme</h1>
       <p class="sub" id="brandSub">Suivi personnel</p>
     </div>
+    <svg class="deco deco-soleil" aria-hidden="true"><use href="#i-soleil"/></svg>
+    <svg class="deco deco-etoile" aria-hidden="true"><use href="#i-etoile"/></svg>
+    <svg class="deco deco-fleur" aria-hidden="true"><use href="#i-fleur"/></svg>
     <div class="mast-tools">
       <button type="button" class="icon-btn" id="exportBtn" aria-label="Exporter mes données" title="Exporter mes données" hidden>
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 20h15"/></svg>
@@ -1173,7 +1356,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     </div>
 
     <div class="card violet">
-      <header><h2>Mes informations</h2><span class="hint">Base de tous les calculs</span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-fleur"/></svg><h2>Mes informations</h2><span class="hint">Base de tous les calculs</span></header>
       <div class="body">
         <div class="grid-form">
           <div class="field">
@@ -1260,7 +1443,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
   <section id="panel-alim" role="tabpanel" aria-labelledby="tab-alim" hidden>
 
     <div class="card plain">
-      <header><h2>Ajouter un aliment</h2><span class="hint">Base de <span id="nbAliments">0</span> aliments</span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-pasteque"/></svg><h2>Ajouter un aliment</h2><span class="hint">Base de <span id="nbAliments">0</span> aliments</span></header>
       <div class="body">
         <div class="row-inline" style="margin-bottom:12px">
           <div class="field" style="flex:2 1 200px">
@@ -1351,12 +1534,12 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     </div>
 
     <div class="card plain">
-      <header><h2>Mes repas</h2><span class="hint" id="repasTotal"></span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-fraise"/></svg><h2>Mes repas</h2><span class="hint" id="repasTotal"></span></header>
       <div class="body tight" id="repasListe"></div>
     </div>
 
     <div class="card blue">
-      <header><h2>Hydratation</h2><span class="hint">1 verre = 250 ml</span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-meduse"/></svg><h2>Hydratation</h2><span class="hint">1 verre = 250 ml</span></header>
       <div class="body">
         <div class="water-top">
           <span><span class="big" id="eauVal">0 L</span> <span class="of" id="eauCible"></span></span>
@@ -1372,7 +1555,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     </div>
 
     <div class="card orange">
-      <header><h2>Énergie du jour</h2><span class="hint" id="alimHint"></span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-orange"/></svg><h2>Énergie du jour</h2><span class="hint" id="alimHint"></span></header>
       <div class="body">
         <div class="kcal-gauge">
           <div class="kcal-head">
@@ -1387,7 +1570,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     </div>
 
     <div class="card plain">
-      <header><h2>Bilan de la journée</h2><span class="hint" id="bilanHint"></span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-fleur"/></svg><h2>Bilan de la journée</h2><span class="hint" id="bilanHint"></span></header>
       <div class="body">
         <div id="bilanVerdict"></div>
         <div class="donut-zone" id="donutZone"></div>
@@ -1402,7 +1585,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
   <section id="panel-poids" role="tabpanel" aria-labelledby="tab-poids" hidden>
 
     <div class="card aqua">
-      <header><h2>Ma pesée</h2><span class="hint">À jeun, le matin</span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-coquillage"/></svg><h2>Ma pesée</h2><span class="hint">À jeun, le matin</span></header>
       <div class="body">
         <div class="row-inline">
           <div class="field" style="flex:1 1 140px">
@@ -1430,7 +1613,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     </div>
 
     <div class="card aqua">
-      <header><h2>Mon parcours</h2><span class="hint" id="parcoursHint"></span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-tortue"/></svg><h2>Mon parcours</h2><span class="hint" id="parcoursHint"></span></header>
       <div class="body">
         <div class="parcours" id="parcours"></div>
         <div id="ecartJour"></div>
@@ -1438,7 +1621,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     </div>
 
     <div class="card plain">
-      <header><h2>Où j'en suis</h2></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-etoile"/></svg><h2>Où j'en suis</h2></header>
       <div class="body"><div class="stats" id="poidsStats"></div></div>
     </div>
 
@@ -1464,7 +1647,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
   <section id="panel-sport" role="tabpanel" aria-labelledby="tab-sport" hidden>
 
     <div class="card blue">
-      <header><h2>Ajouter une séance</h2><span class="hint">Distance, durée, allure</span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-etoile"/></svg><h2>Ajouter une séance</h2><span class="hint">Distance, durée, allure</span></header>
       <div class="body">
         <div class="row-inline">
           <div class="field" style="flex:3 1 210px">
@@ -1498,7 +1681,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     </div>
 
     <div class="card plain">
-      <header><h2>Ma semaine</h2><span class="hint" id="sportSemLabel"></span></header>
+      <header><svg class="illu" aria-hidden="true"><use href="#i-soleil"/></svg><h2>Ma semaine</h2><span class="hint" id="sportSemLabel"></span></header>
       <div class="body">
         <div class="stats" id="sportStats" style="margin-bottom:16px"></div>
         <div class="week-bars" id="weekBars"></div>
@@ -5828,7 +6011,7 @@ var SPORTS = [
         '<h3>' + REPAS_NOMS[k] + '</h3>' +
         '<span class="mk">' + ni(sub) + ' kcal</span></div>';
       if (!items.length) {
-        html += '<p class="empty">Rien de noté.</p>';
+        html += '<p class="empty"><svg class="illu-mini" aria-hidden="true"><use href="#i-ourson"/></svg>Rien de noté.</p>';
       } else {
         html += '<ul class="items">' + items.map(function (it, i) {
           var mac = (it.p || it.g || it.l)
@@ -6015,7 +6198,7 @@ var SPORTS = [
   function dessineAnneau(macros, total) {
     var zone = document.getElementById("donutZone");
     if (!total || total <= 0) {
-      zone.innerHTML = '<p class="empty" style="padding:8px 0">Note un aliment pour voir la répartition.</p>';
+      zone.innerHTML = '<p class="empty" style="padding:8px 0"><svg class="illu-mini" aria-hidden="true"><use href="#i-fraise"/></svg>Note un aliment pour voir la répartition.</p>';
       return;
     }
     var W = 236, c = W / 2, r = 72, ep = 30, C = 2 * Math.PI * r;
@@ -6420,8 +6603,8 @@ var SPORTS = [
     chartPts = [];
 
     if (!l.length) {
-      holder.innerHTML = '<p class="empty" style="padding:30px 12px;text-align:center">' +
-        'Enregistre ta première pesée : la courbe démarre dès le premier point.</p>';
+      holder.innerHTML = '<p class="empty" style="padding:30px 12px;justify-content:center">' +
+        '<svg class="illu-mini" aria-hidden="true"><use href="#i-tortue"/></svg>Enregistre ta première pesée : la courbe démarre dès le premier point.</p>';
       legend.innerHTML = "";
       return;
     }
@@ -6885,7 +7068,7 @@ var SPORTS = [
             '<span class="kc">' + ni(x.k) + ' kcal</span>' +
             '<button type="button" class="del" data-del-sport="' + i + '" aria-label="Retirer ' + esc(x.n) + '">✕</button></li>';
         }).join("")
-      : '<li style="grid-template-columns:1fr"><p class="empty" style="padding:0">Rien de noté pour ce jour. Même trente minutes de marche comptent.</p></li>';
+      : '<li style="grid-template-columns:1fr"><p class="empty" style="padding:0"><svg class="illu-mini" aria-hidden="true"><use href="#i-etoile"/></svg>Rien de noté pour ce jour. Même trente minutes de marche comptent.</p></li>';
 
     var lundi = lundiDe(dateCourante);
     var jours = [], maxK = 0, semK = 0, semMin = 0, semN = 0, semKm = 0;

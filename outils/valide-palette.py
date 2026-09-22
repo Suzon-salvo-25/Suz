@@ -77,14 +77,17 @@ def valide(nom, palette, seuil=14):
 if __name__ == '__main__':
     # La palette en place dans perte-de-poids.html. A tenir a jour si elle change.
     tout = True
-    tout &= valide('macronutriments, clair',  {'prot': '#3b1466', 'gluc': '#ff7a1a', 'lip': '#f0147a'})
-    tout &= valide('macronutriments, sombre', {'prot': '#9d7bff', 'gluc': '#ffa030', 'lip': '#ff2e86'})
+    tout &= valide('macronutriments, clair',  {'prot': '#6a3d8f', 'gluc': '#ff9a4a', 'lip': '#e8337f'})
+    tout &= valide('macronutriments, sombre', {'prot': '#bfa8e8', 'gluc': '#ffb070', 'lip': '#ff3d90'})
     tout &= valide('etats, clair',  {'ok': '#0e8a5f', 'warn': '#9c6000', 'crit': '#7e0512'}, seuil=12)
     tout &= valide('etats, sombre', {'ok': '#3fd69b', 'warn': '#ffc24d', 'crit': '#f4566b'}, seuil=12)
     print('\nContrastes de texte (WCAG, 4,5 attendu pour du texte courant) :')
-    for nom, fg, bg in [('encre sur creme', '#1a0a05', '#fff3e6'), ('encre sur orange', '#1a0a05', '#ff7a1a'),
-                        ('encre sur rose', '#2a0010', '#f0147a'), ('blanc sur violet', '#ffffff', '#3b1466'),
-                        ('blanc sur rose fort', '#ffffff', '#c4005f'), ('creme sur aubergine', '#fff3e6', '#18070e')]:
+    # Les surfaces douces portent les grandes zones ; le texte y est toujours
+    # l'encre brune, jamais du blanc.
+    for nom, fg, bg in [('encre sur creme', '#3d1f14', '#fff8f2'), ('encre sur peche', '#3d1f14', '#ffb27a'),
+                        ('encre sur rose doux', '#3d1f14', '#ffc2d6'), ('encre sur lavande', '#3d1f14', '#d9c8f0'),
+                        ('encre pale sur creme', '#876656', '#fff8f2'), ('clair sur fond sombre', '#fff1e8', '#2a1a22'),
+                        ('sombre sur peche sombre', '#2a1a22', '#d98c5c'), ('sombre sur lavande sombre', '#2a1a22', '#9a82c4')]:
         r = contraste(fg, bg); print('  %-22s %5.2f  %s' % (nom, r, 'ok' if r >= 4.5 else 'INSUFFISANT'))
         tout &= r >= 4.5
     print('\n' + ('Palette validee.' if tout else 'PALETTE A REVOIR.'))

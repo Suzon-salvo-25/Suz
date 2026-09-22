@@ -123,32 +123,49 @@ en parallèle. Le mode est affiché en bas de page.
 Interface en français, tutoiement. Pas de tiret cadratin. Les messages disent
 quoi faire, pas seulement ce qui cloche.
 
-Direction visuelle : éditoriale et franche, dans l'esprit d'un portfolio
-brutaliste. Blocs de couleur pleine largeur, biseaux en `clip-path`,
-typographie display condensée en capitales, arêtes vives (rayons à 0),
-bordures de 3 px, ombres portées réservées aux commandes. L'été : orange
-dominant, rose en contrepoint, violet profond comme ancre froide, fond crème.
+Direction visuelle : éditoriale mais douce, une planche d'autocollants d'été.
+Blocs pleine largeur, biseaux en `clip-path`, typographie display condensée en
+capitales, bordures de 2 px, rayons légers (14 / 10 / 8 px), ombres portées
+réservées aux commandes. On doit avoir envie d'y passer du temps : c'est le
+critère qui tranche entre deux options.
 
-Palette validée pour les déficiences de la vision des couleurs (simulation
-protanopie, deutéranopie, tritanopie, écart CIEDE2000 ≥ 14 entre chaque
-paire des trois macronutriments, dans les deux thèmes) :
+**Deux familles de couleurs, à ne pas confondre.** Les *surfaces douces*
+portent les grandes zones (bandeau, en-têtes de carte, onglet actif, tuile
+héros) ; les *couleurs de données* ne servent qu'aux barres, à l'anneau et
+aux pastilles. Une grande zone en rose vif fatigue, la même en rose poudré
+invite. Le texte sur une surface douce est toujours l'encre brune, jamais
+du blanc.
 
 | Rôle | Clair | Sombre |
 |---|---|---|
-| Orange, glucides, surfaces principales | `#ff7a1a` | `#ffa030` |
-| Rose, lipides (`--aqua`) | `#f0147a` | `#ff2e86` |
-| Violet profond, protéines, focus, eau (`--blue`) | `#3b1466` | `#9d7bff` |
-| Rose fort, en-têtes à texte blanc (`--violet`) | `#c4005f` | `#ff5c9e` |
+| Pêche (bandeau, en-têtes neutres et orange) | `#ffb27a` | `#d98c5c` |
+| Rose poudré (pesée, parcours, bilan) | `#ffc2d6` | `#d47a9c` |
+| Lavande (hydratation, sport) | `#d9c8f0` | `#9a82c4` |
+| Fond, panneau, encre | `#fff8f2` / `#ffffff` / `#3d1f14` | `#2a1a22` / `#35232c` / `#fff1e8` |
+| Glucides (`--orange`) | `#ff9a4a` | `#ffb070` |
+| Lipides (`--aqua`) | `#e8337f` | `#ff3d90` |
+| Protéines (`--blue`) | `#6a3d8f` | `#bfa8e8` |
 | États ok / limite / hors cible | `#0e8a5f` / `#9c6000` / `#7e0512` | `#3fd69b` / `#ffc24d` / `#f4566b` |
 
-Elle fait mieux que la précédente, qui était faible en protanopie (13,2) et
-tritanopie (11,1). **Ne pas changer sans revalider** :
-`python3 outils/valide-palette.py` refait la mesure, mettre à jour les
-valeurs qu'il teste en même temps que celles du CSS. Sur l'orange, le texte est noir : le blanc n'y atteint que 2,6:1.
+Palette validée pour les déficiences de la vision des couleurs : simulation
+protanopie, deutéranopie, tritanopie, écart CIEDE2000 ≥ 14 entre chaque paire
+de macronutriments dans les deux thèmes, plus les contrastes de texte.
+**Ne pas changer sans revalider** : `python3 outils/valide-palette.py` refait
+la mesure, mettre à jour les valeurs qu'il teste en même temps que le CSS.
 
 Les tokens gardent leurs anciens noms (`--blue`, `--aqua`, `--violet`) parce
 que le JavaScript les référence pour les macronutriments : les renommer
 casserait le bilan. Leur rôle est celui du tableau, pas celui du nom.
+
+**Illustrations.** Dix dessins SVG faits maison, dans un `<symbol>` par motif
+en tête de page, appelés par `<use href="#i-...">` : soleil, méduse, tortue,
+pastèque, orange, étoile de mer, fraise, fleur, coquillage, ourson. Ils
+viennent d'une planche d'autocollants aquarelle montrée en référence, jamais
+copiée : elle ne nous appartient pas. Chaque en-tête de carte en porte un,
+les états vides aussi, et le bandeau en a trois qui flottent doucement
+(coupés sous `prefers-reduced-motion`). Tous en `aria-hidden` : ils décorent,
+ils n'informent pas. En ajouter un, c'est un `<symbol>` de plus, pas une
+image externe : le fichier doit rester autonome.
 
 Typographie : Anton (display, un seul poids, toujours en capitales),
 Figtree (texte), Azeret Mono (chiffres tabulaires et étiquettes). Tout token
