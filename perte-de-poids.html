@@ -317,7 +317,6 @@ button { cursor: pointer; }
   transition: transform .08s ease, box-shadow .08s ease;
   min-width: 0;
 }
-.tab .ico { font-size: 1.15rem; line-height: 1; }
 .tab span.txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .tab:hover { transform: translate(1px,1px); box-shadow: 2px 2px 0 var(--line-hard); }
 .tab:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
@@ -478,7 +477,6 @@ input[type="range"] { width: 100%; accent-color: var(--orange); }
 .alert b { font-weight: 700; }
 .alert.warn { background: color-mix(in srgb, var(--yellow) 22%, var(--panel)); }
 .alert.crit { background: color-mix(in srgb, var(--rouge) 20%, var(--panel)); }
-.alert .em { font-size: 1.05rem; line-height: 1.2; flex: none; }
 
 /* ---------- barres de macros ---------- */
 
@@ -950,7 +948,6 @@ td .etat.neutre { color: var(--ink-faint); }
   body { font-size: 15px; }
   .tabs { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .tab { flex-direction: column; gap: 3px; padding: 9px 3px 8px; font-size: .74rem; letter-spacing: -.02em; }
-  .tab .ico { font-size: 1.05rem; }
   .today-tiles { grid-template-columns: repeat(2, 1fr); }
   .items li { grid-template-columns: 1fr auto; row-gap: 4px; }
   .items .del { grid-column: 2; grid-row: 1; }
@@ -1100,7 +1097,6 @@ h1, h2, h3, h4 {
   letter-spacing: 0; text-transform: none; color: var(--ink-soft);
   flex-direction: row; gap: 8px;
 }
-.tab .ico { font-size: 1rem; }
 .tab:hover { transform: none; box-shadow: none; color: var(--ink); }
 .tab[data-c="violet"][aria-selected="true"],
 .tab[data-c="orange"][aria-selected="true"],
@@ -1268,7 +1264,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
   .deco-soleil { width: 92px; height: 92px; right: -4px; bottom: -26px; }
   .deco-etoile { width: 42px; height: 42px; right: 84px; bottom: -12px; }
   .masthead > .mast-tools { margin-right: 104px; }
-  .tab { flex-direction: column; gap: 3px; font-size: .78rem; padding: 8px 2px; }
+  .tab { font-size: .8rem; padding: 9px 2px; }
   .tile { padding: 12px 13px; }
   .tile:last-child:nth-child(odd) { grid-column: span 2; }
   .card > header .illu, .illu { width: 46px; height: 46px; }
@@ -1316,9 +1312,9 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 
   <!-- ===== onglets ===== -->
   <nav class="tabs" id="tabsNav" role="tablist" aria-label="Sections du carnet">
-    <button type="button" class="tab" role="tab" data-tab="alim" data-c="orange" aria-selected="false" aria-controls="panel-alim" id="tab-alim"><span class="ico" aria-hidden="true">🍽️</span><span class="txt">Alimentation</span></button>
-    <button type="button" class="tab" role="tab" data-tab="poids" data-c="aqua" aria-selected="false" aria-controls="panel-poids" id="tab-poids"><span class="ico" aria-hidden="true">⚖️</span><span class="txt">Mon poids</span></button>
-    <button type="button" class="tab" role="tab" data-tab="sport" data-c="blue" aria-selected="false" aria-controls="panel-sport" id="tab-sport"><span class="ico" aria-hidden="true">🏃</span><span class="txt">Sport</span></button>
+    <button type="button" class="tab" role="tab" data-tab="alim" data-c="orange" aria-selected="false" aria-controls="panel-alim" id="tab-alim"><span class="txt">Alimentation</span></button>
+    <button type="button" class="tab" role="tab" data-tab="poids" data-c="aqua" aria-selected="false" aria-controls="panel-poids" id="tab-poids"><span class="txt">Mon poids</span></button>
+    <button type="button" class="tab" role="tab" data-tab="sport" data-c="blue" aria-selected="false" aria-controls="panel-sport" id="tab-sport"><span class="txt">Sport</span></button>
   </nav>
 
   <main>
@@ -1461,7 +1457,6 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 
         <div id="foodPick" hidden style="margin-top:14px">
           <div class="alert" style="margin-top:0">
-            <span class="em" aria-hidden="true">🥄</span>
             <div style="flex:1 1 auto;min-width:0">
               <b id="pickNom">—</b>
               <div class="row-inline" style="margin-top:10px">
@@ -1505,7 +1500,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
             <button type="button" class="btn go" id="libreAdd">Ajouter</button>
           </div>
           <div class="row-inline" style="margin-top:10px">
-            <button type="button" class="btn ghost sm" id="chercheIA" hidden>✦ Trouver les valeurs</button>
+            <button type="button" class="btn ghost sm" id="chercheIA" hidden>Trouver les valeurs</button>
             <span class="ia-etat" id="iaEtat"></span>
           </div>
           <div id="iaFiche"></div>
@@ -5877,28 +5872,28 @@ var SPORTS = [
 
     var al = [];
     if (!p.age || !p.taille || !actuel) {
-      al.push(["warn", "📋", "<b>Il manque des informations.</b> Renseigne au minimum ton âge, ta taille et ton poids de départ : sans eux, aucun objectif calorique ne peut être calculé."]);
+      al.push(["warn", "<b>Il manque des informations.</b> Renseigne au minimum ton âge, ta taille et ton poids de départ : sans eux, aucun objectif calorique ne peut être calculé."]);
     } else {
       var plancher = plancherKcal(actuel);
       if (cible !== null && cible < plancher) {
-        al.push(["crit", "⚠️", "<b>Ce rythme est trop agressif.</b> Il te mènerait à " + ni(cible) + " kcal par jour, sous le plancher de " + ni(plancher) + " kcal. Descends le rythme sous " + nf(Math.max(0.1, Math.floor((dep - plancher) * 7 / 7700 * 20) / 20), 2) + " kg par semaine, ou ajoute des séances de sport."]);
+        al.push(["crit", "<b>Ce rythme est trop agressif.</b> Il te mènerait à " + ni(cible) + " kcal par jour, sous le plancher de " + ni(plancher) + " kcal. Descends le rythme sous " + nf(Math.max(0.1, Math.floor((dep - plancher) * 7 / 7700 * 20) / 20), 2) + " kg par semaine, ou ajoute des séances de sport."]);
       }
       if (p.rythme > 0.75) {
-        al.push(["warn", "🐇", "<b>Au-delà de 0,75 kg par semaine</b>, la perte vient de plus en plus du muscle et de l'eau, et la reprise après coup est fréquente."]);
+        al.push(["warn", "<b>Au-delà de 0,75 kg par semaine</b>, la perte vient de plus en plus du muscle et de l'eau, et la reprise après coup est fréquente."]);
       }
       if (v !== null && p.objectif) {
         var vObj = imc(p.objectif);
         if (vObj !== null && vObj < 18.5) {
-          al.push(["crit", "🩺", "<b>Ton poids visé te placerait en insuffisance pondérale</b> (indice de masse corporelle de " + nf(vObj, 1) + "). Pour ta taille, le bas de la fourchette normale est de " + nf(18.5 * Math.pow(p.taille / 100, 2), 1) + " kg."]);
+          al.push(["crit", "<b>Ton poids visé te placerait en insuffisance pondérale</b> (indice de masse corporelle de " + nf(vObj, 1) + "). Pour ta taille, le bas de la fourchette normale est de " + nf(18.5 * Math.pow(p.taille / 100, 2), 1) + " kg."]);
         }
       }
       if (reel !== null && reel > 0.05) {
-        al.push(["warn", "📈", "<b>Sur la période mesurée, la tendance est à la hausse</b> de " + nf(reel, 2) + " kg par semaine. Vérifie les portions saisies avant de baisser encore les calories."]);
+        al.push(["warn", "<b>Sur la période mesurée, la tendance est à la hausse</b> de " + nf(reel, 2) + " kg par semaine. Vérifie les portions saisies avant de baisser encore les calories."]);
       }
       if (dr && dep) {
         var ecart = dr.tdee - dep;
         if (Math.abs(ecart) >= 150) {
-          al.push([Math.abs(ecart) >= 350 ? "crit" : "warn", "🔬",
+          al.push([Math.abs(ecart) >= 350 ? "crit" : "warn",
             "<b>Ta dépense réelle s'écarte de " + ni(Math.abs(ecart)) + " kcal de l'estimation théorique.</b> " +
             "La formule annonce " + ni(dep) + " kcal, tes chiffres en donnent " + ni(dr.tdee) + ". " +
             (ecart < 0
@@ -5908,12 +5903,12 @@ var SPORTS = [
       }
       var cp = cibleProteines();
       if (cp) {
-        al.push(["", "🥩", "<b>Vise environ " + cp + " g de protéines par jour</b>, soit 1,6 g par kilogramme de ton poids visé. " +
+        al.push(["", "<b>Vise environ " + cp + " g de protéines par jour</b>, soit 1,6 g par kilogramme de ton poids visé. " +
           "C'est le levier le plus efficace pour que la perte vienne de la graisse et non du muscle, et cela cale la faim."]);
       }
     }
     document.getElementById("profilAlertes").innerHTML = al.map(function (a) {
-      return '<div class="alert ' + a[0] + '"><span class="em" aria-hidden="true">' + a[1] + '</span><div>' + a[2] + '</div></div>';
+      return '<div class="alert ' + a[0] + '"><div>' + a[1] + '</div></div>';
     }).join("");
 
     var nomF = p.sexe === "h" ? "10 × poids + 6,25 × taille − 5 × âge + 5" : "10 × poids + 6,25 × taille − 5 × âge − 161";
@@ -5927,7 +5922,6 @@ var SPORTS = [
   /* ==================== ONGLET ALIMENTATION ==================== */
 
   var REPAS_NOMS = { petitdej: "Petit-déjeuner", dejeuner: "Déjeuner", diner: "Dîner", collation: "Collation" };
-  var REPAS_ICO = { petitdej: "🥐", dejeuner: "🍲", diner: "🍽️", collation: "🍎" };
   var MACROS = [
     ["Protéines", "pro", 4, "var(--blue)"],
     ["Glucides", "glu", 4, "var(--orange)"],
@@ -5970,7 +5964,7 @@ var SPORTS = [
     var bsEl = document.getElementById("bilanSem");
     if (bs.n >= 1) {
       var kg = bs.cum / 7700;
-      bsEl.innerHTML = '<div class="alert" style="margin-top:15px"><span class="em" aria-hidden="true">📆</span><div>' +
+      bsEl.innerHTML = '<div class="alert" style="margin-top:15px"><div>' +
         '<b>Semaine en cours : ' + (bs.cum >= 0 ? "déficit" : "excédent") + ' de ' + ni(Math.abs(bs.cum)) + ' kcal</b>' +
         ' sur ' + bs.n + (bs.n > 1 ? " jours renseignés" : " jour renseigné") + '.<br>' +
         '<span style="color:var(--ink-soft)">Soit l\'équivalent de ' + nf(Math.abs(kg), 2) + ' kg de masse grasse ' +
@@ -6001,7 +5995,6 @@ var SPORTS = [
       var items = j.repas[k] || [];
       var sub = items.reduce(function (s, x) { return s + (x.k || 0); }, 0);
       html += '<div class="meal"><div class="meal-head">' +
-        '<span aria-hidden="true">' + REPAS_ICO[k] + '</span>' +
         '<h3>' + REPAS_NOMS[k] + '</h3>' +
         '<span class="mk">' + ni(sub) + ' kcal</span></div>';
       if (!items.length) {
@@ -6355,10 +6348,10 @@ var SPORTS = [
     var vide = document.getElementById("rienTrouve");
     var saisi = String(q || "").trim();
     if (!res.length && saisi.length >= 3 && Claude_sample) {
-      vide.innerHTML = '<div class="alert" style="margin-top:9px"><span class="em" aria-hidden="true">✦</span>' +
+      vide.innerHTML = '<div class="alert" style="margin-top:9px">' +
         '<div><b>Rien dans la base pour « ' + esc(saisi) + ' ».</b><br>' +
         '<span style="color:var(--ink-soft)">Claude peut proposer les valeurs de mémoire, à vérifier ensuite sur l\'emballage.</span><br>' +
-        '<button type="button" class="btn go sm" style="margin-top:9px" data-demander="' + esc(saisi) + '">✦ Demander les valeurs</button></div></div>';
+        '<button type="button" class="btn go sm" style="margin-top:9px" data-demander="' + esc(saisi) + '">Demander les valeurs</button></div></div>';
     } else if (!res.length && saisi.length >= 3) {
       vide.innerHTML = '<p class="empty" style="padding:9px 0">Rien pour « ' + esc(saisi) +
         ' ». Utilise « Mon aliment n\'est pas dans la liste » juste en dessous.</p>';
@@ -6570,19 +6563,19 @@ var SPORTS = [
         if (m !== null && Math.abs(m - hHab) > 120) hors++;
       });
       if (hors) {
-        msgs.push(["warn", "🕐", "<b>" + hors + (hors > 1 ? " pesées ont été faites" : " pesée a été faite") +
+        msgs.push(["warn", "<b>" + hors + (hors > 1 ? " pesées ont été faites" : " pesée a été faite") +
           " à plus de deux heures de ton heure habituelle</b> (" + hhmm(hHab) + "). Ces points-là sont cerclés d'orange sur la courbe : " +
           "l'écart qu'ils montrent vient en partie de l'heure, pas de la graisse."]);
       }
     }
     var pl = plateau();
     if (pl && Math.abs(pl.delta) < 0.25) {
-      msgs.push(["warn", "🧱", "<b>Ton poids stagne depuis " + pl.jours + " jours</b> (" + signeTxt(pl.delta) +
+      msgs.push(["warn", "<b>Ton poids stagne depuis " + pl.jours + " jours</b> (" + signeTxt(pl.delta) +
         " kg sur la moyenne lissée). C'est normal et fréquent. Avant de couper davantage, vérifie tes portions pendant une semaine : " +
         "le plus souvent, l'apport réel a glissé sans qu'on s'en rende compte."]);
     }
     box.innerHTML = msgs.map(function (a) {
-      return '<div class="alert ' + a[0] + '" style="margin:0 17px 16px"><span class="em" aria-hidden="true">' + a[1] + '</span><div>' + a[2] + '</div></div>';
+      return '<div class="alert ' + a[0] + '" style="margin:0 17px 16px"><div>' + a[1] + '</div></div>';
     }).join("");
   }
 
@@ -6816,7 +6809,7 @@ var SPORTS = [
       return;
     }
     if (j.reste <= 0) {
-      note.innerHTML = '<div class="alert"><span class="em" aria-hidden="true">🗓️</span><div>' +
+      note.innerHTML = '<div class="alert"><div>' +
         '<b>La date visée est passée.</b> Choisis une nouvelle échéance dans les réglages : ' +
         'la projection repartira de ton poids d\'aujourd\'hui.</div></div>';
       return;
@@ -6847,31 +6840,31 @@ var SPORTS = [
 
     var msg = null;
     if (j.requis !== null && j.requis > 1) {
-      msg = ["crit", "⏳", "<b>L'échéance demande " + nf(j.requis, 2) + " kg par semaine.</b> " +
+      msg = ["crit", "<b>L'échéance demande " + nf(j.requis, 2) + " kg par semaine.</b> " +
         "C'est au-delà de ce qui se tient sans perdre du muscle. Repousse la date visée d'environ " +
         ni(Math.ceil(j.aPerdre / 0.75 * 7) - j.reste) + " jours, ou revois le poids visé."];
     } else if (j.reel !== null && j.reel > 0) {
-      msg = ["warn", "📈", "<b>Ta tendance actuelle est à la hausse.</b> La projection ci-dessous " +
+      msg = ["warn", "<b>Ta tendance actuelle est à la hausse.</b> La projection ci-dessous " +
         "prolonge cette pente : elle s'éloigne de l'objectif au lieu de s'en approcher. " +
         "Vérifie les portions saisies avant de toucher au déficit."];
     } else if (j.projete !== null && ecart > 0.5) {
       // Sur une pente presque plate, le retard calculé part à des années :
       // mieux vaut le dire que d'afficher un nombre de jours absurde.
       var retard = j.reel < -0.02 ? Math.ceil(ecart / -j.reel * 7) : null;
-      msg = ["warn", "🐢", "<b>À ton rythme actuel, il manquera " + nf(ecart, 1) + " kg le " + dateCourte(j.fin) + ".</b> " +
+      msg = ["warn", "<b>À ton rythme actuel, il manquera " + nf(ecart, 1) + " kg le " + dateCourte(j.fin) + ".</b> " +
         (retard !== null && retard <= 365
           ? "Rien d'inquiétant : soit tu creuses un peu le déficit, soit tu acceptes d'arriver " + ni(retard) + " jours plus tard."
           : "À cette pente, l'objectif n'arrive pas dans un délai raisonnable. Reprends le déficit ou revois la date.")];
     } else if (j.atteintLe) {
-      msg = ["", "🎯", "<b>Tu es en avance.</b> En gardant ce rythme, tu passes sous " +
+      msg = ["", "<b>Tu es en avance.</b> En gardant ce rythme, tu passes sous " +
         nf(j.objectif, 1) + " kg dès le " + dateCourte(j.atteintLe) + ", soit " +
         ni(diffJours(j.atteintLe, j.fin)) + " jours avant l'échéance."];
     } else if (j.projete !== null) {
-      msg = ["", "🎯", "<b>Tu es sur la bonne trajectoire.</b> En gardant ce rythme, tu arrives à " +
+      msg = ["", "<b>Tu es sur la bonne trajectoire.</b> En gardant ce rythme, tu arrives à " +
         nf(j.objectif, 1) + " kg pour le " + dateCourte(j.fin) + "."];
     }
-    note.innerHTML = msg ? '<div class="alert ' + msg[0] + '" style="margin-top:14px"><span class="em" aria-hidden="true">' +
-      msg[1] + '</span><div>' + msg[2] + '</div></div>' : "";
+    note.innerHTML = msg ? '<div class="alert ' + msg[0] + '" style="margin-top:14px"><div>' +
+      msg[1] + '</div></div>' : "";
 
     dessineProjection(j, l);
   }

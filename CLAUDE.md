@@ -139,6 +139,11 @@ en parallèle. Le mode est affiché en bas de page.
 Interface en français, tutoiement. Pas de tiret cadratin. Les messages disent
 quoi faire, pas seulement ce qui cloche.
 
+**Aucun émoji dans l'interface.** Ni en tête d'alerte, ni sur les onglets, ni
+devant les repas. Ils faisaient cheap à côté des aquarelles, qui sont les
+seules images de la page. Les seuls signes qui restent sont fonctionnels :
+les chevrons de navigation et la croix de suppression.
+
 Direction visuelle : **un carnet de papier**. Les aquarelles sont la seule
 chose forte de la page ; tout le reste se tait. Papier chaud, filets d'un
 pixel, ombres à peine posées, aucun aplat de couleur qui vienne concurrencer
