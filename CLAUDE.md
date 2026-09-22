@@ -160,25 +160,6 @@ tuiles les répétaient mot pour mot. Ne restent que les lectures que la barre
 ne porte pas, moyenne sept jours, variation de la semaine, depuis le départ,
 heure habituelle, tour de taille et nombre de pesées.
 
-**Il n'y a plus de niveau d'activité à choisir.** Le menu Sédentaire /
-Légère / Modérée / Élevée a été retiré : personne ne sait honnêtement où il
-se situe, et le choix déplaçait l'objectif de 350 kcal par jour. Ce qui
-reste au plancher n'est plus un jugement sur un mode de vie mais ce que le
-corps dépense quoi qu'il arrive, `metabolismeBase × COEF_REPOS`, avec
-`COEF_REPOS = 1.15` : la digestion, environ 10 % de ce qu'on mange, et les
-gestes qui ne sont pas des pas. Tout le reste est **mesuré** : les
-kilomètres du jour et les séances s'ajoutent à l'objectif.
-
-**Deux planchers, qui ne servent pas à la même chose.** `plancherKcal()`
-vaut `max(métabolisme de base, 1200 ou 1500)` et ne sert qu'à l'alerte du
-profil, qui dit de noter ses kilomètres ou de baisser le rythme.
-`plancherDur()` vaut 1200 pour une femme, 1500 pour un homme, et borne le
-chiffre du jour. **Ne pas borner l'objectif par `plancherKcal()`** : pour
-une femme de 77 kg à 0,5 kg par semaine, il se déclenche tous les jours,
-l'objectif se fige à 1 513 kcal et la marche ne fait plus rien bouger, ce
-qui est exactement ce qu'on cherchait à éviter. Avec le bon plancher, une
-journée sans rien vaut 1 200 kcal et 6,4 km la portent à 1 437.
-
 **Les kilomètres de la journée se notent sans durée.** Ils se font par bouts
 et l'application Santé n'en garde que le total : une carte à part, dans
 l'onglet Sport, prend ce total et le remplace à chaque saisie au lieu de
@@ -260,8 +241,8 @@ en parallèle. Le mode est affiché en bas de page.
   20 et 40 % des calories, 7 700 kcal par kilogramme de masse grasse,
   Mifflin-St Jeor pour le métabolisme, équations de l'ACSM pour la course et
   la marche.
-- L'objectif du jour est **la dépense au repos plus ce qui est mesuré** :
-  kilomètres marchés et séances saisies. Aucun coefficient de mode de vie.
+- Le niveau d'activité du profil **exclut** les séances de sport, qui
+  s'ajoutent à l'objectif du jour.
 
 ## Style
 
@@ -413,8 +394,7 @@ la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1])"
 node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
-                                  # repas, kilomètres du jour et objectif,
-                                  # 32 contrôles
+                                  # repas, kilomètres du jour, 28 contrôles
 node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
                                   # 58 contrôles
