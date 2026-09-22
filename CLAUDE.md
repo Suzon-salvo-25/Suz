@@ -76,6 +76,16 @@ trois avenirs jusqu'à la date visée du profil (`profil.fin`, par défaut le
 réellement observé, et le rythme visé des réglages. Seule la deuxième est une
 mesure, les autres sont des intentions.
 
+**« Où j'en suis » doit passer par ses points.** Une seule fonction,
+`serieMesuree()`, décide de ce qu'on affiche comme poids réel, et toute la
+page la lit : la courbe d'évolution, celle de la projection, le parcours et
+la carte de projection. Sous quatre pesées ou moins d'une semaine d'écart,
+elle relie les pesées elles-mêmes ; au-delà elle lisse sur sept jours, et la
+légende dit alors qu'elle lisse. Avant cette correction, la courbe traçait la
+moyenne dès la deuxième pesée : elle affichait 77,1 kg quand la pesée du jour
+disait 76,9, sans rien expliquer. Elle partait en plus du deuxième point, si
+bien qu'avec deux pesées il n'y avait aucun trait, juste des points.
+
 **Une pente ne se prolonge jamais au-delà de l'objectif.** Prolongée
 bêtement, une bonne pente annonçait 49,9 kg en avril pour un objectif à 66 :
 faux, et malsain à afficher dans une application de perte de poids. La

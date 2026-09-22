@@ -5549,6 +5549,28 @@ var SPORTS = [
       .sort()
       .map(function (d) { return { date: d, kg: Store.jours[d].poids }; });
   }
+  /* La courbe de ce qu'on pèse vraiment.
+     Tant qu'il y a peu de pesées, la moyenne sur sept jours ne veut rien
+     dire et, pire, elle ne passe pas par les points : on lisait « où j'en
+     suis » à 77,1 kg alors que la pesée du jour affichait 76,9. Sous quatre
+     pesées, ou sur moins d'une semaine, la courbe relie donc les pesées
+     elles-mêmes et tombe pile sur ses points. Au-delà, elle lisse, et la
+     légende dit qu'elle lisse. */
+  function serieMesuree(liste) {
+    if (!liste.length) return { pts: [], lissee: false };
+    var span = diffJours(liste[0].date, liste[liste.length - 1].date);
+    var lissee = liste.length >= 4 && span >= 7;
+    var pts = liste.map(function (e, i) {
+      var v = lissee ? moyenne7(liste, i) : e.kg;
+      return { date: e.date, kg: (v === null ? e.kg : v) };
+    });
+    return { pts: pts, lissee: lissee };
+  }
+  function valeurActuelle(liste) {
+    var m = serieMesuree(liste);
+    return m.pts.length ? m.pts[m.pts.length - 1].kg : null;
+  }
+
   function moyenne7(liste, i) {
     var fin = liste[i].date, debut = addDays(fin, -6), s = 0, n = 0;
     for (var k = i; k >= 0; k--) {
@@ -6474,7 +6496,10 @@ var SPORTS = [
         l.length ? ("Relevé le " + dateCourte(l[l.length - 1].date) +
           (Store.jours[l[l.length - 1].date].heure ? " à " + hhmm(minutesDe(Store.jours[l[l.length - 1].date].heure)) : "") + ".")
           : "Aucune pesée enregistrée.", actuel === null ? "" : "hero"],
-      ['Moyenne 7 jours', moy === null ? "—" : nf(moy, 1), "kg", "La lecture à retenir, bien plus que le chiffre du jour."],
+      ['Moyenne 7 jours', moy === null ? "—" : nf(moy, 1), "kg",
+        serieMesuree(l).lissee
+          ? "La lecture à retenir, bien plus que le chiffre du jour."
+          : "Pas encore une vraie moyenne : il faut quatre pesées sur une semaine."],
       ['Sur la semaine', signe(varSem, 2), varSem === null ? "" : "kg",
         varSem === null ? "Deux semaines de pesées sont nécessaires."
           : (varSem < 0 ? "En baisse, c'est la bonne direction." : varSem > 0 ? "En hausse sur sept jours." : "Stable.")],
@@ -6509,7 +6534,8 @@ var SPORTS = [
     var box = document.getElementById("parcours");
     var ec = document.getElementById("ecartJour");
     var depart = p.depart, obj = p.objectif;
-    var reel = moy !== null ? moy : (l.length ? l[l.length - 1].kg : depart);
+    var reel = valeurActuelle(l);
+    if (reel === null) reel = depart;
     var prevu = poidsPlanifie(AUJ);
 
     if (!depart || !obj || reel === null || depart <= obj) {
@@ -6646,11 +6672,8 @@ var SPORTS = [
         trajKg.map(function (q) { return X(q[0]).toFixed(1) + "," + Y(q[1]).toFixed(1); }).join(" ") + '"/>';
     }
 
-    var moyPts = [];
-    l.forEach(function (e, i) {
-      var m = moyenne7(l, i);
-      if (m !== null && i >= 1) moyPts.push([X(e.date), Y(m), e.date, m]);
-    });
+    var mesure = serieMesuree(l);
+    var moyPts = mesure.pts.map(function (q) { return [X(q.date), Y(q.kg), q.date, q.kg]; });
     if (moyPts.length > 1) {
       s += '<polyline fill="none" stroke="var(--blue)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="' +
         moyPts.map(function (q) { return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '"/>';
@@ -6693,8 +6716,10 @@ var SPORTS = [
     holder.innerHTML = s;
 
     legend.innerHTML =
-      (moyPts.length > 1 ? '<li><span class="key" style="border-top-color:var(--blue)"></span> Où j\'en suis — moyenne sur 7 jours</li>'
-                         : '<li><span class="key dot" style="color:var(--blue);border-color:var(--blue)"></span> Où j\'en suis</li>') +
+      (moyPts.length > 1
+        ? '<li><span class="key" style="border-top-color:var(--blue)"></span> Où j\'en suis' +
+          (mesure.lissee ? ' — moyenne sur 7 jours' : '') + '</li>'
+        : '<li><span class="key dot" style="color:var(--blue);border-color:var(--blue)"></span> Où j\'en suis</li>') +
       (trajKg.length > 1 ? '<li><span class="key" style="border-top-color:var(--orange);border-top-style:dashed"></span> Où je devrais en être</li>' : '') +
       '<li><span class="key dot" style="color:var(--ink-faint)"></span> Pesée du jour</li>' +
       (chartPts.some(function (q) { return q.atypique; })
@@ -6762,7 +6787,7 @@ var SPORTS = [
     var l = pesees();
     if (!p.objectif || !p.fin) return null;
     var reste = diffJours(AUJ, p.fin);
-    var actuel = l.length ? (moyenne7(l, l.length - 1) || l[l.length - 1].kg) : p.depart;
+    var actuel = valeurActuelle(l) || p.depart;
     if (!actuel) return null;
     var aPerdre = actuel - p.objectif;
     var reel = rythmeReel();                       // négatif quand tu perds
@@ -6948,11 +6973,7 @@ var SPORTS = [
     }
 
     // le passé mesuré, moyenne sur sept jours
-    var moyPts = [];
-    l.forEach(function (e, i2) {
-      var m = moyenne7(l, i2);
-      if (m !== null && i2 >= 1) moyPts.push(X(e.date).toFixed(1) + "," + Y(m).toFixed(1));
-    });
+    var moyPts = serieMesuree(l).pts.map(function (q) { return X(q.date).toFixed(1) + "," + Y(q.kg).toFixed(1); });
     l.forEach(function (e) {
       s += '<circle cx="' + X(e.date).toFixed(1) + '" cy="' + Y(e.kg).toFixed(1) +
         '" r="2.6" fill="currentColor" fill-opacity=".35"/>';
