@@ -139,25 +139,37 @@ en parallèle. Le mode est affiché en bas de page.
 Interface en français, tutoiement. Pas de tiret cadratin. Les messages disent
 quoi faire, pas seulement ce qui cloche.
 
-Direction visuelle : éditoriale mais douce, une planche d'autocollants d'été.
-Blocs pleine largeur, biseaux en `clip-path`, typographie display condensée en
-capitales, bordures de 2 px, rayons légers (14 / 10 / 8 px), ombres portées
-réservées aux commandes. On doit avoir envie d'y passer du temps : c'est le
-critère qui tranche entre deux options.
+Direction visuelle : **un carnet de papier**. Les aquarelles sont la seule
+chose forte de la page ; tout le reste se tait. Papier chaud, filets d'un
+pixel, ombres à peine posées, aucun aplat de couleur qui vienne concurrencer
+les dessins. On doit avoir envie d'y passer du temps : c'est le critère qui
+tranche entre deux options.
 
-**Deux familles de couleurs, à ne pas confondre.** Les *surfaces douces*
-portent les grandes zones (bandeau, en-têtes de carte, onglet actif, tuile
-héros) ; les *couleurs de données* ne servent qu'aux barres, à l'anneau et
-aux pastilles. Une grande zone en rose vif fatigue, la même en rose poudré
-invite. Le texte sur une surface douce est toujours l'encre brune, jamais
-du blanc.
+Une version précédente était éditoriale et dure, capitales Anton massives,
+bordures de 2 px presque noires, biseaux en `clip-path`, bandes saturées
+pleine largeur. Des aquarelles délicates collées sur une affiche brutaliste :
+les deux se bagarraient. Ne pas y revenir.
+
+**La couleur revient par trois endroits, jamais par de grandes zones** : le
+lavis d'orange derrière le titre, les taches teintées sous les dessins des
+en-têtes, et les barres du bilan. L'orange domine, et le texte posé dessus
+est toujours l'encre brune.
+
+**Les formes ne sont pas géométriques.** Les rayons à quatre valeurs
+(`--r-lg: 28px 22px 30px 24px`) donnent des bords peints plutôt que des
+rectangles arrondis. Sous les dessins, la pastille est une tache
+(`border-radius: 58% 42% 47% 53% / 52% 46% 54% 48%`), déclinée par
+`:nth-of-type` pour qu'aucune carte ne répète la précédente. En revanche les
+boutons restent des pilules franches : un rayon dissymétrique sur un bouton
+ne fait pas peint, il fait raté.
 
 | Rôle | Clair | Sombre |
 |---|---|---|
-| Pêche (bandeau, en-têtes neutres et orange) | `#ffb27a` | `#d98c5c` |
-| Rose poudré (pesée, parcours, bilan) | `#ffc2d6` | `#d47a9c` |
-| Lavande (hydratation, sport) | `#d9c8f0` | `#9a82c4` |
-| Fond, panneau, encre | `#fff8f2` / `#ffffff` / `#3d1f14` | `#2a1a22` / `#35232c` / `#fff1e8` |
+| Papier, carte, panneau | `#fff4e6` / `#fffdfa` / `#ffe6d0` | `#2b1a12` / `#38241a` / `#452e21` |
+| Encre, douce, pâle | `#3d1f14` / `#7d5442` / `#8a6350` | `#fff1e4` / `#d6b19a` / `#b08d75` |
+| Filet | `#f5d3b4` | `#5c3c2a` |
+| Orange d'accent (`--peche`) | `#ff8a3c` | `#e2762c` |
+| Rose poudré, lavande | `#ffb0ca` / `#d3bff0` | `#d47a9c` / `#9a82c4` |
 | Glucides (`--orange`) | `#ff9a4a` | `#ffb070` |
 | Lipides (`--aqua`) | `#e8337f` | `#ff3d90` |
 | Protéines (`--blue`) | `#6a3d8f` | `#bfa8e8` |
@@ -168,10 +180,19 @@ protanopie, deutéranopie, tritanopie, écart CIEDE2000 ≥ 14 entre chaque pair
 de macronutriments dans les deux thèmes, plus les contrastes de texte.
 **Ne pas changer sans revalider** : `python3 outils/valide-palette.py` refait
 la mesure, mettre à jour les valeurs qu'il teste en même temps que le CSS.
+L'encre pâle est à `#8a6350` et pas plus claire : c'est le seuil qui lui fait
+passer 4,5 sur le papier.
 
 Les tokens gardent leurs anciens noms (`--blue`, `--aqua`, `--violet`) parce
 que le JavaScript les référence pour les macronutriments : les renommer
 casserait le bilan. Leur rôle est celui du tableau, pas celui du nom.
+
+**Piège de cascade, déjà payé.** Le CSS de base porte
+`.card.violet > header { background: var(--violet) }` et
+`.tab[data-c="aqua"][aria-selected="true"]`, plus spécifiques que
+`.card > header` et `.tab[aria-selected="true"]`. Une nouvelle couche qui se
+contente de la règle courte ne gagne pas : les aplats saturés reviennent par
+la cascade. Il faut neutraliser à spécificité égale, en listant les classes.
 
 **Illustrations.** Vingt-trois motifs découpés dans la planche
 d'autocollants aquarelle de Suzon, qui lui appartient. **Source de
@@ -208,16 +229,18 @@ fraises et se sépare par deux pixels d'érosion. **L'érosion laisse des
 éclats de quelques pixels** : les filtrer avant de nommer les morceaux,
 sinon le troisième n'a pas de nom.
 
-Typographie : Anton (display, un seul poids, toujours en capitales),
-Figtree (texte), Azeret Mono (chiffres tabulaires et étiquettes). Tout token
+Typographie : **Fraunces** (display, variable, axes `opsz`, `SOFT` et `WONK`
+réglés pour une serif ronde et un peu bancale) et **Figtree** (texte et
+étiquettes). Plus de fonte à chasse fixe : elle faisait technique. Les
+chiffres s'alignent par `font-variant-numeric: tabular-nums`. Tout token
 de couleur est défini sur `:root` nu, puis redéfini sous
 `@media (prefers-color-scheme: dark)` avec la garde
 `:root:not([data-theme="light"])` et sous `:root[data-theme="dark"]`.
 
-Les bandes pleine largeur sortent du conteneur par
-`margin-inline: calc(50% - 50vw)` et `html { overflow-x: clip }` : « clip »
-et non « hidden », qui créerait un conteneur de défilement. Le harnais
-vérifie qu'aucune largeur ne dépasse la fenêtre, à 390 et 1000 px.
+Le lavis derrière le titre déborde du conteneur par un `inset` négatif :
+**il ne peut pas dépasser 18 px**, la gouttière de `.wrap`, sinon la page
+déborde d'autant sur mobile. Le harnais vérifie qu'aucune largeur ne dépasse
+la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 
 ## Vérifier avant de publier
 

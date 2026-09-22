@@ -84,10 +84,12 @@ if __name__ == '__main__':
     print('\nContrastes de texte (WCAG, 4,5 attendu pour du texte courant) :')
     # Les surfaces douces portent les grandes zones ; le texte y est toujours
     # l'encre brune, jamais du blanc.
-    for nom, fg, bg in [('encre sur creme', '#3d1f14', '#fff8f2'), ('encre sur peche', '#3d1f14', '#ffb27a'),
-                        ('encre sur rose doux', '#3d1f14', '#ffc2d6'), ('encre sur lavande', '#3d1f14', '#d9c8f0'),
-                        ('encre pale sur creme', '#876656', '#fff8f2'), ('clair sur fond sombre', '#fff1e8', '#2a1a22'),
-                        ('sombre sur peche sombre', '#2a1a22', '#d98c5c'), ('sombre sur lavande sombre', '#2a1a22', '#9a82c4')]:
+    for nom, fg, bg in [('encre sur papier', '#3d1f14', '#fff4e6'), ('encre sur orange', '#3d1f14', '#ff8a3c'),
+                        ('encre sur rose doux', '#3d1f14', '#ffb0ca'), ('encre sur lavande', '#3d1f14', '#d3bff0'),
+                        ('encre douce sur papier', '#7d5442', '#fff4e6'), ('encre pale sur papier', '#8a6350', '#fff4e6'),
+                        ('encre sur panneau 2', '#3d1f14', '#ffe6d0'), ('clair sur fond sombre', '#fff1e4', '#2b1a12'),
+                        ('sombre sur orange sombre', '#2b1a12', '#e2762c'), ('sombre sur lavande sombre', '#2b1a12', '#9a82c4'),
+                        ('douce sur fond sombre', '#d6b19a', '#2b1a12'), ('pale sur fond sombre', '#b08d75', '#2b1a12')]:
         r = contraste(fg, bg); print('  %-22s %5.2f  %s' % (nom, r, 'ok' if r >= 4.5 else 'INSUFFISANT'))
         tout &= r >= 4.5
     print('\n' + ('Palette validee.' if tout else 'PALETTE A REVOIR.'))
