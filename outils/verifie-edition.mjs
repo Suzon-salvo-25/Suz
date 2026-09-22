@@ -79,6 +79,48 @@ await p.waitForTimeout(200);
 t('un aliment libre s\'édite aussi', await p.isVisible('#editKcal'));
 t('sans champ quantité, il n\'est pas dans la base', !(await p.isVisible('#editQte')));
 await p.screenshot({ path: S + 'shots/edition.png', clip: { x: 0, y: 150, width: 1100, height: 620 } });
+
+console.log('=== changer une ligne de repas ===');
+await p.click('[data-edit-repas="petitdej"][data-i="0"]');
+await p.waitForTimeout(200);
+t('le formulaire porte un choix de repas', await p.isVisible('#editRepas'));
+t('il montre le repas actuel', (await p.inputValue('#editRepas')) === 'petitdej', await p.inputValue('#editRepas'));
+await p.selectOption('#editRepas', 'collation');
+await p.click('[data-edit-ok]');
+await p.waitForTimeout(400);
+const s4 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].repas, auj);
+t('la ligne a quitté le petit-déjeuner', !s4.petitdej.some(x => x.n === 'Riz blanc cuit'), JSON.stringify(s4.petitdej.map(x => x.n)));
+t('elle est arrivée dans la collation', s4.collation.some(x => x.n === 'Riz blanc cuit'), JSON.stringify(s4.collation.map(x => x.n)));
+t('ses valeurs ont suivi', (s4.collation.find(x => x.n === 'Riz blanc cuit') || {}).k === 260,
+  JSON.stringify(s4.collation.find(x => x.n === 'Riz blanc cuit')));
+t('le total du jour ne bouge pas', (await p.textContent('#repasTotal')).includes('332'), await p.textContent('#repasTotal'));
+
+console.log('=== les kilomètres de la journée ===');
+await p.evaluate(() => document.querySelector('[data-tab="sport"]').click());
+await p.waitForTimeout(300);
+t('la carte des kilomètres est là', await p.isVisible('#marcheKm'));
+t('aucune durée ne lui est demandée', !(await p.isVisible('#marcheKm ~ #sportDuree')));
+await p.fill('#marcheKm', '6,4');
+await p.waitForTimeout(150);
+// 0,5 kcal par kg et par km, à 77 kg : 6,4 x 77 x 0,5 = 246
+t('les calories suivent 0,5 kcal/kg/km', (await p.textContent('#marcheKcal')) === '246', await p.textContent('#marcheKcal'));
+await p.click('#marcheSave');
+await p.waitForTimeout(400);
+const s5 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
+t('la marche est enregistrée sans durée', s5.length === 1 && s5[0].jour === 1 && s5[0].m === 0, JSON.stringify(s5));
+t('sa distance est retenue', s5[0].d === 6.4, String(s5[0] && s5[0].d));
+await p.fill('#marcheKm', '9,1');
+await p.click('#marcheSave');
+await p.waitForTimeout(400);
+const s6 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
+t('un nouveau total remplace, il ne s\'ajoute pas', s6.length === 1 && s6[0].d === 9.1, JSON.stringify(s6));
+const sem = await p.textContent('#sportStats');
+t('elle ne compte pas comme une séance', /Séances<\/span><div class="big">0/.test(await p.innerHTML('#sportStats')), sem.slice(0, 120));
+await p.click('#marcheDel');
+await p.waitForTimeout(400);
+const s7 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
+t('elle s\'efface', s7.length === 0, JSON.stringify(s7));
+
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');
 process.exit(ko ? 1 : 0);

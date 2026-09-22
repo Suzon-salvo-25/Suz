@@ -13,7 +13,7 @@ rapport. **Ne pas y toucher.**
 |---|---|
 | Code | `perte-de-poids.html`, branche `claude/programme-perte-poids-u5p9gy` |
 | Application en ligne | https://claude.ai/artifact/3LM1PhEuLuXapTZoGMUeyJ |
-| Harnais de test | `outils/verifie.mjs` |
+| Harnais de test | `outils/verifie.mjs`, `outils/verifie-edition.mjs` |
 | Fiches d'aliments, par domaine | `donnees/aliments/*.json` |
 | Planche d'autocollants source | `images/planche-autocollants.webp` |
 | Fusion et contrôles | `outils/fusionne-marques.mjs` |
@@ -95,8 +95,11 @@ plate, le retard calculé part à des années, on le dit au lieu d'afficher un
 nombre de jours absurde.
 
 **Corriger, pas supprimer et refaire.** Chaque ligne de repas porte un bouton
-« Modifier » qui ouvre un formulaire à sa place : nom, calories, protéines,
-glucides, lipides. Quand le nom correspond à un aliment de `ALIMENTS`, un
+« Modifier » qui ouvre un formulaire à sa place : nom, repas, calories,
+protéines, glucides, lipides. Le choix de repas déplace la ligne d'une liste
+à l'autre, une collation notée au petit-déjeuner se range sans se refaire ;
+la cible vit dans `edition.cible`, séparée de `edition.repas` qui dit où la
+ligne est encore, sinon le formulaire sauterait de place à chaque frappe. Quand le nom correspond à un aliment de `ALIMENTS`, un
 champ quantité apparaît et recalcule les quatre valeurs. C'est pour cela que
 les lignes gardent `gr`, leur quantité en grammes. Les valeurs en cours de
 saisie vivent dans l'objet `edition`, **jamais dans le DOM seul** : une
@@ -109,6 +112,19 @@ ses propres champs de macronutriments, et `libreCalcul()` les lit. Avant, les
 macros venaient d'une fiche figée, retrouvée par comparaison du nom :
 renommer l'aliment ou corriger une valeur faisait silencieusement retomber la
 composition à zéro.
+
+**Les kilomètres de la journée se notent sans durée.** Ils se font par bouts
+et l'application Santé n'en garde que le total : une carte à part, dans
+l'onglet Sport, prend ce total et le remplace à chaque saisie au lieu de
+l'empiler. Sans durée, l'équation de marche de l'ACSM se simplifie d'elle
+même, son terme de vitesse valant `0,1 × v_m/min` : l'énergie par kilomètre
+tombe à **0,5 kcal par kilogramme**, quelle que soit l'allure. C'est le coût
+*net* qui est compté, le repos de ces minutes étant déjà porté par le niveau
+d'activité du profil. L'entrée porte `jour: 1`, ce qui l'exclut du compte de
+séances et du temps actif, mais pas des calories ni de la distance.
+Contrepartie dite en clair sous le champ : le niveau d'activité compte déjà
+la marche ordinaire, donc le mettre sur « Sédentaire » si les kilomètres sont
+notés tous les jours.
 
 **Modèle** : `profil/moi` et un document par jour, `jours/AAAA-MM-JJ`,
 contenant poids, heure, tour de taille, eau, repas et séances. Le profil
@@ -135,6 +151,15 @@ en parallèle. Le mode est affiché en bas de page.
 6. **Une exception non rattrapée laisse des boutons inertes sans rien dire.**
    `signaleErreur()` affiche une bannière, `protege()` enveloppe les
    gestionnaires sensibles.
+7. **Un conteneur flex jette les nœuds de texte blancs.** Passer un bouton en
+   `display: inline-flex` a transformé « Ajouter <span>0</span> kcal » en
+   « Ajouter0kcal ». Un `<button>` centre déjà son texte : `min-height`
+   suffit, la flexbox est de trop.
+8. **Une règle de grille écrite pour une liste s'applique à l'autre.**
+   Les lignes de repas ont un bloc `.actions`, celles du sport une croix
+   nue : placer `.kc` en colonne 2 a fait tomber la croix des séances sur
+   une ligne à elle. La liste des séances porte `items-simple` et garde ses
+   trois colonnes.
 
 ## Règles de contenu
 
@@ -268,6 +293,23 @@ de couleur est défini sur `:root` nu, puis redéfini sous
 `@media (prefers-color-scheme: dark)` avec la garde
 `:root:not([data-theme="light"])` et sous `:root[data-theme="dark"]`.
 
+**L'en-tête, sous 600 px, passe en grille.** Les boutons ronds tiennent le
+coin haut droit, le titre garde une ligne entière en dessous, le soleil et
+l'étoile gardent le bas. Avant, une marge droite les écartait du soleil et
+les poussait à la ligne, où ils flottaient au milieu de rien avec l'étoile
+posée dessus. C'est ce que Suzon a appelé « un décalage qui ne fait pas
+net ».
+
+**Les champs d'une même rangée ont une hauteur commune**, 42 px. Un
+`input[type="time"]` se dessine plus haut qu'un champ de texte et un bouton
+`sm` plus bas qu'un bouton plein : alignés par le bas, leurs étiquettes ne
+tombaient plus sur la même ligne.
+
+**Sur mobile, « Modifier » est une pilule, pas un lien.** Souligné et pâle à
+côté de la croix, il ne se voyait pas. Les deux commandes prennent
+maintenant toute la largeur sous la ligne, la pilule porte un crayon dessiné
+et fait 40 px de haut ; les calories remontent à droite du nom.
+
 Le lavis derrière le titre déborde du conteneur par un `inset` négatif :
 **il ne peut pas dépasser 18 px**, la gouttière de `.wrap`, sinon la page
 déborde d'autant sur mobile. Le harnais vérifie qu'aucune largeur ne dépasse
@@ -277,7 +319,9 @@ la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 
 ```bash
 node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1])"
-node outils/verifie.mjs
+node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
+node outils/verifie-edition.mjs   # correction d'une ligne, changement de
+                                  # repas, kilomètres du jour, 27 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

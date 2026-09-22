@@ -1253,28 +1253,55 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 /* ---------- modifier une ligne ---------- */
 
 .items li { grid-template-columns: 1fr auto auto; }
-.items .actions { display: flex; align-items: center; gap: 4px; }
+.items .actions { display: flex; align-items: center; gap: 6px; }
+
+/* Un lien souligné et pâle ne se voyait pas sur mobile : c'est une pilule,
+   avec son crayon et son mot, et une cible assez grande pour un pouce. */
 .lien-edit {
-  background: none; border: 0; padding: 4px 8px;
-  color: var(--ink-faint); font-family: var(--f-body); font-weight: 600; font-size: .8rem;
-  text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;
-  border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
+  padding: 7px 14px; min-height: 34px;
+  color: var(--ink-soft); font-family: var(--f-body); font-weight: 600; font-size: .8rem;
+  text-decoration: none; white-space: nowrap;
 }
-.lien-edit:hover { color: var(--ink); background: var(--panel-2); text-decoration: none; }
+.lien-edit svg { display: block; flex: none; }
+.lien-edit:hover { color: var(--ink); background: var(--panel); border-color: var(--ink-faint); }
 .lien-edit:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-.del { border: 1px solid var(--line); border-radius: 50%; color: var(--ink-faint); }
+.del {
+  border: 1px solid var(--line); border-radius: 50%; color: var(--ink-faint);
+  width: 34px; height: 34px;
+}
 .del:hover { border-color: var(--crit); color: var(--crit); background: var(--panel-2); }
 
 .items li.edition { display: block; padding: 0; background: var(--panel-2); }
 .edit-bloc { padding: 14px 16px; }
 .edit-bloc .field > label { font-size: 10px; }
+.edit-bloc select { width: 100%; }
+.edit-aide { margin: 10px 0 0; font-size: .76rem; line-height: 1.4; color: var(--ink-faint); }
+
+/* Un champ d'heure natif se dessine plus haut qu'un champ de texte, et un
+   bouton « sm » plus bas qu'un bouton plein : dans une rangée alignée par le
+   bas, les étiquettes et les bords se décalaient de quelques pixels. Une
+   hauteur commune remet tout sur la même ligne. */
+.field > input[type="text"], .field > input[type="number"], .field > input[type="date"],
+.field > input[type="time"], .field > select { height: 42px; }
+.row-inline > .btn { min-height: 42px; }
 
 @media (max-width: 540px) {
-  .items li { grid-template-columns: 1fr auto; row-gap: 6px; }
-  .items .actions { grid-column: 2; grid-row: 1; }
-  .items .kc { grid-column: 1 / -1; }
-  .items li.edition { display: block; }
-  .edit-bloc { padding: 12px 13px; }
+  /* Les calories remontent à côté du nom, et les deux commandes prennent
+     toute la largeur en dessous : plus de bousculade dans un coin. */
+  .items li { grid-template-columns: 1fr auto; row-gap: 9px; padding: 11px 14px 12px; }
+  .items .kc { grid-column: 2; grid-row: 1; align-self: start; }
+  .items .actions { grid-column: 1 / -1; grid-row: 2; gap: 8px; }
+  .items .actions .lien-edit { flex: 1 1 auto; justify-content: center; min-height: 40px; font-size: .84rem; }
+  .items .actions .del { width: 40px; height: 40px; }
+  .items li.edition { display: block; padding: 0; }
+  .edit-bloc { padding: 13px 13px 15px; }
+
+  /* La liste des séances n'a pas de bloc d'actions : sa croix reste au bout
+     de la ligne, elle ne descend pas toute seule sous le nom. */
+  .items.items-simple li { grid-template-columns: 1fr auto auto; row-gap: 4px; }
+  .items.items-simple li > .del { grid-column: 3; grid-row: 1; width: 40px; height: 40px; }
 }
 
 /* ---------- illustrations ---------- */
@@ -1284,12 +1311,27 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 .illu-mini { width: 30px; height: 30px; flex: none; vertical-align: -9px; margin-right: 10px; }
 .empty { display: flex; align-items: center; gap: 0; font-style: normal; color: var(--ink-faint); }
 
+/* Sur un écran étroit, la marge qui écartait les boutons du soleil les
+   poussait à la ligne, où ils flottaient au milieu de rien avec l'étoile de
+   mer posée dessus. Ils tiennent le coin haut droit, le titre garde une
+   ligne entière en dessous, et les dessins gardent le bas. */
+@media (max-width: 600px) {
+  .masthead {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: start; gap: 0;
+  }
+  .masthead > .mast-tools {
+    grid-column: 2; grid-row: 1;
+    margin: 0; align-self: start; z-index: 2;
+  }
+  .masthead > .brand { grid-column: 1 / -1; grid-row: 2; margin-top: 14px; }
+}
+
 @media (max-width: 540px) {
   .masthead { padding-block: 26px 18px; }
   .brand h1 { font-size: 2.1rem; }
   .deco-soleil { width: 92px; height: 92px; right: -4px; bottom: -26px; }
   .deco-etoile { width: 42px; height: 42px; right: 84px; bottom: -12px; }
-  .masthead > .mast-tools { margin-right: 104px; }
   .tab { font-size: .8rem; padding: 9px 2px; }
   .tile { padding: 12px 13px; }
   .tile:last-child:nth-child(odd) { grid-column: span 2; }
@@ -1677,6 +1719,21 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
   <!-- ============ SPORT ============ -->
   <section id="panel-sport" role="tabpanel" aria-labelledby="tab-sport" hidden>
 
+    <div class="card plain">
+      <header><span class="illu st-meduse" aria-hidden="true"></span><h2>Mes kilomètres du jour</h2><span class="hint">Relevé de Santé</span></header>
+      <div class="body">
+        <div class="row-inline">
+          <div class="field" style="flex:1 1 170px">
+            <label for="marcheKm">Kilomètres marchés (km)</label>
+            <input type="text" id="marcheKm" inputmode="decimal" autocomplete="off" placeholder="6,4">
+          </div>
+          <button type="button" class="btn go" id="marcheSave">Enregistrer <span class="num" id="marcheKcal">0</span> kcal</button>
+          <button type="button" class="btn ghost" id="marcheDel" hidden>Effacer</button>
+        </div>
+        <p class="sub-note" style="margin-top:9px;color:var(--ink-faint);font-size:.78rem" id="marcheNote"></p>
+      </div>
+    </div>
+
     <div class="card blue">
       <header><span class="illu st-homard" aria-hidden="true"></span><h2>Ajouter une séance</h2><span class="hint">Distance, durée, allure</span></header>
       <div class="body">
@@ -1708,7 +1765,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 
     <div class="card plain">
       <header><span class="illu st-ballon" aria-hidden="true"></span><h2>Séances du jour</h2><span class="hint" id="sportJourTotal"></span></header>
-      <div class="body tight"><ul class="items" id="sportListe"></ul></div>
+      <div class="body tight"><ul class="items items-simple" id="sportListe"></ul></div>
     </div>
 
     <div class="card plain">
@@ -1731,6 +1788,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
     <ul>
       <li><b>Le métabolisme de base</b> vient de la formule de Mifflin-St Jeor, la plus fiable en population générale. C'est une estimation : ton métabolisme réel peut s'en écarter de 10 % environ.</li>
       <li><b>Course, marche, vélo et natation se saisissent comme sur Strava</b> : distance en kilomètres, durée en heures et minutes, allure en minutes par kilomètre. Quand tu donnes la distance, l'allure est calculée depuis ta séance réelle et les calories suivent les équations de l'American College of Sports Medicine, dont dérivent les équivalents métaboliques habituels. Sans distance, choisis ton allure dans la liste.</li>
+      <li><b>Les kilomètres de la journée se notent sans durée.</b> Ils se font par bouts, et Santé n'en garde que le total. L'équation de marche de l'ACSM se simplifie alors d'elle-même : son terme de vitesse vaut 0,5 kcal par kilogramme et par kilomètre, quelle que soit l'allure. C'est ce coût net qui est compté, le repos de ces minutes étant déjà porté par ton niveau d'activité.</li>
       <li><b>Les calories du sport</b> dépendent de ton poids du moment, donc elles baissent naturellement à mesure que tu perds.</li>
       <li><b>Le niveau d'activité du profil ne compte pas les séances de sport.</b> Elles s'ajoutent quand tu les saisis, sinon elles seraient comptées deux fois.</li>
       <li><b>Un kilogramme de masse grasse vaut environ 7 700 kcal.</b> C'est ce qui relie le déficit quotidien au rythme de perte affiché.</li>
@@ -5987,6 +6045,9 @@ var SPORTS = [
   /* ==================== ONGLET ALIMENTATION ==================== */
 
   var REPAS_NOMS = { petitdej: "Petit-déjeuner", dejeuner: "Déjeuner", diner: "Dîner", collation: "Collation" };
+  // « ajouté au petit-déjeuner », mais « ajoutée à la collation » : l'article
+  // ne se déduit pas du nom, on le porte.
+  var REPAS_VERS = { petitdej: "au petit-déjeuner", dejeuner: "au déjeuner", diner: "au dîner", collation: "à la collation" };
   var MACROS = [
     ["Protéines", "pro", 4, "var(--blue)"],
     ["Glucides", "glu", 4, "var(--orange)"],
@@ -6075,7 +6136,8 @@ var SPORTS = [
             (it.d ? '<small>' + esc(it.d) + '</small>' : '') + mac + '</span>' +
             '<span class="kc">' + ni(it.k) + ' kcal</span>' +
             '<span class="actions">' +
-            '<button type="button" class="lien-edit" data-edit-repas="' + k + '" data-i="' + i + '">Modifier</button>' +
+            '<button type="button" class="lien-edit" data-edit-repas="' + k + '" data-i="' + i +
+            '">' + ICONE_CRAYON + '<span>Modifier</span></button>' +
             '<button type="button" class="del" data-del-repas="' + k + '" data-i="' + i + '" aria-label="Retirer ' + esc(it.n) + '">✕</button>' +
             '</span></li>';
         }).join("") + '</ul>';
@@ -6098,7 +6160,7 @@ var SPORTS = [
     var it = (J().repas[k] || [])[i];
     if (!it) return;
     edition = {
-      repas: k, i: i,
+      repas: k, i: i, cible: k,
       nom: it.n, kcal: it.k, p: it.p || 0, g: it.g || 0, l: it.l || 0,
       gr: it.gr || null,
       base: ALIMENTS.findIndex(function (a) { return a[0] === it.n; })
@@ -6120,6 +6182,10 @@ var SPORTS = [
     edition.l = +(a[4] * f).toFixed(1);
   }
 
+  var ICONE_CRAYON = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" ' +
+    'stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M4.5 19.5h4L19.6 8.4a2.4 2.4 0 0 0-3.4-3.4L5.1 16.1z"/><path d="M14.8 6.6 18 9.8"/></svg>';
+
   function ligneEdition() {
     var e = edition;
     var champNum = function (id, lab, val) {
@@ -6131,6 +6197,10 @@ var SPORTS = [
       '<div class="row-inline">' +
         '<div class="field" style="flex:3 1 190px"><label for="editNom">Nom</label>' +
         '<input type="text" id="editNom" autocomplete="off" value="' + esc(e.nom) + '"></div>' +
+        '<div class="field" style="flex:1 1 150px"><label for="editRepas">Repas</label>' +
+        '<select id="editRepas">' + Object.keys(REPAS_NOMS).map(function (r) {
+          return '<option value="' + r + '"' + (r === e.cible ? ' selected' : '') + '>' + REPAS_NOMS[r] + '</option>';
+        }).join("") + '</select></div>' +
         (e.base !== -1
           ? '<div class="field" style="flex:1 1 110px"><label for="editQte">Quantité (g)</label>' +
             '<input type="text" id="editQte" inputmode="decimal" autocomplete="off" value="' +
@@ -6146,8 +6216,10 @@ var SPORTS = [
       '<div class="row-inline" style="margin-top:11px">' +
         '<button type="button" class="btn go sm" data-edit-ok="1">Enregistrer</button>' +
         '<button type="button" class="btn ghost sm" data-edit-annule="1">Annuler</button>' +
-        (e.base !== -1 ? '<span class="sub-note" style="flex:1 1 160px">La quantité recalcule les valeurs.</span>' : '') +
       '</div>' +
+      '<p class="sub-note edit-aide">' +
+        (e.base !== -1 ? 'La quantité recalcule les valeurs. ' : '') +
+        'Changer le repas déplace la ligne.</p>' +
       '</div></li>';
   }
 
@@ -7393,6 +7465,57 @@ var SPORTS = [
           : "Calcul basé sur " + nf(poids, 1) + " kg. La dépense baisse à mesure que tu perds du poids."));
   }
 
+  /* ==================== LES KILOMÈTRES DU JOUR ====================
+     Les pas d'une journée ne se donnent pas en durée : ils se font par
+     bouts, entre deux choses, et l'application Santé n'en garde que le
+     total. Sans durée, l'équation de marche de l'ACSM se simplifie d'elle
+     même : son terme de vitesse vaut 0,1 ml/kg/min par mètre-minute, soit
+     exactement 0,5 kcal par kilogramme et par kilomètre, quelle que soit
+     l'allure. C'est le coût net qu'on compte, le repos de ces minutes
+     étant déjà porté par le niveau d'activité du profil. */
+  var KCAL_PAR_KG_KM = 0.5;
+  var NOM_MARCHE = "Marche de la journée";
+
+  function kcalMarche(km, poids) {
+    if (!(km > 0) || !poids) return 0;
+    return Math.round(KCAL_PAR_KG_KM * poids * km);
+  }
+  function indexMarche(j) {
+    for (var i = 0; i < j.sport.length; i++) if (j.sport[i].jour) return i;
+    return -1;
+  }
+  function kmMarcheJour(date) {
+    var j = Store.jours[date];
+    if (!j || !j.sport) return 0;
+    var i = indexMarche(j);
+    return i === -1 ? 0 : (j.sport[i].d || 0);
+  }
+
+  function renderMarche() {
+    var j = J(), poids = poidsA(dateCourante);
+    var i = indexMarche(j);
+    var inp = document.getElementById("marcheKm");
+    if (document.activeElement !== inp) inp.value = i === -1 ? "" : nf(j.sport[i].d, 1);
+    document.getElementById("marcheDel").hidden = i === -1;
+    majMarcheKcal();
+  }
+
+  function majMarcheKcal() {
+    var poids = poidsA(dateCourante);
+    var km = champ("marcheKm");
+    if (!isFinite(km) || km < 0) km = 0;
+    var k = kcalMarche(km, poids);
+    document.getElementById("marcheKcal").textContent = ni(k);
+    document.getElementById("marcheSave").disabled = !poids || km <= 0 || km > 100;
+    document.getElementById("marcheNote").textContent = !poids
+      ? "Renseigne ton poids dans les réglages pour convertir ces kilomètres en calories."
+      : km > 100
+        ? "Au-delà de cent kilomètres, c'est sans doute une faute de frappe."
+        : "Pas besoin de durée : ces kilomètres se font par bouts. Le total remplace celui du " +
+          "jour, recopie-le de Santé quand tu veux. Ton niveau d'activité compte déjà la marche " +
+          "ordinaire : mets-le sur «\u00a0Sédentaire\u00a0» si tu notes tes kilomètres chaque jour.";
+  }
+
   function renderSport() {
     var j = J();
     var poids = poidsA(dateCourante);
@@ -7407,10 +7530,14 @@ var SPORTS = [
       ? j.sport.map(function (x, i) {
           var t = typeParNom(x.n);
           var bits = [];
-          if (x.d > 0) bits.push((t === "nage" ? ni(x.d * 1000) + " m" : fmtKm(x.d)) + (x.est ? " estimés" : ""));
-          bits.push(fmtDuree(x.m));
-          if (x.d > 0 && x.m > 0) bits.push(uniteAllure(t, x.d / (x.m / 60)));
-          else bits.push("intensité " + nf(x.met, 1) + " MET");
+          if (x.d > 0) bits.push((x.jour ? nf(x.d, 1) + " km"
+            : (t === "nage" ? ni(x.d * 1000) + " m" : fmtKm(x.d))) + (x.est ? " estimés" : ""));
+          if (x.jour) bits.push("tout au long de la journée");
+          else {
+            bits.push(fmtDuree(x.m));
+            if (x.d > 0 && x.m > 0) bits.push(uniteAllure(t, x.d / (x.m / 60)));
+            else bits.push("intensité " + nf(x.met, 1) + " MET");
+          }
           return '<li><span class="nm">' + esc(x.n) + '<small>' + esc(bits.join(" · ")) + '</small></span>' +
             '<span class="kc">' + ni(x.k) + ' kcal</span>' +
             '<button type="button" class="del" data-del-sport="' + i + '" aria-label="Retirer ' + esc(x.n) + '">✕</button></li>';
@@ -7418,16 +7545,20 @@ var SPORTS = [
       : '<li style="grid-template-columns:1fr"><p class="empty" style="padding:0"><span class="illu-mini st-hippocampe" aria-hidden="true"></span>Rien de noté pour ce jour. Même trente minutes de marche comptent.</p></li>';
 
     var lundi = lundiDe(dateCourante);
-    var jours = [], maxK = 0, semK = 0, semMin = 0, semN = 0, semKm = 0;
+    var jours = [], maxK = 0, semK = 0, semMin = 0, semN = 0, semKm = 0, semKSeances = 0;
     for (var i = 0; i < 7; i++) {
       var d = addDays(lundi, i);
       var jj = Store.jours[d];
       var k = jj ? (jj.sport || []).reduce(function (s, x) { return s + (x.k || 0); }, 0) : 0;
       var m = jj ? (jj.sport || []).reduce(function (s, x) { return s + (x.m || 0); }, 0) : 0;
       var km = jj ? (jj.sport || []).reduce(function (s, x) { return s + (x.d || 0); }, 0) : 0;
-      var n = jj ? (jj.sport || []).length : 0;
+      // Les kilomètres de la journée ne sont pas une séance : ils ne
+      // comptent ni dans l'objectif hebdomadaire ni dans la moyenne.
+      var seances = jj ? (jj.sport || []).filter(function (x) { return !x.jour; }) : [];
+      var kSeances = seances.reduce(function (s, x) { return s + (x.k || 0); }, 0);
+      var n = seances.length;
       jours.push({ d: d, k: k, m: m, n: n });
-      semK += k; semMin += m; semN += n; semKm += km;
+      semK += k; semMin += m; semN += n; semKm += km; semKSeances += kSeances;
       if (k > maxK) maxK = k;
     }
 
@@ -7438,7 +7569,7 @@ var SPORTS = [
       ['Calories brûlées', ni(semK), "kcal", "Sur les sept jours de la semaine."],
       ['Temps actif', semMin > 0 ? fmtDuree(semMin) : "—", "", "L'Organisation mondiale de la santé recommande 2 h 30 par semaine."],
       ['Séances', ni(semN), objSeances ? "/ " + objSeances : "", objSeances ? (semN >= objSeances ? "Objectif hebdomadaire atteint." : "Encore " + (objSeances - semN) + (objSeances - semN > 1 ? " séances." : " séance.")) : "Fixe un objectif dans ton profil."],
-      ['Moyenne par séance', semN ? ni(semK / semN) : "—", semN ? "kcal" : "", semN ? "Sur " + semN + (semN > 1 ? " séances." : " séance.") : "Aucune séance cette semaine."],
+      ['Moyenne par séance', semN ? ni(semKSeances / semN) : "—", semN ? "kcal" : "", semN ? "Sur " + semN + (semN > 1 ? " séances." : " séance.") : "Aucune séance cette semaine."],
       ['Distance parcourue', semKm > 0 ? nf(semKm, 1) : "—", semKm > 0 ? "km" : "",
         semKm > 0 ? "Course, marche, vélo et natation confondus." : "Renseigne une distance sur tes sorties."]
     ].map(function (c) {
@@ -7467,6 +7598,7 @@ var SPORTS = [
     renderFavoris();
     renderPoids();
     renderSport();
+    renderMarche();
     majSportKcal();
     majDiag();
   }
@@ -7917,7 +8049,7 @@ var SPORTS = [
     var present = (J().repas[repas] || []).some(function (x) { return x.n === nom; });
     var affiche = document.getElementById("repasListe").textContent.indexOf(nom) !== -1;
     if (present && affiche) {
-      toast(nom + " ajouté au " + REPAS_NOMS[repas].toLowerCase() + " · " + ni(kcal) + " kcal");
+      toast(nom + " ajouté " + REPAS_VERS[repas] + " · " + ni(kcal) + " kcal");
     } else {
       toast("L'ajout n'a pas abouti (" + (present ? "affichage" : "enregistrement") + "). Signale-le.", true);
     }
@@ -7944,7 +8076,8 @@ var SPORTS = [
     if (e.target.closest("[data-edit-annule]")) { fermeEdition(); return; }
     if (!e.target.closest("[data-edit-ok]") || !edition) return;
 
-    var it = (J().repas[edition.repas] || [])[edition.i];
+    var src = edition.repas, cible = REPAS_NOMS[edition.cible] ? edition.cible : src;
+    var it = (J().repas[src] || [])[edition.i];
     if (!it) { fermeEdition(); return; }
     var nom = document.getElementById("editNom").value.trim();
     var kcal = champ("editKcal");
@@ -7961,10 +8094,18 @@ var SPORTS = [
     }
     // Les valeurs viennent d'être revues à la main : elles ne sont plus estimées.
     delete it.ia;
+    // Se tromper de repas arrive : la ligne change de liste, elle ne se refait pas.
+    if (cible !== src) {
+      J().repas[src].splice(edition.i, 1);
+      if (!J().repas[cible]) J().repas[cible] = [];
+      J().repas[cible].push(it);
+    }
     Store.sauveJour(dateCourante);
     edition = null;
     renderAlim(); renderBandeau(); majDiag();
-    toast(it.n + " modifié · " + ni(it.k) + " kcal");
+    toast(cible !== src
+      ? it.n + " déplacé " + REPAS_VERS[cible] + " · " + ni(it.k) + " kcal"
+      : it.n + " modifié · " + ni(it.k) + " kcal");
   }));
 
   // La quantité pilote les valeurs, et l'inverse délie la quantité.
@@ -7981,11 +8122,17 @@ var SPORTS = [
         var el = document.getElementById(c);
         if (el) el.value = String(maj[c]).replace(".", ",");
       });
-    } else if (id === "editNom") { edition.nom = e.target.value; }
+    } else if (id === "editRepas") { edition.cible = e.target.value; }
+    else if (id === "editNom") { edition.nom = e.target.value; }
     else if (id === "editKcal") { edition.kcal = e.target.value; }
     else if (id === "editProt") { edition.p = e.target.value; }
     else if (id === "editGluc") { edition.g = e.target.value; }
     else if (id === "editLip") { edition.l = e.target.value; }
+  });
+
+  // Un `<select>` n'émet pas « input » partout : on écoute aussi « change ».
+  document.getElementById("repasListe").addEventListener("change", function (e) {
+    if (edition && e.target.id === "editRepas") edition.cible = e.target.value;
   });
 
   /* --- poids --- */
@@ -8038,6 +8185,32 @@ var SPORTS = [
   });
 
   /* --- sport --- */
+  document.getElementById("marcheKm").addEventListener("input", majMarcheKcal);
+  document.getElementById("marcheSave").addEventListener("click", protege("kilomètres du jour", function () {
+    var poids = poidsA(dateCourante);
+    var km = champ("marcheKm");
+    if (!poids) { toast("Renseigne ton poids avant de compter tes kilomètres.", true); return; }
+    if (!isFinite(km) || km <= 0) { toast("Indique un nombre de kilomètres.", true); return; }
+    if (km > 100) { toast("Au-delà de cent kilomètres, vérifie le chiffre.", true); return; }
+    km = Math.round(km * 100) / 100;
+    var j = J(), i = indexMarche(j);
+    // Santé donne un total, pas un ajout : la ligne du jour se remplace.
+    var e = { n: NOM_MARCHE, m: 0, met: 0, k: kcalMarche(km, poids), d: km, jour: 1 };
+    if (i === -1) j.sport.push(e); else j.sport[i] = e;
+    Store.sauveJour(dateCourante);
+    renderSport(); renderMarche(); renderBandeau(); renderAlim(); majDiag();
+    toast(nf(km, 1) + " km notés · " + ni(e.k) + " kcal");
+  }));
+  document.getElementById("marcheDel").addEventListener("click", protege("kilomètres du jour", function () {
+    var j = J(), i = indexMarche(j);
+    if (i === -1) return;
+    j.sport.splice(i, 1);
+    document.getElementById("marcheKm").value = "";
+    Store.sauveJour(dateCourante);
+    renderSport(); renderMarche(); renderBandeau(); renderAlim(); majDiag();
+    toast("Kilomètres du jour effacés.");
+  }));
+
   document.getElementById("sportSel").addEventListener("change", function () {
     modeAllure = false;
     document.getElementById("sportDist").value = "";
@@ -8072,7 +8245,7 @@ var SPORTS = [
     J().sport.push(e);
     document.getElementById("sportDist").value = "";
     Store.sauveJour(dateCourante);
-    renderSport(); renderBandeau(); renderAlim();
+    renderSport(); renderMarche(); renderBandeau(); renderAlim();
     toast(e.n + " enregistré · " + fmtDuree(e.m) + " · " + ni(e.k) + " kcal");
  
   }));
@@ -8081,7 +8254,7 @@ var SPORTS = [
     if (!b) return;
     J().sport.splice(+b.dataset.delSport, 1);
     Store.sauveJour(dateCourante);
-    renderSport(); renderBandeau(); renderAlim();
+    renderSport(); renderMarche(); renderBandeau(); renderAlim();
   });
 
   /* --- export --- */
