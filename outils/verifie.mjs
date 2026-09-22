@@ -105,7 +105,7 @@ for (const largeur of [1000, 390]) {
           'total ' + (await total()));
 
   // saisie libre, avec virgule décimale
-  await pg.click('#panel-alim summary');
+  await pg.click('#libreBloc summary');
   await pg.fill('#libreNom', 'yaourt maison');
   await pg.fill('#libreKcal', '62,5');
   await pg.click('#libreAdd');

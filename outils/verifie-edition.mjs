@@ -59,7 +59,7 @@ const s2 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')
 t('la virgule décimale est acceptée', s2.p === 9.5, JSON.stringify(s2.p));
 
 console.log('=== saisie libre avec macros ===');
-await p.click('#panel-alim details summary');
+await p.click('#libreBloc summary');
 await p.fill('#libreNom', 'Compote pomme vanille');
 await p.fill('#libreKcal', '60');
 await p.selectOption('#libreBase', '100');

@@ -1292,6 +1292,11 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 /* Le pied d'un repas : la seule action qui ne porte pas sur une ligne. */
 .meal-pied { padding: 9px 16px 12px; }
 .meal-pied .lien-edit { width: 100%; justify-content: center; min-height: 38px; }
+.items.bordee {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  overflow: hidden; margin-top: 9px; background: var(--panel-2);
+}
+.items.bordee li { padding: 9px 13px; }
 .items li.choix { grid-template-columns: 1fr auto; }
 .plat-case { display: flex; align-items: center; gap: 12px; min-width: 0; cursor: pointer; }
 .plat-case input { width: 20px; height: 20px; flex: none; accent-color: var(--peche); margin: 0; }
@@ -1498,11 +1503,6 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
     </div>
 
     <div class="card plain">
-      <header><span class="illu st-noeud" aria-hidden="true"></span><h2>Mes plats</h2><span class="hint">Repas enregistrés</span></header>
-      <div class="body tight"><ul class="items items-simple" id="platsGestion"></ul></div>
-    </div>
-
-    <div class="card plain">
       <header><span class="illu st-grenade" aria-hidden="true"></span><h2>Mes données</h2></header>
       <div class="body">
         <dl class="diag" id="diagBloc"></dl>
@@ -1539,6 +1539,10 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
             <select id="platSel"></select>
           </div>
         </div>
+        <details id="platsGere" hidden style="margin:-6px 0 14px">
+          <summary style="cursor:pointer;font-size:.86rem;color:var(--ink-soft)">Supprimer un plat</summary>
+          <ul class="items items-simple bordee" id="platsGestion"></ul>
+        </details>
 
         <div class="field" style="margin-bottom:12px">
           <label id="lblFiltre">Type de produit</label>
@@ -1577,7 +1581,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
           </div>
         </div>
 
-        <details style="margin-top:14px">
+        <details id="libreBloc" style="margin-top:14px">
           <summary style="cursor:pointer;font-size:.86rem;color:var(--ink-soft)">Mon aliment n'est pas dans la liste</summary>
           <div class="row-inline" style="margin-top:11px">
             <div class="field" style="flex:2 1 180px">
@@ -6744,21 +6748,17 @@ var SPORTS = [
 
   function renderPlatsProfil() {
     var noms = Object.keys(plats()).sort(function (a, b) { return a.localeCompare(b, "fr"); });
-    var ul = document.getElementById("platsGestion");
-    if (!ul) return;
-    ul.innerHTML = noms.length
-      ? noms.map(function (n) {
-          var pl = plats()[n];
-          return '<li><span class="nm">' + esc(n) +
-            '<small>' + esc(pl.items.map(function (x) { return x.n; }).join(", ")) + '</small></span>' +
-            '<span class="kc">' + ni(totalPlat(pl)) + ' kcal</span>' +
-            '<button type="button" class="del" data-del-plat="' + esc(n) +
-            '" aria-label="Supprimer le plat ' + esc(n) + '">\u2715</button></li>';
-        }).join("")
-      : '<li style="grid-template-columns:1fr"><p class="empty" style="padding:0">' +
-        '<span class="illu-mini st-ourson" aria-hidden="true"></span>' +
-        'Aucun plat pour l\'instant. Note un repas entier dans l\'onglet Alimentation, ' +
-        'puis enregistre-le sous un nom.</p></li>';
+    var det = document.getElementById("platsGere");
+    det.hidden = !noms.length;
+    if (!noms.length) { det.open = false; return; }
+    document.getElementById("platsGestion").innerHTML = noms.map(function (n) {
+      var pl = plats()[n];
+      return '<li><span class="nm">' + esc(n) +
+        '<small>' + esc(pl.items.map(function (x) { return x.n; }).join(", ")) + '</small></span>' +
+        '<span class="kc">' + ni(totalPlat(pl)) + ' kcal</span>' +
+        '<button type="button" class="del" data-del-plat="' + esc(n) +
+        '" aria-label="Supprimer le plat ' + esc(n) + '">\u2715</button></li>';
+    }).join("");
   }
 
   // Le profil vient parfois d'un instantané gelé : on s'en fait une copie
@@ -7964,10 +7964,13 @@ var SPORTS = [
   document.getElementById("platsGestion").addEventListener("click", protege("suppression d'un plat", function (e) {
     var b = e.target.closest("[data-del-plat]");
     if (!b) return;
-    delete platsEcrivables()[b.dataset.delPlat];
+    var nom = b.dataset.delPlat;
+    // Un plat représente un repas entier ressaisi : on demande avant.
+    if (!window.confirm("Supprimer le plat « " + nom + " » ? Les repas déjà notés avec lui ne bougent pas.")) return;
+    delete platsEcrivables()[nom];
     Store.sauveProfil();
     renderFavoris();
-    toast(b.dataset.delPlat + " supprimé.");
+    toast(nom + " supprimé.");
   }));
 
   document.getElementById("platSel").addEventListener("change", protege("pose d'un plat", function () {

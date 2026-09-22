@@ -81,14 +81,28 @@ await p.waitForTimeout(400);
 const pr2 = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
 t('corriger la ligne ne réécrit pas le plat', pr2['Pâtes au jambon'].items[0].k === 262, String(pr2['Pâtes au jambon'].items[0].k));
 
-console.log('=== gérer les plats depuis le profil ===');
-await p.evaluate(() => document.getElementById('profilBtn').click());
-await p.waitForTimeout(400);
-t('le plat est listé dans le profil', (await p.textContent('#platsGestion')).includes('Pâtes au jambon'));
+console.log('=== supprimer un plat ===');
+t('la suppression est à côté du menu', await p.isVisible('#platsGere'));
+t('elle est repliée au départ', !(await p.evaluate(() => document.getElementById('platsGere').open)));
+await p.evaluate(() => document.querySelector('#platsGere summary').click());
+await p.waitForTimeout(250);
+t('le plat y est listé', (await p.textContent('#platsGestion')).includes('Pâtes au jambon'));
+t('avec ses aliments en clair', (await p.textContent('#platsGestion')).includes('Jambon blanc'));
+
+// refuser la confirmation ne supprime rien
+p.once('dialog', d => d.dismiss());
 await p.click('[data-del-plat]');
 await p.waitForTimeout(400);
 const pr3 = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
-t('il se supprime', !pr3['Pâtes au jambon'], JSON.stringify(Object.keys(pr3)));
+t('annuler la confirmation garde le plat', !!pr3['Pâtes au jambon'], JSON.stringify(Object.keys(pr3)));
+
+p.once('dialog', d => d.accept());
+await p.click('[data-del-plat]');
+await p.waitForTimeout(400);
+const pr4 = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
+t('confirmer le supprime', !pr4['Pâtes au jambon'], JSON.stringify(Object.keys(pr4)));
+t('le menu des plats disparaît avec lui', !(await p.isVisible('#platSel')));
+t('et le bloc de suppression aussi', !(await p.isVisible('#platsGere')));
 
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');

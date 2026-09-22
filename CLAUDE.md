@@ -123,7 +123,9 @@ dans n'importe quel repas depuis le menu « Mes plats ». **Les lignes sont
 copiées, jamais référencées** : corriger la portion du jour ne doit pas
 réécrire la recette, ni l'inverse. La sélection vit dans `nomPlat.choix`,
 pas dans les cases : une rediffusion du serveur les remettrait toutes à
-coché. Gestion et suppression dans l'onglet Profil, carte « Mes plats ».
+coché. **La suppression est sous le menu « Mes plats »**, dans un `<details>`
+replié, et pas dans le profil : Suzon l'y cherchait et ne la trouvait pas.
+Elle passe par `window.confirm`, comme l'effacement des données.
 
 **Les raccourcis tiennent en deux menus d'une ligne.** Une liste de
 pastilles dépliée prenait la moitié de l'écran pour des aliments croisés une
@@ -174,7 +176,11 @@ en parallèle. Le mode est affiché en bas de page.
    `display: inline-flex` a transformé « Ajouter <span>0</span> kcal » en
    « Ajouter0kcal ». Un `<button>` centre déjà son texte : `min-height`
    suffit, la flexbox est de trop.
-8. **Une règle de grille écrite pour une liste s'applique à l'autre.**
+8. **Un second `<details>` dans un panneau casse les sélecteurs des tests.**
+   `#panel-alim summary` désignait la saisie libre, jusqu'à ce que le bloc
+   de suppression des plats arrive avant elle. Le bloc de saisie libre
+   porte `id="libreBloc"`, et les harnais le visent par cet identifiant.
+9. **Une règle de grille écrite pour une liste s'applique à l'autre.**
    Les lignes de repas ont un bloc `.actions`, celles du sport une croix
    nue : placer `.kc` en colonne 2 a fait tomber la croix des séances sur
    une ligne à elle. La liste des séances porte `items-simple` et garde ses
@@ -355,8 +361,8 @@ node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').m
 node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres du jour, 27 contrôles
-node outils/verifie-plats.mjs     # plats enregistrés et raccourcis,
-                                  # 25 contrôles
+node outils/verifie-plats.mjs     # plats enregistrés, raccourcis et
+                                  # suppression, 31 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la
