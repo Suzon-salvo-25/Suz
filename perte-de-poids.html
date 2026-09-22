@@ -1793,12 +1793,16 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
   <section id="panel-sport" role="tabpanel" aria-labelledby="tab-sport" hidden>
 
     <div class="card plain">
-      <header><span class="illu st-meduse" aria-hidden="true"></span><h2>Mes kilomètres du jour</h2><span class="hint">Relevé de Santé</span></header>
+      <header><span class="illu st-meduse" aria-hidden="true"></span><h2>Mes déplacements du jour</h2><span class="hint">Relevé de Santé</span></header>
       <div class="body">
         <div class="row-inline">
-          <div class="field" style="flex:1 1 170px">
-            <label for="marcheKm">Kilomètres marchés (km)</label>
+          <div class="field" style="flex:1 1 150px">
+            <label for="marcheKm">Kilomètres marchés</label>
             <input type="text" id="marcheKm" inputmode="decimal" autocomplete="off" placeholder="6,4">
+          </div>
+          <div class="field" style="flex:1 1 130px">
+            <label for="marcheEtages">Étages montés</label>
+            <input type="text" id="marcheEtages" inputmode="numeric" autocomplete="off" placeholder="12">
           </div>
           <button type="button" class="btn go" id="marcheSave">Enregistrer <span class="num" id="marcheKcal">0</span> kcal</button>
           <button type="button" class="btn ghost" id="marcheDel" hidden>Effacer</button>
@@ -1861,7 +1865,7 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
     <ul>
       <li><b>Le métabolisme de base</b> vient de la formule de Mifflin-St Jeor, la plus fiable en population générale. C'est une estimation : ton métabolisme réel peut s'en écarter de 10 % environ.</li>
       <li><b>Course, marche, vélo et natation se saisissent comme sur Strava</b> : distance en kilomètres, durée en heures et minutes, allure en minutes par kilomètre. Quand tu donnes la distance, l'allure est calculée depuis ta séance réelle et les calories suivent les équations de l'American College of Sports Medicine, dont dérivent les équivalents métaboliques habituels. Sans distance, choisis ton allure dans la liste.</li>
-      <li><b>Les kilomètres de la journée se notent sans durée.</b> Ils se font par bouts, et Santé n'en garde que le total. L'équation de marche de l'ACSM se simplifie alors d'elle-même : son terme de vitesse vaut 0,5 kcal par kilogramme et par kilomètre, quelle que soit l'allure. C'est ce coût net qui est compté, le repos de ces minutes étant déjà porté par ton niveau d'activité.</li>
+      <li><b>Les déplacements de la journée se notent sans durée.</b> Ils se font par bouts, et Santé n'en garde que le total. L'équation de marche de l'ACSM se simplifie alors d'elle-même : son terme de vitesse vaut 0,5 kcal par kilogramme et par kilomètre, quelle que soit l'allure. Pour les étages, c'est le terme vertical de la même équation : 2,39 ml d'oxygène par kilogramme et par mètre grimpé, soit 0,012 kcal, quelle que soit la vitesse là aussi. Santé compte un étage pour trois mètres, ce qui fait environ 2,8 kcal l'étage à 77 kg. La descente n'est pas comptée : Santé ne la relève pas, et elle coûte environ trois fois moins. Dans les deux cas c'est le coût net, le repos de ces minutes étant déjà porté par ton niveau d'activité.</li>
       <li><b>Les calories du sport</b> dépendent de ton poids du moment, donc elles baissent naturellement à mesure que tu perds.</li>
       <li><b>Le niveau d'activité du profil ne compte pas les séances de sport.</b> Elles s'ajoutent quand tu les saisis, sinon elles seraient comptées deux fois.</li>
       <li><b>Un kilogramme de masse grasse vaut environ 7 700 kcal.</b> C'est ce qui relie le déficit quotidien au rythme de perte affiché.</li>
@@ -7796,10 +7800,29 @@ var SPORTS = [
   var KCAL_PAR_KG_KM = 0.5;
   var NOM_MARCHE = "Marche de la journée";
 
+  /* Monter, c'est soulever son corps. Le terme vertical de l'équation ACSM
+     vaut 1,33 × 1,8 × (mètres par minute) ml d'oxygène par kilogramme et par
+     minute, soit 2,39 ml par mètre grimpé, quelle que soit la vitesse. À
+     5 kcal par litre d'oxygène, cela fait 0,012 kcal par kilogramme et par
+     mètre. Santé compte un étage pour dix pieds, soit environ trois mètres.
+     La descente n'est pas comptée : Santé ne la relève pas, et elle coûte
+     environ trois fois moins. */
+  var KCAL_PAR_KG_METRE = 0.012;
+  var METRES_PAR_ETAGE = 3;
+
   function kcalMarche(km, poids) {
     if (!(km > 0) || !poids) return 0;
     return Math.round(KCAL_PAR_KG_KM * poids * km);
   }
+  function kcalEtages(etages, poids) {
+    if (!(etages > 0) || !poids) return 0;
+    return Math.round(KCAL_PAR_KG_METRE * METRES_PAR_ETAGE * poids * etages);
+  }
+  function kcalDeplacements(km, etages, poids) {
+    return kcalMarche(km, poids) + kcalEtages(etages, poids);
+  }
+
+  var LIB_ACTIVITE = { 1.2: "Sédentaire", 1.375: "Légère", 1.55: "Modérée", 1.725: "Élevée" };
   function indexMarche(j) {
     for (var i = 0; i < j.sport.length; i++) if (j.sport[i].jour) return i;
     return -1;
@@ -7816,6 +7839,8 @@ var SPORTS = [
     var i = indexMarche(j);
     var inp = document.getElementById("marcheKm");
     if (document.activeElement !== inp) inp.value = i === -1 ? "" : nf(j.sport[i].d, 1);
+    var ine = document.getElementById("marcheEtages");
+    if (document.activeElement !== ine) ine.value = (i === -1 || !j.sport[i].et) ? "" : String(j.sport[i].et);
     document.getElementById("marcheDel").hidden = i === -1;
     majMarcheKcal();
   }
@@ -7824,16 +7849,24 @@ var SPORTS = [
     var poids = poidsA(dateCourante);
     var km = champ("marcheKm");
     if (!isFinite(km) || km < 0) km = 0;
-    var k = kcalMarche(km, poids);
+    var et = champ("marcheEtages");
+    if (!isFinite(et) || et < 0) et = 0;
+    var k = kcalDeplacements(km, et, poids);
     document.getElementById("marcheKcal").textContent = ni(k);
-    document.getElementById("marcheSave").disabled = !poids || km <= 0 || km > 100;
+    var hors = km > 100 || et > 300;
+    document.getElementById("marcheSave").disabled = !poids || (km <= 0 && et <= 0) || hors;
+
+    var p = P();
+    var lib = LIB_ACTIVITE[p.activite] || "courante";
     document.getElementById("marcheNote").textContent = !poids
-      ? "Renseigne ton poids dans les réglages pour convertir ces kilomètres en calories."
-      : km > 100
-        ? "Au-delà de cent kilomètres, c'est sans doute une faute de frappe."
-        : "Pas besoin de durée : ces kilomètres se font par bouts. Le total remplace celui du " +
-          "jour, recopie-le de Santé quand tu veux. Ton niveau d'activité compte déjà la marche " +
-          "ordinaire : mets-le sur «\u00a0Sédentaire\u00a0» si tu notes tes kilomètres chaque jour.";
+      ? "Renseigne ton poids dans les réglages pour convertir ces déplacements en calories."
+      : hors
+        ? "Au-delà de cent kilomètres ou trois cents étages, c'est sans doute une faute de frappe."
+        : "Pas besoin de durée : tout cela se fait par bouts. Le total remplace celui du jour, " +
+          "recopie-le de Santé quand tu veux. Attention, ces " + ni(k) + " kcal s'ajoutent à ton " +
+          "niveau d'activité «\u00a0" + lib + "\u00a0», qui compte déjà la marche ordinaire : si tu " +
+          "notes tes déplacements tous les jours, mets-le sur «\u00a0Sédentaire\u00a0» dans les " +
+          "réglages, sinon ils sont comptés deux fois.";
   }
 
   function renderSport() {
@@ -7852,6 +7885,7 @@ var SPORTS = [
           var bits = [];
           if (x.d > 0) bits.push((x.jour ? nf(x.d, 1) + " km"
             : (t === "nage" ? ni(x.d * 1000) + " m" : fmtKm(x.d))) + (x.est ? " estimés" : ""));
+          if (x.jour && x.et > 0) bits.push(x.et + (x.et > 1 ? " étages" : " étage"));
           if (x.jour) bits.push("tout au long de la journée");
           else {
             bits.push(fmtDuree(x.m));
@@ -8625,29 +8659,39 @@ var SPORTS = [
 
   /* --- sport --- */
   document.getElementById("marcheKm").addEventListener("input", majMarcheKcal);
+  document.getElementById("marcheEtages").addEventListener("input", majMarcheKcal);
   document.getElementById("marcheSave").addEventListener("click", protege("kilomètres du jour", function () {
     var poids = poidsA(dateCourante);
     var km = champ("marcheKm");
-    if (!poids) { toast("Renseigne ton poids avant de compter tes kilomètres.", true); return; }
-    if (!isFinite(km) || km <= 0) { toast("Indique un nombre de kilomètres.", true); return; }
-    if (km > 100) { toast("Au-delà de cent kilomètres, vérifie le chiffre.", true); return; }
+    var et = champ("marcheEtages");
+    if (!isFinite(km) || km < 0) km = 0;
+    if (!isFinite(et) || et < 0) et = 0;
+    if (!poids) { toast("Renseigne ton poids avant de compter tes déplacements.", true); return; }
+    if (km <= 0 && et <= 0) { toast("Indique des kilomètres ou des étages.", true); return; }
+    if (km > 100 || et > 300) { toast("Au-delà de cent kilomètres ou trois cents étages, vérifie le chiffre.", true); return; }
     km = Math.round(km * 100) / 100;
+    et = Math.round(et);
     var j = J(), i = indexMarche(j);
     // Santé donne un total, pas un ajout : la ligne du jour se remplace.
-    var e = { n: NOM_MARCHE, m: 0, met: 0, k: kcalMarche(km, poids), d: km, jour: 1 };
+    var e = { n: NOM_MARCHE, m: 0, met: 0, k: kcalDeplacements(km, et, poids), d: km, jour: 1 };
+    if (et > 0) e.et = et;
     if (i === -1) j.sport.push(e); else j.sport[i] = e;
     Store.sauveJour(dateCourante);
     renderSport(); renderMarche(); renderBandeau(); renderAlim(); majDiag();
-    toast(nf(km, 1) + " km notés · " + ni(e.k) + " kcal");
+    var dit = [];
+    if (km > 0) dit.push(nf(km, 1) + " km");
+    if (et > 0) dit.push(et + (et > 1 ? " étages" : " étage"));
+    toast(dit.join(" et ") + " · " + ni(e.k) + " kcal");
   }));
   document.getElementById("marcheDel").addEventListener("click", protege("kilomètres du jour", function () {
     var j = J(), i = indexMarche(j);
     if (i === -1) return;
     j.sport.splice(i, 1);
     document.getElementById("marcheKm").value = "";
+    document.getElementById("marcheEtages").value = "";
     Store.sauveJour(dateCourante);
     renderSport(); renderMarche(); renderBandeau(); renderAlim(); majDiag();
-    toast("Kilomètres du jour effacés.");
+    toast("Déplacements du jour effacés.");
   }));
 
   document.getElementById("sportSel").addEventListener("change", function () {

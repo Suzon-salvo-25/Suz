@@ -108,17 +108,40 @@ t('le total du jour ne bouge pas', (await p.textContent('#repasTotal')).includes
 console.log('=== les kilomètres de la journée ===');
 await p.evaluate(() => document.querySelector('[data-tab="sport"]').click());
 await p.waitForTimeout(300);
-t('la carte des kilomètres est là', await p.isVisible('#marcheKm'));
+t('la carte des déplacements est là', await p.isVisible('#marcheKm'));
+t('les étages ont leur champ', await p.isVisible('#marcheEtages'));
 t('aucune durée ne lui est demandée', !(await p.isVisible('#marcheKm ~ #sportDuree')));
 await p.fill('#marcheKm', '6,4');
 await p.waitForTimeout(150);
 // 0,5 kcal par kg et par km, à 77 kg : 6,4 x 77 x 0,5 = 246
 t('les calories suivent 0,5 kcal/kg/km', (await p.textContent('#marcheKcal')) === '246', await p.textContent('#marcheKcal'));
+// 12 étages x 3 m x 0,012 kcal/kg/m x 77 kg = 33 kcal, qui s'ajoutent
+await p.fill('#marcheEtages', '12');
+await p.waitForTimeout(150);
+t('les étages s\'ajoutent aux kilomètres', (await p.textContent('#marcheKcal')) === '279', await p.textContent('#marcheKcal'));
+t('la note prévient du double comptage', (await p.textContent('#marcheNote')).includes('comptés deux fois'), await p.textContent('#marcheNote'));
+await p.fill('#marcheEtages', '');
+await p.waitForTimeout(150);
 await p.click('#marcheSave');
 await p.waitForTimeout(400);
 const s5 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
 t('la marche est enregistrée sans durée', s5.length === 1 && s5[0].jour === 1 && s5[0].m === 0, JSON.stringify(s5));
 t('sa distance est retenue', s5[0].d === 6.4, String(s5[0] && s5[0].d));
+
+// des étages seuls, sans un kilomètre
+await p.fill('#marcheKm', '');
+await p.fill('#marcheEtages', '20');
+await p.waitForTimeout(150);
+t('des étages seuls se comptent', (await p.textContent('#marcheKcal')) === '55', await p.textContent('#marcheKcal'));
+await p.click('#marcheSave');
+await p.waitForTimeout(400);
+const sE = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
+t('ils sont enregistrés seuls', sE.length === 1 && sE[0].et === 20 && sE[0].d === 0 && sE[0].k === 55, JSON.stringify(sE));
+t('la ligne les affiche', (await p.textContent('#sportListe')).includes('20 étages'), await p.textContent('#sportListe'));
+await p.fill('#marcheKm', '6,4');
+await p.fill('#marcheEtages', '');
+await p.click('#marcheSave');
+await p.waitForTimeout(400);
 await p.fill('#marcheKm', '9,1');
 await p.click('#marcheSave');
 await p.waitForTimeout(400);

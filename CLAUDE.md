@@ -160,7 +160,7 @@ tuiles les répétaient mot pour mot. Ne restent que les lectures que la barre
 ne porte pas, moyenne sept jours, variation de la semaine, depuis le départ,
 heure habituelle, tour de taille et nombre de pesées.
 
-**Les kilomètres de la journée se notent sans durée.** Ils se font par bouts
+**Les déplacements de la journée se notent sans durée.** Ils se font par bouts
 et l'application Santé n'en garde que le total : une carte à part, dans
 l'onglet Sport, prend ce total et le remplace à chaque saisie au lieu de
 l'empiler. Sans durée, l'équation de marche de l'ACSM se simplifie d'elle
@@ -169,9 +169,24 @@ tombe à **0,5 kcal par kilogramme**, quelle que soit l'allure. C'est le coût
 *net* qui est compté, le repos de ces minutes étant déjà porté par le niveau
 d'activité du profil. L'entrée porte `jour: 1`, ce qui l'exclut du compte de
 séances et du temps actif, mais pas des calories ni de la distance.
-Contrepartie dite en clair sous le champ : le niveau d'activité compte déjà
-la marche ordinaire, donc le mettre sur « Sédentaire » si les kilomètres sont
-notés tous les jours.
+**Les étages suivent la même logique.** Le terme vertical de la même
+équation vaut 1,33 × 1,8 × (mètres par minute) ml d'oxygène par kilogramme
+et par minute, soit 2,39 ml par mètre grimpé, indépendamment de la vitesse
+là aussi ; à 5 kcal par litre d'oxygène cela fait **0,012 kcal par
+kilogramme et par mètre**. Santé compte un étage pour dix pieds, soit trois
+mètres, d'où 0,036 kcal par kilogramme et par étage, environ 2,8 kcal à
+77 kg. La descente n'est pas comptée : Santé ne la relève pas et elle coûte
+environ trois fois moins. Les étages vivent dans `et` sur la même entrée, et
+l'un des deux champs suffit pour enregistrer.
+
+**Le double comptage est réel, et dit en clair sous le champ**, avec le
+montant du jour et le nom du niveau d'activité choisi : ces calories
+s'ajoutent à un coefficient qui compte déjà la marche ordinaire, donc le
+mettre sur « Sédentaire » si les déplacements sont notés tous les jours.
+Tentative de supprimer le niveau d'activité au profit du seul mesuré :
+**refusée par Suzon**, l'écart était trop brutal (dépense de 2 080 à
+1 741 kcal, objectif du jour de 1 530 à 1 200). Ne pas y revenir sans le
+lui redemander. Les séances de sport, elles, restent une addition à part.
 
 **Modèle** : `profil/moi` et un document par jour, `jours/AAAA-MM-JJ`,
 contenant poids, heure, tour de taille, eau, repas et séances. Le profil
@@ -394,7 +409,8 @@ la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1])"
 node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
-                                  # repas, kilomètres du jour, 28 contrôles
+                                  # repas, kilomètres et étages du jour,
+                                  # 34 contrôles
 node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
                                   # 58 contrôles
