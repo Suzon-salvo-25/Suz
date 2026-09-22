@@ -69,8 +69,23 @@ Les fiches tenues à la main passent avant les imports en masse et gardent
 la place en cas de doublon : elles portent la vraie portion, « 1 œuf »
 plutôt que 100 g.
 
+**Projection.** L'onglet Mon poids porte une carte « D'ici le … » qui trace
+trois avenirs jusqu'à la date visée du profil (`profil.fin`, par défaut le
+8 avril) : ce qu'il faut tenir pour arriver à l'heure, où mène le rythme
+réellement observé, et le rythme visé des réglages. Seule la deuxième est une
+mesure, les autres sont des intentions.
+
+**Une pente ne se prolonge jamais au-delà de l'objectif.** Prolongée
+bêtement, une bonne pente annonçait 49,9 kg en avril pour un objectif à 66 :
+faux, et malsain à afficher dans une application de perte de poids. La
+projection est bornée à l'objectif, et ce qui est annoncé devient la *date*
+à laquelle il tombe. Même prudence sur les messages : sur une pente presque
+plate, le retard calculé part à des années, on le dit au lieu d'afficher un
+nombre de jours absurde.
+
 **Modèle** : `profil/moi` et un document par jour, `jours/AAAA-MM-JJ`,
-contenant poids, heure, tour de taille, eau, repas et séances.
+contenant poids, heure, tour de taille, eau, repas et séances. Le profil
+porte aussi `debut` et `fin`, les deux bornes de la trajectoire.
 
 **Stockage** : capacité `db` quand elle est là, `localStorage` **toujours**,
 en parallèle. Le mode est affiché en bas de page.
