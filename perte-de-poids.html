@@ -1279,6 +1279,17 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 .edit-bloc select { width: 100%; }
 .edit-aide { margin: 10px 0 0; font-size: .76rem; line-height: 1.4; color: var(--ink-faint); }
 
+/* Le pied d'un repas : la seule action qui ne porte pas sur une ligne. */
+.meal-pied { padding: 9px 16px 12px; }
+.meal-pied .lien-edit { width: 100%; justify-content: center; min-height: 38px; }
+.items li.choix { grid-template-columns: 1fr auto; }
+.plat-case { display: flex; align-items: center; gap: 12px; min-width: 0; cursor: pointer; }
+.plat-case input { width: 20px; height: 20px; flex: none; accent-color: var(--peche); margin: 0; }
+.plat-case .nm { min-width: 0; }
+.items li.choix:has(input:not(:checked)) .nm { color: var(--ink-faint); text-decoration: line-through; }
+.plat-form { padding: 13px 16px 15px; background: var(--panel-2); }
+.plat-form .edit-aide { margin-top: 9px; }
+
 /* Un champ d'heure natif se dessine plus haut qu'un champ de texte, et un
    bouton « sm » plus bas qu'un bouton plein : dans une rangée alignée par le
    bas, les étiquettes et les bords se décalaient de quelques pixels. Une
@@ -1300,6 +1311,8 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 
   /* La liste des séances n'a pas de bloc d'actions : sa croix reste au bout
      de la ligne, elle ne descend pas toute seule sous le nom. */
+  .items li.choix { grid-template-columns: 1fr auto; row-gap: 4px; }
+  .items li.choix .kc { grid-column: 2; grid-row: 1; }
   .items.items-simple li { grid-template-columns: 1fr auto auto; row-gap: 4px; }
   .items.items-simple li > .del { grid-column: 3; grid-row: 1; width: 40px; height: 40px; }
 }
@@ -1475,6 +1488,11 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
     </div>
 
     <div class="card plain">
+      <header><span class="illu st-noeud" aria-hidden="true"></span><h2>Mes plats</h2><span class="hint">Repas enregistrés</span></header>
+      <div class="body tight"><ul class="items items-simple" id="platsGestion"></ul></div>
+    </div>
+
+    <div class="card plain">
       <header><span class="illu st-grenade" aria-hidden="true"></span><h2>Mes données</h2></header>
       <div class="body">
         <dl class="diag" id="diagBloc"></dl>
@@ -1501,9 +1519,15 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
             </select>
           </div>
         </div>
-        <div class="field" id="favorisBloc" hidden style="margin-bottom:14px">
-          <label>Mes aliments fréquents</label>
-          <div class="chips" id="favoris"></div>
+        <div class="row-inline" id="raccourcis" hidden style="margin-bottom:14px">
+          <div class="field" id="favorisBloc" style="flex:1 1 200px" hidden>
+            <label for="favSel">Ce que je reprends souvent</label>
+            <select id="favSel"></select>
+          </div>
+          <div class="field" id="platsBloc" style="flex:1 1 200px" hidden>
+            <label for="platSel">Mes plats</label>
+            <select id="platSel"></select>
+          </div>
         </div>
 
         <div class="field" style="margin-bottom:12px">
@@ -5381,7 +5405,7 @@ var SPORTS = [
       prenom: "", sexe: "f", age: null, taille: null,
       depart: null, objectif: null, debut: AUJ, fin: "2027-04-08",
       activite: 1.375, rythme: 0.5, seances: 3,
-      freq: {}, perso: {}
+      freq: {}, perso: {}, plats: {}
     };
   }
   function jourVide(date) {
@@ -5433,6 +5457,20 @@ var SPORTS = [
         });
       }
     });
+    // Les plats enregistrés : un nom, et la liste des lignes à reposer telles
+    // quelles. Un document venu du serveur peut porter n'importe quoi, on ne
+    // garde que ce qui a la bonne forme.
+    if (raw.plats && typeof raw.plats === "object" && !Array.isArray(raw.plats)) {
+      p.plats = {};
+      Object.keys(raw.plats).slice(0, 80).forEach(function (n) {
+        var pl = raw.plats[n];
+        if (!pl || !Array.isArray(pl.items)) return;
+        var items = pl.items.filter(function (it) {
+          return it && typeof it.n === "string" && typeof it.k === "number" && isFinite(it.k);
+        }).slice(0, 40);
+        if (items.length) p.plats[n] = { items: items };
+      });
+    }
     return p;
   }
 
@@ -6127,6 +6165,7 @@ var SPORTS = [
         html += '<p class="empty"><span class="illu-mini st-ourson" aria-hidden="true"></span>Rien de noté.</p>';
       } else {
         html += '<ul class="items">' + items.map(function (it, i) {
+          if (nomPlat && nomPlat.repas === k) return ligneChoixPlat(it, i);
           if (edition && edition.repas === k && edition.i === i) return ligneEdition();
           var mac = (it.p || it.g || it.l)
             ? '<span class="mac">P <em>' + nf(it.p, 0) + ' g</em> · G <em>' + nf(it.g, 0) +
@@ -6141,6 +6180,13 @@ var SPORTS = [
             '<button type="button" class="del" data-del-repas="' + k + '" data-i="' + i + '" aria-label="Retirer ' + esc(it.n) + '">✕</button>' +
             '</span></li>';
         }).join("") + '</ul>';
+      }
+      // Deux lignes ou plus, c'est un plat : on propose de le garder.
+      if (items.length >= 2) {
+        html += (nomPlat && nomPlat.repas === k)
+          ? formulairePlat(k)
+          : '<div class="meal-pied"><button type="button" class="lien-edit" data-plat-repas="' + k + '">' +
+            ICONE_PLAT + '<span>Enregistrer ce repas comme un plat</span></button></div>';
       }
       html += '</div>';
     });
@@ -6185,6 +6231,50 @@ var SPORTS = [
   var ICONE_CRAYON = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" ' +
     'stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M4.5 19.5h4L19.6 8.4a2.4 2.4 0 0 0-3.4-3.4L5.1 16.1z"/><path d="M14.8 6.6 18 9.8"/></svg>';
+
+  /* ==================== NOMMER UN PLAT ====================
+     Le nom en cours de saisie vit ici et pas dans le champ : une rediffusion
+     du serveur redessine la liste des repas à tout moment. */
+  var nomPlat = null;
+
+  var ICONE_PLAT = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" ' +
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M3.4 13.6h17.2a8.6 8.6 0 0 1-17.2 0z"/><path d="M2.4 20.4h19.2"/>' +
+    '<path d="M12 10.2V7.4"/><path d="M9.6 4.6a2.4 2.4 0 0 1 4.8 0"/></svg>';
+
+  // Un dessert pris à la fin n'appartient pas forcément au plat : chaque
+  // ligne se décoche. Tout est coché au départ, c'est le cas courant.
+  function ligneChoixPlat(it, i) {
+    var coche = nomPlat.choix.indexOf(i) !== -1;
+    return '<li class="choix"><label class="plat-case">' +
+      '<input type="checkbox" data-plat-i="' + i + '"' + (coche ? ' checked' : '') + '>' +
+      '<span class="nm">' + esc(it.n) + (it.d ? '<small>' + esc(it.d) + '</small>' : '') + '</span>' +
+      '</label><span class="kc">' + ni(it.k) + ' kcal</span></li>';
+  }
+
+  function resumePlat(k) {
+    var items = J().repas[k] || [];
+    var n = nomPlat.choix.length;
+    var kc = nomPlat.choix.reduce(function (s, i) { return s + ((items[i] || {}).k || 0); }, 0);
+    return n === 0
+      ? "Coche au moins un aliment."
+      : n + (n > 1 ? " aliments retenus" : " aliment retenu") + " sur " + items.length +
+        " · " + ni(kc) + " kcal. Tu pourras reposer ce plat dans n'importe quel repas, " +
+        "depuis « Mes plats ».";
+  }
+
+  function formulairePlat(k) {
+    return '<div class="meal-pied plat-form">' +
+      '<div class="row-inline">' +
+        '<div class="field" style="flex:2 1 190px"><label for="platNom">Nom du plat</label>' +
+        '<input type="text" id="platNom" autocomplete="off" placeholder="Pâtes au jambon" value="' +
+        esc(nomPlat.nom) + '"></div>' +
+        '<button type="button" class="btn go sm" data-plat-ok="1">Enregistrer</button>' +
+        '<button type="button" class="btn ghost sm" data-plat-annule="1">Annuler</button>' +
+      '</div>' +
+      '<p class="sub-note edit-aide" id="platResume">' + esc(resumePlat(k)) + '</p>' +
+      '</div>';
+  }
 
   function ligneEdition() {
     var e = edition;
@@ -6586,20 +6676,110 @@ var SPORTS = [
     Store.sauveProfil();
   }
 
+  /* Une liste de pastilles dépliée prenait la moitié de l'écran pour des
+     aliments vus une seule fois. Deux menus déroulants d'une ligne les
+     remplacent, et seuls entrent les aliments repris au moins deux fois :
+     un aliment croisé une fois n'est pas une habitude. */
   function renderFavoris() {
     var p = P();
     var freq = p.freq || {};
-    var noms = Object.keys(freq).sort(function (a, b) { return freq[b] - freq[a]; }).slice(0, 10);
-    var bloc = document.getElementById("favorisBloc");
-    if (!noms.length) { bloc.hidden = true; return; }
-    bloc.hidden = false;
-    document.getElementById("favoris").innerHTML = noms.map(function (n) {
+    var noms = Object.keys(freq)
+      .filter(function (n) { return freq[n] >= 2; })
+      .sort(function (a, b) { return freq[b] - freq[a]; })
+      .slice(0, 20);
+    var lignes = noms.map(function (n) {
       var i = ALIMENTS.findIndex(function (a) { return a[0] === n; });
       var kcal = i !== -1 ? Math.round(ALIMENTS[i][1] * ALIMENTS[i][6] / 100) : (p.perso && p.perso[n]);
       if (kcal === undefined || kcal === null) return "";
-      return '<button type="button" class="chip-food" data-fav="' + esc(n) + '">' +
-        '<span class="t">' + esc(n) + '</span><b>' + ni(kcal) + '</b></button>';
-    }).join("");
+      return '<option value="' + esc(n) + '">' + esc(n) + ' · ' + ni(kcal) + ' kcal</option>';
+    }).filter(Boolean);
+    var bloc = document.getElementById("favorisBloc");
+    bloc.hidden = !lignes.length;
+    if (lignes.length) {
+      document.getElementById("favSel").innerHTML =
+        '<option value="">Choisir…</option>' + lignes.join("");
+    }
+    renderPlatsListe();
+  }
+
+  /* ==================== LES PLATS ====================
+     Un dîner de pâtes, fromage et jambon se refait souvent à l'identique.
+     Plutôt que de resaisir trois lignes à chaque fois, on enregistre le
+     repas sous un nom et on le repose où on veut. Les lignes sont copiées,
+     pas référencées : corriger le plat du jour ne doit pas réécrire la
+     recette, et l'inverse non plus. */
+
+  function plats() { return P().plats || {}; }
+
+  function totalPlat(pl) {
+    return pl.items.reduce(function (s, x) { return s + (x.k || 0); }, 0);
+  }
+
+  function renderPlatsListe() {
+    var noms = Object.keys(plats()).sort(function (a, b) { return a.localeCompare(b, "fr"); });
+    var bloc = document.getElementById("platsBloc");
+    bloc.hidden = !noms.length;
+    if (noms.length) {
+      document.getElementById("platSel").innerHTML = '<option value="">Choisir…</option>' +
+        noms.map(function (n) {
+          var pl = plats()[n];
+          return '<option value="' + esc(n) + '">' + esc(n) + ' · ' + ni(totalPlat(pl)) +
+            ' kcal · ' + pl.items.length + ' aliments</option>';
+        }).join("");
+    }
+    var rac = document.getElementById("raccourcis");
+    rac.hidden = document.getElementById("favorisBloc").hidden && bloc.hidden;
+    renderPlatsProfil();
+  }
+
+  function renderPlatsProfil() {
+    var noms = Object.keys(plats()).sort(function (a, b) { return a.localeCompare(b, "fr"); });
+    var ul = document.getElementById("platsGestion");
+    if (!ul) return;
+    ul.innerHTML = noms.length
+      ? noms.map(function (n) {
+          var pl = plats()[n];
+          return '<li><span class="nm">' + esc(n) +
+            '<small>' + esc(pl.items.map(function (x) { return x.n; }).join(", ")) + '</small></span>' +
+            '<span class="kc">' + ni(totalPlat(pl)) + ' kcal</span>' +
+            '<button type="button" class="del" data-del-plat="' + esc(n) +
+            '" aria-label="Supprimer le plat ' + esc(n) + '">\u2715</button></li>';
+        }).join("")
+      : '<li style="grid-template-columns:1fr"><p class="empty" style="padding:0">' +
+        '<span class="illu-mini st-ourson" aria-hidden="true"></span>' +
+        'Aucun plat pour l\'instant. Note un repas entier dans l\'onglet Alimentation, ' +
+        'puis enregistre-le sous un nom.</p></li>';
+  }
+
+  // Le profil vient parfois d'un instantané gelé : on s'en fait une copie
+  // avant d'y écrire, comme pour `freq` et `perso`.
+  function platsEcrivables() {
+    var p = P();
+    if (!p.plats || Object.isFrozen(p.plats) || !Object.isExtensible(p.plats)) {
+      p.plats = Object.assign({}, p.plats || {});
+    }
+    return p.plats;
+  }
+
+  function enregistrePlat(repas, nom, choix) {
+    var src = J().repas[repas] || [];
+    var items = choix.slice().sort(function (a, b) { return a - b; })
+      .map(function (i) { return copieLibre(src[i]); }).filter(Boolean);
+    if (!items.length) return false;
+    platsEcrivables()[nom] = { items: items };
+    Store.sauveProfil();
+    return true;
+  }
+
+  function posePlat(nom, repas) {
+    var pl = plats()[nom];
+    if (!pl) return 0;
+    var cible = J().repas[repas] || (J().repas[repas] = []);
+    pl.items.forEach(function (it) {
+      var c = copieLibre(it);
+      if (c) cible.push(c);
+    });
+    return totalPlat(pl);
   }
 
   function ouvrePicker(idx) {
@@ -7771,10 +7951,30 @@ var SPORTS = [
     });
   });
 
-  document.getElementById("favoris").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-fav]");
+  document.getElementById("platsGestion").addEventListener("click", protege("suppression d'un plat", function (e) {
+    var b = e.target.closest("[data-del-plat]");
     if (!b) return;
-    var nom = b.dataset.fav;
+    delete platsEcrivables()[b.dataset.delPlat];
+    Store.sauveProfil();
+    renderFavoris();
+    toast(b.dataset.delPlat + " supprimé.");
+  }));
+
+  document.getElementById("platSel").addEventListener("change", protege("pose d'un plat", function () {
+    var nom = this.value;
+    this.value = "";
+    if (!nom || !plats()[nom]) return;
+    var repas = document.getElementById("foodRepas").value;
+    var k = posePlat(nom, repas);
+    Store.sauveJour(dateCourante);
+    renderAlim(); renderBandeau(); majDiag();
+    toast(nom + " ajouté " + REPAS_VERS[repas] + " · " + ni(k) + " kcal");
+  }));
+
+  document.getElementById("favSel").addEventListener("change", protege("ajout d'un favori", function () {
+    var nom = this.value;
+    this.value = "";
+    if (!nom) return;
     var i = ALIMENTS.findIndex(function (a) { return a[0] === nom; });
     if (i !== -1) { ouvrePicker(i); return; }
     var p = P();
@@ -7787,7 +7987,7 @@ var SPORTS = [
     Store.sauveJour(dateCourante);
     renderAlim(); renderFavoris(); renderBandeau(); majDiag();
     confirmeAjout(nom, document.getElementById("foodRepas").value, kcal);
-  });
+  }));
 
   document.getElementById("pickQte").addEventListener("input", majPickKcal);
   document.getElementById("pickUnite").addEventListener("change", function () {
@@ -8071,8 +8271,34 @@ var SPORTS = [
       renderAlim(); renderBandeau(); majDiag();
       return;
     }
+    var plat = e.target.closest("[data-plat-repas]");
+    if (plat) {
+      edition = null;
+      nomPlat = {
+        repas: plat.dataset.platRepas, nom: "",
+        choix: (J().repas[plat.dataset.platRepas] || []).map(function (_, i) { return i; })
+      };
+      renderAlim();
+      var ch = document.getElementById("platNom");
+      if (ch) ch.focus();
+      return;
+    }
+    if (e.target.closest("[data-plat-annule]")) { nomPlat = null; renderAlim(); return; }
+    if (e.target.closest("[data-plat-ok]") && nomPlat) {
+      var nom = document.getElementById("platNom").value.trim().slice(0, 60);
+      if (!nom) { toast("Donne un nom à ce plat.", true); return; }
+      var repas = nomPlat.repas;
+      if (!nomPlat.choix.length) { toast("Coche au moins un aliment pour ce plat.", true); return; }
+      var dejaLa = !!plats()[nom];
+      if (!enregistrePlat(repas, nom, nomPlat.choix)) { toast("Ce repas est vide.", true); return; }
+      nomPlat = null;
+      renderAlim(); renderFavoris();
+      toast(dejaLa ? nom + " mis à jour · " + ni(totalPlat(plats()[nom])) + " kcal"
+                   : nom + " enregistré · " + ni(totalPlat(plats()[nom])) + " kcal");
+      return;
+    }
     var mod = e.target.closest("[data-edit-repas]");
-    if (mod) { ouvreEdition(mod.dataset.editRepas, +mod.dataset.i); return; }
+    if (mod) { edition = null; nomPlat = null; ouvreEdition(mod.dataset.editRepas, +mod.dataset.i); return; }
     if (e.target.closest("[data-edit-annule]")) { fermeEdition(); return; }
     if (!e.target.closest("[data-edit-ok]") || !edition) return;
 
@@ -8110,6 +8336,7 @@ var SPORTS = [
 
   // La quantité pilote les valeurs, et l'inverse délie la quantité.
   document.getElementById("repasListe").addEventListener("input", function (e) {
+    if (e.target.id === "platNom" && nomPlat) { nomPlat.nom = e.target.value; return; }
     if (!edition) return;
     var id = e.target.id;
     if (id === "editQte") {
@@ -8132,7 +8359,17 @@ var SPORTS = [
 
   // Un `<select>` n'émet pas « input » partout : on écoute aussi « change ».
   document.getElementById("repasListe").addEventListener("change", function (e) {
-    if (edition && e.target.id === "editRepas") edition.cible = e.target.value;
+    if (edition && e.target.id === "editRepas") { edition.cible = e.target.value; return; }
+    var c = e.target.closest("[data-plat-i]");
+    if (!c || !nomPlat) return;
+    // La sélection vit dans `nomPlat`, pas dans les cases : une rediffusion
+    // du serveur redessine la liste et les remettrait toutes à coché.
+    var i = +c.dataset.platI;
+    var pos = nomPlat.choix.indexOf(i);
+    if (c.checked && pos === -1) nomPlat.choix.push(i);
+    else if (!c.checked && pos !== -1) nomPlat.choix.splice(pos, 1);
+    var r = document.getElementById("platResume");
+    if (r) r.textContent = resumePlat(nomPlat.repas);
   });
 
   /* --- poids --- */

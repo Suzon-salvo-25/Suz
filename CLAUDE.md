@@ -13,7 +13,7 @@ rapport. **Ne pas y toucher.**
 |---|---|
 | Code | `perte-de-poids.html`, branche `claude/programme-perte-poids-u5p9gy` |
 | Application en ligne | https://claude.ai/artifact/3LM1PhEuLuXapTZoGMUeyJ |
-| Harnais de test | `outils/verifie.mjs`, `outils/verifie-edition.mjs` |
+| Harnais de test | `outils/verifie.mjs`, `outils/verifie-edition.mjs`, `outils/verifie-plats.mjs` |
 | Fiches d'aliments, par domaine | `donnees/aliments/*.json` |
 | Planche d'autocollants source | `images/planche-autocollants.webp` |
 | Fusion et contrôles | `outils/fusionne-marques.mjs` |
@@ -112,6 +112,25 @@ ses propres champs de macronutriments, et `libreCalcul()` les lit. Avant, les
 macros venaient d'une fiche figée, retrouvée par comparaison du nom :
 renommer l'aliment ou corriger une valeur faisait silencieusement retomber la
 composition à zéro.
+
+**Un repas se garde sous un nom.** Un dîner de pâtes, fromage et jambon se
+refait à l'identique : sous la liste d'un repas d'au moins deux lignes,
+« Enregistrer ce repas comme un plat » ouvre un champ de nom **et coche les
+lignes une à une**. Tout est coché au départ, mais un dessert pris à la fin
+n'appartient pas au plat : on le décoche, le résumé recompte en direct. Les
+plats vivent dans `profil.plats`, `{ nom: { items: [...] } }`, et se reposent
+dans n'importe quel repas depuis le menu « Mes plats ». **Les lignes sont
+copiées, jamais référencées** : corriger la portion du jour ne doit pas
+réécrire la recette, ni l'inverse. La sélection vit dans `nomPlat.choix`,
+pas dans les cases : une rediffusion du serveur les remettrait toutes à
+coché. Gestion et suppression dans l'onglet Profil, carte « Mes plats ».
+
+**Les raccourcis tiennent en deux menus d'une ligne.** Une liste de
+pastilles dépliée prenait la moitié de l'écran pour des aliments croisés une
+seule fois. « Ce que je reprends souvent » n'admet que les aliments notés au
+moins **deux** fois (`freq[n] >= 2`, vingt au plus) ; « Mes plats » est à
+côté. Les deux se remettent sur « Choisir… » après chaque usage, et la
+rangée entière disparaît quand les deux sont vides.
 
 **Les kilomètres de la journée se notent sans durée.** Ils se font par bouts
 et l'application Santé n'en garde que le total : une carte à part, dans
@@ -322,6 +341,8 @@ node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').m
 node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres du jour, 27 contrôles
+node outils/verifie-plats.mjs     # plats enregistrés et raccourcis,
+                                  # 25 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la
