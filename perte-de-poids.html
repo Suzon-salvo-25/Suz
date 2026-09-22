@@ -1514,17 +1514,6 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
         </div>
 
         <div class="field" style="margin-top:16px">
-          <label for="pActivite">Activité de la vie courante</label>
-          <select id="pActivite">
-            <option value="1.2">Sédentaire — bureau, peu de marche</option>
-            <option value="1.375">Légère — quelques déplacements, un peu debout</option>
-            <option value="1.55">Modérée — beaucoup de marche ou métier debout</option>
-            <option value="1.725">Élevée — métier physique</option>
-          </select>
-          <span class="sub-note">Hors séances de sport : celles-ci s'ajoutent depuis l'onglet Sport, pour éviter de les compter deux fois.</span>
-        </div>
-
-        <div class="field" style="margin-top:16px">
           <label for="pRythme">Rythme visé : <span class="num" id="rythmeVal">0,5</span> kg par semaine</label>
           <input type="range" id="pRythme" min="0.1" max="1" step="0.05" value="0.5">
           <span class="sub-note">Entre 0,25 et 0,75 kg par semaine, la perte reste tenable et préserve le muscle.</span>
@@ -1861,9 +1850,9 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
     <ul>
       <li><b>Le métabolisme de base</b> vient de la formule de Mifflin-St Jeor, la plus fiable en population générale. C'est une estimation : ton métabolisme réel peut s'en écarter de 10 % environ.</li>
       <li><b>Course, marche, vélo et natation se saisissent comme sur Strava</b> : distance en kilomètres, durée en heures et minutes, allure en minutes par kilomètre. Quand tu donnes la distance, l'allure est calculée depuis ta séance réelle et les calories suivent les équations de l'American College of Sports Medicine, dont dérivent les équivalents métaboliques habituels. Sans distance, choisis ton allure dans la liste.</li>
-      <li><b>Les kilomètres de la journée se notent sans durée.</b> Ils se font par bouts, et Santé n'en garde que le total. L'équation de marche de l'ACSM se simplifie alors d'elle-même : son terme de vitesse vaut 0,5 kcal par kilogramme et par kilomètre, quelle que soit l'allure. C'est ce coût net qui est compté, le repos de ces minutes étant déjà porté par ton niveau d'activité.</li>
+      <li><b>Les kilomètres de la journée se notent sans durée.</b> Ils se font par bouts, et Santé n'en garde que le total. L'équation de marche de l'ACSM se simplifie alors d'elle-même : son terme de vitesse vaut 0,5 kcal par kilogramme et par kilomètre, quelle que soit l'allure. C'est ce coût net qui est compté, le repos de ces minutes étant déjà dans ta dépense au repos.</li>
       <li><b>Les calories du sport</b> dépendent de ton poids du moment, donc elles baissent naturellement à mesure que tu perds.</li>
-      <li><b>Le niveau d'activité du profil ne compte pas les séances de sport.</b> Elles s'ajoutent quand tu les saisis, sinon elles seraient comptées deux fois.</li>
+      <li><b>Il n'y a pas de niveau d'activité à choisir.</b> Personne ne sait honnêtement s'il est « léger » ou « modéré », et ce choix déplaçait l'objectif de 350 kcal par jour. Ce qui reste au plancher est ce que le corps dépense quoi qu'il arrive : le métabolisme de base multiplié par 1,15, ce qui couvre la digestion, environ 10 % de ce que tu manges, et les gestes qui ne sont pas des pas. Tout le reste est mesuré : tes kilomètres et tes séances s'ajoutent à l'objectif du jour. Un jour où tu ne notes rien, l'objectif retombe à cette dépense au repos moins le déficit, sans jamais passer sous 1 200 kcal pour une femme.</li>
       <li><b>Un kilogramme de masse grasse vaut environ 7 700 kcal.</b> C'est ce qui relie le déficit quotidien au rythme de perte affiché.</li>
       <li><b>La moyenne sur sept jours est la seule lecture honnête du poids.</b> D'un jour à l'autre, ce sont surtout l'eau, le sel et le transit qui bougent, pas la graisse.</li>
       <li><b>Les valeurs des aliments sont des ordres de grandeur</b> pour des portions courantes. Une recette maison peut s'en écarter nettement.</li>
@@ -5453,7 +5442,7 @@ var SPORTS = [
     return {
       prenom: "", sexe: "f", age: null, taille: null,
       depart: null, objectif: null, debut: AUJ, fin: "2027-04-08",
-      activite: 1.375, rythme: 0.5, seances: 3,
+      rythme: 0.5, seances: 3,
       freq: {}, perso: {}, plats: {}
     };
   }
@@ -5493,7 +5482,7 @@ var SPORTS = [
     raw = copieLibre(raw);
     if (!raw || typeof raw !== "object") return p;
     ["prenom", "sexe", "debut", "fin"].forEach(function (k) { if (typeof raw[k] === "string") p[k] = raw[k]; });
-    ["age", "taille", "depart", "objectif", "activite", "rythme", "seances"].forEach(function (k) {
+    ["age", "taille", "depart", "objectif", "rythme", "seances"].forEach(function (k) {
       if (typeof raw[k] === "number" && isFinite(raw[k])) p[k] = raw[k];
     });
     if (p.sexe !== "h" && p.sexe !== "f") p.sexe = "f";
@@ -5896,15 +5885,33 @@ var SPORTS = [
     var b = 10 * poids + 6.25 * p.taille - 5 * p.age;
     return Math.round(p.sexe === "h" ? b + 5 : b - 161);
   }
+  /* Le niveau d'activité a été retiré des réglages : personne ne sait
+     honnêtement s'il est « léger » ou « modéré », et le choix déplaçait
+     l'objectif de 350 kcal. Ce qui reste au plancher n'est plus un jugement
+     sur un mode de vie, mais ce que le corps dépense quoi qu'il arrive : le
+     métabolisme de base, la digestion (environ 10 % de ce qu'on mange) et
+     les gestes qui ne sont pas des pas, se lever, s'habiller, cuisiner.
+     Tout le reste est mesuré : les kilomètres de la journée et les séances
+     saisies s'ajoutent à l'objectif. */
+  var COEF_REPOS = 1.15;
+
   function depenseBase(poids) {
     var mb = metabolismeBase(poids);
-    return mb ? Math.round(mb * P().activite) : null;
+    return mb ? Math.round(mb * COEF_REPOS) : null;
   }
   function deficitJour() { return Math.round(P().rythme * 7700 / 7); }
+  // Deux planchers, et ils ne servent pas à la même chose. Celui-ci prévient
+  // dans le profil : descendre sous son métabolisme de base durablement n'est
+  // pas tenable, et l'alerte dit de quoi baisser le rythme.
   function plancherKcal(poids) {
     var mb = metabolismeBase(poids) || 0;
     return Math.max(mb, P().sexe === "h" ? 1500 : 1200);
   }
+  // Celui-là borne le chiffre du jour. Il est plus bas, sinon il se
+  // déclencherait tous les jours et la marche ne ferait plus rien bouger :
+  // l'objectif serait figé quoi qu'on fasse, ce qui est exactement ce qu'on
+  // cherchait à éviter en retirant le niveau d'activité.
+  function plancherDur() { return P().sexe === "h" ? 1500 : 1200; }
   function kcalSportJour(date) {
     var j = Store.jours[date];
     if (!j || !j.sport) return 0;
@@ -5914,7 +5921,11 @@ var SPORTS = [
     var poids = poidsA(date);
     var dep = depenseBase(poids);
     if (!dep) return null;
-    return Math.round(dep + kcalSportJour(date) - deficitJour());
+    // Un jour sans kilomètres notés ne doit pas produire un objectif de
+    // famine : le plancher vaut le métabolisme de base, jamais moins de
+    // 1 200 kcal.
+    return Math.max(plancherDur(),
+                    Math.round(dep + kcalSportJour(date) - deficitJour()));
   }
   function totauxRepas(date) {
     var j = Store.jours[date] || jourVide(date);
@@ -6036,7 +6047,6 @@ var SPORTS = [
     set("pDebut", p.debut);
     set("pFin", p.fin);
     set("pSeances", p.seances);
-    set("pActivite", String(p.activite));
     var r = document.getElementById("pRythme");
     if (r && document.activeElement !== r) r.value = p.rythme;
     document.getElementById("rythmeVal").textContent = nf(p.rythme, 2);
@@ -6061,8 +6071,8 @@ var SPORTS = [
     cartes.push(['Poids à perdre', reste === null ? "—" : nf(Math.abs(reste), 1), reste === null ? "" : "kg",
       reste === null ? "Renseigne ton poids et ton objectif." : (reste <= 0 ? "Objectif atteint." : "Depuis " + nf(actuel, 1) + " kg vers " + nf(p.objectif, 1) + " kg."), "hero"]);
     cartes.push(['Métabolisme de base', mb ? ni(mb) : "—", "kcal", "Ce que ton corps brûle au repos absolu."]);
-    cartes.push(['Dépense quotidienne', dep ? ni(dep) : "—", "kcal", "Métabolisme × activité courante, sport non compris."]);
-    cartes.push(['Objectif calorique', cible ? ni(cible) : "—", "kcal", "Déficit de " + ni(def) + " kcal par jour. Les séances de sport s'y ajoutent."]);
+    cartes.push(['Dépense au repos', dep ? ni(dep) : "—", "kcal", "Métabolisme, digestion et gestes du quotidien. Ni marche ni sport."]);
+    cartes.push(['Objectif d\'un jour sans rien', cible ? ni(cible) : "—", "kcal", "Déficit de " + ni(def) + " kcal. Tes kilomètres et tes séances s'y ajoutent, jour par jour."]);
     cartes.push(['Indice de masse corporelle', v ? nf(v, 1) : "—", "", categorieImc(v)]);
     cartes.push(['Eau recommandée', actuel ? nf(eauCible(AUJ) / 1000, 1) : "—", "L", "Environ 30 ml par kilogramme de boissons, plus 0,4 L par heure de sport."]);
     cartes.push(['Arrivée estimée', cd ? dateCourte(cd) : "—", "",
@@ -6086,7 +6096,12 @@ var SPORTS = [
     } else {
       var plancher = plancherKcal(actuel);
       if (cible !== null && cible < plancher) {
-        al.push(["crit", "<b>Ce rythme est trop agressif.</b> Il te mènerait à " + ni(cible) + " kcal par jour, sous le plancher de " + ni(plancher) + " kcal. Descends le rythme sous " + nf(Math.max(0.1, Math.floor((dep - plancher) * 7 / 7700 * 20) / 20), 2) + " kg par semaine, ou ajoute des séances de sport."]);
+        // Ce chiffre est celui d'une journée où rien n'est noté. Marcher le
+        // relève, et c'est la première chose à dire.
+        al.push(["crit", "<b>Ce rythme est trop agressif pour une journée sans rien.</b> Sans kilomètres ni séance, il te mènerait à " + ni(cible) +
+          " kcal, sous ton métabolisme de base de " + ni(plancher) + " kcal. Note tes kilomètres chaque jour : " +
+          (actuel ? "dix kilomètres de marche valent " + ni(Math.round(0.5 * actuel * 10)) + " kcal de plus. " : "") +
+          "Sinon, descends le rythme sous " + nf(Math.max(0.1, Math.floor((dep - plancher) * 7 / 7700 * 20) / 20), 2) + " kg par semaine."]);
       }
       if (p.rythme > 0.75) {
         al.push(["warn", "<b>Au-delà de 0,75 kg par semaine</b>, la perte vient de plus en plus du muscle et de l'eau, et la reprise après coup est fréquente."]);
@@ -6124,7 +6139,8 @@ var SPORTS = [
     var nomF = p.sexe === "h" ? "10 × poids + 6,25 × taille − 5 × âge + 5" : "10 × poids + 6,25 × taille − 5 × âge − 161";
     document.getElementById("profilMethode").innerHTML =
       "<p><b>Métabolisme de base.</b> Formule de Mifflin-St Jeor : " + nomF + ". Avec tes valeurs, cela donne " + (mb ? ni(mb) + " kcal" : "un résultat indisponible") + ".</p>" +
-      "<p><b>Dépense quotidienne.</b> Le métabolisme multiplié par " + nf(p.activite, 3) + ", le coefficient de ton niveau d'activité courante. Le sport n'y est pas inclus : chaque séance saisie augmente l'objectif du jour d'autant.</p>" +
+      "<p><b>Dépense au repos.</b> Le métabolisme multiplié par 1,15. Ce coefficient n'est pas un jugement sur ton mode de vie : il couvre la digestion, environ 10 % de ce que tu manges, et les gestes qui ne sont pas des pas. Il n'y a plus de niveau d'activité à choisir, parce que personne ne sait honnêtement où il se situe et que le choix déplaçait l'objectif de 350 kcal.</p>" +
+      "<p><b>Ce qui s'ajoute.</b> Tes kilomètres du jour, à 0,5 kcal par kilogramme et par kilomètre, et chaque séance saisie. Un jour où tu ne notes rien, l'objectif retombe à ta dépense au repos moins le déficit, sans jamais descendre sous " + ni(plancherDur()) + " kcal.</p>" +
       "<p><b>Déficit.</b> Un kilogramme de masse grasse représente environ 7 700 kcal. Pour " + nf(p.rythme, 2) + " kg par semaine, il faut " + ni(def) + " kcal de moins par jour.</p>" +
       "<p><b>Rythme observé.</b> Droite de tendance calculée sur l'ensemble de tes pesées. Elle devient fiable après deux à trois semaines de relevés réguliers.</p>";
   }
@@ -6148,7 +6164,12 @@ var SPORTS = [
 
     document.getElementById("kcalMange").textContent = ni(t.kcal);
     document.getElementById("kcalCible").textContent = cible ? "/ " + ni(cible) + " kcal" : "kcal — complète ton profil";
-    document.getElementById("alimHint").textContent = brule ? "+ " + ni(brule) + " kcal de sport" : "";
+    // L'objectif ne monte que si la journée est notée : le dire, plutôt que
+    // de laisser croire à un chiffre bas.
+    var kmJ = kmMarcheJour(dateCourante);
+    document.getElementById("alimHint").textContent = brule
+      ? "+ " + ni(brule) + " kcal bougé" + (kmJ > 0 ? " · " + nf(kmJ, 1) + " km" : "")
+      : "Note tes kilomètres dans Sport";
 
     var pct = cible ? clamp(t.kcal / cible * 100, 0, 100) : 0;
     var fill = document.getElementById("kcalFill");
@@ -7832,8 +7853,8 @@ var SPORTS = [
       : km > 100
         ? "Au-delà de cent kilomètres, c'est sans doute une faute de frappe."
         : "Pas besoin de durée : ces kilomètres se font par bouts. Le total remplace celui du " +
-          "jour, recopie-le de Santé quand tu veux. Ton niveau d'activité compte déjà la marche " +
-          "ordinaire : mets-le sur «\u00a0Sédentaire\u00a0» si tu notes tes kilomètres chaque jour.";
+          "jour, recopie-le de Santé quand tu veux. C'est lui qui fait monter ton objectif du " +
+          "jour, alors note-le : sans lui, la journée compte comme une journée sans marche.";
   }
 
   function renderSport() {
@@ -7953,7 +7974,6 @@ var SPORTS = [
     p.seances = num("pSeances") || 0;
     p.debut = document.getElementById("pDebut").value || AUJ;
     p.fin = document.getElementById("pFin").value || "";
-    p.activite = parseFloat(document.getElementById("pActivite").value) || 1.375;
     p.rythme = parseFloat(document.getElementById("pRythme").value) || 0.5;
     document.getElementById("rythmeVal").textContent = nf(p.rythme, 2);
     document.getElementById("brandSub").textContent = p.prenom ? "Le carnet de " + p.prenom : "Suivi personnel";
@@ -7984,7 +8004,6 @@ var SPORTS = [
     el.addEventListener("change", flushProfil);
     el.addEventListener("blur", flushProfil);
   });
-  document.getElementById("pActivite").addEventListener("change", majProfilDepuisForm);
   document.getElementById("pRythme").addEventListener("input", function () {
     document.getElementById("rythmeVal").textContent = nf(parseFloat(this.value), 2);
     profilChange();

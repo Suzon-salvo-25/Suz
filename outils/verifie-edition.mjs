@@ -105,6 +105,18 @@ t('ses valeurs ont suivi', (s4.collation.find(x => x.n === 'Riz blanc cuit') || 
   JSON.stringify(s4.collation.find(x => x.n === 'Riz blanc cuit')));
 t('le total du jour ne bouge pas', (await p.textContent('#repasTotal')).includes('332'), await p.textContent('#repasTotal'));
 
+console.log('=== plus de niveau d\'activité, la marche fait l\'objectif ===');
+await p.evaluate(() => document.getElementById('profilBtn').click());
+await p.waitForTimeout(400);
+t('le réglage a disparu', !(await p.$('#pActivite')));
+await p.evaluate(() => document.querySelector('[data-tab="alim"]').click());
+await p.waitForTimeout(400);
+// femme, 29 ans, 168 cm, 77 kg : Mifflin donne 1514 kcal, × 1,15 = 1741,
+// déficit 550, donc 1191, sous le plancher de 1200.
+const objSans = await p.evaluate(() => document.getElementById('kcalCible').textContent);
+t('sans kilomètres, l\'objectif tombe au plancher', objSans.replace(/\s/g, '').includes('1200'), objSans);
+t('et l\'en-tête dit quoi faire', (await p.textContent('#alimHint')).includes('Note tes kilomètres'), await p.textContent('#alimHint'));
+
 console.log('=== les kilomètres de la journée ===');
 await p.evaluate(() => document.querySelector('[data-tab="sport"]').click());
 await p.waitForTimeout(300);
@@ -118,6 +130,13 @@ await p.click('#marcheSave');
 await p.waitForTimeout(400);
 const s5 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
 t('la marche est enregistrée sans durée', s5.length === 1 && s5[0].jour === 1 && s5[0].m === 0, JSON.stringify(s5));
+await p.evaluate(() => document.querySelector('[data-tab="alim"]').click());
+await p.waitForTimeout(400);
+// 1741 + 246 − 550 = 1437, le plancher ne joue plus
+const objAvec = await p.evaluate(() => document.getElementById('kcalCible').textContent);
+t('les kilomètres font monter l\'objectif', objAvec.replace(/\s/g, '').includes('1437'), objAvec);
+await p.evaluate(() => document.querySelector('[data-tab="sport"]').click());
+await p.waitForTimeout(300);
 t('sa distance est retenue', s5[0].d === 6.4, String(s5[0] && s5[0].d));
 await p.fill('#marcheKm', '9,1');
 await p.click('#marcheSave');
