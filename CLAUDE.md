@@ -15,6 +15,7 @@ rapport. **Ne pas y toucher.**
 | Application en ligne | https://claude.ai/artifact/3LM1PhEuLuXapTZoGMUeyJ |
 | Harnais de test | `outils/verifie.mjs` |
 | Fiches d'aliments, par domaine | `donnees/aliments/*.json` |
+| Planche d'autocollants source | `images/planche-autocollants.webp` |
 | Fusion et contrôles | `outils/fusionne-marques.mjs` |
 | Imports en masse | `outils/importe-ciqual.mjs`, `outils/importe-openfoodfacts.mjs` |
 
@@ -172,27 +173,40 @@ Les tokens gardent leurs anciens noms (`--blue`, `--aqua`, `--violet`) parce
 que le JavaScript les référence pour les macronutriments : les renommer
 casserait le bilan. Leur rôle est celui du tableau, pas celui du nom.
 
-**Illustrations.** Vingt et un motifs découpés dans la planche
-d'autocollants aquarelle de Suzon, qui lui appartient. Ils sont détourés du
-fond blanc, exportés en WebP à transparence et **embarqués en base64** dans
-le CSS : le fichier doit rester autonome, donc jamais d'image externe. Chaque
-motif est déclaré une seule fois, dans une classe `.st-<nom>`, et posé par
-`<span class="illu st-<nom>" aria-hidden="true">`. Tous en `aria-hidden` :
-ils décorent, ils n'informent pas.
+**Illustrations.** Vingt-trois motifs découpés dans la planche
+d'autocollants aquarelle de Suzon, qui lui appartient. **Source de
+référence : `images/planche-autocollants.webp`, 1125 × 2000.** Une première version avait été
+découpée dans un aperçu à 232 × 405 : les motifs y faisaient 40 à 90 px et
+rendaient flou. Si la planche doit être redécoupée, partir de la haute
+résolution, jamais d'un aperçu.
 
-Chaque en-tête de carte en porte un, distinct ; quatre états vides en portent
+Ils sont détourés du fond blanc, exportés en WebP à transparence et
+**embarqués en base64** dans le CSS : le fichier doit rester autonome, donc
+jamais d'image externe. Chaque motif est déclaré une seule fois, dans une
+classe `.st-<nom>`, et posé par `<span class="illu st-<nom>"
+aria-hidden="true">`. Tous en `aria-hidden` : ils décorent, ils n'informent
+pas.
+
+Chaque en-tête de carte en porte un, distinct ; cinq états vides en portent
 un aussi ; le bandeau a le soleil et l'étoile de mer, qui flottent doucement
 (animation coupée sous `prefers-reduced-motion`). **Aucun motif déclaré sans
-emploi** : le verre et la bouteille ont été retirés faute de place, plutôt que
-de laisser 6 ko de base64 mort.
+emploi**, et un contrôle au montage le vérifie. La bouteille de soda de
+marque a été écartée : elle n'a pas sa place dans un carnet de perte de
+poids.
 
-Pour en ajouter un, le découpage est reproductible : masque du fond par
-« clair et peu saturé » puis remplissage depuis les bords, de sorte que les
-blancs intérieurs d'un dessin (reflets, pulpe) restent opaques ; étiquetage
-des composantes connexes ; export à deux fois la taille native, alpha
-légèrement adouci. La planche source fait 232 × 405, donc les motifs font
-40 à 90 px : ne pas les afficher beaucoup plus grand que 2×, l'aquarelle
-supporte le flou mais pas l'agrandissement franc.
+Budget d'export : 210 px de côté pour les motifs d'en-tête, 420 px pour le
+soleil et l'étoile du bandeau, seuls affichés en grand. Ce sont les deux
+seuls qui méritent le poids. L'ensemble pèse 238 ko de WebP, soit 319 ko une
+fois en base64.
+
+Le découpage est reproductible : masque du fond par « clair et peu saturé »
+puis remplissage depuis les bords, de sorte que les blancs intérieurs d'un
+dessin (reflets, pulpe) restent opaques ; étiquetage des composantes
+connexes. Deux corrections tiennent à la planche elle-même : la tête de la
+tortue se détache du corps et doit être recollée ; la pêche touche les
+fraises et se sépare par deux pixels d'érosion. **L'érosion laisse des
+éclats de quelques pixels** : les filtrer avant de nommer les morceaux,
+sinon le troisième n'a pas de nom.
 
 Typographie : Anton (display, un seul poids, toujours en capitales),
 Figtree (texte), Azeret Mono (chiffres tabulaires et étiquettes). Tout token
