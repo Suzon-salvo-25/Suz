@@ -32,7 +32,15 @@ await p.goto('file:///home/user/Suz/perte-de-poids.html');
 await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
 await p.waitForTimeout(800);
 
+const ouvreRepas = (k) => p.evaluate(x => {
+  const d = document.querySelector('details.meal[data-repas="' + x + '"]');
+  if (d && !d.open) d.open = true;
+}, k);
+
 console.log('=== modifier une ligne existante ===');
+t('les repas sont repliés au départ', await p.evaluate(() =>
+  [...document.querySelectorAll('details.meal')].every(d => !d.open)));
+await ouvreRepas('petitdej');
 await p.click('[data-edit-repas="petitdej"]');
 await p.waitForTimeout(200);
 t('le formulaire s\'ouvre', await p.isVisible('#editNom'));
@@ -74,6 +82,7 @@ const c = s3.find(x => x.n.startsWith('Compote'));
 t('l\'aliment libre est ajouté', !!c);
 t('ses macros sont retenues', c && c.g === 17 && c.p === 0.5, JSON.stringify(c));
 t('sa quantité est retenue', c && c.gr === 120, c && String(c.gr));
+await ouvreRepas('petitdej');
 await p.click('[data-edit-repas="petitdej"][data-i="1"]');
 await p.waitForTimeout(200);
 t('un aliment libre s\'édite aussi', await p.isVisible('#editKcal'));
@@ -81,6 +90,7 @@ t('sans champ quantité, il n\'est pas dans la base', !(await p.isVisible('#edit
 await p.screenshot({ path: S + 'shots/edition.png', clip: { x: 0, y: 150, width: 1100, height: 620 } });
 
 console.log('=== changer une ligne de repas ===');
+await ouvreRepas('petitdej');
 await p.click('[data-edit-repas="petitdej"][data-i="0"]');
 await p.waitForTimeout(200);
 t('le formulaire porte un choix de repas', await p.isVisible('#editRepas'));

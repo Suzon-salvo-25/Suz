@@ -131,11 +131,34 @@ repas, on corrige la ligne et on réenregistre sous le même nom, ce qui
 remplace la recette.
 
 **Les raccourcis tiennent en deux menus d'une ligne.** Une liste de
-pastilles dépliée prenait la moitié de l'écran pour des aliments croisés une
-seule fois. « Ce que je reprends souvent » n'admet que les aliments notés au
-moins **deux** fois (`freq[n] >= 2`, vingt au plus) ; « Mes plats » est à
-côté. Les deux se remettent sur « Choisir… » après chaque usage, et la
-rangée entière disparaît quand les deux sont vides.
+pastilles dépliée prenait la moitié de l'écran. « Mes raccourcis » s'ouvre
+sur un `<optgroup>` « Ce que je reprends souvent » (`freq[n] >= 2`,
+quarante au plus), puis sur trois familles tirées de la base :
+Petit-déjeuner (`pain`, `laitier`), Collation (`fruit`, `noix`) et Sucré
+(`sucre`), soit environ 520 entrées. En sont écartés les noms de plus de
+34 caractères et les moyennes de Ciqual (`RE_CIQUAL` attrape « (aliment
+moyen) », « sans précision… ») : elles ne se lisent pas dans un menu. La
+recherche, elle, continue de voir toute la base. « Mes plats » est à côté ;
+les deux se remettent sur « Choisir… » après usage, et la rangée disparaît
+quand les deux sont vides.
+
+**Le filtre « Type de produit » a été retiré.** Quatre boutons Tout / Maison
+/ Marques / Industriel, jamais utilisés, qui prenaient une rangée entière.
+La recherche cherche dans tout.
+
+**Les repas sont repliés par défaut.** Quatre listes ouvertes faisaient un
+écran entier à faire défiler avant d'atteindre le bilan. Chaque repas est un
+`<details>` dont le résumé porte le nom, le nombre d'aliments et les
+calories ; le chevron pivote à l'ouverture. **L'ouverture vit dans
+`repasOuverts`, pas dans le DOM** : la liste est redessinée à chaque
+rediffusion du serveur. Modifier une ligne, nommer un plat ou poser un plat
+ouvre le repas concerné, sinon le formulaire s'ouvrirait dans un bloc fermé.
+
+**« Mon parcours » et « Où j'en suis » n'en font qu'une.** La barre de
+parcours dit déjà le poids du jour, le départ et ce qui reste à perdre : les
+tuiles les répétaient mot pour mot. Ne restent que les lectures que la barre
+ne porte pas, moyenne sept jours, variation de la semaine, depuis le départ,
+heure habituelle, tour de taille et nombre de pesées.
 
 **Les kilomètres de la journée se notent sans durée.** Ils se font par bouts
 et l'application Santé n'en garde que le total : une carte à part, dans
@@ -371,10 +394,10 @@ la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1])"
 node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
-                                  # repas, kilomètres du jour, 27 contrôles
-node outils/verifie-plats.mjs     # plats enregistrés, raccourcis,
+                                  # repas, kilomètres du jour, 28 contrôles
+node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
-                                  # 46 contrôles
+                                  # 58 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

@@ -1256,6 +1256,27 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 .meal-head { background: transparent; border-bottom: 1px solid var(--line); }
 .meal-head h3 { font-family: var(--f-display); font-weight: 600; font-size: 1rem; }
 .meal { border-bottom: 1px solid var(--line); }
+
+/* Replié par défaut : quatre listes ouvertes, c'est un écran entier à faire
+   défiler avant d'arriver au bilan. Le repère est un chevron dessiné, il
+   pivote à l'ouverture. */
+details.meal > summary.meal-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; cursor: pointer; list-style: none;
+  min-height: 46px;
+}
+details.meal > summary.meal-head::-webkit-details-marker { display: none; }
+details.meal > summary.meal-head:hover { background: var(--panel-2); }
+details.meal > summary.meal-head:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.meal-head .chev { flex: none; color: var(--ink-faint); transition: transform .15s ease; }
+details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
+.meal-head h3 { flex: 0 1 auto; min-width: 0; }
+.meal-head .mn {
+  flex: 1 1 auto; font-size: .78rem; color: var(--ink-faint); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.meal-head .mk { flex: none; }
+@media (prefers-reduced-motion: reduce) { .meal-head .chev { transition: none; } }
 .foot { border-top: 1px solid var(--line); margin-top: 40px; }
 .foot h2 { font-size: 1.1rem; }
 .foot li { font-size: .86rem; }
@@ -1559,7 +1580,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
         </div>
         <div class="row-inline" id="raccourcis" hidden style="margin-bottom:14px">
           <div class="field" id="favorisBloc" style="flex:1 1 200px" hidden>
-            <label for="favSel">Ce que je reprends souvent</label>
+            <label for="favSel">Mes raccourcis</label>
             <select id="favSel"></select>
           </div>
           <div class="field" id="platsBloc" style="flex:1 1 200px" hidden>
@@ -1571,16 +1592,6 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
           <summary style="cursor:pointer;font-size:.86rem;color:var(--ink-soft)">Modifier ou supprimer un plat</summary>
           <ul class="items items-simple bordee" id="platsGestion"></ul>
         </details>
-
-        <div class="field" style="margin-bottom:12px">
-          <label id="lblFiltre">Type de produit</label>
-          <div class="seg-choice" role="group" aria-labelledby="lblFiltre">
-            <button type="button" data-filtre="tout" aria-pressed="true">Tout</button>
-            <button type="button" data-filtre="maison" aria-pressed="false">Maison</button>
-            <button type="button" data-filtre="marque" aria-pressed="false">Marques</button>
-            <button type="button" data-filtre="industriel" aria-pressed="false">Industriel</button>
-          </div>
-        </div>
 
         <div class="field search-wrap">
           <label for="foodSearch">Chercher un aliment</label>
@@ -1744,12 +1755,8 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
       <div class="body">
         <div class="parcours" id="parcours"></div>
         <div id="ecartJour"></div>
+        <div class="stats" id="poidsStats" style="margin-top:18px"></div>
       </div>
-    </div>
-
-    <div class="card plain">
-      <header><span class="illu st-etoile" aria-hidden="true"></span><h2>Où j'en suis</h2></header>
-      <div class="body"><div class="stats" id="poidsStats"></div></div>
     </div>
 
     <div class="card plain">
@@ -6200,9 +6207,18 @@ var SPORTS = [
     Object.keys(REPAS_NOMS).forEach(function (k) {
       var items = j.repas[k] || [];
       var sub = items.reduce(function (s, x) { return s + (x.k || 0); }, 0);
-      html += '<div class="meal"><div class="meal-head">' +
+      // Quatre listes dépliées, c'est un écran entier à faire défiler avant
+      // d'atteindre le bilan. Elles s'ouvrent à la demande, et restent
+      // ouvertes tant qu'on ne les referme pas.
+      var ouvert = !!repasOuverts[k] ||
+        (edition && edition.repas === k) || (nomPlat && nomPlat.repas === k);
+      html += '<details class="meal" data-repas="' + k + '"' + (ouvert ? ' open' : '') + '>' +
+        '<summary class="meal-head">' + CHEVRON_REPAS +
         '<h3>' + REPAS_NOMS[k] + '</h3>' +
-        '<span class="mk">' + ni(sub) + ' kcal</span></div>';
+        '<span class="mn">' + (items.length
+          ? items.length + (items.length > 1 ? " aliments" : " aliment")
+          : "vide") + '</span>' +
+        '<span class="mk">' + ni(sub) + ' kcal</span></summary>';
       if (!items.length) {
         html += '<p class="empty"><span class="illu-mini st-ourson" aria-hidden="true"></span>Rien de noté.</p>';
       } else {
@@ -6230,7 +6246,7 @@ var SPORTS = [
           : '<div class="meal-pied"><button type="button" class="lien-edit" data-plat-repas="' + k + '">' +
             ICONE_PLAT + '<span>Enregistrer ce repas comme un plat</span></button></div>';
       }
-      html += '</div>';
+      html += '</details>';
     });
     document.getElementById("repasListe").innerHTML = html;
     document.getElementById("repasTotal").textContent = ni(t.kcal) + " kcal au total";
@@ -6247,6 +6263,7 @@ var SPORTS = [
   function ouvreEdition(k, i) {
     var it = (J().repas[k] || [])[i];
     if (!it) return;
+    repasOuverts[k] = true;
     edition = {
       repas: k, i: i, cible: k,
       nom: it.n, kcal: it.k, p: it.p || 0, g: it.g || 0, l: it.l || 0,
@@ -6278,6 +6295,14 @@ var SPORTS = [
      Le nom en cours de saisie vit ici et pas dans le champ : une rediffusion
      du serveur redessine la liste des repas à tout moment. */
   var nomPlat = null;
+
+  // Quel repas est déplié. L'état vit ici, pas dans le DOM : la liste est
+  // redessinée à chaque rediffusion du serveur.
+  var repasOuverts = {};
+
+  var CHEVRON_REPAS = '<svg class="chev" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" ' +
+    'fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></svg>';
 
   var ICONE_PLAT = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" ' +
     'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
@@ -6360,7 +6385,6 @@ var SPORTS = [
   }
   var ALIM_PLIE = ALIMENTS.map(function (a) { return plie(a[0]); });
 
-  var filtreType = "tout";
 
   /* ==================== BILAN DE LA JOURNÉE ====================
      Les repères retenus : 1,6 g de protéines par kilogramme du poids visé,
@@ -6663,7 +6687,6 @@ var SPORTS = [
     var freq = P().freq || {};
     var res = [];
     for (var i = 0; i < ALIM_PLIE.length; i++) {
-      if (filtreType !== "tout" && typeAliment(ALIMENTS[i][0]) !== filtreType) continue;
       var n = ALIM_PLIE[i];
       var ok = true, pos = 0;
       for (var m = 0; m < mots.length; m++) {
@@ -6718,28 +6741,67 @@ var SPORTS = [
     Store.sauveProfil();
   }
 
-  /* Une liste de pastilles dépliée prenait la moitié de l'écran pour des
-     aliments vus une seule fois. Deux menus déroulants d'une ligne les
-     remplacent, et seuls entrent les aliments repris au moins deux fois :
-     un aliment croisé une fois n'est pas une habitude. */
+  /* Une liste de pastilles dépliée prenait la moitié de l'écran. Un menu
+     déroulant d'une ligne la remplace, et il s'ouvre sur les familles qu'on
+     reprend sans y penser : petit-déjeuner, collation, sucré. Les entrées
+     de Ciqual qui portent une longue précision entre parenthèses en sont
+     écartées, elles ne se lisent pas dans un menu ; la recherche, elle,
+     continue de voir toute la base. */
+  // Ciqual qualifie ses moyennes entre parenthèses : « Fromage (aliment
+  // moyen) » n'a rien à faire dans un menu de raccourcis.
+  var RE_CIQUAL = /\((aliment moyen|.*?moyenne?|sans précision.*?|aliment reconstitué)\)/i;
+
+  var FAMILLES_RACCOURCI = [
+    ["Petit-déjeuner", ["pain", "laitier"]],
+    ["Collation", ["fruit", "noix"]],
+    ["Sucré", ["sucre"]]
+  ];
+
+  function optionAliment(i) {
+    var a = ALIMENTS[i];
+    return '<option value="' + esc(a[0]) + '">' + esc(a[0]) + ' · ' +
+      ni(Math.round(a[1] * a[6] / 100)) + ' kcal</option>';
+  }
+
   function renderFavoris() {
     var p = P();
     var freq = p.freq || {};
-    var noms = Object.keys(freq)
+    var deja = {};
+    var groupes = [];
+
+    var siens = Object.keys(freq)
       .filter(function (n) { return freq[n] >= 2; })
       .sort(function (a, b) { return freq[b] - freq[a]; })
-      .slice(0, 20);
-    var lignes = noms.map(function (n) {
-      var i = ALIMENTS.findIndex(function (a) { return a[0] === n; });
-      var kcal = i !== -1 ? Math.round(ALIMENTS[i][1] * ALIMENTS[i][6] / 100) : (p.perso && p.perso[n]);
-      if (kcal === undefined || kcal === null) return "";
-      return '<option value="' + esc(n) + '">' + esc(n) + ' · ' + ni(kcal) + ' kcal</option>';
-    }).filter(Boolean);
+      .slice(0, 40)
+      .map(function (n) {
+        var i = ALIMENTS.findIndex(function (a) { return a[0] === n; });
+        if (i !== -1) { deja[n] = 1; return optionAliment(i); }
+        var kcal = p.perso && p.perso[n];
+        if (kcal === undefined || kcal === null) return "";
+        deja[n] = 1;
+        return '<option value="' + esc(n) + '">' + esc(n) + ' · ' + ni(kcal) + ' kcal</option>';
+      }).filter(Boolean);
+    if (siens.length) groupes.push(['<optgroup label="Ce que je reprends souvent">' + siens.join("") + '</optgroup>']);
+
+    FAMILLES_RACCOURCI.forEach(function (f) {
+      var lignes = [];
+      for (var i = 0; i < ALIMENTS.length; i++) {
+        var a = ALIMENTS[i];
+        if (f[1].indexOf(a[5]) === -1 || deja[a[0]]) continue;
+        if (a[0].length > 34 || typeAliment(a[0]) === "industriel" || RE_CIQUAL.test(a[0])) continue;
+        lignes.push([a[0], i]);
+      }
+      if (!lignes.length) return;
+      lignes.sort(function (x, y) { return x[0].localeCompare(y[0], "fr"); });
+      groupes.push(['<optgroup label="' + esc(f[0]) + '">' +
+        lignes.map(function (x) { return optionAliment(x[1]); }).join("") + '</optgroup>']);
+    });
+
     var bloc = document.getElementById("favorisBloc");
-    bloc.hidden = !lignes.length;
-    if (lignes.length) {
+    bloc.hidden = !groupes.length;
+    if (groupes.length) {
       document.getElementById("favSel").innerHTML =
-        '<option value="">Choisir…</option>' + lignes.join("");
+        '<option value="">Choisir…</option>' + groupes.join("");
     }
     renderPlatsListe();
   }
@@ -6923,7 +6985,6 @@ var SPORTS = [
     }
     var varSem = (moy !== null && moyPrec !== null) ? moy - moyPrec : null;
     var varTot = (actuel !== null && depart !== null) ? actuel - depart : null;
-    var reste = (actuel !== null && p.objectif) ? actuel - p.objectif : null;
     var hHab = heureHabituelle();
 
     var tours = Object.keys(Store.jours).filter(function (d) {
@@ -6937,11 +6998,10 @@ var SPORTS = [
       return (v > 0 ? "+" : v < 0 ? "−" : "") + nf(Math.abs(v), dec);
     }
 
+    // La barre de parcours dit déjà le poids du jour, ce qui reste à perdre et
+    // le point de départ : les répéter en tuiles faisait lire deux fois la
+    // même chose. Ne restent ici que les lectures qu'elle ne porte pas.
     var cartes = [
-      ['Poids actuel', actuel === null ? "—" : nf(actuel, 1), "kg",
-        l.length ? ("Relevé le " + dateCourte(l[l.length - 1].date) +
-          (Store.jours[l[l.length - 1].date].heure ? " à " + hhmm(minutesDe(Store.jours[l[l.length - 1].date].heure)) : "") + ".")
-          : "Aucune pesée enregistrée.", actuel === null ? "" : "hero"],
       ['Moyenne 7 jours', moy === null ? "—" : nf(moy, 1), "kg",
         serieMesuree(l).lissee
           ? "La lecture à retenir, bien plus que le chiffre du jour."
@@ -6951,8 +7011,6 @@ var SPORTS = [
           : (varSem < 0 ? "En baisse, c'est la bonne direction." : varSem > 0 ? "En hausse sur sept jours." : "Stable.")],
       ['Depuis le départ', signe(varTot, 1), varTot === null ? "" : "kg",
         depart === null ? "Renseigne un poids de départ." : "Départ à " + nf(depart, 1) + " kg."],
-      ['Reste à perdre', reste === null ? "—" : (reste <= 0 ? "0" : nf(reste, 1)), "kg",
-        p.objectif ? "Objectif : " + nf(p.objectif, 1) + " kg." : "Aucun objectif fixé."],
       ['Heure habituelle', hHab === null ? "—" : hhmm(hHab), "",
         hHab === null ? "Note l'heure de tes pesées pour fiabiliser la courbe." : "Médiane de tes pesées horodatées."],
       ['Tour de taille', tourAct === null ? "—" : nf(tourAct, 1), tourAct === null ? "" : "cm",
@@ -8035,15 +8093,6 @@ var SPORTS = [
     var b = e.target.closest("[data-food]");
     if (b) ouvrePicker(+b.dataset.food);
   });
-  document.querySelectorAll("[data-filtre]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      filtreType = b.dataset.filtre;
-      document.querySelectorAll("[data-filtre]").forEach(function (o) {
-        o.setAttribute("aria-pressed", String(o.dataset.filtre === filtreType));
-      });
-      renderResultats(document.getElementById("foodSearch").value);
-    });
-  });
 
   document.getElementById("platsGestion").addEventListener("click", protege("suppression d'un plat", function (e) {
     // Un plat représente un repas entier ressaisi : on demande avant, et la
@@ -8112,6 +8161,7 @@ var SPORTS = [
     if (!nom || !plats()[nom]) return;
     var repas = document.getElementById("foodRepas").value;
     var k = posePlat(nom, repas);
+    repasOuverts[repas] = true;
     Store.sauveJour(dateCourante);
     renderAlim(); renderBandeau(); majDiag();
     toast(nom + " ajouté " + REPAS_VERS[repas] + " · " + ni(k) + " kcal");
@@ -8420,6 +8470,7 @@ var SPORTS = [
     var plat = e.target.closest("[data-plat-repas]");
     if (plat) {
       edition = null;
+      repasOuverts[plat.dataset.platRepas] = true;
       nomPlat = {
         repas: plat.dataset.platRepas, nom: "",
         choix: (J().repas[plat.dataset.platRepas] || []).map(function (_, i) { return i; })
@@ -8481,6 +8532,11 @@ var SPORTS = [
   }));
 
   // La quantité pilote les valeurs, et l'inverse délie la quantité.
+  document.getElementById("repasListe").addEventListener("toggle", function (e) {
+    var d = e.target.closest("details[data-repas]");
+    if (d) repasOuverts[d.dataset.repas] = d.open;
+  }, true);
+
   document.getElementById("repasListe").addEventListener("input", function (e) {
     if (e.target.id === "platNom" && nomPlat) { nomPlat.nom = e.target.value; return; }
     if (!edition) return;
