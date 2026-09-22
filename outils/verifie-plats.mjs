@@ -81,28 +81,71 @@ await p.waitForTimeout(400);
 const pr2 = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
 t('corriger la ligne ne réécrit pas le plat', pr2['Pâtes au jambon'].items[0].k === 262, String(pr2['Pâtes au jambon'].items[0].k));
 
-console.log('=== supprimer un plat ===');
-t('la suppression est à côté du menu', await p.isVisible('#platsGere'));
+console.log('=== gérer ses plats ===');
+t('la gestion est à côté du menu', await p.isVisible('#platsGere'));
 t('elle est repliée au départ', !(await p.evaluate(() => document.getElementById('platsGere').open)));
 await p.evaluate(() => document.querySelector('#platsGere summary').click());
 await p.waitForTimeout(250);
 t('le plat y est listé', (await p.textContent('#platsGestion')).includes('Pâtes au jambon'));
 t('avec ses aliments en clair', (await p.textContent('#platsGestion')).includes('Jambon blanc'));
 
-// refuser la confirmation ne supprime rien
-p.once('dialog', d => d.dismiss());
-await p.click('[data-del-plat]');
-await p.waitForTimeout(400);
-const pr3 = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
-t('annuler la confirmation garde le plat', !!pr3['Pâtes au jambon'], JSON.stringify(Object.keys(pr3)));
+// aucune boîte native : elles ne s'ouvrent pas dans l'iframe de l'artefact
+let boites = 0;
+p.on('dialog', d => { boites++; d.dismiss(); });
 
-p.once('dialog', d => d.accept());
+console.log('=== modifier un plat ===');
+await p.click('[data-edit-plat]');
+await p.waitForTimeout(250);
+t('le formulaire s\'ouvre', await p.isVisible('#platEditNom'));
+t('le nom est pré-rempli', (await p.inputValue('#platEditNom')) === 'Pâtes au jambon', await p.inputValue('#platEditNom'));
+t('chaque aliment porte sa croix', (await p.$$('[data-plat-retire]')).length === 3, String((await p.$$('[data-plat-retire]')).length));
+await p.click('[data-plat-retire="2"]');
+await p.waitForTimeout(250);
+t('retirer un aliment le sort du formulaire', (await p.$$('[data-plat-retire]')).length === 2);
+t('le total du formulaire suit', (await p.textContent('.plat-edit .edit-aide')).includes('316 kcal'), await p.textContent('.plat-edit .edit-aide'));
+await p.fill('#platEditNom', 'Pâtes jambon simple');
+await p.click('[data-plat-enr]');
+await p.waitForTimeout(400);
+const pm = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
+t('le plat est renommé', !!pm['Pâtes jambon simple'] && !pm['Pâtes au jambon'], JSON.stringify(Object.keys(pm)));
+t('et allégé de son aliment', pm['Pâtes jambon simple'].items.length === 2, JSON.stringify(pm['Pâtes jambon simple'].items.map(x => x.n)));
+t('le menu reprend le nouveau nom', (await p.textContent('#platSel')).includes('Pâtes jambon simple'));
+
+console.log('=== supprimer un plat ===');
 await p.click('[data-del-plat]');
+await p.waitForTimeout(250);
+t('la question se pose dans la ligne', await p.isVisible('[data-del-oui]'));
+await p.click('[data-del-non]');
+await p.waitForTimeout(300);
+const pr3 = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
+t('annuler garde le plat', !!pr3['Pâtes jambon simple'], JSON.stringify(Object.keys(pr3)));
+t('la ligne revient à la normale', !(await p.isVisible('[data-del-oui]')));
+
+await p.click('[data-del-plat]');
+await p.waitForTimeout(250);
+await p.click('[data-del-oui]');
 await p.waitForTimeout(400);
 const pr4 = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.plats);
-t('confirmer le supprime', !pr4['Pâtes au jambon'], JSON.stringify(Object.keys(pr4)));
+t('confirmer le supprime', !pr4['Pâtes jambon simple'], JSON.stringify(Object.keys(pr4)));
 t('le menu des plats disparaît avec lui', !(await p.isVisible('#platSel')));
-t('et le bloc de suppression aussi', !(await p.isVisible('#platsGere')));
+t('et le bloc de gestion aussi', !(await p.isVisible('#platsGere')));
+t('aucune boîte native n\'a été demandée', boites === 0, String(boites));
+
+console.log('=== « Tout effacer » se confirme aussi dans la page ===');
+await p.evaluate(() => document.getElementById('profilBtn').click());
+await p.waitForTimeout(400);
+await p.click('#wipeBtn');
+await p.waitForTimeout(250);
+t('la confirmation apparaît', await p.isVisible('#wipeOui'));
+await p.click('#wipeNon');
+await p.waitForTimeout(250);
+t('annuler la referme', !(await p.isVisible('#wipeOui')) && (await p.isVisible('#wipeBtn')));
+await p.click('#wipeBtn');
+await p.click('#wipeOui');
+await p.waitForTimeout(500);
+const vide = await p.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')));
+t('confirmer efface tout', Object.keys(vide.jours).length === 0, JSON.stringify(Object.keys(vide.jours)));
+t('toujours aucune boîte native', boites === 0, String(boites));
 
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');

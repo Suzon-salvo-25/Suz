@@ -123,9 +123,12 @@ dans n'importe quel repas depuis le menu « Mes plats ». **Les lignes sont
 copiées, jamais référencées** : corriger la portion du jour ne doit pas
 réécrire la recette, ni l'inverse. La sélection vit dans `nomPlat.choix`,
 pas dans les cases : une rediffusion du serveur les remettrait toutes à
-coché. **La suppression est sous le menu « Mes plats »**, dans un `<details>`
-replié, et pas dans le profil : Suzon l'y cherchait et ne la trouvait pas.
-Elle passe par `window.confirm`, comme l'effacement des données.
+coché. **Modifier et supprimer sont sous le menu « Mes plats »**, dans un
+`<details>` replié, et pas dans le profil : Suzon l'y cherchait et ne la
+trouvait pas. « Modifier » renomme le plat et en retire des aliments, un au
+moins devant rester ; pour changer une quantité, on pose le plat dans un
+repas, on corrige la ligne et on réenregistre sous le même nom, ce qui
+remplace la recette.
 
 **Les raccourcis tiennent en deux menus d'une ligne.** Une liste de
 pastilles dépliée prenait la moitié de l'écran pour des aliments croisés une
@@ -180,7 +183,15 @@ en parallèle. Le mode est affiché en bas de page.
    `#panel-alim summary` désignait la saisie libre, jusqu'à ce que le bloc
    de suppression des plats arrive avant elle. Le bloc de saisie libre
    porte `id="libreBloc"`, et les harnais le visent par cet identifiant.
-9. **Une règle de grille écrite pour une liste s'applique à l'autre.**
+9. **`window.confirm` ne s'ouvre pas dans l'artefact.** La page tourne dans
+   une iframe bac à sable : l'appel renvoie faux sans rien afficher, donc
+   `if (!confirm(...)) return;` transformait le bouton en bouton mort, sans
+   message ni bannière. C'est ce qui a fait dire à Suzon que la suppression
+   d'un plat ne marchait pas, et « Tout effacer » avait le même défaut
+   depuis toujours. **Aucune boîte native** : la question se pose dans la
+   page, dans la ligne concernée. Le harnais compte les `dialog` et refuse
+   qu'il y en ait.
+10. **Une règle de grille écrite pour une liste s'applique à l'autre.**
    Les lignes de repas ont un bloc `.actions`, celles du sport une croix
    nue : placer `.kc` en colonne 2 a fait tomber la croix des séances sur
    une ligne à elle. La liste des séances porte `items-simple` et garde ses
@@ -361,8 +372,9 @@ node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').m
 node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres du jour, 27 contrôles
-node outils/verifie-plats.mjs     # plats enregistrés, raccourcis et
-                                  # suppression, 31 contrôles
+node outils/verifie-plats.mjs     # plats enregistrés, raccourcis,
+                                  # modification et suppression,
+                                  # 46 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

@@ -1297,6 +1297,28 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
   overflow: hidden; margin-top: 9px; background: var(--panel-2);
 }
 .items.bordee li { padding: 9px 13px; }
+.items li.plat-edit, .items li.plat-suppr { display: block; padding: 0; background: var(--panel); }
+.items li.plat-suppr {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px;
+  align-items: center; padding: 11px 13px;
+  background: color-mix(in srgb, var(--crit) 12%, var(--panel));
+}
+.items li.plat-suppr .nm { font-weight: 700; }
+.plat-lignes { list-style: none; margin: 11px 0 0; padding: 0; }
+.plat-lignes li {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px;
+  align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line);
+  font-size: .87rem;
+}
+.plat-lignes li:last-child { border-bottom: 0; }
+.plat-lignes i { font-style: normal; color: var(--ink-faint); font-size: .8rem; }
+.plat-lignes b {
+  font-weight: 500; font-size: .82rem; color: var(--ink-soft);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.plat-lignes .del { width: 28px; height: 28px; }
+.btn.danger { background: var(--crit); color: #fff; border-color: var(--crit); }
+.btn.danger:hover { filter: brightness(1.1); }
 .items li.choix { grid-template-columns: 1fr auto; }
 .plat-case { display: flex; align-items: center; gap: 12px; min-width: 0; cursor: pointer; }
 .plat-case input { width: 20px; height: 20px; flex: none; accent-color: var(--peche); margin: 0; }
@@ -1508,6 +1530,12 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
         <dl class="diag" id="diagBloc"></dl>
         <p class="prose" style="margin:14px 0 13px">Tout est enregistré automatiquement. Cette action efface définitivement le profil et tous les jours enregistrés.</p>
         <button type="button" class="btn ghost" id="wipeBtn">Tout effacer</button>
+        <div class="row-inline" id="wipeConfirme" hidden>
+          <span class="sub-note" style="flex:1 1 200px;color:var(--crit);font-weight:600">
+            Effacer le profil et tous les jours ? C'est irréversible.</span>
+          <button type="button" class="btn sm danger" id="wipeOui">Oui, tout effacer</button>
+          <button type="button" class="btn ghost sm" id="wipeNon">Annuler</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1540,7 +1568,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
           </div>
         </div>
         <details id="platsGere" hidden style="margin:-6px 0 14px">
-          <summary style="cursor:pointer;font-size:.86rem;color:var(--ink-soft)">Supprimer un plat</summary>
+          <summary style="cursor:pointer;font-size:.86rem;color:var(--ink-soft)">Modifier ou supprimer un plat</summary>
           <ul class="items items-simple bordee" id="platsGestion"></ul>
         </details>
 
@@ -6746,18 +6774,62 @@ var SPORTS = [
     renderPlatsProfil();
   }
 
+  /* La page tourne dans une iframe bac à sable : `window.confirm` y est
+     bloqué et renvoie faux sans rien afficher, si bien que le bouton ne
+     faisait rien du tout. La confirmation se demande donc dans la page. */
+  var editPlat = null;     // { nom, nouveau, items }
+  var supprPlat = null;    // nom en attente de confirmation
+
+  function ligneEditPlat() {
+    var e = editPlat;
+    var kc = e.items.reduce(function (s, x) { return s + (x.k || 0); }, 0);
+    return '<li class="plat-edit"><div class="edit-bloc">' +
+      '<div class="row-inline">' +
+        '<div class="field" style="flex:2 1 180px"><label for="platEditNom">Nom du plat</label>' +
+        '<input type="text" id="platEditNom" autocomplete="off" value="' + esc(e.nouveau) + '"></div>' +
+      '</div>' +
+      '<ul class="plat-lignes">' + e.items.map(function (x, i) {
+        return '<li><span>' + esc(x.n) + (x.d ? ' <i>' + esc(x.d) + '</i>' : '') + '</span>' +
+          '<b>' + ni(x.k) + ' kcal</b>' +
+          '<button type="button" class="del" data-plat-retire="' + i +
+          '" aria-label="Retirer ' + esc(x.n) + ' du plat">\u2715</button></li>';
+      }).join("") + '</ul>' +
+      '<div class="row-inline" style="margin-top:11px">' +
+        '<button type="button" class="btn go sm" data-plat-enr="1">Enregistrer</button>' +
+        '<button type="button" class="btn ghost sm" data-plat-ann="1">Annuler</button>' +
+      '</div>' +
+      '<p class="sub-note edit-aide">' + e.items.length +
+      (e.items.length > 1 ? ' aliments' : ' aliment') + ' · ' + ni(kc) + ' kcal. ' +
+      'Pour changer une quantité, pose le plat dans un repas, corrige la ligne, ' +
+      'puis réenregistre-le sous le même nom.</p>' +
+      '</div></li>';
+  }
+
   function renderPlatsProfil() {
     var noms = Object.keys(plats()).sort(function (a, b) { return a.localeCompare(b, "fr"); });
     var det = document.getElementById("platsGere");
     det.hidden = !noms.length;
-    if (!noms.length) { det.open = false; return; }
+    if (!noms.length) { det.open = false; editPlat = null; supprPlat = null; return; }
     document.getElementById("platsGestion").innerHTML = noms.map(function (n) {
+      if (editPlat && editPlat.nom === n) return ligneEditPlat();
       var pl = plats()[n];
+      if (supprPlat === n) {
+        return '<li class="plat-suppr"><span class="nm">Supprimer « ' + esc(n) + ' » ?' +
+          '<small>Les repas déjà notés avec lui ne bougent pas.</small></span>' +
+          '<span class="actions">' +
+          '<button type="button" class="btn sm danger" data-del-oui="' + esc(n) + '">Supprimer</button>' +
+          '<button type="button" class="btn ghost sm" data-del-non="1">Annuler</button>' +
+          '</span></li>';
+      }
       return '<li><span class="nm">' + esc(n) +
         '<small>' + esc(pl.items.map(function (x) { return x.n; }).join(", ")) + '</small></span>' +
         '<span class="kc">' + ni(totalPlat(pl)) + ' kcal</span>' +
+        '<span class="actions">' +
+        '<button type="button" class="lien-edit" data-edit-plat="' + esc(n) + '">' +
+        ICONE_CRAYON + '<span>Modifier</span></button>' +
         '<button type="button" class="del" data-del-plat="' + esc(n) +
-        '" aria-label="Supprimer le plat ' + esc(n) + '">\u2715</button></li>';
+        '" aria-label="Supprimer le plat ' + esc(n) + '">\u2715</button>' +
+        '</span></li>';
     }).join("");
   }
 
@@ -7898,12 +7970,24 @@ var SPORTS = [
     window.scrollTo(0, 0);
   });
 
+  // Même piège que pour les plats : `window.confirm` ne s'ouvre pas dans
+  // l'iframe, le bouton ne faisait rien. La question se pose dans la page.
   document.getElementById("wipeBtn").addEventListener("click", function () {
-    if (!window.confirm("Effacer définitivement ton profil et tous les jours enregistrés ? Cette action est irréversible.")) return;
+    document.getElementById("wipeBtn").hidden = true;
+    document.getElementById("wipeConfirme").hidden = false;
+  });
+  document.getElementById("wipeNon").addEventListener("click", function () {
+    document.getElementById("wipeConfirme").hidden = true;
+    document.getElementById("wipeBtn").hidden = false;
+  });
+  document.getElementById("wipeOui").addEventListener("click", protege("effacement", function () {
+    document.getElementById("wipeConfirme").hidden = true;
+    document.getElementById("wipeBtn").hidden = false;
     Store.efface();
     dateCourante = AUJ;
     renderTout();
-  });
+    toast("Tout a été effacé.");
+  }));
 
   document.querySelectorAll(".tab").forEach(function (b) {
     b.addEventListener("click", function () { montreOnglet(b.dataset.tab); });
@@ -7962,16 +8046,65 @@ var SPORTS = [
   });
 
   document.getElementById("platsGestion").addEventListener("click", protege("suppression d'un plat", function (e) {
-    var b = e.target.closest("[data-del-plat]");
-    if (!b) return;
-    var nom = b.dataset.delPlat;
-    // Un plat représente un repas entier ressaisi : on demande avant.
-    if (!window.confirm("Supprimer le plat « " + nom + " » ? Les repas déjà notés avec lui ne bougent pas.")) return;
-    delete platsEcrivables()[nom];
-    Store.sauveProfil();
-    renderFavoris();
-    toast(nom + " supprimé.");
+    // Un plat représente un repas entier ressaisi : on demande avant, et la
+    // question se pose dans la ligne elle-même.
+    var dem = e.target.closest("[data-del-plat]");
+    if (dem) { editPlat = null; supprPlat = dem.dataset.delPlat; renderPlatsProfil(); return; }
+    if (e.target.closest("[data-del-non]")) { supprPlat = null; renderPlatsProfil(); return; }
+
+    var oui = e.target.closest("[data-del-oui]");
+    if (oui) {
+      var nom = oui.dataset.delOui;
+      delete platsEcrivables()[nom];
+      supprPlat = null;
+      Store.sauveProfil();
+      renderFavoris();
+      toast(nom + " supprimé.");
+      return;
+    }
+
+    var mod = e.target.closest("[data-edit-plat]");
+    if (mod) {
+      var n = mod.dataset.editPlat;
+      supprPlat = null;
+      editPlat = { nom: n, nouveau: n, items: copieLibre(plats()[n].items) || [] };
+      renderPlatsProfil();
+      var ch = document.getElementById("platEditNom");
+      if (ch) ch.focus();
+      return;
+    }
+    if (e.target.closest("[data-plat-ann]")) { editPlat = null; renderPlatsProfil(); return; }
+
+    var ret = e.target.closest("[data-plat-retire]");
+    if (ret && editPlat) {
+      if (editPlat.items.length <= 1) { toast("Un plat garde au moins un aliment.", true); return; }
+      editPlat.items.splice(+ret.dataset.platRetire, 1);
+      renderPlatsProfil();
+      return;
+    }
+
+    if (e.target.closest("[data-plat-enr]") && editPlat) {
+      var nouveau = editPlat.nouveau.trim().slice(0, 60);
+      if (!nouveau) { toast("Donne un nom à ce plat.", true); return; }
+      if (nouveau !== editPlat.nom && plats()[nouveau]) {
+        toast("Un autre plat porte déjà ce nom.", true); return;
+      }
+      if (!editPlat.items.length) { toast("Un plat garde au moins un aliment.", true); return; }
+      var reg = platsEcrivables();
+      if (nouveau !== editPlat.nom) delete reg[editPlat.nom];
+      reg[nouveau] = { items: editPlat.items };
+      var fait = nouveau;
+      editPlat = null;
+      Store.sauveProfil();
+      renderFavoris();
+      toast(fait + " mis à jour · " + ni(totalPlat(plats()[fait])) + " kcal");
+      return;
+    }
   }));
+
+  document.getElementById("platsGestion").addEventListener("input", function (e) {
+    if (editPlat && e.target.id === "platEditNom") editPlat.nouveau = e.target.value;
+  });
 
   document.getElementById("platSel").addEventListener("change", protege("pose d'un plat", function () {
     var nom = this.value;
