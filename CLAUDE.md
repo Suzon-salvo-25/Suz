@@ -329,6 +329,20 @@ côté de la croix, il ne se voyait pas. Les deux commandes prennent
 maintenant toute la largeur sous la ligne, la pilule porte un crayon dessiné
 et fait 40 px de haut ; les calories remontent à droite du nom.
 
+**Le lavis doit contenir le titre entier, sous-titre compris.** Son coin bas
+gauche avait un rayon vertical de 42 % de la hauteur : la courbe passait
+au-dessus de « LE CARNET DE SUZON », qui dépassait dans le fond sombre. Il
+est à 30 %, la somme du bord gauche tombe donc sous 100 % et y laisse un
+segment droit, et le bas de l'en-tête a 30 px de marge sur mobile. Le
+contrôle est géométrique : le coin bas gauche du sous-titre doit vérifier
+`((x-cx)/rx)² + ((y-cy)/ry)² ≤ 1` pour l'ellipse de ce coin.
+
+**Les onglets se centrent à la main.** La couche de base empile icône et
+texte en colonne, donc centrés ; la couche carnet les repasse en ligne et
+ils retombaient sur `justify-content: flex-start`. « Alimentation » et
+« Sport » se calaient à gauche de leur cellule, et seule la pastille de
+l'onglet actif semblait centrée.
+
 Le lavis derrière le titre déborde du conteneur par un `inset` négatif :
 **il ne peut pas dépasser 18 px**, la gouttière de `.wrap`, sinon la page
 déborde d'autant sur mobile. Le harnais vérifie qu'aucune largeur ne dépasse

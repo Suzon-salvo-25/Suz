@@ -1035,14 +1035,20 @@ h1, h2, h3, h4 {
   border-bottom: 0;
   position: relative;
 }
+/* Le coin bas gauche du lavis mordait sur le sous-titre : son rayon vertical
+   descendait à 42 % de la hauteur, si bien que la courbe passait au-dessus
+   de « LE CARNET DE SUZON ». Il tombe à 30 %, la somme du bord gauche passe
+   sous 100 % et laisse un segment droit, et le titre rentre entier. Les
+   marges latérales ne peuvent toujours pas dépasser 18 px, la gouttière de
+   `.wrap`. */
 .masthead::before {
   content: "";
   position: absolute; z-index: 0;
-  inset: -10px -18px -16px -18px;
+  inset: -10px -18px -18px -18px;
   background:
     radial-gradient(120% 90% at 78% 58%, color-mix(in srgb, var(--peche) 52%, transparent) 0%, transparent 68%),
     radial-gradient(130% 110% at 12% 40%, color-mix(in srgb, var(--peche) 30%, transparent) 0%, transparent 72%);
-  border-radius: 46% 54% 38% 62% / 58% 44% 56% 42%;
+  border-radius: 46% 54% 38% 62% / 58% 44% 56% 30%;
 }
 .brand h1 {
   font-size: clamp(2.1rem, 6.4vw, 3.4rem);
@@ -1089,12 +1095,16 @@ h1, h2, h3, h4 {
   gap: 4px; margin-bottom: 24px; padding: 4px;
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
 }
+/* La couche de base empilait l'icône et le texte en colonne, donc centrés.
+   Repassés en ligne, ils retombaient sur `justify-content: flex-start` :
+   « Alimentation » et « Sport » se calaient à gauche de leur cellule, et
+   seule la pastille de l'onglet actif semblait centrée. */
 .tab {
   border: 0; box-shadow: none; background: transparent;
   border-radius: 999px; padding: 10px 6px;
   font-family: var(--f-body); font-weight: 600; font-size: .92rem;
   letter-spacing: 0; text-transform: none; color: var(--ink-soft);
-  flex-direction: row; gap: 8px;
+  flex-direction: row; justify-content: center; gap: 8px;
 }
 .tab:hover { transform: none; box-shadow: none; color: var(--ink); }
 .tab[data-c="violet"][aria-selected="true"],
@@ -1341,7 +1351,7 @@ input:focus-visible, select:focus-visible, .btn:focus-visible, .tab:focus-visibl
 }
 
 @media (max-width: 540px) {
-  .masthead { padding-block: 26px 18px; }
+  .masthead { padding-block: 26px 30px; }
   .brand h1 { font-size: 2.1rem; }
   .deco-soleil { width: 92px; height: 92px; right: -4px; bottom: -26px; }
   .deco-etoile { width: 42px; height: 42px; right: 84px; bottom: -12px; }
