@@ -157,15 +157,27 @@ Les tokens gardent leurs anciens noms (`--blue`, `--aqua`, `--violet`) parce
 que le JavaScript les référence pour les macronutriments : les renommer
 casserait le bilan. Leur rôle est celui du tableau, pas celui du nom.
 
-**Illustrations.** Dix dessins SVG faits maison, dans un `<symbol>` par motif
-en tête de page, appelés par `<use href="#i-...">` : soleil, méduse, tortue,
-pastèque, orange, étoile de mer, fraise, fleur, coquillage, ourson. Ils
-viennent d'une planche d'autocollants aquarelle montrée en référence, jamais
-copiée : elle ne nous appartient pas. Chaque en-tête de carte en porte un,
-les états vides aussi, et le bandeau en a trois qui flottent doucement
-(coupés sous `prefers-reduced-motion`). Tous en `aria-hidden` : ils décorent,
-ils n'informent pas. En ajouter un, c'est un `<symbol>` de plus, pas une
-image externe : le fichier doit rester autonome.
+**Illustrations.** Vingt et un motifs découpés dans la planche
+d'autocollants aquarelle de Suzon, qui lui appartient. Ils sont détourés du
+fond blanc, exportés en WebP à transparence et **embarqués en base64** dans
+le CSS : le fichier doit rester autonome, donc jamais d'image externe. Chaque
+motif est déclaré une seule fois, dans une classe `.st-<nom>`, et posé par
+`<span class="illu st-<nom>" aria-hidden="true">`. Tous en `aria-hidden` :
+ils décorent, ils n'informent pas.
+
+Chaque en-tête de carte en porte un, distinct ; quatre états vides en portent
+un aussi ; le bandeau a le soleil et l'étoile de mer, qui flottent doucement
+(animation coupée sous `prefers-reduced-motion`). **Aucun motif déclaré sans
+emploi** : le verre et la bouteille ont été retirés faute de place, plutôt que
+de laisser 6 ko de base64 mort.
+
+Pour en ajouter un, le découpage est reproductible : masque du fond par
+« clair et peu saturé » puis remplissage depuis les bords, de sorte que les
+blancs intérieurs d'un dessin (reflets, pulpe) restent opaques ; étiquetage
+des composantes connexes ; export à deux fois la taille native, alpha
+légèrement adouci. La planche source fait 232 × 405, donc les motifs font
+40 à 90 px : ne pas les afficher beaucoup plus grand que 2×, l'aquarelle
+supporte le flou mais pas l'agrandissement franc.
 
 Typographie : Anton (display, un seul poids, toujours en capitales),
 Figtree (texte), Azeret Mono (chiffres tabulaires et étiquettes). Tout token
