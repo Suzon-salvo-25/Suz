@@ -97,24 +97,26 @@ def footer(label):
 def dossier(path):
     s = []
     s += [P("Russie / pays occidentaux", title),
-          P("Profondeur stratégique, sécurité européenne et confrontation<br/>"
+          P("Profondeur stratégique, sécurité européenne et rivalités<br/>"
             "avec un éclairage comparatif : le Pakistan et ses voisins", subtitle),
           P("Dossier d'exposé — Nom : ______________________ — septembre 2026", meta),
           Spacer(1, 10)]
 
     s += [P("1. Introduction et problématique", h1),
           P("Depuis l'annexion de la Crimée en 2014, et surtout depuis l'invasion de l'Ukraine "
-            "le 24 février 2022, la Russie et les pays occidentaux sont entrés dans une "
-            "confrontation durable. Chaque camp présente ses actes comme défensifs : Moscou "
+            "le 24 février 2022, la rivalité entre la Russie et les pays occidentaux est "
+            "redevenue ouverte. Elle ne se limite pas à la guerre : elle touche l'influence sur "
+            "les pays voisins, l'énergie, les valeurs et l'information. Chaque camp présente ses actes comme défensifs : Moscou "
             "dénonce un « encerclement » par l'OTAN, tandis que l'OTAN, l'Union européenne et "
             "les États d'Europe centrale y voient la politique d'une puissance révisionniste."),
           P("Le cas du Pakistan, de l'Inde et de l'Afghanistan, où la notion de « profondeur "
             "stratégique » est née comme doctrine officielle, permet de mieux comprendre cette "
-            "logique et ses effets pervers."),
-          framed([P("<b>Problématique :</b> quels sont les points de conflit entre la Russie "
-                    "et les pays occidentaux, et en quoi la quête de profondeur stratégique, "
-                    "éclairée par le cas pakistanais, explique-t-elle la confrontation et ses "
-                    "risques d'escalade ?", box)]),
+            "logique et ses effets pervers : la rivalité indo-pakistanaise est l'exemple type "
+            "d'une « rivalité durable » entre voisins."),
+          framed([P("<b>Problématique :</b> sur quels terrains s'affrontent la Russie et "
+                    "les pays occidentaux, et en quoi la quête de profondeur stratégique, "
+                    "éclairée par le cas pakistanais, explique-t-elle cette rivalité durable "
+                    "et ses risques d'escalade ?", box)]),
           P("<i>Méthode : ne pas moraliser d'abord, mais identifier les acteurs, les "
             "perceptions, les instruments et les risques d'escalade.</i>", fn)]
 
@@ -128,6 +130,10 @@ def dossier(path):
               ["Puissance révisionniste", "Acteur qui cherche à changer un ordre, une frontière "
                "ou une architecture de sécurité existants.",
                "Annexion de la Crimée (2014) ; projets de traités russes de décembre 2021."],
+              ["Rivalité durable", "Opposition prolongée entre deux États qui se voient "
+               "mutuellement comme la principale menace ; les crises et guerres n'en sont que "
+               "des épisodes (Goertz et Diehl, 1993).",
+               "Inde / Pakistan depuis 1947 ; Russie / Occident, de la guerre froide à aujourd'hui."],
               ["Sanctions", "Restrictions imposant un coût sans recours direct à la force.",
                "20 paquets de sanctions de l'UE entre 2022 et avril 2026."],
               ["Dilemme de sécurité", "Ce qu'un État fait pour se protéger inquiète l'autre, "
@@ -139,8 +145,10 @@ def dossier(path):
           P("3.1. Une doctrine née d'un manque de profondeur", h2),
           P("Le Pakistan est un pays étiré et étroit : ses grandes villes et ses axes vitaux, "
             "comme Lahore située à une trentaine de kilomètres de la frontière indienne, sont "
-            "proches de son rival, avec lequel il s'est affronté en 1947, 1965, 1971 et 1999 "
-            "(Kargil). À la fin des années 1980, l'armée pakistanaise, autour du général "
+            "proches de son rival. La rivalité avec l'Inde, née de la partition de 1947, est "
+            "territoriale (Cachemire), identitaire (État musulman contre Inde laïque puis "
+            "nationaliste hindoue) et stratégique ; elle a produit quatre guerres (1947, 1965, "
+            "1971, 1999) et une course aux armements jusqu'aux essais nucléaires de 1998. À la fin des années 1980, l'armée pakistanaise, autour du général "
             "Mirza Aslam Beg, formule la doctrine de « profondeur stratégique » : un "
             "gouvernement ami à Kaboul sécuriserait la frontière ouest, exclurait l'Inde "
             "d'Afghanistan et offrirait un arrière-pays en cas de guerre. D'où le soutien aux "
@@ -153,16 +161,19 @@ def dossier(path):
             "frappes pakistanaises jusqu'à Kaboul, un cessez-le-feu est conclu à Doha le 19 "
             "octobre sous médiation du Qatar et de la Turquie. Plusieurs analystes parlent "
             "désormais de passage « de la profondeur stratégique à l'impasse stratégique »."),
-          P("3.3. Deux puissances nucléaires au bord de l'escalade", h2),
+          P("3.3. Une rivalité durable entre deux puissances nucléaires", h2),
           P("Le 22 avril 2025, un attentat tue 26 personnes à Pahalgam, au Cachemire indien. "
             "L'Inde riposte le 7 mai par l'opération Sindoor (frappes sur neuf cibles au "
             "Pakistan et au Cachemire pakistanais), le Pakistan réplique, et un cessez-le-feu "
             "intervient le 10 mai. L'épisode montre comment, entre puissances nucléaires, un "
             "incident peut dégénérer très vite, mais aussi comment la dissuasion et la "
-            "médiation extérieure finissent par freiner l'escalade."),
+            "médiation extérieure finissent par freiner l'escalade. La rivalité, elle, demeure : "
+            "comme entre la Russie et l'Occident, la crise se referme sans que sa cause soit réglée."),
           P("3.4. Ce que le cas pakistanais apprend sur la Russie", h2),
           table([
               ["Élément", "Pakistan / Afghanistan / Inde", "Russie / Ukraine / Occident"],
+              ["Nature de la rivalité", "Territoriale et identitaire, depuis 1947 (Cachemire)",
+               "Stratégique et idéologique : sphère d'influence contre libre choix, depuis 1991"],
               ["Peur de départ", "Pays étroit, rival indien proche et plus puissant",
                "Mémoire des invasions (1812, 1941), crainte de l'OTAN à ses frontières"],
               ["Quête de tampon", "Un Afghanistan « ami » comme arrière-pays",
@@ -182,34 +193,46 @@ def dossier(path):
             "Pakistan n'a pas fait en Afghanistan."),
           ]
 
-    s += [P("4. Les points de conflit Russie / Occident", h1),
+    s += [P("4. Les terrains de rivalité Russie / Occident", h1),
+          P("La rivalité se joue sur six terrains ; la guerre en Ukraine n'est que le plus "
+            "visible, là où la rivalité est devenue conflit armé."),
           table([
-              ["Point de conflit", "Position russe", "Position occidentale", "Risque"],
-              ["Ukraine : territoire et statut",
-               "Garder la Crimée et les régions annexées, obtenir tout le Donbass, neutralité",
-               "Intégrité territoriale, garanties de sécurité pour Kyiv",
-               "Très élevé : guerre en cours ; en sept. 2026, pas de cessez-le-feu formel"],
-              ["Élargissement de l'OTAN",
-               "« Trahison » de 1990, encerclement",
-               "Libre choix des alliances (Helsinki 1975, Paris 1990)",
-               "Structurel : cause invoquée par Moscou"],
-              ["Baltique, Kaliningrad, corridor de Suwałki",
-               "Enclave à protéger, « flotte fantôme »",
-               "Défense de l'avant, protection des câbles",
-               "Élevé : incident naval ou blocus"],
-              ["Espace aérien et guerre hybride",
-               "Déni, action sous le seuil de la guerre",
-               "Drones au-dessus de la Pologne (sept. 2025, article 4 invoqué), sabotages",
-               "Élevé : test du seuil de l'article 5"],
-              ["Biélorussie", "Armes nucléaires tactiques (2023), exercices Zapad",
-               "Sanctions, renforcement des frontières", "Moyen à élevé"],
-              ["Nucléaire et maîtrise des armements",
-               "Doctrine assouplie (2024), fin de New START (2026)",
-               "Dissuasion de l'OTAN", "Faible probabilité, conséquences extrêmes"],
-              ["Sanctions, énergie, avoirs gelés", "« Guerre économique »",
-               "20 paquets UE, sortie du GNL russe (19e paquet, oct. 2025)",
-               "Moyen : escalade économique et juridique"],
-          ], [3.6 * cm, 4.3 * cm, 4.6 * cm, 4.1 * cm])]
+              ["Terrain de rivalité", "Ce que veut la Russie", "Ce que veut l'Occident",
+               "Manifestation concrète"],
+              ["Stratégique et militaire",
+               "Stopper l'élargissement de l'OTAN, retrouver un glacis",
+               "Dissuader, défendre le flanc Est",
+               "Guerre en Ukraine ; Finlande (2023) et Suède (2024) dans l'OTAN ; tensions en "
+               "Baltique et au corridor de Suwałki"],
+              ["Influence sur le voisinage commun",
+               "Garder Ukraine, Biélorussie, Moldavie, Géorgie dans son orbite (Union économique "
+               "eurasiatique)",
+               "Ancrer ces pays à l'UE (candidatures de l'Ukraine et de la Moldavie, 2022)",
+               "Biélorussie alignée sur Moscou ; bras de fer électoraux en Moldavie et en Géorgie"],
+              ["Économique et énergétique",
+               "Utiliser le gaz et le pétrole comme levier",
+               "Réduire la dépendance, sanctionner",
+               "20 paquets de sanctions UE ; sortie du gaz et du GNL russes ; avoirs gelés"],
+              ["Idéologique : deux visions de l'ordre",
+               "Ordre multipolaire, sphères d'influence, « valeurs traditionnelles »",
+               "Ordre fondé sur des règles, démocratie libérale",
+               "Discours de Munich (2007) ; Concept de politique étrangère russe (2023)"],
+              ["Informationnelle et hybride",
+               "Diviser les sociétés occidentales sous le seuil de la guerre",
+               "Résilience, lutte contre la désinformation",
+               "Ingérence dans l'élection roumaine (2024) ; drones sur la Pologne (sept. 2025) ; "
+               "sabotages de câbles"],
+              ["Influence dans le « Sud global »",
+               "Se poser en alternative à l'Occident",
+               "Garder ses partenaires, isoler Moscou",
+               "Wagner puis Africa Corps au Sahel à la place de la France ; neutralité de l'Inde "
+               "et de nombreux États africains"],
+          ], [3.3 * cm, 4.2 * cm, 3.9 * cm, 5.2 * cm]),
+          Spacer(1, 4),
+          P("<b>Trois foyers d'escalade à surveiller :</b> l'Ukraine (guerre en cours, "
+            "pas de cessez-le-feu formel en septembre 2026), la Baltique (Kaliningrad, flotte "
+            "fantôme) et le nucléaire (fin du traité New START en février 2026, doctrine russe "
+            "assouplie en 2024).")]
 
     s += [P("5. Quelle sécurité européenne ?", h1),
           P("Quatre options coexistent : la <b>dissuasion de l'OTAN</b> (objectif de 5 % du "
@@ -221,7 +244,7 @@ def dossier(path):
             "médiation de tiers reste le principal canal de désescalade.")]
 
     s += [P("6. Conclusion", h1),
-          P("La confrontation Russie / Occident s'explique d'abord par deux lectures "
+          P("La rivalité Russie / Occident est une rivalité durable, fondée sur deux lectures "
             "opposées de la sécurité : la Russie cherche de la profondeur stratégique, ses "
             "voisins refusent d'être son glacis. Le cas pakistanais montre que cette quête, "
             "menée par le contrôle d'un voisin, crée souvent de nouvelles menaces au lieu de "
@@ -260,6 +283,8 @@ def dossier(path):
         "10 févr. 2007 ; Assemblée générale de l'ONU, résolution ES-11/1, 2 mars 2022.",
         "J. Mearsheimer, « Why the Ukraine Crisis Is the West's Fault », <i>Foreign Affairs</i>, 2014.",
         "M. E. Sarotte, <i>Not One Inch</i>, Yale University Press, 2021.",
+        "G. Goertz et P. Diehl, « Enduring Rivalries: Theoretical Constructs and Empirical "
+        "Patterns », <i>International Studies Quarterly</i>, 37(2), 1993.",
         "R. Jervis, « Cooperation Under the Security Dilemma », <i>World Politics</i>, 30(2), 1978.",
         "A. Rashid, <i>Taliban</i>, Yale University Press, 2000 (sur le soutien pakistanais aux talibans).",
     ]
@@ -283,16 +308,18 @@ ORAL = [
     ("Introduction", "25 s",
      "La profondeur stratégique, c'est la capacité d'absorber une menace grâce à la distance "
      "ou à des États-tampons. Moscou la recherche à l'Ouest ; les Occidentaux y voient une "
-     "puissance révisionniste, qui veut changer les frontières par la force. Question : quels "
-     "sont les points de conflit, et que nous apprend le cas pakistanais ?"),
-    ("1. Les points de conflit", "45 s",
-     "D'abord l'Ukraine : la Russie veut garder les territoires annexés et obtenir tout le Donbass, avec une Ukraine neutre ; "
-     "Kyiv et l'Europe défendent son intégrité territoriale, et les négociations sont toujours bloquées. Ensuite l'élargissement de l'OTAN : "
-     "encerclement pour Moscou, libre choix pour l'Occident. Enfin la mer Baltique et la guerre "
-     "hybride : drones au-dessus de la Pologne, câbles sabotés, corridor de Suwałki. Chaque camp "
-     "se dit défensif et voit l'autre comme agressif : c'est ce qu'on appelle le dilemme de sécurité."),
+     "puissance révisionniste, qui veut changer les frontières par la force. Question : sur quels "
+     "terrains s'affrontent ces rivaux, et que nous apprend le cas pakistanais ?"),
+    ("1. Les terrains de rivalité", "45 s",
+     "Cette rivalité se joue sur plusieurs terrains. Militaire d'abord : Moscou veut stopper "
+     "l'élargissement de l'OTAN, l'Occident parle de libre choix des alliances ; en Ukraine, la "
+     "rivalité est devenue guerre. Ensuite l'influence sur les voisins : Ukraine, Moldavie, "
+     "Géorgie hésitent entre l'UE et la Russie. Puis l'énergie et les sanctions. Enfin les idées : "
+     "un monde de sphères d'influence contre un ordre fondé sur des règles. Chaque camp se dit "
+     "défensif et voit l'autre comme agressif : c'est le dilemme de sécurité."),
     ("2. La leçon pakistanaise", "40 s",
-     "Le Pakistan a soutenu les talibans pour avoir un Afghanistan ami. Résultat : les talibans "
+     "L'Inde et le Pakistan sont des rivaux depuis 1947. Pour tenir face à l'Inde, le Pakistan a "
+     "soutenu les talibans pour avoir un Afghanistan ami. Résultat : les talibans "
      "abritent aujourd'hui les terroristes du TTP, et les deux pays se sont affrontés en octobre "
      "2025, jusqu'à un cessez-le-feu négocié à Doha. Même effet boomerang pour la Russie : en voulant éloigner l'OTAN, elle a poussé la "
      "Finlande et la Suède à y entrer. Et comme entre l'Inde et le Pakistan en mai 2025, la "
@@ -311,7 +338,7 @@ oral_h = ParagraphStyle("oralh", fontName="Sans-B", fontSize=11.5, leading=14,
 
 def oral(path):
     s = [P("Texte de l'oral (2 min 30)", title),
-         P("Russie / pays occidentaux : profondeur stratégique et points de conflit", subtitle),
+         P("Russie / pays occidentaux : profondeur stratégique et rivalités", subtitle),
          Spacer(1, 6)]
     for part, dur, txt in ORAL:
         s.append(KeepTogether([P(f"{part} <font name='Sans' color='#666666'>({dur})</font>", oral_h),
