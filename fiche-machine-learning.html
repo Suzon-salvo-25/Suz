@@ -640,11 +640,17 @@
 
   @media print {
     :root { --ground: #fff; --panel: #fff; --line: #bbb; --line-soft: #ddd; --rail: #f4f4f4; }
-    .controls, .verdict, .card-mark { display: none; }
+    .controls, .card-mark { display: none; }
     body { font-size: 11pt; }
-    .card { break-inside: avoid; border-color: #999; }
     .wrap { max-width: none; padding: 0; }
-    details { open: true; }
+    .masthead { padding-top: 0; }
+    .card { border-color: #999; break-inside: auto; }
+    .card-head { break-inside: avoid; break-after: avoid; }
+    h3 { break-after: avoid; }
+    .tally, .verdict, figure, pre, .compare, .formula-grid, ol.quiz > li, tr { break-inside: avoid; }
+    table { break-inside: auto; }
+    thead { display: table-header-group; }
+    pre, pre.formula { font-size: 9pt; }
     details summary::after { display: none; }
   }
 </style>
@@ -835,7 +841,7 @@
               <line x1="40" y1="180" x2="500" y2="180"/>
               <line x1="40" y1="180" x2="40" y2="15"/>
             </g>
-            <text x="470" y="196" font-size="12" font-family="monospace" fill="currentColor" fill-opacity=".6">paramètre a</text>
+            <text x="510" y="196" text-anchor="end" font-size="12" font-family="monospace" fill="currentColor" fill-opacity=".6">paramètre a</text>
             <text x="46" y="14" font-size="12" font-family="monospace" fill="currentColor" fill-opacity=".6">L(a)</text>
             <path d="M60 30 Q 270 400 480 30" stroke="currentColor" stroke-opacity=".7" stroke-width="2" fill="none"/>
             <g fill="var(--accent)" stroke="var(--accent)" stroke-width="2">
