@@ -1,0 +1,19 @@
+{
+  "name": "Mes Pépites",
+  "short_name": "Pépites",
+  "description": "Le second cerveau de tes enregistrements Instagram et TikTok.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff4e6",
+  "theme_color": "#ff8a3c",
+  "icons": [
+    { "src": "icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  }
+}
