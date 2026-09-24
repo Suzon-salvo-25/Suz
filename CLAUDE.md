@@ -1,9 +1,11 @@
-# La Guerre du Gras — mémoire du projet
+# Côté Sud — mémoire du projet
 
 Application de suivi de perte de poids, en français, pour une seule
 utilisatrice. Elle s'appelait « Carnet de Forme », que Suzon trouvait
-minable ; elle a choisi **La Guerre du Gras** dans une liste de noms drôles.
-Le sous-titre reste « Le carnet de Suzon ». Tout tient dans **un fichier autonome**, `perte-de-poids.html` :
+minable. Après un passage par « La Guerre du Gras », elle a tranché pour
+**Côté Sud** : elle voulait un nom qui ne parle pas de régime du tout, juste
+un nom qui a du style. **Ne pas y ramener de vocabulaire de poids, de gras
+ou de calories.** Le sous-titre reste « Le carnet de Suzon ». Tout tient dans **un fichier autonome**, `perte-de-poids.html` :
 pas de dépendance, pas d'étape de compilation, pas de serveur.
 
 Le dépôt contient aussi `index.html`, un planning de marathon Marvel sans
@@ -406,7 +408,7 @@ ils retombaient sur `justify-content: flex-start`. « Alimentation » et
 « Sport » se calaient à gauche de leur cellule, et seule la pastille de
 l'onglet actif semblait centrée.
 
-**Le titre doit tenir sur une ligne.** « La Guerre du Gras » fait 34 px de
+**Le titre doit tenir sur une ligne.** « Côté Sud » fait 34 px de
 haut à 390 comme à 430 px, donc une seule ligne. Un titre plus long
 passerait à deux et repousserait le sous-titre hors du lavis : mesurer la
 hauteur du `h1` après tout changement de nom.
