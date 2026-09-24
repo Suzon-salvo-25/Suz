@@ -92,15 +92,18 @@ var PLATEFORMES = {
       ["partiel", "Connexion officielle (OAuth)", "L'API Instagram n'accepte que les comptes professionnels (Business ou Créateur). Les comptes personnels ne peuvent plus se connecter depuis la fin de l'API Basic Display, le 4 décembre 2024."],
       ["non", "Publications enregistrées et collections", "Aucun point d'accès de l'API ne les expose, même pour un compte professionnel. Aucune appli ne peut les synchroniser automatiquement aujourd'hui."],
       ["partiel", "Légende et miniature d'un post", "Possibles via oEmbed avec une appli Meta validée et un serveur. Cette page ne peut pas appeler Instagram elle-même."],
-      ["ok", "Export « Télécharger vos informations »", "Donne le lien de chaque publication enregistrée, son auteur, la date et tes collections. Pas de légende ni d'image."],
+      ["ok", "Export « Exporter vos informations »", "Donne le lien de chaque publication enregistrée, son auteur, la date et tes collections. Pas de légende ni d'image."],
       ["ok", "Partage d'un lien", "Partager › Copier le lien, puis coller ici. Tu peux ajouter la légende ou une capture pour une analyse complète."]
     ],
+    // Meta renomme régulièrement ces écrans : en 2026, « Télécharger vos
+    // informations » est devenu « Exporter vos informations ».
     guide: [
-      "Dans Instagram, ouvre ton profil puis le menu <b>☰</b>.",
-      "Va dans <b>Espace Comptes</b> › <b>Vos informations et autorisations</b> › <b>Télécharger vos informations</b>.",
-      "Choisis <b>Certaines de vos informations</b> et coche <b>Enregistré</b> (Saved).",
-      "Choisis <b>Télécharger sur l'appareil</b>, format <b>JSON</b>, période <b>Depuis le début</b>.",
-      "Meta t'envoie un e-mail quand le fichier est prêt (de quelques minutes à quelques jours). Dépose ici le .zip tel quel, ou le fichier saved_posts.json."
+      "Dans Instagram, ouvre ton profil, le menu <b>☰</b>, puis <b>Espace Comptes</b> › <b>Vos informations et autorisations</b>.",
+      "Touche <b>Exporter vos informations</b>, puis <b>Créer une exportation</b> et choisis ton compte Instagram.",
+      "Choisis <b>Exporter vers l'appareil</b>.",
+      "Dans <b>Personnaliser les informations</b>, décoche tout et ne garde que <b>Enregistré</b> (dans ton activité Instagram) : l'export est plus léger.",
+      "Période : <b>Depuis le début</b>. Format : <b>JSON</b> (pas HTML). Puis <b>Démarrer l'exportation</b>.",
+      "Meta te prévient quand c'est prêt (de quelques minutes à quelques jours). Reviens dans <b>Exporter vos informations</b> pour télécharger le .zip, puis dépose-le ici tel quel."
     ]
   },
   tiktok: {

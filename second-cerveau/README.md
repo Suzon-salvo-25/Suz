@@ -30,7 +30,7 @@ Aucune intégration n'est simulée. L'appli le dit aussi dans ses réglages.
 - L'API Instagram (Instagram Login ou Facebook Login) n'accepte que les comptes professionnels. L'API Basic Display, qui servait aux comptes personnels, a fermé le 4 décembre 2024.
 - **Aucun point d'accès n'expose les publications enregistrées ni les collections.** Une synchronisation automatique est donc impossible aujourd'hui.
 - oEmbed (légende, miniature) demande une appli Meta validée et un serveur.
-- Solution retenue : l'export « Télécharger vos informations » (JSON, rubrique *Enregistré*), qui donne le lien, l'auteur, la date et les collections, sans légende ni image. Au quotidien : partager le lien.
+- Solution retenue : l'export « Exporter vos informations » (JSON, rubrique *Enregistré*), qui donne le lien, l'auteur, la date et les collections, sans légende ni image. Au quotidien : partager le lien.
 
 **TikTok**
 - Login Kit (OAuth) + Display API : profil et vidéos publiques de l'utilisateur, **pas les favoris**.

@@ -543,7 +543,7 @@ function vueOnboarding() {
       '<p class="intro">Ni Instagram ni TikTok ne laissent une appli lire tes enregistrements automatiquement. Voici ce qui marche vraiment aujourd\'hui.</p>' +
       '<div class="onb-sources">' +
         '<div class="onb-src"><h3><span class="tache t-rose" style="width:44px;height:44px"><span class="illu st-hibiscus"></span></span>Instagram</h3>' +
-          '<span>Tes publications enregistrées et tes collections, via l\'export officiel « Télécharger vos informations ».</span>' +
+          '<span>Tes publications enregistrées et tes collections, via l\'export officiel « Exporter vos informations ».</span>' +
           '<button type="button" class="btn go sm" data-action="onb-fin" data-suite="export-instagram">Importer mon export</button></div>' +
         '<div class="onb-src"><h3><span class="tache t-lavande b2" style="width:44px;height:44px"><span class="illu st-meduse"></span></span>TikTok</h3>' +
           '<span>Tes favoris (et tes likes si tu veux), via l\'export officiel « Télécharger tes données ».</span>' +
