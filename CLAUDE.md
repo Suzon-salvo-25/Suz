@@ -17,7 +17,7 @@ rapport. **Ne pas y toucher.**
 |---|---|
 | Code | `perte-de-poids.html`, branche `claude/programme-perte-poids-u5p9gy` |
 | Application en ligne | https://claude.ai/artifact/3LM1PhEuLuXapTZoGMUeyJ |
-| Harnais de test | `outils/verifie.mjs`, `outils/verifie-edition.mjs`, `outils/verifie-plats.mjs` |
+| Harnais de test | `outils/verifie.mjs`, `outils/verifie-edition.mjs`, `outils/verifie-plats.mjs`, `outils/verifie-muscu.mjs` |
 | Fiches d'aliments, par domaine | `donnees/aliments/*.json` |
 | Planche d'autocollants source | `images/planche-autocollants.webp` |
 | Fusion et contrôles | `outils/fusionne-marques.mjs` |
@@ -191,6 +191,18 @@ Tentative de supprimer le niveau d'activité au profit du seul mesuré :
 **refusée par Suzon**, l'écart était trop brutal (dépense de 2 080 à
 1 741 kcal, objectif du jour de 1 530 à 1 200). Ne pas y revenir sans le
 lui redemander. Les séances de sport, elles, restent une addition à part.
+
+**Une séance de salle se détaille machine par machine.** Sous une séance
+dont la catégorie `SPORTS` est `renfo`, et seulement celle-là, un carnet
+d'exercices : nom de la machine, séries, répétitions, poids. Les exercices
+vivent dans `ex` sur l'entrée de séance, `{ n, s, r, kg }`. Le poids vide
+vaut « poids du corps ». **Ces lignes ne changent pas les calories**, qui
+restent celles de la durée et du MET : c'est un carnet d'entraînement, pas
+un second calcul, et le formulaire le dit. Le total affiché est le tonnage,
+`séries × répétitions × poids`, la seule mesure de progression lisible d'un
+coup d'œil. Le formulaire **reste ouvert après chaque ajout**, en gardant le
+nombre de séries et le poids : on enchaîne rarement un seul exercice. La
+saisie vit dans `exoSaisie`, jamais dans le DOM seul.
 
 **Le tour de taille a été retiré de l'interface.** « Je ne le ferai
 jamais. » Le champ, sa tuile et sa lecture sont partis ; le champ `tour`
@@ -429,6 +441,8 @@ node outils/verifie-edition.mjs   # correction d'une ligne, changement de
 node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
                                   # 58 contrôles
+node outils/verifie-muscu.mjs     # carnet d'exercices d'une séance de
+                                  # renforcement, 20 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

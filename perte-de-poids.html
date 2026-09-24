@@ -1340,6 +1340,20 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
 .plat-lignes .del { width: 28px; height: 28px; }
 .btn.danger { background: var(--crit); color: #fff; border-color: var(--crit); }
 .btn.danger:hover { filter: brightness(1.1); }
+/* Le carnet d'exercices prend toute la largeur sous sa séance. */
+.items li.avec-exos { grid-template-columns: 1fr auto auto; row-gap: 0; }
+.exos { grid-column: 1 / -1; margin-top: 9px; }
+.exo-ajout { width: 100%; justify-content: center; min-height: 36px; }
+.exo-vol {
+  margin: 7px 0 9px; font-size: .76rem; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.exo-form {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--panel-2); padding: 12px 13px 14px; margin-top: 4px;
+}
+.exos .plat-lignes { margin-top: 0; }
+.exos .plat-lignes li { grid-template-columns: 1fr auto auto; }
 .items li.choix { grid-template-columns: 1fr auto; }
 .plat-case { display: flex; align-items: center; gap: 12px; min-width: 0; cursor: pointer; }
 .plat-case input { width: 20px; height: 20px; flex: none; accent-color: var(--peche); margin: 0; }
@@ -1372,6 +1386,7 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
   .items li.choix { grid-template-columns: 1fr auto; row-gap: 4px; }
   .items li.choix .kc { grid-column: 2; grid-row: 1; }
   .items.items-simple li { grid-template-columns: 1fr auto auto; row-gap: 4px; }
+  .items li.avec-exos { row-gap: 4px; }
   .items.items-simple li > .del { grid-column: 3; grid-row: 1; width: 40px; height: 40px; }
 }
 
@@ -7570,6 +7585,82 @@ var SPORTS = [
     for (var i = 0; i < SPORTS.length; i++) if (SPORTS[i][0] === nom) return SPORTS[i][3] || null;
     return null;
   }
+  function categorieParNom(nom) {
+    for (var i = 0; i < SPORTS.length; i++) if (SPORTS[i][0] === nom) return SPORTS[i][2] || null;
+    return null;
+  }
+  // Une séance de salle se détaille, une sortie course non : le carnet
+  // d'exercices n'apparaît que sur le renforcement.
+  function seanceDetaillable(x) { return !x.jour && categorieParNom(x.n) === "renfo"; }
+
+  /* ==================== LE CARNET D'EXERCICES ====================
+     Machine, séries, répétitions, poids. Ces lignes ne changent pas les
+     calories de la séance : celles-ci viennent de sa durée et de son MET.
+     C'est un carnet d'entraînement, pas un second calcul. Le volume affiché
+     (séries × répétitions × poids, le tonnage) est la seule mesure de
+     progression qui se lise d'un coup d'œil. */
+  var exoSaisie = null;   // { i, nom, series, reps, poids }
+
+  var ICONE_HALTERE = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" ' +
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
+    '<path d="M3.2 9.6v4.8M6.6 7.2v9.6M17.4 7.2v9.6M20.8 9.6v4.8M6.6 12h10.8"/></svg>';
+
+  function volumeExercices(ex) {
+    return (ex || []).reduce(function (t, e) {
+      return t + (e.s || 0) * (e.r || 0) * (e.kg || 0);
+    }, 0);
+  }
+
+  function ligneExercice(e, i, s) {
+    var bits = [];
+    if (e.s > 0 && e.r > 0) bits.push(e.s + " × " + e.r);
+    else if (e.r > 0) bits.push(e.r + (e.r > 1 ? " répétitions" : " répétition"));
+    if (e.kg > 0) bits.push(nf(e.kg, e.kg % 1 ? 1 : 0) + " kg");
+    else bits.push("poids du corps");
+    return '<li><span>' + esc(e.n) + '</span><b>' + esc(bits.join(" · ")) + '</b>' +
+      '<button type="button" class="del" data-del-exo="' + s + '" data-i="' + i +
+      '" aria-label="Retirer ' + esc(e.n) + '">\u2715</button></li>';
+  }
+
+  function blocExercices(x, s) {
+    var ex = x.ex || [];
+    var vol = volumeExercices(ex);
+    var h = '<div class="exos">';
+    if (ex.length) {
+      h += '<ul class="plat-lignes">' + ex.map(function (e, i) { return ligneExercice(e, i, s); }).join("") + '</ul>';
+      if (vol > 0) h += '<p class="sub-note exo-vol">Volume total : ' + ni(vol) + ' kg soulevés.</p>';
+    }
+    h += (exoSaisie && exoSaisie.i === s)
+      ? formulaireExercice()
+      : '<button type="button" class="lien-edit exo-ajout" data-exo-seance="' + s + '">' +
+        ICONE_HALTERE + '<span>' + (ex.length ? "Ajouter un exercice" : "Détailler cette séance") + '</span></button>';
+    return h + '</div>';
+  }
+
+  function formulaireExercice() {
+    var e = exoSaisie;
+    var champ3 = function (id, lab, val, mode) {
+      return '<div class="field" style="flex:1 1 84px"><label for="' + id + '">' + lab + '</label>' +
+        '<input type="text" id="' + id + '" inputmode="' + mode + '" autocomplete="off" value="' + esc(val) + '"></div>';
+    };
+    return '<div class="exo-form">' +
+      '<div class="row-inline">' +
+        '<div class="field" style="flex:3 1 170px"><label for="exoNom">Machine ou exercice</label>' +
+        '<input type="text" id="exoNom" autocomplete="off" placeholder="Presse à cuisses" value="' + esc(e.nom) + '"></div>' +
+      '</div>' +
+      '<div class="row-inline" style="margin-top:9px">' +
+        champ3("exoSeries", "Séries", e.series, "numeric") +
+        champ3("exoReps", "Répétitions", e.reps, "numeric") +
+        champ3("exoPoids", "Poids (kg)", e.poids, "decimal") +
+      '</div>' +
+      '<div class="row-inline" style="margin-top:11px">' +
+        '<button type="button" class="btn go sm" data-exo-ok="1">Ajouter</button>' +
+        '<button type="button" class="btn ghost sm" data-exo-annule="1">Annuler</button>' +
+      '</div>' +
+      '<p class="sub-note edit-aide">Laisse le poids vide pour un exercice au poids du corps. ' +
+      'Ces lignes ne changent pas les calories de la séance, qui viennent de sa durée.</p>' +
+      '</div>';
+  }
 
   // Allures proposées, dans l'unité que Strava affiche pour chaque sport :
   // min/km à pied, km/h à vélo, min/100 m en bassin. [libellé, km/h]
@@ -7875,9 +7966,12 @@ var SPORTS = [
             if (x.d > 0 && x.m > 0) bits.push(uniteAllure(t, x.d / (x.m / 60)));
             else bits.push("intensité " + nf(x.met, 1) + " MET");
           }
-          return '<li><span class="nm">' + esc(x.n) + '<small>' + esc(bits.join(" · ")) + '</small></span>' +
+          if (x.ex && x.ex.length) bits.push(x.ex.length + (x.ex.length > 1 ? " exercices" : " exercice"));
+          return '<li' + (seanceDetaillable(x) ? ' class="avec-exos"' : '') + '>' +
+            '<span class="nm">' + esc(x.n) + '<small>' + esc(bits.join(" · ")) + '</small></span>' +
             '<span class="kc">' + ni(x.k) + ' kcal</span>' +
-            '<button type="button" class="del" data-del-sport="' + i + '" aria-label="Retirer ' + esc(x.n) + '">✕</button></li>';
+            '<button type="button" class="del" data-del-sport="' + i + '" aria-label="Retirer ' + esc(x.n) + '">\u2715</button>' +
+            (seanceDetaillable(x) ? blocExercices(x, i) : '') + '</li>';
         }).join("")
       : '<li style="grid-template-columns:1fr"><p class="empty" style="padding:0"><span class="illu-mini st-hippocampe" aria-hidden="true"></span>Rien de noté pour ce jour. Même trente minutes de marche comptent.</p></li>';
 
@@ -8697,12 +8791,69 @@ var SPORTS = [
     toast(e.n + " enregistré · " + fmtDuree(e.m) + " · " + ni(e.k) + " kcal");
  
   }));
-  document.getElementById("sportListe").addEventListener("click", function (e) {
+  document.getElementById("sportListe").addEventListener("click", protege("carnet d'exercices", function (e) {
     var b = e.target.closest("[data-del-sport]");
-    if (!b) return;
-    J().sport.splice(+b.dataset.delSport, 1);
-    Store.sauveJour(dateCourante);
-    renderSport(); renderMarche(); renderBandeau(); renderAlim();
+    if (b) {
+      exoSaisie = null;
+      J().sport.splice(+b.dataset.delSport, 1);
+      Store.sauveJour(dateCourante);
+      renderSport(); renderMarche(); renderBandeau(); renderAlim();
+      return;
+    }
+
+    var ouvre = e.target.closest("[data-exo-seance]");
+    if (ouvre) {
+      exoSaisie = { i: +ouvre.dataset.exoSeance, nom: "", series: "", reps: "", poids: "" };
+      renderSport();
+      var ch = document.getElementById("exoNom");
+      if (ch) ch.focus();
+      return;
+    }
+    if (e.target.closest("[data-exo-annule]")) { exoSaisie = null; renderSport(); return; }
+
+    var sup = e.target.closest("[data-del-exo]");
+    if (sup) {
+      var se = J().sport[+sup.dataset.delExo];
+      if (se && se.ex) se.ex.splice(+sup.dataset.i, 1);
+      Store.sauveJour(dateCourante);
+      renderSport();
+      return;
+    }
+
+    if (e.target.closest("[data-exo-ok]") && exoSaisie) {
+      var s = J().sport[exoSaisie.i];
+      if (!s) { exoSaisie = null; renderSport(); return; }
+      var nom = String(exoSaisie.nom || "").trim().slice(0, 50);
+      if (!nom) { toast("Donne un nom à cet exercice.", true); return; }
+      var lu = function (v, max) {
+        var x = nombre(v);
+        return (isFinite(x) && x > 0 && x <= max) ? x : 0;
+      };
+      var ser = Math.round(lu(exoSaisie.series, 50));
+      var rep = Math.round(lu(exoSaisie.reps, 500));
+      var kg = Math.round(lu(exoSaisie.poids, 500) * 10) / 10;
+      if (!rep) { toast("Indique au moins un nombre de répétitions.", true); return; }
+      if (!s.ex) s.ex = [];
+      if (s.ex.length >= 30) { toast("Trente exercices par séance, c'est déjà beaucoup.", true); return; }
+      s.ex.push({ n: nom, s: ser || 1, r: rep, kg: kg });
+      // On garde le formulaire ouvert : on enchaîne rarement un seul exercice.
+      exoSaisie = { i: exoSaisie.i, nom: "", series: String(ser || ""), reps: "", poids: String(kg || "") };
+      Store.sauveJour(dateCourante);
+      renderSport();
+      var c2 = document.getElementById("exoNom");
+      if (c2) c2.focus();
+      toast(nom + " noté");
+      return;
+    }
+  }));
+
+  document.getElementById("sportListe").addEventListener("input", function (e) {
+    if (!exoSaisie) return;
+    var id = e.target.id;
+    if (id === "exoNom") exoSaisie.nom = e.target.value;
+    else if (id === "exoSeries") exoSaisie.series = e.target.value;
+    else if (id === "exoReps") exoSaisie.reps = e.target.value;
+    else if (id === "exoPoids") exoSaisie.poids = e.target.value;
   });
 
   /* --- export --- */
