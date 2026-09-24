@@ -1,7 +1,9 @@
-# Carnet de Forme — mémoire du projet
+# La Guerre du Gras — mémoire du projet
 
 Application de suivi de perte de poids, en français, pour une seule
-utilisatrice. Tout tient dans **un fichier autonome**, `perte-de-poids.html` :
+utilisatrice. Elle s'appelait « Carnet de Forme », que Suzon trouvait
+minable ; elle a choisi **La Guerre du Gras** dans une liste de noms drôles.
+Le sous-titre reste « Le carnet de Suzon ». Tout tient dans **un fichier autonome**, `perte-de-poids.html` :
 pas de dépendance, pas d'étape de compilation, pas de serveur.
 
 Le dépôt contient aussi `index.html`, un planning de marathon Marvel sans
@@ -188,8 +190,14 @@ Tentative de supprimer le niveau d'activité au profit du seul mesuré :
 1 741 kcal, objectif du jour de 1 530 à 1 200). Ne pas y revenir sans le
 lui redemander. Les séances de sport, elles, restent une addition à part.
 
+**Le tour de taille a été retiré de l'interface.** « Je ne le ferai
+jamais. » Le champ, sa tuile et sa lecture sont partis ; le champ `tour`
+reste dans le modèle et dans l'export CSV, pour ne pas effacer en silence
+les mesures déjà notées. Il ne compte plus dans `aDesDonnees()`.
+
 **Modèle** : `profil/moi` et un document par jour, `jours/AAAA-MM-JJ`,
-contenant poids, heure, tour de taille, eau, repas et séances. Le profil
+contenant poids, heure, eau, repas et séances (plus `tour`, conservé sans
+interface). Le profil
 porte aussi `debut` et `fin`, les deux bornes de la trajectoire.
 
 **Stockage** : capacité `db` quand elle est là, `localStorage` **toujours**,
@@ -397,6 +405,11 @@ texte en colonne, donc centrés ; la couche carnet les repasse en ligne et
 ils retombaient sur `justify-content: flex-start`. « Alimentation » et
 « Sport » se calaient à gauche de leur cellule, et seule la pastille de
 l'onglet actif semblait centrée.
+
+**Le titre doit tenir sur une ligne.** « La Guerre du Gras » fait 34 px de
+haut à 390 comme à 430 px, donc une seule ligne. Un titre plus long
+passerait à deux et repousserait le sous-titre hors du lavis : mesurer la
+hauteur du `h1` après tout changement de nom.
 
 Le lavis derrière le titre déborde du conteneur par un `inset` négatif :
 **il ne peut pas dépasser 18 px**, la gouttière de `.wrap`, sinon la page

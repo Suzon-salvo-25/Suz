@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Carnet de suivi personnel : alimentation, hydratation, poids et sport, avec calculs personnalisés.">
 <!-- ARTIFACT-START -->
-<title>Carnet de Forme</title>
+<title>La Guerre du Gras</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Figtree:wght@400;500;600;700&display=swap">
@@ -1417,7 +1417,7 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
 
   <header class="masthead">
     <div class="brand">
-      <h1>Carnet de Forme</h1>
+      <h1>La Guerre du Gras</h1>
       <p class="sub" id="brandSub">Suivi personnel</p>
     </div>
     <span class="deco deco-soleil st-soleil" aria-hidden="true"></span>
@@ -1736,13 +1736,6 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
           </div>
           <button type="button" class="btn go" id="poidsSave">Enregistrer</button>
           <button type="button" class="btn ghost sm" id="poidsDel">Effacer</button>
-        </div>
-        <div class="row-inline" style="margin-top:12px">
-          <div class="field" style="flex:1 1 150px">
-            <label for="tailleInput">Tour de taille (cm), facultatif</label>
-            <input type="text" id="tailleInput" inputmode="decimal" autocomplete="off" placeholder="85,5">
-          </div>
-          <button type="button" class="btn sm" id="tailleSave">Enregistrer</button>
         </div>
         <p class="sub-note" style="margin-top:9px;color:var(--ink-faint);font-size:.78rem">
           Note l'heure : une pesée du soir dépasse souvent celle du matin de un à deux kilogrammes,
@@ -5711,7 +5704,7 @@ var SPORTS = [
 
   function aDesDonnees(j) {
     if (!j) return false;
-    if (j.poids !== null || j.tour !== null || j.eau > 0 || (j.sport && j.sport.length)) return true;
+    if (j.poids !== null || j.eau > 0 || (j.sport && j.sport.length)) return true;
     return ["petitdej", "dejeuner", "diner", "collation"].some(function (k) {
       return j.repas[k] && j.repas[k].length;
     });
@@ -6971,8 +6964,6 @@ var SPORTS = [
     if (document.activeElement !== hin) {
       hin.value = (j && j.heure) ? j.heure : (dateCourante === AUJ ? heureMaintenant() : "");
     }
-    var tin = document.getElementById("tailleInput");
-    if (document.activeElement !== tin) tin.value = (j && typeof j.tour === "number") ? nf(j.tour, 1) : "";
 
     var l = pesees();
     var p = P();
@@ -6991,11 +6982,6 @@ var SPORTS = [
     var varTot = (actuel !== null && depart !== null) ? actuel - depart : null;
     var hHab = heureHabituelle();
 
-    var tours = Object.keys(Store.jours).filter(function (d) {
-      return typeof Store.jours[d].tour === "number";
-    }).sort();
-    var tourAct = tours.length ? Store.jours[tours[tours.length - 1]].tour : null;
-    var tourVar = tours.length > 1 ? tourAct - Store.jours[tours[0]].tour : null;
 
     function signe(v, dec) {
       if (v === null) return "—";
@@ -7017,9 +7003,6 @@ var SPORTS = [
         depart === null ? "Renseigne un poids de départ." : "Départ à " + nf(depart, 1) + " kg."],
       ['Heure habituelle', hHab === null ? "—" : hhmm(hHab), "",
         hHab === null ? "Note l'heure de tes pesées pour fiabiliser la courbe." : "Médiane de tes pesées horodatées."],
-      ['Tour de taille', tourAct === null ? "—" : nf(tourAct, 1), tourAct === null ? "" : "cm",
-        tourAct === null ? "Facultatif, mais c'est le meilleur complément du poids."
-          : (tourVar === null ? "Première mesure enregistrée." : signe(tourVar, 1) + " cm depuis la première mesure.")],
       ['Pesées enregistrées', l.length ? ni(l.length) : "0", "",
         l.length > 1 ? "Sur " + (diffJours(l[0].date, l[l.length - 1].date) + 1) + " jours." : "Pèse-toi chaque matin, à jeun."]
     ];
@@ -8635,24 +8618,6 @@ var SPORTS = [
     renderTout();
   });
 
-  document.getElementById("tailleSave").addEventListener("click", function () {
-    var v = champ("tailleInput");
-    var j = J();
-    if (document.getElementById("tailleInput").value.trim() === "") {
-      j.tour = null;
-    } else if (!isFinite(v) || v < 40 || v > 200) {
-      toast("Saisis un tour de taille compris entre 40 et 200 cm.", true);
-      return;
-    } else {
-      j.tour = Math.round(v * 10) / 10;
-    }
-    Store.sauveJour(dateCourante);
-    renderTout();
-    toast(j.tour === null ? "Tour de taille effacé" : "Tour de taille enregistré : " + nf(j.tour, 1) + " cm");
-  });
-  document.getElementById("tailleInput").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); document.getElementById("tailleSave").click(); }
-  });
   document.getElementById("poidsInput").addEventListener("keydown", function (e) {
     if (e.key === "Enter") { e.preventDefault(); document.getElementById("poidsSave").click(); }
   });
