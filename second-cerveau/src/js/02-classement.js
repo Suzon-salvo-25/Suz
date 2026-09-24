@@ -527,7 +527,10 @@ function integrer(liste, source) {
       if (e.createur && !ex.createur) { ex.createur = e.createur; change = true; }
       if (e.legende && !ex.legende) { ex.legende = e.legende; change = true; }
       if (e.ajoute && !ex.ajoute) { ex.ajoute = e.ajoute; change = true; }
-      if (change) { sauverItem(ex); completes++; }
+      if (change) {
+        if (!(ex.analyse && (ex.analyse.par === "ia" || ex.analyse.par === "manuel"))) reclasserUn(ex);
+        sauverItem(ex); completes++;
+      }
       return;
     }
     var it = nouvelItem(e.r, {
@@ -566,6 +569,8 @@ function collecterLiens(json) {
       return;
     }
     if (typeof n.title === "string" && n.title && !/^https?:/.test(n.title)) titre = n.title;
+    // Format récent de Meta : [{label: "URL", value}, {label: "Owner", dict: [{label: "Username", value}]}].
+    if (Array.isArray(n.label_values)) titre = auteurLabelValues(n.label_values) || titre;
     var ts = tsDe(n) || tsParent;
     // Le format « string_map_data » range la date dans une valeur sœur.
     if (n.string_map_data) {
@@ -586,6 +591,22 @@ function collecterLiens(json) {
   }
   visite(json, "", "", null);
   return out;
+}
+
+function auteurLabelValues(lv) {
+  var trouve = null, secours = null;
+  (function cherche(x) {
+    if (trouve || !x || typeof x !== "object") return;
+    if (Array.isArray(x)) { x.forEach(cherche); return; }
+    var lab = typeof x.label === "string" ? norm(x.label) : "";
+    var val = typeof x.value === "string" ? x.value : "";
+    if (val && !/^https?:/.test(val)) {
+      if (/user ?name|nom d utilisateur|identifiant/.test(lab)) { trouve = val; return; }
+      if (!secours && /owner|proprietaire|auteur|author|^name$|^nom$/.test(lab)) secours = val;
+    }
+    Object.keys(x).forEach(function (k) { if (x[k] && typeof x[k] === "object") cherche(x[k]); });
+  })(lv);
+  return (trouve || secours || "").replace(/^@/, "");
 }
 
 // Collections Instagram : un en-tête (le nom), puis ses publications.
@@ -622,6 +643,10 @@ async function lireFichiers(fichiers) {
       docs.push({ nom: f.name, texte: await f.text() });
     } else if (/\.html?$/i.test(f.name)) {
       throw new Error("html");
+    } else {
+      // Nom ou type inattendu (fréquent sur iPhone) : on tente le JSON quand même.
+      var brut = await f.text();
+      if (/^\s*[\[{]/.test(brut)) docs.push({ nom: f.name || "export.json", texte: brut });
     }
   }
   return docs;

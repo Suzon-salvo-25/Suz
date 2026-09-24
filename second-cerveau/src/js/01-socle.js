@@ -124,7 +124,7 @@ var PLATEFORMES = {
       ["ok", "Connexion officielle (Login Kit)", "OAuth fonctionne pour tous les comptes, avec une appli déclarée chez TikTok et un serveur pour garder les jetons."],
       ["partiel", "Display API", "Donne ton profil et tes propres vidéos publiques. Pas tes favoris ni tes likes."],
       ["partiel", "Data Portability API", "Peut transmettre ton activité, favoris compris, mais seulement pour les comptes de l'Espace économique européen et du Royaume-Uni, avec une appli approuvée par TikTok. Prévue pour la version serveur."],
-      ["partiel", "Titre, auteur, miniature (oEmbed)", "Service public, mais cette page ne peut pas l'appeler (le navigateur bloque les requêtes externes). Possible depuis un serveur."],
+      ["ok", "Titre, auteur, miniature (oEmbed)", "Service public, appelé par le petit serveur de l'appli (projet Supabase « mes-pepites ») : chaque vidéo arrive avec sa miniature et sa légende complète."],
       ["ok", "Export « Télécharger tes données »", "Donne le lien et la date de chaque favori, et de chaque like si tu veux. Pas de légende ni d'auteur."],
       ["ok", "Partage d'un lien", "Partager › Copier le lien, puis coller ici."]
     ],

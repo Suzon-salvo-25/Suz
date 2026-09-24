@@ -37,6 +37,15 @@ var VUES = { accueil: vueAccueil, recettes: vueRecettes, tout: vueTout, categori
 
 function banniereAnalyse() {
   var b = $("#banniere");
+  if (Apercus.enCours || Apercus.file.length) {
+    var p = Apercus.total ? Math.round(Apercus.fait / Apercus.total * 100) : 0;
+    b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-poisson" aria-hidden="true" style="margin:0"></span>' +
+      (Apercus.erreur
+        ? '<span style="flex:1 1 200px">' + esc(Apercus.erreur) + '</span><button type="button" class="btn ghost sm" data-action="reprendre-apercus">Reprendre</button><button type="button" class="btn ghost sm" data-action="fermer-apercus">Plus tard</button>'
+        : '<span>Récupération des miniatures TikTok · <b>' + Apercus.fait + ' / ' + Apercus.total + '</b></span><span class="jauge"><i style="width:' + p + '%"></i></span><button type="button" class="btn ghost sm" data-action="arreter-apercus">Arrêter</button>') +
+      '</div>';
+    return;
+  }
   if (IA.enCours || IA.file.length) {
     var pct = IA.total ? Math.round(IA.fait / IA.total * 100) : 0;
     b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-meduse" aria-hidden="true" style="margin:0"></span>' +
@@ -279,6 +288,11 @@ document.addEventListener("click", function (ev) {
     case "supprimer-compte": supprimerCompte(); break;
 
     case "arreter-analyse": arreterAnalyse(); break;
+    case "apercu-un": if (it) lancerApercus([it.id], function (ids) { if (iaDispo()) lancerAnalyse(ids); }); break;
+    case "apercus-tous": traiterNouveaux(aApercuManquant().map(function (x) { return x.id; })); break;
+    case "arreter-apercus": Apercus.file = []; Apercus.suite = null; Apercus.ids = []; rendreBientot(); break;
+    case "reprendre-apercus": Apercus.erreur = ""; boucleApercus(); break;
+    case "fermer-apercus": Apercus.erreur = ""; Apercus.file = []; Apercus.fait = 0; Apercus.total = 0; Apercus.suite = null; Apercus.ids = []; rendreBientot(); break;
     case "reprendre-analyse": IA.erreur = ""; IA.total = IA.fait + IA.file.length; boucleAnalyse(); break;
     case "fermer-erreur": IA.erreur = ""; IA.file = []; IA.fait = 0; IA.total = 0; rendreBientot(); break;
 
@@ -568,6 +582,8 @@ try {
   }).catch(function () {});
 
   window.claude.use("downloads").then(function (dl) { Telechargement = dl; }).catch(function () {});
+
+  window.claude.use("mcp").then(function (m) { Apercus.mcp = m; rendreBientot(); }).catch(function () {});
 
   Promise.all([window.claude.use("user"), window.claude.use("db")]).then(function (r) {
     var u = r[0], db = r[1];

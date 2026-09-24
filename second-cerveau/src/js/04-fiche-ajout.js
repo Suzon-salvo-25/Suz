@@ -27,7 +27,8 @@ function ficheHTML(it) {
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +
       (ICI.ficheTitre ? "" : '<button type="button" class="btn ghost sm" data-action="edit-titre">Renommer</button>') +
       (iaDispo() ? '<button type="button" class="btn ghost sm" data-action="reanalyser" data-id="' + esc(it.id) + '">' + (IA.file.indexOf(it.id) >= 0 ? "Analyse en cours…" : "Réanalyser avec Claude") + '</button>' : "") +
-    '</div></div></div>';
+      (apercusDispo() && apercuPossible(it) ? '<button type="button" class="btn ghost sm" data-action="apercu-un" data-id="' + esc(it.id) + '">' + (Apercus.file.indexOf(it.id) >= 0 ? "Récupération…" : "Récupérer la miniature") + '</button>' : "") +
+    '</div>' + (it.apercu && !it.apercu.ok && it.apercu.raison !== "instagram_sans_jeton" ? '<p class="aide" style="margin-top:8px">Aperçu indisponible : la vidéo est peut-être privée ou supprimée.</p>' : "") + '</div></div>';
 
   // --- la recette
   if (r) {
@@ -196,7 +197,7 @@ function ajoutHTML() {
     '<div><p class="lab" style="margin-bottom:8px">Obtenir ton export ' + p.nom + '</p><ol class="etapes-guide">' + p.guide.map(function (g) { return '<li>' + g + '</li>'; }).join("") + '</ol></div>' +
     '<label class="depot" id="depot" for="ajFichier"><span class="illu st-' + (a.plat === "instagram" ? "hibiscus" : "meduse") + '" aria-hidden="true"></span>' +
     '<b style="color:var(--ink)">Dépose ton fichier ici</b><span>ou touche pour le choisir · .zip ou .json</span></label>' +
-    '<input type="file" id="ajFichier" accept=".zip,.json,application/zip,application/json" multiple hidden>' +
+    '<input type="file" id="ajFichier" multiple hidden>' +
     (a.plat === "tiktok" ? '<label class="interrupteur"><input type="checkbox" id="ajLikes"' + (a.likes ? " checked" : "") + '>Inclure aussi les vidéos likées (en plus des favoris)</label>' : "");
   var L = a.lecture;
   if (L && L.plat === a.plat) {
@@ -265,7 +266,7 @@ function importer() {
   ICI.ajout.lecture = null;
   $("#ajout").close();
   toast(res.nouveaux.length ? pluriel(res.nouveaux.length, "pépite importée", "pépites importées") : "Rien de nouveau : tout était déjà là.");
-  if (res.nouveaux.length && iaDispo() && Store.reg.iaAuto) lancerAnalyse(res.nouveaux);
+  if (res.nouveaux.length) traiterNouveaux(res.nouveaux);
   allerA("tout");
 }
 
@@ -288,7 +289,7 @@ async function ajouterLiens() {
   ICI.ajout.liens = ""; ICI.ajout.legende = ""; ICI.ajout.note = ""; ICI.ajout.capture = null;
   $("#ajout").close();
   toast(res.nouveaux.length > 1 ? pluriel(res.nouveaux.length, "pépite ajoutée", "pépites ajoutées") : "Pépite ajoutée");
-  if (iaDispo() && Store.reg.iaAuto) lancerAnalyse(res.nouveaux);
+  traiterNouveaux(res.nouveaux);
   if (res.nouveaux.length === 1) ouvrirFiche(res.nouveaux[0]);
 }
 

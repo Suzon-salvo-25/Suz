@@ -833,7 +833,7 @@ var PLATEFORMES = {
       ["ok", "Connexion officielle (Login Kit)", "OAuth fonctionne pour tous les comptes, avec une appli déclarée chez TikTok et un serveur pour garder les jetons."],
       ["partiel", "Display API", "Donne ton profil et tes propres vidéos publiques. Pas tes favoris ni tes likes."],
       ["partiel", "Data Portability API", "Peut transmettre ton activité, favoris compris, mais seulement pour les comptes de l'Espace économique européen et du Royaume-Uni, avec une appli approuvée par TikTok. Prévue pour la version serveur."],
-      ["partiel", "Titre, auteur, miniature (oEmbed)", "Service public, mais cette page ne peut pas l'appeler (le navigateur bloque les requêtes externes). Possible depuis un serveur."],
+      ["ok", "Titre, auteur, miniature (oEmbed)", "Service public, appelé par le petit serveur de l'appli (projet Supabase « mes-pepites ») : chaque vidéo arrive avec sa miniature et sa légende complète."],
       ["ok", "Export « Télécharger tes données »", "Donne le lien et la date de chaque favori, et de chaque like si tu veux. Pas de légende ni d'auteur."],
       ["ok", "Partage d'un lien", "Partager › Copier le lien, puis coller ici."]
     ],
@@ -1684,7 +1684,10 @@ function integrer(liste, source) {
       if (e.createur && !ex.createur) { ex.createur = e.createur; change = true; }
       if (e.legende && !ex.legende) { ex.legende = e.legende; change = true; }
       if (e.ajoute && !ex.ajoute) { ex.ajoute = e.ajoute; change = true; }
-      if (change) { sauverItem(ex); completes++; }
+      if (change) {
+        if (!(ex.analyse && (ex.analyse.par === "ia" || ex.analyse.par === "manuel"))) reclasserUn(ex);
+        sauverItem(ex); completes++;
+      }
       return;
     }
     var it = nouvelItem(e.r, {
@@ -1723,6 +1726,8 @@ function collecterLiens(json) {
       return;
     }
     if (typeof n.title === "string" && n.title && !/^https?:/.test(n.title)) titre = n.title;
+    // Format récent de Meta : [{label: "URL", value}, {label: "Owner", dict: [{label: "Username", value}]}].
+    if (Array.isArray(n.label_values)) titre = auteurLabelValues(n.label_values) || titre;
     var ts = tsDe(n) || tsParent;
     // Le format « string_map_data » range la date dans une valeur sœur.
     if (n.string_map_data) {
@@ -1743,6 +1748,22 @@ function collecterLiens(json) {
   }
   visite(json, "", "", null);
   return out;
+}
+
+function auteurLabelValues(lv) {
+  var trouve = null, secours = null;
+  (function cherche(x) {
+    if (trouve || !x || typeof x !== "object") return;
+    if (Array.isArray(x)) { x.forEach(cherche); return; }
+    var lab = typeof x.label === "string" ? norm(x.label) : "";
+    var val = typeof x.value === "string" ? x.value : "";
+    if (val && !/^https?:/.test(val)) {
+      if (/user ?name|nom d utilisateur|identifiant/.test(lab)) { trouve = val; return; }
+      if (!secours && /owner|proprietaire|auteur|author|^name$|^nom$/.test(lab)) secours = val;
+    }
+    Object.keys(x).forEach(function (k) { if (x[k] && typeof x[k] === "object") cherche(x[k]); });
+  })(lv);
+  return (trouve || secours || "").replace(/^@/, "");
 }
 
 // Collections Instagram : un en-tête (le nom), puis ses publications.
@@ -1779,6 +1800,10 @@ async function lireFichiers(fichiers) {
       docs.push({ nom: f.name, texte: await f.text() });
     } else if (/\.html?$/i.test(f.name)) {
       throw new Error("html");
+    } else {
+      // Nom ou type inattendu (fréquent sur iPhone) : on tente le JSON quand même.
+      var brut = await f.text();
+      if (/^\s*[\[{]/.test(brut)) docs.push({ nom: f.name || "export.json", texte: brut });
     }
   }
   return docs;
@@ -2493,6 +2518,14 @@ function vueReglages() {
   h += '<p class="prose" style="margin-bottom:18px">Aucun mot de passe Instagram ou TikTok n\'est demandé ni gardé. Ni Instagram ni TikTok ne laissent aujourd\'hui une appli lire tes enregistrements automatiquement : l\'import passe par l\'export officiel de tes données, et le quotidien par le partage de liens. Les tableaux ci-dessous disent ce que chaque API permet vraiment.</p>';
   h += blocSource("instagram", "hibiscus", "rose") + blocSource("tiktok", "meduse", "lavande");
 
+  var manquants = aApercuManquant().length;
+  h += '<div class="card"><header><span class="tache t-lavande b2"><span class="illu st-poisson" aria-hidden="true"></span></span><h2>Miniatures et légendes</h2><span class="hint">' + (apercusDispo() ? "Serveur actif" : "Indisponible ici") + '</span></header><div class="body">' +
+    '<p class="prose">Pour chaque vidéo TikTok, un petit serveur (projet Supabase « mes-pepites ») récupère la miniature, l\'auteur et la légende complète via le service oEmbed public de TikTok. Sur claude.ai, il passe par ton connecteur Supabase : la page n\'y lance qu\'une seule requête, celle des aperçus. ' +
+    'Pour Instagram, Meta exige une appli validée et un jeton : le serveur est prêt, il manque ce jeton.</p>' +
+    (apercusDispo() ? (manquants ? '<div class="boutons"><button type="button" class="btn go sm" data-action="apercus-tous">Récupérer ' + pluriel(manquants, "miniature") + '</button></div>' : '<p class="aide" style="margin-top:10px">Toutes tes vidéos TikTok ont déjà leur aperçu.</p>')
+      : '<p class="aide" style="margin-top:10px">Le connecteur Supabase n\'est pas disponible dans cette vue.</p>') +
+    '</div></div>';
+
   h += '<div class="card"><header><span class="tache t-jaune b2"><span class="illu st-ballon" aria-hidden="true"></span></span><h2>Bientôt</h2><span class="hint">Architecture prête</span></header><div class="body">' +
     '<div class="bientot">' + BIENTOT.map(function (b) { return '<div><b>' + esc(b[0]) + '</b>' + esc(b[1]) + '</div>'; }).join("") + '</div></div></div>';
 
@@ -2565,7 +2598,8 @@ function ficheHTML(it) {
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +
       (ICI.ficheTitre ? "" : '<button type="button" class="btn ghost sm" data-action="edit-titre">Renommer</button>') +
       (iaDispo() ? '<button type="button" class="btn ghost sm" data-action="reanalyser" data-id="' + esc(it.id) + '">' + (IA.file.indexOf(it.id) >= 0 ? "Analyse en cours…" : "Réanalyser avec Claude") + '</button>' : "") +
-    '</div></div></div>';
+      (apercusDispo() && apercuPossible(it) ? '<button type="button" class="btn ghost sm" data-action="apercu-un" data-id="' + esc(it.id) + '">' + (Apercus.file.indexOf(it.id) >= 0 ? "Récupération…" : "Récupérer la miniature") + '</button>' : "") +
+    '</div>' + (it.apercu && !it.apercu.ok && it.apercu.raison !== "instagram_sans_jeton" ? '<p class="aide" style="margin-top:8px">Aperçu indisponible : la vidéo est peut-être privée ou supprimée.</p>' : "") + '</div></div>';
 
   // --- la recette
   if (r) {
@@ -2734,7 +2768,7 @@ function ajoutHTML() {
     '<div><p class="lab" style="margin-bottom:8px">Obtenir ton export ' + p.nom + '</p><ol class="etapes-guide">' + p.guide.map(function (g) { return '<li>' + g + '</li>'; }).join("") + '</ol></div>' +
     '<label class="depot" id="depot" for="ajFichier"><span class="illu st-' + (a.plat === "instagram" ? "hibiscus" : "meduse") + '" aria-hidden="true"></span>' +
     '<b style="color:var(--ink)">Dépose ton fichier ici</b><span>ou touche pour le choisir · .zip ou .json</span></label>' +
-    '<input type="file" id="ajFichier" accept=".zip,.json,application/zip,application/json" multiple hidden>' +
+    '<input type="file" id="ajFichier" multiple hidden>' +
     (a.plat === "tiktok" ? '<label class="interrupteur"><input type="checkbox" id="ajLikes"' + (a.likes ? " checked" : "") + '>Inclure aussi les vidéos likées (en plus des favoris)</label>' : "");
   var L = a.lecture;
   if (L && L.plat === a.plat) {
@@ -2803,7 +2837,7 @@ function importer() {
   ICI.ajout.lecture = null;
   $("#ajout").close();
   toast(res.nouveaux.length ? pluriel(res.nouveaux.length, "pépite importée", "pépites importées") : "Rien de nouveau : tout était déjà là.");
-  if (res.nouveaux.length && iaDispo() && Store.reg.iaAuto) lancerAnalyse(res.nouveaux);
+  if (res.nouveaux.length) traiterNouveaux(res.nouveaux);
   allerA("tout");
 }
 
@@ -2826,7 +2860,7 @@ async function ajouterLiens() {
   ICI.ajout.liens = ""; ICI.ajout.legende = ""; ICI.ajout.note = ""; ICI.ajout.capture = null;
   $("#ajout").close();
   toast(res.nouveaux.length > 1 ? pluriel(res.nouveaux.length, "pépite ajoutée", "pépites ajoutées") : "Pépite ajoutée");
-  if (iaDispo() && Store.reg.iaAuto) lancerAnalyse(res.nouveaux);
+  traiterNouveaux(res.nouveaux);
   if (res.nouveaux.length === 1) ouvrirFiche(res.nouveaux[0]);
 }
 
@@ -3112,6 +3146,151 @@ function finirOnboarding(suite) {
 }
 
 /* ==================================================================
+   APERÇUS : miniature, auteur et légende des vidéos TikTok
+   La page ne peut pas appeler TikTok elle-même. Elle passe par le projet
+   Supabase « mes-pepites » : une fonction SQL (pepites.apercu) appelle la
+   fonction Edge « apercu », qui interroge l'oEmbed public de TikTok et
+   rapporte la miniature. Sur claude.ai, l'appel passe par le connecteur
+   Supabase de la personne ; en version autonome, directement en HTTPS.
+   Instagram suivra le même chemin dès qu'un jeton Meta sera posé côté
+   serveur ; d'ici là le serveur répond « instagram_sans_jeton ».
+   ================================================================== */
+
+var APERCU = {
+  projet: "roxsrrscddkeibiqrxxp",
+  serveur: "Supabase",
+  outil: "execute_sql",
+  // Version autonome : appel direct de la fonction Edge (clé publique « anon »).
+  url: "https://roxsrrscddkeibiqrxxp.supabase.co/functions/v1/apercu",
+  cle: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveHNycnNjZGRrZWliaXFyeHhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjkzNDcsImV4cCI6MjEwNTg0NTM0N30.I4dCySQo-HdCY750XvQ1DlSnki7HBEsqfYINHV5_RB4"
+};
+
+var Apercus = { mcp: null, file: [], enCours: false, fait: 0, total: 0, erreur: "", instagramOff: true, suite: null, ids: [] };
+
+function apercusDispo() { return !!Apercus.mcp || !EN_ARTIFACT; }
+function apercuPossible(it) {
+  if (!it || !it.url || it.vignette || it.demo) return false;
+  if (it.apercu && it.apercu.ok) return false;
+  if (it.plateforme === "tiktok") return true;
+  return it.plateforme === "instagram" && !Apercus.instagramOff;
+}
+function aApercuManquant() { return tousItems().filter(apercuPossible); }
+
+var MESSAGES_APERCU = {
+  server_not_connected: "Le connecteur Supabase n'est pas branché sur ton compte Claude : ajoute-le dans Réglages › Connecteurs de claude.ai, puis reprends.",
+  needs_reauth: "Le connecteur Supabase doit être reconnecté dans les réglages de claude.ai.",
+  not_in_manifest: "Cette page n'a pas l'autorisation d'utiliser Supabase.",
+  blocked_by_policy: "Ton organisation bloque l'usage de Supabase depuis cette page.",
+  approval_required: "L'accès à Supabase attend ton accord : reprends et accepte la demande.",
+  tool_error: "Le serveur des aperçus a renvoyé une erreur. Vérifie que le projet Supabase « mes-pepites » n'est pas en pause."
+};
+
+// Le connecteur rend le résultat SQL enrobé de texte : on n'en garde que le tableau JSON.
+function lignesSql(payload) {
+  if (typeof payload === "string" && /^\s*\{/.test(payload)) {
+    try { payload = JSON.parse(payload); } catch (e) {}
+  }
+  if (payload && payload.content && payload.payload == null && Array.isArray(payload.content)) {
+    payload = (payload.content.filter(function (c) { return c && c.type === "text"; })[0] || {}).text || "";
+    if (/^\s*\{/.test(payload)) { try { payload = JSON.parse(payload); } catch (e) {} }
+  }
+  var t = typeof payload === "string" ? payload : payload && typeof payload.result === "string" ? payload.result : JSON.stringify(payload || "");
+  var m = t.match(/<untrusted-data-[^>]*>\s*([\s\S]*?)\s*<\/untrusted-data/);
+  var j = m ? m[1] : t;
+  var a = j.indexOf("["), b = j.lastIndexOf("]");
+  if (a < 0 || b < a) return [];
+  var lignes = JSON.parse(j.slice(a, b + 1));
+  return lignes.map(function (l) { return { id: l.id, r: typeof l.r === "string" ? JSON.parse(l.r) : l.r }; });
+}
+
+function sqlTexte(s) { return "'" + String(s).replace(/'/g, "''") + "'"; }
+
+async function demanderApercus(items) {
+  if (Apercus.mcp) {
+    var q = "select v.id, pepites.apercu(v.lien) as r from (values " +
+      items.map(function (it) { return "(" + sqlTexte(it.id) + ", " + sqlTexte(it.url) + ")"; }).join(", ") +
+      ") as v(id, lien);";
+    var res = await Apercus.mcp.callTool(APERCU.serveur, APERCU.outil, { project_id: APERCU.projet, query: q });
+    return lignesSql(res.payload != null ? res.payload : res);
+  }
+  var out = [];
+  for (var i = 0; i < items.length; i++) {
+    var rep = await fetch(APERCU.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + APERCU.cle, apikey: APERCU.cle },
+      body: JSON.stringify({ url: items[i].url })
+    });
+    out.push({ id: items[i].id, r: rep.ok ? await rep.json() : { ok: false, raison: "serveur_" + rep.status } });
+  }
+  return out;
+}
+
+async function appliquerApercu(id, r) {
+  var it = Store.items[id];
+  if (!it || !r) return;
+  it.apercu = { ok: !!r.ok, raison: r.raison || null, date: Date.now() };
+  if (r.raison === "instagram_sans_jeton") Apercus.instagramOff = true;
+  if (r.ok) {
+    if (r.auteur && !it.createur) it.createur = String(r.auteur).replace(/^@/, "");
+    // Sur TikTok, le « titre » oEmbed est la légende complète de la vidéo.
+    if (r.titre && !it.legende) it.legende = String(r.titre).slice(0, 2500);
+    if (r.miniature && !it.vignette) {
+      var blob = await dataUrlVersBlob(r.miniature);
+      var img = blob ? await preparerImage(blob) : null;
+      if (img) { it.vignette = img.vignette; it.ratio = img.ratio; IA.images[id] = img.ia; }
+    }
+    if (!(it.analyse && it.analyse.par === "ia")) reclasserUn(it);
+  }
+  sauverItem(it);
+}
+
+function lancerApercus(ids, suite) {
+  var nouveaux = ids.filter(function (id) { return apercuPossible(Store.items[id]) && Apercus.file.indexOf(id) < 0; });
+  if (!apercusDispo() || !nouveaux.length) { if (suite) suite(ids); return; }
+  Apercus.file = Apercus.file.concat(nouveaux);
+  Apercus.ids = Apercus.ids.concat(ids);
+  if (suite) Apercus.suite = suite;
+  Apercus.total = Apercus.fait + Apercus.file.length;
+  Apercus.erreur = "";
+  rendreBientot();
+  if (!Apercus.enCours) boucleApercus();
+}
+
+async function boucleApercus() {
+  Apercus.enCours = true;
+  rendreBientot();
+  while (Apercus.file.length) {
+    var lot = Apercus.file.splice(0, 3).map(function (id) { return Store.items[id]; }).filter(Boolean);
+    if (!lot.length) continue;
+    try {
+      var lignes = await demanderApercus(lot);
+      for (var i = 0; i < lignes.length; i++) await appliquerApercu(lignes[i].id, lignes[i].r);
+    } catch (e) {
+      Apercus.file = lot.map(function (it) { return it.id; }).concat(Apercus.file);
+      Apercus.erreur = MESSAGES_APERCU[e && e.code] || "Les aperçus n'ont pas pu être récupérés pour le moment.";
+      break;
+    }
+    Apercus.fait += lot.length;
+    rendreBientot();
+  }
+  Apercus.enCours = false;
+  if (!Apercus.file.length) {
+    var n = Apercus.fait, suite = Apercus.suite, ids = Apercus.ids;
+    Apercus.fait = 0; Apercus.total = 0; Apercus.suite = null; Apercus.ids = [];
+    if (n) journal(pluriel(n, "aperçu récupéré", "aperçus récupérés") + " (miniature, auteur, légende).");
+    if (suite) suite(ids);
+  }
+  rendreBientot();
+}
+
+// Après un ajout : d'abord les aperçus (ils apportent la légende), puis Claude.
+function traiterNouveaux(ids) {
+  lancerApercus(ids, function (tous) {
+    if (iaDispo() && Store.reg.iaAuto) lancerAnalyse(tous.filter(function (id) { return Store.items[id]; }));
+  });
+}
+
+/* ==================================================================
    RENDU
    ================================================================== */
 
@@ -3149,6 +3328,15 @@ var VUES = { accueil: vueAccueil, recettes: vueRecettes, tout: vueTout, categori
 
 function banniereAnalyse() {
   var b = $("#banniere");
+  if (Apercus.enCours || Apercus.file.length) {
+    var p = Apercus.total ? Math.round(Apercus.fait / Apercus.total * 100) : 0;
+    b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-poisson" aria-hidden="true" style="margin:0"></span>' +
+      (Apercus.erreur
+        ? '<span style="flex:1 1 200px">' + esc(Apercus.erreur) + '</span><button type="button" class="btn ghost sm" data-action="reprendre-apercus">Reprendre</button><button type="button" class="btn ghost sm" data-action="fermer-apercus">Plus tard</button>'
+        : '<span>Récupération des miniatures TikTok · <b>' + Apercus.fait + ' / ' + Apercus.total + '</b></span><span class="jauge"><i style="width:' + p + '%"></i></span><button type="button" class="btn ghost sm" data-action="arreter-apercus">Arrêter</button>') +
+      '</div>';
+    return;
+  }
   if (IA.enCours || IA.file.length) {
     var pct = IA.total ? Math.round(IA.fait / IA.total * 100) : 0;
     b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-meduse" aria-hidden="true" style="margin:0"></span>' +
@@ -3391,6 +3579,11 @@ document.addEventListener("click", function (ev) {
     case "supprimer-compte": supprimerCompte(); break;
 
     case "arreter-analyse": arreterAnalyse(); break;
+    case "apercu-un": if (it) lancerApercus([it.id], function (ids) { if (iaDispo()) lancerAnalyse(ids); }); break;
+    case "apercus-tous": traiterNouveaux(aApercuManquant().map(function (x) { return x.id; })); break;
+    case "arreter-apercus": Apercus.file = []; Apercus.suite = null; Apercus.ids = []; rendreBientot(); break;
+    case "reprendre-apercus": Apercus.erreur = ""; boucleApercus(); break;
+    case "fermer-apercus": Apercus.erreur = ""; Apercus.file = []; Apercus.fait = 0; Apercus.total = 0; Apercus.suite = null; Apercus.ids = []; rendreBientot(); break;
     case "reprendre-analyse": IA.erreur = ""; IA.total = IA.fait + IA.file.length; boucleAnalyse(); break;
     case "fermer-erreur": IA.erreur = ""; IA.file = []; IA.fait = 0; IA.total = 0; rendreBientot(); break;
 
@@ -3680,6 +3873,8 @@ try {
   }).catch(function () {});
 
   window.claude.use("downloads").then(function (dl) { Telechargement = dl; }).catch(function () {});
+
+  window.claude.use("mcp").then(function (m) { Apercus.mcp = m; rendreBientot(); }).catch(function () {});
 
   Promise.all([window.claude.use("user"), window.claude.use("db")]).then(function (r) {
     var u = r[0], db = r[1];

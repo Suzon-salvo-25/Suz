@@ -666,6 +666,14 @@ function vueReglages() {
   h += '<p class="prose" style="margin-bottom:18px">Aucun mot de passe Instagram ou TikTok n\'est demandé ni gardé. Ni Instagram ni TikTok ne laissent aujourd\'hui une appli lire tes enregistrements automatiquement : l\'import passe par l\'export officiel de tes données, et le quotidien par le partage de liens. Les tableaux ci-dessous disent ce que chaque API permet vraiment.</p>';
   h += blocSource("instagram", "hibiscus", "rose") + blocSource("tiktok", "meduse", "lavande");
 
+  var manquants = aApercuManquant().length;
+  h += '<div class="card"><header><span class="tache t-lavande b2"><span class="illu st-poisson" aria-hidden="true"></span></span><h2>Miniatures et légendes</h2><span class="hint">' + (apercusDispo() ? "Serveur actif" : "Indisponible ici") + '</span></header><div class="body">' +
+    '<p class="prose">Pour chaque vidéo TikTok, un petit serveur (projet Supabase « mes-pepites ») récupère la miniature, l\'auteur et la légende complète via le service oEmbed public de TikTok. Sur claude.ai, il passe par ton connecteur Supabase : la page n\'y lance qu\'une seule requête, celle des aperçus. ' +
+    'Pour Instagram, Meta exige une appli validée et un jeton : le serveur est prêt, il manque ce jeton.</p>' +
+    (apercusDispo() ? (manquants ? '<div class="boutons"><button type="button" class="btn go sm" data-action="apercus-tous">Récupérer ' + pluriel(manquants, "miniature") + '</button></div>' : '<p class="aide" style="margin-top:10px">Toutes tes vidéos TikTok ont déjà leur aperçu.</p>')
+      : '<p class="aide" style="margin-top:10px">Le connecteur Supabase n\'est pas disponible dans cette vue.</p>') +
+    '</div></div>';
+
   h += '<div class="card"><header><span class="tache t-jaune b2"><span class="illu st-ballon" aria-hidden="true"></span></span><h2>Bientôt</h2><span class="hint">Architecture prête</span></header><div class="body">' +
     '<div class="bientot">' + BIENTOT.map(function (b) { return '<div><b>' + esc(b[0]) + '</b>' + esc(b[1]) + '</div>'; }).join("") + '</div></div></div>';
 
