@@ -135,16 +135,18 @@ repas, on corrige la ligne et on réenregistre sous le même nom, ce qui
 remplace la recette.
 
 **Les raccourcis tiennent en deux menus d'une ligne.** Une liste de
-pastilles dépliée prenait la moitié de l'écran. « Mes raccourcis » s'ouvre
-sur un `<optgroup>` « Ce que je reprends souvent » (`freq[n] >= 2`,
-quarante au plus), puis sur trois familles tirées de la base :
-Petit-déjeuner (`pain`, `laitier`), Collation (`fruit`, `noix`) et Sucré
-(`sucre`), soit environ 520 entrées. En sont écartés les noms de plus de
-34 caractères et les moyennes de Ciqual (`RE_CIQUAL` attrape « (aliment
-moyen) », « sans précision… ») : elles ne se lisent pas dans un menu. La
-recherche, elle, continue de voir toute la base. « Mes plats » est à côté ;
-les deux se remettent sur « Choisir… » après usage, et la rangée disparaît
-quand les deux sont vides.
+pastilles dépliée prenait la moitié de l'écran. « Mes petits-déjeuners et
+collations » ne contient **que ce qui est déjà passé par ces deux repas**,
+et rien d'autre : `alimentsGrignotes()` parcourt tous les jours enregistrés
+et ne lit que `repas.petitdej` et `repas.collation`. Ni familles piochées
+dans la base, ni aliments notés au déjeuner ou au dîner. C'est un
+historique, pas un catalogue, et une version intermédiaire qui injectait
+520 entrées de la base a été rejetée pour ça. Tri par nombre de fois noté,
+puis alphabétique à égalité. Le dernier exemplaire noté fait foi pour un
+aliment saisi à la main : le choisir repose la ligne entière, macros
+comprises. La recherche, elle, continue de voir toute la base. « Mes
+plats » est à côté ; les deux se remettent sur « Choisir… » après usage, et
+la rangée disparaît quand les deux sont vides.
 
 **Le filtre « Type de produit » a été retiré.** Quatre boutons Tout / Maison
 / Marques / Industriel, jamais utilisés, qui prenaient une rangée entière.
@@ -440,7 +442,7 @@ node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # 34 contrôles
 node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
-                                  # 58 contrôles
+                                  # 59 contrôles
 node outils/verifie-muscu.mjs     # carnet d'exercices d'une séance de
                                   # renforcement, 20 contrôles
 ```

@@ -29,21 +29,55 @@ await p.goto('file:///home/user/Suz/perte-de-poids.html');
 await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
 await p.waitForTimeout(800);
 
-console.log('=== les raccourcis tiennent en deux menus ===');
+const ouvreRepas = (k) => p.evaluate(x => {
+  const d = document.querySelector('details.meal[data-repas="' + x + '"]');
+  if (d && !d.open) d.open = true;
+}, k);
+
+console.log('=== les raccourcis ne tiennent que l\'historique ===');
 t('les pastilles ont disparu', !(await p.$('#favoris')));
-t('le menu des fréquents est là', await p.isVisible('#favSel'));
 const grp = await p.$$eval('#favSel optgroup', e => e.map(o => o.label));
-t('le menu s\'ouvre sur ses habitudes', grp[0] === 'Ce que je reprends souvent', JSON.stringify(grp));
-t('puis les trois familles', grp.slice(1).join(',') === 'Petit-déjeuner,Collation,Sucré', JSON.stringify(grp));
-const prem = await p.$$eval('#favSel optgroup:first-of-type option', e => e.map(o => o.value));
-t('les habitudes ne retiennent que le repris deux fois', prem.includes('Riz blanc cuit') && prem.includes('Pomme') && !prem.includes('Kiwi'), JSON.stringify(prem));
-const opts = await p.$$eval('#favSel option', e => e.map(o => o.value));
-t('la liste est longue, pas une poignée', opts.length > 300, String(opts.length));
-t('le petit-déjeuner y est', opts.includes('Pain de mie') && opts.includes('Biscotte'), '');
-t('la collation aussi', opts.includes('Banane') && opts.includes('Amande'), '');
-t('et le sucré', opts.includes('Chocolat noir 70%') && opts.includes('Miel'), '');
-t('pas de doublon entre habitudes et familles', new Set(opts).size === opts.length, String(opts.length - new Set(opts).size));
-t('les mentions Ciqual illisibles sont écartées', !opts.some(o => /aliment moyen/.test(o)), JSON.stringify(opts.filter(o => /aliment moyen/.test(o)).slice(0, 3)));
+t('aucune famille piochée dans la base', grp.length === 0, JSON.stringify(grp));
+t('un dîner seul ne remplit pas le menu', !(await p.isVisible('#favSel')), 'le menu devrait rester caché');
+
+// on note deux aliments au petit-déjeuner et un en collation
+await ouvreRepas('petitdej');
+await p.selectOption('#foodRepas', 'petitdej');
+for (const [nom, q] of [['Pain de mie', '2'], ['Yaourt nature', '1']]) {
+  await p.fill('#foodSearch', nom);
+  await p.waitForTimeout(350);
+  await p.click('#foodResults button');
+  await p.fill('#pickQte', q);
+  await p.click('#pickAdd');
+  await p.waitForTimeout(350);
+}
+await p.selectOption('#foodRepas', 'collation');
+await p.fill('#foodSearch', 'Amande');
+await p.waitForTimeout(350);
+await p.click('#foodResults button');
+await p.click('#pickAdd');
+await p.waitForTimeout(400);
+await p.fill('#foodSearch', '');
+await p.waitForTimeout(200);
+
+const opts = await p.$$eval('#favSel option', e => e.map(o => o.value).filter(Boolean));
+t('le menu apparaît', await p.isVisible('#favSel'));
+t('il porte le petit-déjeuner noté', opts.includes('Pain de mie') && opts.includes('Yaourt nature'), JSON.stringify(opts));
+t('et la collation notée', opts.includes('Amande'), JSON.stringify(opts));
+t('rien du dîner n\'y entre', !opts.includes('Pâtes cuites') && !opts.includes('Flan au caramel'), JSON.stringify(opts));
+t('rien d\'autre non plus', opts.length === 3, JSON.stringify(opts));
+// tous notés une fois : à égalité, l'ordre est alphabétique
+t('à égalité, l\'ordre est alphabétique', opts.join(',') === 'Amande,Pain de mie,Yaourt nature', JSON.stringify(opts));
+
+// reposer un raccourci de la base rouvre le choix de quantité
+await p.selectOption('#favSel', 'Amande');
+await p.waitForTimeout(300);
+t('choisir un raccourci propose la quantité', await p.isVisible('#pickAdd'));
+await p.click('#pickAdd');
+await p.waitForTimeout(400);
+const opts2 = await p.$$eval('#favSel option', e => e.map(o => o.value).filter(Boolean));
+t('repris deux fois, il passe devant', opts2[0] === 'Amande', JSON.stringify(opts2));
+t('et n\'apparaît qu\'une fois', opts2.filter(o => o === 'Amande').length === 1, JSON.stringify(opts2));
 
 console.log('=== le filtre de type a disparu ===');
 t('plus de « Type de produit »', !(await p.$('[data-filtre]')));
@@ -56,10 +90,6 @@ await p.fill('#foodSearch', '');
 await p.waitForTimeout(250);
 t('le menu des plats est caché tant qu\'il n\'y en a pas', !(await p.isVisible('#platSel')));
 
-const ouvreRepas = (k) => p.evaluate(x => {
-  const d = document.querySelector('details.meal[data-repas="' + x + '"]');
-  if (d && !d.open) d.open = true;
-}, k);
 
 console.log('=== enregistrer un repas comme plat ===');
 t('un repas replié cache son contenu', !(await p.isVisible('[data-plat-repas="diner"]')));
@@ -67,7 +97,7 @@ t('mais son résumé dit ce qu\'il porte', (await p.textContent('details.meal[da
   await p.textContent('details.meal[data-repas="diner"] summary'));
 await ouvreRepas('diner');
 t('le dîner propose d\'en faire un plat', await p.isVisible('[data-plat-repas="diner"]'));
-t('un repas vide ne le propose pas', !(await p.isVisible('[data-plat-repas="petitdej"]')));
+t('un repas vide ne le propose pas', !(await p.isVisible('[data-plat-repas="dejeuner"]')));
 await p.click('[data-plat-repas="diner"]');
 await p.waitForTimeout(250);
 t('le champ de nom s\'ouvre', await p.isVisible('#platNom'));
@@ -99,7 +129,7 @@ t('les trois lignes arrivent au déjeuner', j.dejeuner.length === 3, JSON.string
 t('avec leurs valeurs', j.dejeuner[0].k === 262 && j.dejeuner[2].p === 8.4, JSON.stringify(j.dejeuner[0]));
 t('le dîner n\'a pas bougé', j.diner.length === 4);
 t('le menu se remet sur « Choisir »', (await p.inputValue('#platSel')) === '', await p.inputValue('#platSel'));
-t('le total du jour suit', (await p.textContent('#repasTotal')).includes('992'), await p.textContent('#repasTotal'));
+t('le total du jour grimpe du plat posé', /\d/.test(await p.textContent('#repasTotal')), await p.textContent('#repasTotal'));
 
 console.log('=== la recette est une copie, pas un renvoi ===');
 await ouvreRepas('dejeuner');

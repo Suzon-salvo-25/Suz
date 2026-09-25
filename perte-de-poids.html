@@ -1595,7 +1595,7 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
         </div>
         <div class="row-inline" id="raccourcis" hidden style="margin-bottom:14px">
           <div class="field" id="favorisBloc" style="flex:1 1 200px" hidden>
-            <label for="favSel">Mes raccourcis</label>
+            <label for="favSel">Mes petits-déjeuners et collations</label>
             <select id="favSel"></select>
           </div>
           <div class="field" id="platsBloc" style="flex:1 1 200px" hidden>
@@ -6753,67 +6753,48 @@ var SPORTS = [
     Store.sauveProfil();
   }
 
-  /* Une liste de pastilles dépliée prenait la moitié de l'écran. Un menu
-     déroulant d'une ligne la remplace, et il s'ouvre sur les familles qu'on
-     reprend sans y penser : petit-déjeuner, collation, sucré. Les entrées
-     de Ciqual qui portent une longue précision entre parenthèses en sont
-     écartées, elles ne se lisent pas dans un menu ; la recherche, elle,
-     continue de voir toute la base. */
-  // Ciqual qualifie ses moyennes entre parenthèses : « Fromage (aliment
-  // moyen) » n'a rien à faire dans un menu de raccourcis.
-  var RE_CIQUAL = /\((aliment moyen|.*?moyenne?|sans précision.*?|aliment reconstitué)\)/i;
+  /* Le menu des raccourcis ne contient que ce qui est déjà passé par le
+     petit-déjeuner ou la collation, et rien d'autre : ni familles piochées
+     dans la base, ni aliments notés au déjeuner ou au dîner. C'est un
+     historique, pas un catalogue. La recherche, elle, continue de voir
+     toute la base. */
+  var REPAS_RACCOURCI = ["petitdej", "collation"];
 
-  var FAMILLES_RACCOURCI = [
-    ["Petit-déjeuner", ["pain", "laitier"]],
-    ["Collation", ["fruit", "noix"]],
-    ["Sucré", ["sucre"]]
-  ];
-
-  function optionAliment(i) {
-    var a = ALIMENTS[i];
-    return '<option value="' + esc(a[0]) + '">' + esc(a[0]) + ' · ' +
-      ni(Math.round(a[1] * a[6] / 100)) + ' kcal</option>';
+  // Le dernier exemplaire noté fait foi : c'est lui qui porte les calories
+  // et les macros d'un aliment saisi à la main, absent de `ALIMENTS`.
+  function alimentsGrignotes() {
+    var vus = {}, dates = Object.keys(Store.jours).sort();
+    dates.forEach(function (d) {
+      var r = (Store.jours[d] || {}).repas || {};
+      REPAS_RACCOURCI.forEach(function (k) {
+        (r[k] || []).forEach(function (it) {
+          if (!it || typeof it.n !== "string" || !it.n) return;
+          if (!vus[it.n]) vus[it.n] = { n: it.n, fois: 0, dernier: null };
+          vus[it.n].fois++;
+          vus[it.n].dernier = it;
+        });
+      });
+    });
+    return Object.keys(vus).map(function (n) { return vus[n]; })
+      .sort(function (a, b) {
+        return b.fois - a.fois || a.n.localeCompare(b.n, "fr");
+      });
   }
 
   function renderFavoris() {
-    var p = P();
-    var freq = p.freq || {};
-    var deja = {};
-    var groupes = [];
-
-    var siens = Object.keys(freq)
-      .filter(function (n) { return freq[n] >= 2; })
-      .sort(function (a, b) { return freq[b] - freq[a]; })
-      .slice(0, 40)
-      .map(function (n) {
-        var i = ALIMENTS.findIndex(function (a) { return a[0] === n; });
-        if (i !== -1) { deja[n] = 1; return optionAliment(i); }
-        var kcal = p.perso && p.perso[n];
-        if (kcal === undefined || kcal === null) return "";
-        deja[n] = 1;
-        return '<option value="' + esc(n) + '">' + esc(n) + ' · ' + ni(kcal) + ' kcal</option>';
-      }).filter(Boolean);
-    if (siens.length) groupes.push(['<optgroup label="Ce que je reprends souvent">' + siens.join("") + '</optgroup>']);
-
-    FAMILLES_RACCOURCI.forEach(function (f) {
-      var lignes = [];
-      for (var i = 0; i < ALIMENTS.length; i++) {
-        var a = ALIMENTS[i];
-        if (f[1].indexOf(a[5]) === -1 || deja[a[0]]) continue;
-        if (a[0].length > 34 || typeAliment(a[0]) === "industriel" || RE_CIQUAL.test(a[0])) continue;
-        lignes.push([a[0], i]);
-      }
-      if (!lignes.length) return;
-      lignes.sort(function (x, y) { return x[0].localeCompare(y[0], "fr"); });
-      groupes.push(['<optgroup label="' + esc(f[0]) + '">' +
-        lignes.map(function (x) { return optionAliment(x[1]); }).join("") + '</optgroup>']);
+    var lignes = alimentsGrignotes().map(function (v) {
+      var i = ALIMENTS.findIndex(function (a) { return a[0] === v.n; });
+      var kcal = i !== -1
+        ? Math.round(ALIMENTS[i][1] * ALIMENTS[i][6] / 100)
+        : Math.round(v.dernier.k || 0);
+      return '<option value="' + esc(v.n) + '">' + esc(v.n) + ' · ' + ni(kcal) + ' kcal</option>';
     });
 
     var bloc = document.getElementById("favorisBloc");
-    bloc.hidden = !groupes.length;
-    if (groupes.length) {
+    bloc.hidden = !lignes.length;
+    if (lignes.length) {
       document.getElementById("favSel").innerHTML =
-        '<option value="">Choisir…</option>' + groupes.join("");
+        '<option value="">Choisir…</option>' + lignes.join("");
     }
     renderPlatsListe();
   }
@@ -8284,12 +8265,13 @@ var SPORTS = [
     if (!nom) return;
     var i = ALIMENTS.findIndex(function (a) { return a[0] === nom; });
     if (i !== -1) { ouvrePicker(i); return; }
-    var p = P();
-    var kcal = p.perso && p.perso[nom];
-    if (kcal === undefined) return;
-    J().repas[document.getElementById("foodRepas").value].push({
-      n: nom, d: "saisie libre", k: kcal, p: 0, g: 0, l: 0
-    });
+    // Aliment saisi à la main : on repose la dernière ligne notée, macros
+    // comprises, plutôt que ses seules calories.
+    var vu = alimentsGrignotes().filter(function (v) { return v.n === nom; })[0];
+    var copie = vu && copieLibre(vu.dernier);
+    if (!copie) return;
+    var kcal = copie.k || 0;
+    J().repas[document.getElementById("foodRepas").value].push(copie);
     noteUsage(nom);
     Store.sauveJour(dateCourante);
     renderAlim(); renderFavoris(); renderBandeau(); majDiag();
