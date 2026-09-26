@@ -230,15 +230,27 @@ Sur ce temps travaillé, trois choses s'additionnent.
    pour le reste.
 2. Le temps de fonte au **MET publié pour la musculation à effort léger ou
    modéré, 3,5**, repos entre séries compris.
-3. **Le travail mécanique de la fonte réellement déplacée**, ce que le MET
-   ignore et ce qui fait qu'une presse à 80 kg ne vaut pas une presse à
-   20 kg. `m·g·h`, la descente ajoutant un tiers, rendement musculaire 22 %,
-   amplitude moyenne 0,5 m, soit `9,81 × 0,5 × 4/3 ÷ 0,22 ÷ 4184 =`
-   **0,0071 kcal par kilogramme et par répétition**. Mille kilos soulevés
-   valent sept calories : c'est peu, et c'est la vérité.
+3. **Le travail mécanique de la masse réellement déplacée**, ce que le MET
+   ignore. `m·g·h`, la descente ajoutant un tiers, rendement musculaire
+   22 %, soit `9,81 × 4/3 ÷ 0,22 ÷ 4184 =` **0,014210 kcal par kilogramme et
+   par mètre**. **La masse n'est pas que la charge** : « on ne dépense pas
+   les mêmes kcal quand on pousse avec les jambes ou avec les bras ». Un
+   squat lève la barre *et* tout ce qui est au-dessus des genoux, une presse
+   à cuisses ne lève que le chariot, des tractions lèvent le corps entier et
+   rien d'autre, un curl ne lève que l'haltère et l'avant-bras. Chaque
+   exercice porte donc son **amplitude** et sa **part de poids du corps
+   déplacée** (`PROFIL_EXO`, à défaut `PROFIL_ZONE` par zone, à défaut
+   `PROFIL_NEUTRE`), les parts venant des tables anthropométriques usuelles :
+   2 % pour un avant-bras, 5 % pour un bras, 16 % pour une jambe, deux tiers
+   pour le tronc et la tête. Sans ça, **des tractions valaient zéro**, leur
+   charge étant nulle. À 4 × 10 avec 40 kg et 77 kg de corps : squat 59 kcal,
+   presse à cuisses 45, curl 40, mollets debout 40, tractions à vide 46.
 
 Le temps travaillé ne dépasse jamais le temps sur place, et la fonte est
-plafonnée à **6 MET**, la valeur publiée d'une musculation soutenue. Tant
+plafonnée à **6 MET rapportés au temps passé sur place**, pas aux seules
+minutes travaillées : sur sept minutes de séries, ce plafond écrasait tous
+les écarts entre un squat et un curl, qui sont justement ce qu'on cherche à
+voir. Tant
 qu'aucune ligne n'est notée, la séance vaut provisoirement tout son temps à
 3,5 MET et le carnet le dit ; la première ligne remplace l'estimation par le
 calcul, et **le chiffre peut alors descendre, c'est normal**. Le résumé sous
@@ -256,14 +268,27 @@ voir avec quelqu'un qui en a fait 200 ». Toute reprise du modèle doit garder
 les trois propriétés gagnées : **chaque série notée fait bouger le chiffre**,
 **le poids compte**, et **le temps oisif ne rapporte rien**.
 
+**Une machine inconnue ne bloque rien, et le carnet le dit.** En fonte, elle
+prend l'amplitude et la part de corps neutres, `PROFIL_NEUTRE` ; en cardio,
+elle est comptée à `MET_CARDIO_INCONNU`, 6 MET sur la durée, la distance
+étant ignorée faute de savoir ce qu'elle veut dire, trois kilomètres au
+rameur ne coûtant pas trois kilomètres de course.
+
+**Une ligne d'exercice se corrige sans se supprimer** : la ligne entière est
+un bouton qui ouvre le formulaire à sa place (`exoDepuisLigne`,
+`exoSaisie.edit`). Une correction referme le formulaire, un ajout le laisse
+ouvert. À l'ouverture, le mode fonte ou cardio vient de la ligne, et la
+détection automatique par le nom ne reprend la main que si elle aurait choisi
+pareil : sinon c'est un choix explicite qu'on ne défait pas.
+
 **Le temps passé sur place se corrige dans le carnet** (`.salle-duree`).
-Toute retouche, ligne ajoutée, ligne retirée ou durée changée, repasse par
-`recalculeSalle`.
+Toute retouche, ligne ajoutée, corrigée, retirée ou durée changée, repasse
+par `recalculeSalle`.
 
 Repères de contrôle, 77 kg : trois heures sur place avec un seul exercice de
-trois séries valent **35 kcal**, les mêmes trois heures avec soixante séries
-en valent **642**. Une heure avec 20 min de tapis à 9 km/h et treize séries
-pour 5 040 kg donne 258 + 105 + 36 = **399 kcal**.
+trois séries valent **37 kcal**, les mêmes trois heures avec soixante séries
+en valent **634**. Une heure avec 20 min de tapis à 9 km/h et treize séries
+pour 5 040 kg donne 258 + 105 + 38 = **402 kcal**.
 
 **Le tour de taille a été retiré de l'interface.** « Je ne le ferai
 jamais. » Le champ, sa tuile et sa lecture sont partis ; le champ `tour`
@@ -503,8 +528,8 @@ node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
                                   # 59 contrôles
 node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
-                                  # dedans, dépense calculée depuis le
-                                  # travail réel, 32 contrôles
+                                  # dedans, correction d'une ligne, masse
+                                  # déplacée, 41 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

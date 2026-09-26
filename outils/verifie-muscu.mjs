@@ -60,9 +60,9 @@ for (const [nom, se, re, kg] of [['Presse à cuisses','4','12','45'], ['Leg exte
 }
 const s1 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
 t('les quatre machines sont notées', s1.ex.length === 4, JSON.stringify(s1.ex.map(x => x.n)));
-// 13 séries : 23:27 de séries et de repos à 3,5 MET = 105 kcal, plus
-// 5 040 kg soulevés à 0,0071 kcal/kg = 36 kcal. Total 141.
-t('la dépense vaut le temps travaillé plus la fonte déplacée', s1.k === 141, String(s1.k));
+// 13 séries : 23:27 de séries et de repos à 3,5 MET = 105 kcal, plus le
+// travail de la charge et du corps déplacé avec, 38 kcal. Total 144.
+t('la dépense vaut le temps travaillé plus la masse déplacée', s1.k === 144, String(s1.k));
 t('chaque machine a compté dès la première', paliers[0] > 0 && paliers.every((v, i) => i === 0 || v > paliers[i - 1]), JSON.stringify(paliers));
 
 console.log('=== le cardio dans la séance ===');
@@ -81,10 +81,10 @@ const c = s2.ex.find(x => x.t === 'cardio');
 t('la ligne de cardio est enregistrée', !!c && c.m === 20 && c.d === 3, JSON.stringify(c));
 // 3 km en 20 min = 9 km/h. ACSM : (0,2 x 150 + 3,5) x 77 / 1000 x 5 x 20 = 258 kcal,
 // qui s'ajoutent aux 141 de la fonte.
-t('la dépense se recalcule depuis le contenu', s2.k === 399, String(s2.k));
+t('la dépense se recalcule depuis le contenu', s2.k === 402, String(s2.k));
 const resume = await p.textContent('.exo-vol');
 t('le résumé dit le partage', resume.includes('20:00 de cardio') && resume.includes('258 kcal'), resume);
-t('et ce que la fonte déplacée ajoute', resume.includes('5 040 kg soulevés pour 36 kcal'), resume);
+t('et ce que la masse déplacée ajoute', resume.includes('5 040 kg de charge'), resume);
 
 console.log('=== l\'allure seule suffit ===');
 await p.fill('#exoNom', 'Tapis de course');
@@ -103,7 +103,7 @@ await p.waitForTimeout(400);
 const s3 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
 // Le temps travaillé vient des séries, pas de la durée : rallonger le
 // séjour ne gonfle plus rien.
-t('rallonger le séjour ne gonfle pas la dépense', s3.k === 399, String(s3.k));
+t('rallonger le séjour ne gonfle pas la dépense', s3.k === 402, String(s3.k));
 t('et les minutes oisives sont dites', (await p.textContent('.exo-vol')).includes('sans rien soulever'), await p.textContent('.exo-vol'));
 t('et la durée est retenue', s3.m === 90, String(s3.m));
 
@@ -113,7 +113,7 @@ await p.waitForTimeout(400);
 const s4 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
 t('le cardio retiré, la séance redevient de la fonte', s4.ex.length === 4 && !s4.ex.some(x => x.t === 'cardio'), JSON.stringify(s4.ex.length));
 // il ne reste que la fonte : 141.
-t('et la dépense suit', s4.k === 141, String(s4.k));
+t('et la dépense suit', s4.k === 144, String(s4.k));
 
 console.log('=== le poids du corps, et le plafond ===');
 await p.click('[data-exo-seance="0"]');
@@ -127,7 +127,7 @@ await p.waitForTimeout(400);
 const s5 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
 t('le poids du corps reste accepté', s5.ex[4].kg === 0, JSON.stringify(s5.ex[4]));
 // 3 séries de 30 ajoutent 8:15 de travail : 141 devient 178.
-t('sans charge, le temps de travail compte quand même', s5.k === 178, String(s5.k));
+t('sans charge, le temps de travail compte quand même', s5.k === 181, String(s5.k));
 
 // une séance énorme se fait plafonner
 await p.fill('#exoNom', 'Squat à la barre');
@@ -137,10 +137,60 @@ await p.fill('#exoPoids', '200');
 await p.click('[data-exo-ok]');
 await p.waitForTimeout(400);
 const s6 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
-// 75:27 de travail, 339 kcal de temps plus 391 de fonte déplacée = 730,
-// au-dessus du plafond de 6 MET sur ce temps, 581 kcal.
-t('le plafond de 6 MET tient', s6.k === 581, String(s6.k));
+// 75:27 de travail, 339 kcal de temps plus 496 de masse déplacée = 835,
+// au-dessus du plafond de 6 MET sur les 90 min sur place, 693 kcal.
+t('le plafond de 6 MET tient', s6.k === 693, String(s6.k));
 t('et il est annoncé', (await p.textContent('.exo-vol')).includes('plafonné à 6 MET'), await p.textContent('.exo-vol'));
+
+console.log('=== modifier une ligne sans la supprimer ===');
+await p.click('[data-edit-exo="0"][data-i="0"]');
+await p.waitForTimeout(250);
+t('le formulaire s\'ouvre sur la ligne', await p.isVisible('#exoNom'));
+t('il est pré-rempli', (await p.inputValue('#exoNom')) === 'Presse à cuisses' &&
+  (await p.inputValue('#exoPoids')) === '45', await p.inputValue('#exoNom') + ' / ' + await p.inputValue('#exoPoids'));
+await p.fill('#exoPoids', '50');
+await p.click('[data-exo-ok]');
+await p.waitForTimeout(400);
+const sM = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
+t('la ligne est corrigée, pas dupliquée', sM.ex.length === 6 && sM.ex[0].kg === 50, JSON.stringify(sM.ex.map(x => x.n + ':' + x.kg)));
+t('le formulaire se referme après une correction', !(await p.$('#exoNom')));
+
+console.log('=== une ligne de cardio se corrige aussi ===');
+const iCardio = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0].ex.findIndex(x => x.t === 'cardio'), auj);
+t('il n\'y a plus de cardio à ce stade', iCardio === -1, String(iCardio));
+
+console.log('=== jambes et bras ne coûtent pas pareil ===');
+const memeSerie = async (nom, kg) => {
+  const c2 = await b.newContext({ viewport: { width: 1100, height: 950 }, ignoreHTTPSErrors: true });
+  const p2 = await c2.newPage();
+  p2.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+  await p2.addInitScript(([d, n, k]) => {
+    localStorage.setItem('suz-forme-onglet', 'sport');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:d,
+                fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+      jours: { [d]: { date:d, poids:77, heure:'07:30', eau:0,
+        sport:[{ n:'Musculation', m:60, met:0, k:0, ex:[{ n:n, s:4, r:10, kg:k }] }],
+        repas:{ petitdej:[], dejeuner:[], diner:[], collation:[] } } }
+    }));
+  }, [auj, nom, kg]);
+  await p2.goto('file:///home/user/Suz/perte-de-poids.html');
+  await p2.waitForTimeout(700);
+  await p2.dispatchEvent('.salle-duree', 'change');
+  await p2.waitForTimeout(350);
+  const v = await p2.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0].k, auj);
+  await c2.close();
+  return v;
+};
+const kSquat = await memeSerie('Squat à la barre', 40);
+const kCurl = await memeSerie('Curl biceps barre', 40);
+const kMollet = await memeSerie('Mollets debout', 40);
+const kTract = await memeSerie('Tractions', 0);
+const kInconnu = await memeSerie('Bidule à ressorts', 40);
+t('à charge égale, le squat coûte plus que le curl', kSquat > kCurl, kSquat + ' contre ' + kCurl);
+t('le mollet, à faible amplitude, coûte peu', kMollet < kSquat, kMollet + ' contre ' + kSquat);
+t('des tractions ne valent pas zéro', kTract > kCurl * 0.9 && kTract > 40, String(kTract));
+t('une machine inconnue prend une valeur neutre', kInconnu > kCurl && kInconnu < kSquat, String(kInconnu));
 
 console.log('=== trois heures sur place ne valent pas trois heures de travail ===');
 // Contexte neuf par cas : recharger la page rejouerait le script d'amorce
@@ -172,8 +222,8 @@ const unSeul = await troisHeures([{ n:'Presse à cuisses', s:3, r:12, kg:40 }]);
 const gros = [];
 for (let i = 0; i < 20; i++) gros.push({ n:'Machine ' + i, s:3, r:10, kg:40 });
 const beaucoup = await troisHeures(gros);
-t('un seul exercice en trois heures reste modeste', unSeul.k === 35, String(unSeul.k));
-t('soixante séries dans le même temps valent bien plus', beaucoup.k === 642, String(beaucoup.k));
+t('un seul exercice en trois heures reste modeste', unSeul.k === 37, String(unSeul.k));
+t('soixante séries dans le même temps valent bien plus', beaucoup.k === 634, String(beaucoup.k));
 t('l\'écart est net, pas cosmétique', beaucoup.k > unSeul.k * 10, unSeul.k + ' contre ' + beaucoup.k);
 t('le temps oisif est annoncé', unSeul.note.includes('2:54:27 sur place sans rien soulever'), unSeul.note);
 

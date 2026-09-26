@@ -1349,12 +1349,23 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
   font-variant-numeric: tabular-nums;
 }
 .exo-duree { margin-bottom: 11px; }
+/* Une ligne d'exercice s'ouvre d'une pression, comme une ligne de repas. */
+.exo-ligne {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px;
+  align-items: center; width: 100%; min-width: 0;
+  background: none; border: 0; padding: 7px 8px; margin: -7px -8px;
+  border-radius: var(--r-sm); color: inherit; font: inherit; text-align: left;
+}
+.exo-ligne:hover { background: var(--panel-2); }
+.exo-ligne:focus-visible { outline: 2px solid var(--blue); outline-offset: 0; }
+.exo-ligne svg { display: block; flex: none; color: var(--ink-faint); }
+.exos .plat-lignes li.exo-edite { display: block; padding: 0; border-bottom: 0; }
 .exo-form {
   border: 1px solid var(--line); border-radius: var(--r-md);
   background: var(--panel-2); padding: 12px 13px 14px; margin-top: 4px;
 }
 .exos .plat-lignes { margin-top: 0; }
-.exos .plat-lignes li { grid-template-columns: 1fr auto auto; }
+.exos .plat-lignes li { grid-template-columns: 1fr auto; }
 .items li.choix { grid-template-columns: 1fr auto; }
 .plat-case { display: flex; align-items: center; gap: 12px; min-width: 0; cursor: pointer; }
 .plat-case input { width: 20px; height: 20px; flex: none; accent-color: var(--peche); margin: 0; }
@@ -7707,9 +7718,101 @@ var SPORTS = [
      notées ne changeaient rien, et le poids ne comptait nulle part. L'autre
      facturait tout le temps passé sur place : trois heures à ne rien faire
      valaient presque trois heures de travail. */
+  /* Une machine de cardio que la liste ne connaît pas : on ne sait ni sa
+     mécanique ni ce que sa distance veut dire, trois kilomètres au rameur ne
+     coûtant pas trois kilomètres de course. On retombe sur l'effort général
+     soutenu du compendium, 6 MET sur la durée, et **on le dit** : c'est une
+     valeur par défaut, pas une mesure. Une machine de fonte inconnue, elle,
+     ne pose aucun problème : son nom n'entre dans aucun calcul, seules les
+     séries, les répétitions et le poids comptent. */
+  /* ==================== CE QUE CHAQUE MOUVEMENT DÉPLACE ====================
+     Pousser avec les jambes et tirer avec les bras ne coûtent pas la même
+     chose à charge égale, pour deux raisons mécaniques.
+
+     La **masse réellement déplacée** d'abord. Un squat lève la barre *et*
+     tout ce qui est au-dessus des genoux ; une presse à cuisses ne lève que
+     le chariot ; des tractions lèvent le corps entier et rien d'autre ; un
+     curl ne lève que l'haltère et l'avant-bras. La part du poids du corps
+     emmenée par le mouvement vient des tables anthropométriques usuelles :
+     environ 2 % pour un avant-bras, 5 % pour un bras, 16 % pour une jambe,
+     et les deux tiers restants pour le tronc et la tête.
+
+     L'**amplitude** ensuite. Un mollet monte de quinze centimètres, un squat
+     d'un demi-mètre. À charge et répétitions égales, l'un fait trois fois
+     moins de travail que l'autre.
+
+     Chaque exercice porte donc son amplitude et sa part de corps déplacée,
+     par zone du corps, avec des exceptions là où la zone ne suffit pas.
+     Un exercice inconnu prend une valeur neutre, et le carnet le dit.
+
+     Sans ça, des tractions valaient zéro calorie, puisque leur charge est
+     nulle. */
+  var PROFIL_ZONE = {
+    "Jambes":     [0.45, 0.15],
+    "Pectoraux":  [0.40, 0.05],
+    "Dos":        [0.45, 0.05],
+    "Épaules":    [0.45, 0.05],
+    "Bras":       [0.35, 0.02],
+    "Abdominaux": [0.30, 0.30]
+  };
+  var PROFIL_NEUTRE = [0.40, 0.10];
+
+  // Amplitude en mètres, part du poids du corps déplacée.
+  var PROFIL_EXO = {
+    "Squat à la barre": [0.50, 0.75], "Squat guidé (Smith)": [0.50, 0.75],
+    "Hack squat": [0.50, 0.70], "Fentes": [0.45, 0.70],
+    "Soulevé de terre": [0.50, 0.50], "Soulevé de terre roumain": [0.40, 0.45],
+    "Chaise romaine": [0.40, 0.60], "Hip thrust": [0.35, 0.55],
+    "Presse à cuisses": [0.45, 0.15], "Leg extension": [0.45, 0.10],
+    "Leg curl assis": [0.40, 0.05], "Leg curl allongé": [0.40, 0.05],
+    "Adducteurs": [0.35, 0.00], "Abducteurs": [0.35, 0.00],
+    "Kickback fessier": [0.35, 0.05], "Machine à fessiers": [0.35, 0.05],
+    "Mollets debout": [0.15, 0.85], "Mollets assis": [0.15, 0.00],
+    "Presse à mollets": [0.15, 0.00],
+
+    "Développé couché": [0.40, 0.05], "Développé incliné": [0.40, 0.05],
+    "Développé décliné": [0.40, 0.05], "Développé couché guidé": [0.40, 0.05],
+    "Pompes": [0.45, 0.65], "Dips": [0.45, 0.90],
+
+    "Tractions": [0.50, 0.95], "Tractions assistées": [0.50, 0.55],
+    "Rowing barre": [0.40, 0.03], "Rowing haltère": [0.45, 0.03],
+    "Pull-over": [0.50, 0.03], "Banc à lombaires": [0.40, 0.45],
+    "Haussements d'épaules": [0.15, 0.00],
+
+    "Développé épaules": [0.45, 0.05], "Développé militaire": [0.45, 0.08],
+    "Élévations latérales": [0.45, 0.03], "Élévations frontales": [0.45, 0.03],
+    "Oiseau": [0.35, 0.03], "Rowing menton": [0.35, 0.03],
+
+    "Dips triceps": [0.40, 0.90], "Curl pupitre": [0.35, 0.02],
+
+    "Crunch": [0.25, 0.30], "Crunch machine": [0.30, 0.15],
+    "Relevé de jambes": [0.40, 0.30], "Relevé de jambes suspendu": [0.45, 0.32],
+    "Roue abdominale": [0.50, 0.50], "Russian twist": [0.25, 0.25],
+    "Gainage": [0.00, 0.00], "Planche latérale": [0.00, 0.00]
+  };
+
+  var ZONE_EXO = (function () {
+    var z = {};
+    EXERCICES.forEach(function (e) { z[e[0]] = e[1]; });
+    return z;
+  })();
+
+  // Amplitude et part du corps pour un exercice, connu ou non.
+  function profilExercice(nom) {
+    if (PROFIL_EXO[nom]) return PROFIL_EXO[nom];
+    var z = ZONE_EXO[nom];
+    if (z && PROFIL_ZONE[z]) return PROFIL_ZONE[z];
+    return PROFIL_NEUTRE;
+  }
+  function exerciceConnu(nom) { return !!(PROFIL_EXO[nom] || ZONE_EXO[nom]); }
+
+  var MET_CARDIO_INCONNU = 6.0;
   var MET_FONTE = 3.5;
   var MET_PLAFOND = 6.0;
-  var KCAL_PAR_KG_LEVE = 0.0071;
+  /* Le travail d'une répétition : masse déplacée × g × amplitude, la descente
+     ajoutant un tiers, rendement musculaire 22 %, converti en calories.
+        9,81 × 4/3 ÷ 0,22 ÷ 4184 = 0,014210 kcal par kilogramme et par mètre. */
+  var KCAL_PAR_KG_METRE_LEVE = 0.014210;
   var SECONDES_PAR_REP = 3;
   var REPOS_PAR_SERIE = 75;
 
@@ -7728,7 +7831,7 @@ var SPORTS = [
       }
       if (type === "velo") return Math.round(metVelo(kmh) * poids * min / 60);
     }
-    var met = c ? c[1] : 6.0;
+    var met = c ? c[1] : MET_CARDIO_INCONNU;
     return Math.round(met * poids * min / 60);
   }
 
@@ -7736,16 +7839,24 @@ var SPORTS = [
     var ex = x.ex || [];
     var minTot = x.m || 0;
     var kcalCardio = 0, minCardio = 0, reps = 0, tonnage = 0, minSeries = 0, nFonte = 0;
+    var travail = 0, inconnues = [];
     ex.forEach(function (e) {
       if (estCardio(e)) {
         minCardio += e.m || 0;
         kcalCardio += kcalLigneCardio(e, poids);
+        if (!cardioSalle(e.n)) inconnues.push(e.n);
       } else {
         nFonte++;
-        var ser = e.s || 0, rep = e.r || 0;
-        reps += ser * rep;
-        tonnage += ser * rep * (e.kg || 0);
+        var ser = e.s || 0, rep = e.r || 0, n = ser * rep;
+        reps += n;
+        tonnage += n * (e.kg || 0);
         minSeries += ser * (rep * SECONDES_PAR_REP + REPOS_PAR_SERIE) / 60;
+        // Masse réellement déplacée : la charge, plus la part du corps que
+        // le mouvement emmène.
+        var pr = profilExercice(e.n);
+        var masse = (e.kg || 0) + pr[1] * (poids || 0);
+        travail += n * masse * pr[0] * KCAL_PAR_KG_METRE_LEVE;
+        if (!exerciceConnu(e.n)) inconnues.push(e.n);
       }
     });
     var dispo = Math.max(0, minTot - minCardio);
@@ -7755,8 +7866,11 @@ var SPORTS = [
     var minTraine = Math.max(0, dispo - minFonte);
 
     var kcalTemps = poids ? MET_FONTE * poids * minFonte / 60 : 0;
-    var kcalCharge = poids ? tonnage * KCAL_PAR_KG_LEVE : 0;
-    var plafond = poids ? MET_PLAFOND * poids * minFonte / 60 : 0;
+    var kcalCharge = poids ? travail : 0;
+    // Le plafond se rapporte au temps passé sur place, pas aux seules minutes
+    // travaillées : sur sept minutes de séries il écrasait tous les écarts
+    // entre un squat et un curl, qui sont justement ce qu'on cherche à voir.
+    var plafond = poids ? MET_PLAFOND * poids * dispo / 60 : 0;
     var kcalFonte = Math.min(kcalTemps + kcalCharge, plafond);
     return {
       minTot: minTot, minCardio: minCardio, minFonte: minFonte, minTraine: minTraine,
@@ -7765,6 +7879,7 @@ var SPORTS = [
       kcalFonte: Math.round(kcalFonte),
       kcal: kcalCardio + Math.round(kcalFonte),
       reps: reps, tonnage: tonnage, nFonte: nFonte, provisoire: provisoire,
+      inconnues: inconnues,
       deborde: minSeries > dispo + 0.5,
       plafonne: kcalTemps + kcalCharge > plafond + 0.5,
       trop: minCardio > minTot
@@ -7817,7 +7932,10 @@ var SPORTS = [
       if (e.kg > 0) bits.push(nf(e.kg, e.kg % 1 ? 1 : 0) + " kg");
       else bits.push("poids du corps");
     }
-    return '<li><span>' + esc(e.n) + '</span><b>' + esc(bits.join(" · ")) + '</b>' +
+    return '<li><button type="button" class="exo-ligne" data-edit-exo="' + s + '" data-i="' + i +
+      '" aria-label="Modifier ' + esc(e.n) + '">' +
+      '<span>' + esc(e.n) + '</span><b>' + esc(bits.join(" · ")) + '</b>' +
+      ICONE_CRAYON + '</button>' +
       '<button type="button" class="del" data-del-exo="' + s + '" data-i="' + i +
       '" aria-label="Retirer ' + esc(e.n) + '">\u2715</button></li>';
   }
@@ -7852,7 +7970,12 @@ var SPORTS = [
     }
     if (ex.length || estSeanceSalle(x)) {
       if (ex.length) {
-        h += '<ul class="plat-lignes">' + ex.map(function (e, i) { return ligneExercice(e, i, s); }).join("") + '</ul>';
+        h += '<ul class="plat-lignes">' + ex.map(function (e, i) {
+          if (exoSaisie && exoSaisie.i === s && exoSaisie.edit === i) {
+            return '<li class="exo-edite">' + formulaireExercice(x) + '</li>';
+          }
+          return ligneExercice(e, i, s);
+        }).join("") + '</ul>';
       }
       var notes = [];
       if (estSeanceSalle(x)) {
@@ -7862,10 +7985,19 @@ var SPORTS = [
           notes.push(fmtDuree(d.minFonte) + (d.provisoire ? " de fonte estimée" : " de séries et de repos") +
             " pour " + ni(d.kcalTemps) + " kcal");
         }
-        if (d.tonnage > 0) notes.push(ni(d.tonnage) + " kg soulevés pour " + ni(d.kcalCharge) + " kcal de plus");
+        if (d.kcalCharge > 0) {
+          notes.push((d.tonnage > 0 ? ni(d.tonnage) + " kg de charge, " : "") +
+            "et le corps déplacé avec, pour " + ni(d.kcalCharge) + " kcal de travail");
+        }
         if (d.minTraine > 1) {
           notes.push(fmtDuree(d.minTraine) + " sur place sans rien soulever, qui ne comptent pas : " +
             "ton niveau d'activité les compte déjà");
+        }
+        if (d.inconnues.length) {
+          var lst = d.inconnues.slice(0, 3).join(", ");
+          notes.push(lst + (d.inconnues.length > 3 ? " et d'autres" : "") +
+            (d.inconnues.length > 1 ? " ne sont pas dans la liste" : " n'est pas dans la liste") +
+            " : amplitude et masse déplacée prises au neutre, un cardio inconnu étant compté à 6 MET");
         }
         if (d.plafonne) notes.push("plafonné à 6 MET, la valeur d'une musculation soutenue");
         if (d.deborde) notes.push("tes séries durent plus longtemps que la séance, allonge le temps à la salle");
@@ -7876,7 +8008,7 @@ var SPORTS = [
       }
       if (notes.length) h += '<p class="sub-note exo-vol">' + esc(notes.join(" · ") + ".") + '</p>';
     }
-    h += (exoSaisie && exoSaisie.i === s)
+    h += (exoSaisie && exoSaisie.i === s && exoSaisie.edit === null)
       ? formulaireExercice(x)
       : '<button type="button" class="lien-edit exo-ajout" data-exo-seance="' + s + '">' +
         ICONE_HALTERE + '<span>' + (ex.length ? "Ajouter un exercice" : "Détailler cette séance") + '</span></button>';
@@ -7884,8 +8016,26 @@ var SPORTS = [
   }
 
   function exoVide(i) {
-    return { i: i, nom: "", series: "", reps: "", poids: "",
+    return { i: i, edit: null, nom: "", series: "", reps: "", poids: "",
              duree: "", dist: "", allure: "", mode: "fonte", force: 0 };
+  }
+
+  // Ouvrir une ligne existante : on garde son mode, et on ne laisse la
+  // détection automatique reprendre la main que si le nom l'aurait choisi
+  // pareil. Sinon c'est un choix explicite, on ne le défait pas.
+  function exoDepuisLigne(s, i, e) {
+    var cardio = estCardio(e);
+    var auto = !!cardioSalle(e.n);
+    return {
+      i: s, edit: i, nom: e.n,
+      series: e.s ? String(e.s) : "", reps: e.r ? String(e.r) : "",
+      poids: e.kg ? String(e.kg).replace(".", ",") : "",
+      duree: cardio && e.m ? fmtDuree(e.m) : "",
+      dist: cardio && e.d ? String(e.d).replace(".", ",") : "",
+      allure: (cardio && e.m > 0 && e.d > 0) ? fmtAllure(e.m / e.d) : "",
+      mode: cardio ? "cardio" : "fonte",
+      force: cardio === auto ? 0 : 1
+    };
   }
 
   function focusFin(id) {
@@ -7939,7 +8089,8 @@ var SPORTS = [
             champ3("exoPoids", "Poids (kg)", e.poids, "decimal", "")) +
       '</div>' +
       '<div class="row-inline" style="margin-top:11px">' +
-        '<button type="button" class="btn go sm" data-exo-ok="1">Ajouter</button>' +
+        '<button type="button" class="btn go sm" data-exo-ok="1">' +
+          (e.edit === null ? "Ajouter" : "Enregistrer") + '</button>' +
         '<button type="button" class="btn ghost sm" data-exo-annule="1">Annuler</button>' +
         '<button type="button" class="lien" data-exo-bascule="1">' +
           (cardio ? "C'est de la fonte, pas du cardio" : "C'est du cardio, pas de la fonte") + '</button>' +
@@ -9121,6 +9272,17 @@ var SPORTS = [
       return;
     }
 
+    var modExo = e.target.closest("[data-edit-exo]");
+    if (modExo) {
+      var se0 = J().sport[+modExo.dataset.editExo];
+      var lig = se0 && se0.ex ? se0.ex[+modExo.dataset.i] : null;
+      if (!lig) return;
+      exoSaisie = exoDepuisLigne(+modExo.dataset.editExo, +modExo.dataset.i, lig);
+      renderSport();
+      focusFin("exoNom");
+      return;
+    }
+
     var sup = e.target.closest("[data-del-exo]");
     if (sup) {
       var se = J().sport[+sup.dataset.delExo];
@@ -9162,19 +9324,26 @@ var SPORTS = [
         ligne = { n: nom, s: ser || 1, r: rep, kg: kg };
         garde = { series: String(ser || ""), reps: "", poids: String(kg || "") };
       }
-      s.ex.push(ligne);
+      var corrige = exoSaisie.edit !== null;
+      if (corrige) s.ex[exoSaisie.edit] = ligne;
+      else s.ex.push(ligne);
       recalculeSalle(s, poidsA(dateCourante));
 
-      // On garde le formulaire ouvert : on enchaîne rarement un seul exercice.
-      var suivant = exoVide(exoSaisie.i);
-      suivant.mode = exoSaisie.mode;
-      Object.keys(garde).forEach(function (k) { suivant[k] = garde[k]; });
-      exoSaisie = suivant;
+      if (corrige) {
+        // Une correction se termine : on referme.
+        exoSaisie = null;
+      } else {
+        // Un ajout s'enchaîne : on garde le formulaire ouvert, et ce qui se
+        // répète d'un exercice au suivant.
+        var suivant = exoVide(exoSaisie.i);
+        suivant.mode = exoSaisie.mode;
+        Object.keys(garde).forEach(function (k) { suivant[k] = garde[k]; });
+        exoSaisie = suivant;
+      }
       Store.sauveJour(dateCourante);
       renderSport(); renderBandeau(); renderAlim(); majDiag();
-      var c2 = document.getElementById("exoNom");
-      if (c2) c2.focus();
-      toast(nom + " noté");
+      if (!corrige) focusFin("exoNom");
+      toast(nom + (corrige ? " modifié" : " noté"));
       return;
     }
   }));
