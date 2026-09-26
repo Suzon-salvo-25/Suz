@@ -1349,6 +1349,11 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
   font-variant-numeric: tabular-nums;
 }
 .exo-duree { margin-bottom: 11px; }
+/* Une fiche apprise se dit, et se retire. */
+.exo-appris {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin: 7px 0 9px; font-size: .76rem; color: var(--ink-faint);
+}
 /* Une ligne d'exercice s'ouvre d'une pression, comme une ligne de repas. */
 .exo-ligne {
   display: grid; grid-template-columns: 1fr auto auto; gap: 10px;
@@ -1870,6 +1875,19 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
       <div class="body">
         <div class="stats" id="sportStats" style="margin-bottom:16px"></div>
         <div class="week-bars" id="weekBars"></div>
+      </div>
+    </div>
+
+    <div class="card plain" id="progCard" hidden>
+      <header><span class="illu st-peche" aria-hidden="true"></span><h2>Mes progrès</h2><span class="hint" id="progHint"></span></header>
+      <div class="body">
+        <div class="field" style="margin-bottom:14px">
+          <label for="progSel">Machine ou exercice</label>
+          <select id="progSel"></select>
+        </div>
+        <div class="stats" id="progStats" style="margin-bottom:16px"></div>
+        <div id="progChart"></div>
+        <div class="table-scroll" id="progTable"></div>
       </div>
     </div>
   </section>
@@ -5481,7 +5499,7 @@ var SPORTS = [
       prenom: "", sexe: "f", age: null, taille: null,
       depart: null, objectif: null, debut: AUJ, fin: "2027-04-08",
       activite: 1.375, rythme: 0.5, seances: 3,
-      freq: {}, perso: {}, plats: {}
+      freq: {}, perso: {}, plats: {}, machines: {}
     };
   }
   function jourVide(date) {
@@ -5533,6 +5551,23 @@ var SPORTS = [
         });
       }
     });
+    /* Les machines apprises. Une salle a toujours un appareil que la liste ne
+       connaît pas : plutôt que de le compter au neutre pour toujours, on
+       demande à Claude ce que c'est, une fois, et on le retient. Ce qui
+       revient du serveur peut être n'importe quoi, donc tout est borné. */
+    if (raw.machines && typeof raw.machines === "object" && !Array.isArray(raw.machines)) {
+      p.machines = {};
+      Object.keys(raw.machines).slice(0, 200).forEach(function (n) {
+        var m = raw.machines[n];
+        if (!m || typeof m !== "object") return;
+        var t = m.t === "cardio" ? "cardio" : "fonte";
+        var h = (typeof m.h === "number" && isFinite(m.h)) ? Math.min(1.2, Math.max(0, m.h)) : 0.4;
+        var c = (typeof m.c === "number" && isFinite(m.c)) ? Math.min(1, Math.max(0, m.c)) : 0.1;
+        var met = (typeof m.met === "number" && isFinite(m.met)) ? Math.min(16, Math.max(2, m.met)) : 6;
+        p.machines[n] = { t: t, z: typeof m.z === "string" ? m.z.slice(0, 20) : "",
+                          h: h, c: c, met: met, ia: m.ia ? 1 : 0 };
+      });
+    }
     // Les plats enregistrés : un nom, et la liste des lignes à reposer telles
     // quelles. Un document venu du serveur peut porter n'importe quoi, on ne
     // garde que ce qui a la bonne forme.
@@ -7664,10 +7699,17 @@ var SPORTS = [
     ["Corde à sauter", 11.8, null]
   ];
 
+  function machineApprise(nom) {
+    var m = P().machines || {};
+    return m[nom] || null;
+  }
+
   function cardioSalle(nom) {
     for (var i = 0; i < CARDIO_SALLE.length; i++) {
       if (CARDIO_SALLE[i][0] === nom) return CARDIO_SALLE[i];
     }
+    var a = machineApprise(nom);
+    if (a && a.t === "cardio") return [nom, a.met, null];
     return null;
   }
 
@@ -7802,9 +7844,13 @@ var SPORTS = [
     if (PROFIL_EXO[nom]) return PROFIL_EXO[nom];
     var z = ZONE_EXO[nom];
     if (z && PROFIL_ZONE[z]) return PROFIL_ZONE[z];
+    var a = machineApprise(nom);
+    if (a && a.t === "fonte") return [a.h, a.c];
     return PROFIL_NEUTRE;
   }
-  function exerciceConnu(nom) { return !!(PROFIL_EXO[nom] || ZONE_EXO[nom]); }
+  function exerciceConnu(nom) {
+    return !!(PROFIL_EXO[nom] || ZONE_EXO[nom] || machineApprise(nom));
+  }
 
   var MET_CARDIO_INCONNU = 6.0;
   var MET_FONTE = 3.5;
@@ -7839,8 +7885,10 @@ var SPORTS = [
     var ex = x.ex || [];
     var minTot = x.m || 0;
     var kcalCardio = 0, minCardio = 0, reps = 0, tonnage = 0, minSeries = 0, nFonte = 0;
-    var travail = 0, inconnues = [];
+    var travail = 0, inconnues = [], apprises = [];
     ex.forEach(function (e) {
+      var ap = machineApprise(e.n);
+      if (ap && ap.ia && apprises.indexOf(e.n) === -1) apprises.push(e.n);
       if (estCardio(e)) {
         minCardio += e.m || 0;
         kcalCardio += kcalLigneCardio(e, poids);
@@ -7879,11 +7927,96 @@ var SPORTS = [
       kcalFonte: Math.round(kcalFonte),
       kcal: kcalCardio + Math.round(kcalFonte),
       reps: reps, tonnage: tonnage, nFonte: nFonte, provisoire: provisoire,
-      inconnues: inconnues,
+      inconnues: inconnues, apprises: apprises,
       deborde: minSeries > dispo + 0.5,
       plafonne: kcalTemps + kcalCharge > plafond + 0.5,
       trop: minCardio > minTot
     };
+  }
+
+  /* ==================== APPRENDRE UNE MACHINE ====================
+     Une salle a toujours un appareil que la liste ne connaît pas. Plutôt que
+     de le compter au neutre pour toujours, on demande une fois à Claude ce
+     que c'est, et on le retient dans le profil. La réponse est bornée de
+     partout : une amplitude de trois mètres ou une part de corps de 400 %
+     sont refusées, et on retombe alors sur le neutre.
+
+     La fiche apprise porte `ia: 1`. Elle vient de la mémoire de Claude, pas
+     d'un catalogue : c'est un ordre de grandeur, corrigeable. */
+  var ZONES_VALIDES = ["Jambes", "Pectoraux", "Dos", "Épaules", "Bras", "Abdominaux"];
+  var apprentissageEnCours = {};
+
+  function promptMachine(nom) {
+    return "Tu renseignes un carnet d'entraînement en salle de sport.\n\n" +
+      "Décris l'appareil ou l'exercice suivant : « " + nom + " ».\n\n" +
+      "Réponds en JSON strict, sans texte autour :\n" +
+      '{"type":"fonte"|"cardio","zone":"Jambes"|"Pectoraux"|"Dos"|"Épaules"|"Bras"|"Abdominaux",' +
+      '"amplitude_m":nombre,"part_du_corps":nombre,"met":nombre,"note":"une phrase"}\n\n' +
+      "type : « cardio » pour un appareil d'endurance (tapis, vélo, rameur, elliptique), " +
+      "« fonte » pour tout travail contre résistance.\n" +
+      "zone : la zone du corps principalement travaillée, pour la fonte.\n" +
+      "amplitude_m : la distance que parcourt la charge à chaque répétition, en mètres. " +
+      "Un mollet vaut 0,15, un développé couché 0,4, un squat 0,5.\n" +
+      "part_du_corps : la fraction du poids du corps que le mouvement soulève, entre 0 et 1. " +
+      "Une presse à cuisses vaut 0,15, un squat 0,75, des tractions 0,95, un curl 0,02.\n" +
+      "met : pour un appareil de cardio seulement, son MET au compendium des activités physiques.\n" +
+      "Si tu ne reconnais pas l'appareil, réponds avec des valeurs moyennes plausibles.";
+  }
+
+  async function apprendMachine(nom) {
+    nom = String(nom || "").trim();
+    if (!nom || !Claude_sample) return;
+    if (exerciceConnu(nom) || cardioSalle(nom)) return;
+    if (apprentissageEnCours[nom]) return;
+    apprentissageEnCours[nom] = 1;
+    try {
+      var d = await Claude_sample.json(promptMachine(nom), { modelTier: "default" });
+      var t = (d && d.type === "cardio") ? "cardio" : "fonte";
+      var h = nombreSur(d && d.amplitude_m);
+      var c = nombreSur(d && d.part_du_corps);
+      var met = nombreSur(d && d.met);
+      var z = (d && typeof d.zone === "string" && ZONES_VALIDES.indexOf(d.zone) !== -1) ? d.zone : "";
+      // Hors de ces bornes, la réponse ne vaut rien : on garde le neutre.
+      if (t === "fonte" && (h === null || h < 0.05 || h > 1.2 || c === null || c > 1)) return;
+      if (t === "cardio" && (met === null || met < 2 || met > 16)) return;
+
+      var p = P();
+      if (!p.machines || Object.isFrozen(p.machines) || !Object.isExtensible(p.machines)) {
+        p.machines = Object.assign({}, p.machines || {});
+      }
+      p.machines[nom] = {
+        t: t, z: z,
+        h: t === "fonte" ? h : 0.4,
+        c: t === "fonte" ? c : 0.1,
+        met: t === "cardio" ? met : 6,
+        ia: 1
+      };
+      Store.sauveProfil();
+      // La séance du jour vaut désormais autre chose.
+      (J().sport || []).forEach(function (se) { recalculeSalle(se, poidsA(dateCourante)); });
+      Store.sauveJour(dateCourante);
+      renderSport(); renderProgres(); renderBandeau(); renderAlim(); majDiag();
+      toast(nom + " appris · " + (t === "cardio"
+        ? nf(met, 1) + " MET"
+        : (z ? z.toLowerCase() + ", " : "") + "amplitude " + nf(h, 2) + " m"));
+    } catch (e) {
+      // Muet : ne pas savoir n'empêche rien, le neutre fait le travail.
+    } finally {
+      delete apprentissageEnCours[nom];
+    }
+  }
+
+  function oublieMachine(nom) {
+    var p = P();
+    if (!p.machines || !p.machines[nom]) return;
+    if (Object.isFrozen(p.machines) || !Object.isExtensible(p.machines)) {
+      p.machines = Object.assign({}, p.machines);
+    }
+    delete p.machines[nom];
+    Store.sauveProfil();
+    (J().sport || []).forEach(function (se) { recalculeSalle(se, poidsA(dateCourante)); });
+    Store.sauveJour(dateCourante);
+    renderSport(); renderProgres(); renderBandeau(); renderAlim(); majDiag();
   }
 
   function estSeanceSalle(x) {
@@ -7942,9 +8075,8 @@ var SPORTS = [
 
   // Le menu de suggestions : les machines de cardio d'abord, puis la fonte
   // par zone du corps.
-  var LISTE_EXOS = (function () {
-    var h = '<datalist id="exoListe">';
-    h += CARDIO_SALLE.map(function (c) {
+  var LISTE_EXOS_FIXE = (function () {
+    var h = CARDIO_SALLE.map(function (c) {
       return '<option value="' + esc(c[0]) + '" label="Cardio"></option>';
     }).join("");
     var zones = {};
@@ -7954,8 +8086,38 @@ var SPORTS = [
         return '<option value="' + esc(n) + '" label="' + esc(z) + '"></option>';
       }).join("");
     });
-    return h + '</datalist>';
+    return h;
   })();
+
+  // Une machine apprise entre dans les suggestions : on ne la retape pas.
+  function listeExos() {
+    var m = P().machines || {};
+    var h = Object.keys(m).sort(function (a, b) { return a.localeCompare(b, "fr"); })
+      .map(function (n) {
+        return '<option value="' + esc(n) + '" label="' +
+          esc(m[n].t === "cardio" ? "Cardio appris" : (m[n].z || "Appris")) + '"></option>';
+      }).join("");
+    return '<datalist id="exoListe">' + h + LISTE_EXOS_FIXE + '</datalist>';
+  }
+
+  /* Une fiche apprise vient de la mémoire de Claude, pas d'un catalogue :
+     on dit ce qu'elle contient, et on laisse la retirer d'un geste. */
+  function decritMachine(nom) {
+    var a = machineApprise(nom);
+    if (!a) return "";
+    if (a.t === "cardio") return "cardio à " + nf(a.met, 1) + " MET";
+    return (a.z ? a.z.toLowerCase() + ", " : "") + "amplitude " + nf(a.h, 2) + " m, " +
+      ni(Math.round((a.c || 0) * 100)) + " % du poids du corps déplacé";
+  }
+
+  function blocApprises(noms) {
+    return noms.map(function (n) {
+      return '<p class="sub-note exo-appris"><span>' +
+        esc(n + " : fiche retrouvée par Claude, " + decritMachine(n) + ".") + '</span>' +
+        '<button type="button" class="lien-edit" data-oublie-machine="' + esc(n) +
+        '">Oublier cette fiche</button></p>';
+    }).join("");
+  }
 
   function blocExercices(x, s) {
     var ex = x.ex || [];
@@ -8007,6 +8169,7 @@ var SPORTS = [
         notes.push(ni(vol) + " kg soulevés");
       }
       if (notes.length) h += '<p class="sub-note exo-vol">' + esc(notes.join(" · ") + ".") + '</p>';
+      if (estSeanceSalle(x) && d.apprises.length) h += blocApprises(d.apprises);
     }
     h += (exoSaisie && exoSaisie.i === s && exoSaisie.edit === null)
       ? formulaireExercice(x)
@@ -8074,7 +8237,7 @@ var SPORTS = [
         (ph ? ' placeholder="' + esc(ph) + '"' : '') + ' value="' + esc(val) + '"></div>';
     };
     var cardio = e.mode === "cardio";
-    return '<div class="exo-form">' + LISTE_EXOS +
+    return '<div class="exo-form">' + listeExos() +
       '<div class="row-inline">' +
         '<div class="field" style="flex:3 1 170px"><label for="exoNom">Machine ou exercice</label>' +
         '<input type="text" id="exoNom" list="exoListe" autocomplete="off" placeholder="Presse à cuisses" value="' + esc(e.nom) + '"></div>' +
@@ -8469,6 +8632,165 @@ var SPORTS = [
     }).join("");
   }
 
+  /* ==================== LES PROGRÈS, MACHINE PAR MACHINE ====================
+     Un carnet d'entraînement ne sert qu'à ça : voir si la barre monte. On
+     parcourt tous les jours enregistrés, on regroupe les lignes par nom, et
+     pour chaque jour on garde ce qui compte. En fonte, la charge la plus
+     lourde de la séance et le volume total : la première dit la force, le
+     second dit le travail. En cardio, la durée, la distance et l'allure. */
+  var progChoix = null;
+
+  function historiqueMachines() {
+    var par = {};
+    Object.keys(Store.jours).sort().forEach(function (d) {
+      (Store.jours[d].sport || []).forEach(function (se) {
+        (se.ex || []).forEach(function (e) {
+          if (!e || !e.n) return;
+          var m = par[e.n] || (par[e.n] = { nom: e.n, cardio: estCardio(e), jours: {} });
+          var j = m.jours[d] || (m.jours[d] = { date: d, kgMax: 0, volume: 0, reps: 0, min: 0, km: 0, series: 0 });
+          if (estCardio(e)) {
+            m.cardio = true;
+            j.min += e.m || 0;
+            j.km += e.d || 0;
+          } else {
+            var n = (e.s || 0) * (e.r || 0);
+            j.series += e.s || 0;
+            j.reps += n;
+            j.volume += n * (e.kg || 0);
+            if ((e.kg || 0) > j.kgMax) j.kgMax = e.kg || 0;
+          }
+        });
+      });
+    });
+    Object.keys(par).forEach(function (n) {
+      var m = par[n];
+      m.liste = Object.keys(m.jours).sort().map(function (d) { return m.jours[d]; });
+      m.dernier = m.liste[m.liste.length - 1].date;
+    });
+    return par;
+  }
+
+  // Une courbe simple : une valeur par jour, des points reliés.
+  function courbeProgres(pts, unite) {
+    if (pts.length < 2) return "";
+    var W = 720, H = 210, padL = 48, padR = 18, padT = 18, padB = 30;
+    var pw = W - padL - padR, ph = H - padT - padB;
+    var d0 = pts[0].date, d1 = pts[pts.length - 1].date;
+    var span = Math.max(1, diffJours(d0, d1));
+    var vals = pts.map(function (p) { return p.v; });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if (hi - lo < 1e-6) { hi = lo + 1; lo = Math.max(0, lo - 1); }
+    var marge = (hi - lo) * 0.15;
+    lo = Math.max(0, lo - marge); hi = hi + marge;
+    var X = function (d) { return padL + pw * diffJours(d0, d) / span; };
+    var Y = function (v) { return padT + ph * (1 - (v - lo) / (hi - lo)); };
+
+    var g = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Progression, ' +
+      nf(pts[0].v, 1) + ' à ' + nf(pts[pts.length - 1].v, 1) + ' ' + esc(unite) + '">';
+    [0, 0.5, 1].forEach(function (f) {
+      var v = lo + (hi - lo) * f, y = Y(v);
+      g += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) +
+        '" stroke="currentColor" stroke-opacity=".12"/>' +
+        '<text x="' + (padL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" ' +
+        'fill="currentColor" fill-opacity=".55">' + nf(v, v < 10 ? 1 : 0) + '</text>';
+    });
+    g += '<polyline fill="none" stroke="var(--peche)" stroke-width="3" stroke-linejoin="round" ' +
+      'stroke-linecap="round" points="' +
+      pts.map(function (p) { return X(p.date).toFixed(1) + "," + Y(p.v).toFixed(1); }).join(" ") + '"/>';
+    pts.forEach(function (p) {
+      g += '<circle cx="' + X(p.date).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) +
+        '" r="4" fill="var(--peche)" stroke="var(--panel)" stroke-width="2"><title>' +
+        esc(dateCourte(p.date) + " : " + nf(p.v, 1) + " " + unite) + '</title></circle>';
+    });
+    [d0, d1].forEach(function (d, i) {
+      g += '<text x="' + X(d).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' +
+        (i ? "end" : "start") + '" font-size="11" fill="currentColor" fill-opacity=".55">' +
+        esc(dateCourte(d)) + '</text>';
+    });
+    return g + '</svg>';
+  }
+
+  function renderProgres() {
+    var par = historiqueMachines();
+    var noms = Object.keys(par).sort(function (a, b) {
+      return par[b].dernier.localeCompare(par[a].dernier) || a.localeCompare(b, "fr");
+    });
+    var carte = document.getElementById("progCard");
+    carte.hidden = !noms.length;
+    if (!noms.length) { progChoix = null; return; }
+    if (!progChoix || !par[progChoix]) progChoix = noms[0];
+
+    document.getElementById("progSel").innerHTML = noms.map(function (n) {
+      var nb = par[n].liste.length;
+      return '<option value="' + esc(n) + '"' + (n === progChoix ? " selected" : "") + '>' +
+        esc(n) + ' · ' + nb + (nb > 1 ? " séances" : " séance") + '</option>';
+    }).join("");
+
+    var m = par[progChoix], l = m.liste, der = l[l.length - 1], prem = l[0];
+    document.getElementById("progHint").textContent =
+      l.length + (l.length > 1 ? " séances notées" : " séance notée");
+
+    var cartes = [], pts, unite;
+    if (m.cardio) {
+      unite = "km";
+      pts = l.filter(function (j) { return j.km > 0; }).map(function (j) { return { date: j.date, v: j.km }; });
+      var kmTot = l.reduce(function (t, j) { return t + j.km; }, 0);
+      var minTot = l.reduce(function (t, j) { return t + j.min; }, 0);
+      var best = l.reduce(function (b, j) { return (!b || j.km > b.km) ? j : b; }, null);
+      cartes.push(["Dernière sortie", der.km > 0 ? nf(der.km, 2) : fmtDuree(der.min), der.km > 0 ? "km" : "",
+        dateCourte(der.date) + (der.km > 0 && der.min > 0 ? " à " + fmtAllure(der.min / der.km) + " /km" : ".")]);
+      cartes.push(["Meilleure distance", best && best.km > 0 ? nf(best.km, 2) : "—", best && best.km > 0 ? "km" : "",
+        best && best.km > 0 ? "Le " + dateCourte(best.date) + "." : "Aucune distance notée."]);
+      cartes.push(["Distance cumulée", nf(kmTot, 1), "km", "Sur " + fmtDuree(minTot) + " au total."]);
+    } else {
+      unite = "kg";
+      pts = l.filter(function (j) { return j.kgMax > 0; }).map(function (j) { return { date: j.date, v: j.kgMax }; });
+      var record = l.reduce(function (b, j) { return (!b || j.kgMax > b.kgMax) ? j : b; }, null);
+      var gain = (der.kgMax > 0 && prem.kgMax > 0) ? der.kgMax - prem.kgMax : null;
+      var volTot = l.reduce(function (t, j) { return t + j.volume; }, 0);
+      cartes.push(["Charge du jour", der.kgMax > 0 ? nf(der.kgMax, der.kgMax % 1 ? 1 : 0) : "—",
+        der.kgMax > 0 ? "kg" : "", "Le " + dateCourte(der.date) + ", " + der.series +
+        (der.series > 1 ? " séries" : " série") + " pour " + ni(der.reps) + " répétitions.", "hero"]);
+      cartes.push(["Record", record && record.kgMax > 0 ? nf(record.kgMax, record.kgMax % 1 ? 1 : 0) : "—",
+        record && record.kgMax > 0 ? "kg" : "",
+        record && record.kgMax > 0 ? "Le " + dateCourte(record.date) + "." : "Aucune charge notée."]);
+      cartes.push(["Depuis la première fois", gain === null ? "—" :
+        (gain > 0 ? "+" : gain < 0 ? "−" : "") + nf(Math.abs(gain), gain % 1 ? 1 : 0),
+        gain === null ? "" : "kg",
+        gain === null ? "Note une charge pour suivre l'écart."
+          : gain > 0 ? "Tu montes depuis le " + dateCourte(prem.date) + "."
+          : gain < 0 ? "Tu es descendue depuis le " + dateCourte(prem.date) + "."
+          : "Même charge qu'au départ."]);
+      cartes.push(["Volume cumulé", ni(volTot), "kg", "Charge multipliée par les répétitions, toutes séances."]);
+    }
+
+    document.getElementById("progStats").innerHTML = cartes.map(function (c) {
+      return '<div class="stat ' + (c[4] || "") + '"><span class="lab">' + esc(c[0]) + '</span>' +
+        '<div class="big">' + c[1] + (c[2] ? '<u>' + esc(c[2]) + '</u>' : '') + '</div>' +
+        '<div class="note">' + esc(c[3]) + '</div></div>';
+    }).join("");
+
+    var ch = courbeProgres(pts, unite);
+    document.getElementById("progChart").innerHTML = ch ||
+      '<p class="empty" style="padding:18px 0">Deux séances suffisent pour voir une courbe.</p>';
+
+    var lignes = l.slice(-10).reverse();
+    document.getElementById("progTable").innerHTML =
+      '<table><thead><tr><th>Date</th>' +
+      (m.cardio ? '<th>Durée</th><th>Distance</th><th>Allure</th>'
+                : '<th>Séries</th><th>Charge</th>') +
+      '</tr></thead><tbody>' + lignes.map(function (j) {
+        return '<tr><td>' + esc(dateCourte(j.date)) + '</td>' + (m.cardio
+          ? '<td class="n">' + esc(fmtDuree(j.min)) + '</td><td class="n">' +
+            (j.km > 0 ? nf(j.km, 2) + " km" : "—") + '</td><td class="n">' +
+            (j.km > 0 && j.min > 0 ? fmtAllure(j.min / j.km) + " /km" : "—") + '</td>'
+          : '<td class="n">' + ni(j.series) + ' × ' + ni(j.series ? Math.round(j.reps / j.series) : 0) +
+            '</td><td class="n">' +
+            (j.kgMax > 0 ? nf(j.kgMax, j.kgMax % 1 ? 1 : 0) + " kg" : "poids du corps") + '</td>') +
+          '</tr>';
+      }).join("") + '</tbody></table>';
+  }
+
   /* ==================== RENDU GLOBAL ==================== */
 
   function renderTout() {
@@ -8479,6 +8801,7 @@ var SPORTS = [
     renderFavoris();
     renderPoids();
     renderSport();
+    renderProgres();
     renderMarche();
     majSportKcal();
     majDiag();
@@ -9263,6 +9586,14 @@ var SPORTS = [
     }
     if (e.target.closest("[data-exo-annule]")) { exoSaisie = null; renderSport(); return; }
 
+    var oub = e.target.closest("[data-oublie-machine]");
+    if (oub) {
+      var nomOub = oub.dataset.oublieMachine;
+      oublieMachine(nomOub);
+      toast("Fiche de " + nomOub + " oubliée. Elle repasse au neutre.");
+      return;
+    }
+
     if (e.target.closest("[data-exo-bascule]") && exoSaisie) {
       exoSaisie.mode = exoSaisie.mode === "cardio" ? "fonte" : "cardio";
       exoSaisie.force = 1;   // choix explicite : le nom ne le défait plus
@@ -9328,6 +9659,8 @@ var SPORTS = [
       if (corrige) s.ex[exoSaisie.edit] = ligne;
       else s.ex.push(ligne);
       recalculeSalle(s, poidsA(dateCourante));
+      // Machine inconnue : on va demander ce que c'est, et on le retiendra.
+      if (!exerciceConnu(nom) && !cardioSalle(nom)) apprendMachine(nom);
 
       if (corrige) {
         // Une correction se termine : on referme.
@@ -9347,6 +9680,11 @@ var SPORTS = [
       return;
     }
   }));
+
+  document.getElementById("progSel").addEventListener("change", function () {
+    progChoix = this.value;
+    renderProgres();
+  });
 
   document.getElementById("sportListe").addEventListener("change", protege("durée de séance", function (e) {
     var ch = e.target.closest(".salle-duree");

@@ -227,6 +227,136 @@ t('soixante séries dans le même temps valent bien plus', beaucoup.k === 634, S
 t('l\'écart est net, pas cosmétique', beaucoup.k > unSeul.k * 10, unSeul.k + ' contre ' + beaucoup.k);
 t('le temps oisif est annoncé', unSeul.note.includes('2:54:27 sur place sans rien soulever'), unSeul.note);
 
+console.log('=== les progrès, machine par machine ===');
+const jourAvant = n => new Date(Date.parse(auj + 'T12:00:00Z') - n * 86400000).toISOString().slice(0, 10);
+const j14 = jourAvant(14), j7 = jourAvant(7);
+const cProg = await b.newContext({ viewport: { width: 1100, height: 1200 }, ignoreHTTPSErrors: true });
+const pg = await cProg.newPage();
+pg.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+pg.on('dialog', d => { ko++; console.log('  ÉCHEC boîte native demandée'); d.dismiss(); });
+await pg.addInitScript(([d, a, bb]) => {
+  localStorage.setItem('suz-forme-onglet', 'sport');
+  const seance = ex => ({ date: '', poids: 77, heure: '07:30', eau: 0,
+    sport: [{ n: 'Musculation', m: 60, met: 0, k: 0, ex: ex }],
+    repas: { petitdej: [], dejeuner: [], diner: [], collation: [] } });
+  const jours = {};
+  jours[a] = seance([{ n: 'Presse à cuisses', s: 3, r: 12, kg: 40 },
+                     { t: 'cardio', n: 'Tapis de course', m: 20, d: 3 }]);
+  jours[bb] = seance([{ n: 'Presse à cuisses', s: 4, r: 12, kg: 45 }]);
+  jours[d] = seance([{ n: 'Presse à cuisses', s: 4, r: 10, kg: 50 },
+                     { t: 'cardio', n: 'Tapis de course', m: 30, d: 5 }]);
+  Object.keys(jours).forEach(k => { jours[k].date = k; });
+  localStorage.setItem('suz-forme-v1', JSON.stringify({
+    profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:a,
+              fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+    jours: jours
+  }));
+}, [auj, j14, j7]);
+await pg.goto('file:///home/user/Suz/perte-de-poids.html');
+await pg.waitForTimeout(800);
+t('la carte des progrès apparaît', await pg.isVisible('#progCard'));
+const opts = await pg.$$eval('#progSel option', e => e.map(o => o.textContent));
+t('chaque machine notée est proposée', opts.some(o => o.startsWith('Presse à cuisses')) &&
+  opts.some(o => o.startsWith('Tapis de course')), JSON.stringify(opts));
+t('le nombre de séances est dit', opts.some(o => o.includes('3 séances')), JSON.stringify(opts));
+const statsFonte = await pg.textContent('#progStats');
+t('la charge du jour est celle du jour', statsFonte.includes('50'), statsFonte.slice(0, 120));
+t('le record est repéré', statsFonte.includes('Record'), '');
+t('l\'écart depuis la première fois est dit', statsFonte.includes('+10'), statsFonte.slice(0, 300));
+t('la courbe relie les trois séances',
+  (await pg.$$eval('#progChart circle', e => e.length)) === 3,
+  String(await pg.$$eval('#progChart circle', e => e.length)));
+t('le tableau porte une ligne par séance', (await pg.$$eval('#progTable tbody tr', e => e.length)) === 3,
+  String(await pg.$$eval('#progTable tbody tr', e => e.length)));
+t('le plus récent est en haut', (await pg.textContent('#progTable tbody tr:first-child')).includes('50 kg'),
+  await pg.textContent('#progTable tbody tr:first-child'));
+
+await pg.selectOption('#progSel', 'Tapis de course');
+await pg.waitForTimeout(300);
+const statsCardio = await pg.textContent('#progStats');
+t('changer de machine change la lecture', statsCardio.includes('Distance cumulée'), statsCardio.slice(0, 160));
+t('le cumul de distance est juste', statsCardio.includes('8'), statsCardio.slice(0, 300));
+t('le tableau du cardio porte l\'allure', (await pg.textContent('#progTable thead')).includes('Allure'),
+  await pg.textContent('#progTable thead'));
+t('et une allure calculée', (await pg.textContent('#progTable tbody tr:first-child')).includes('6:00'),
+  await pg.textContent('#progTable tbody tr:first-child'));
+// Une rediffusion ne doit pas ramener la carte sur la première machine.
+await pg.evaluate(() => window.dispatchEvent(new Event('focus')));
+await pg.waitForTimeout(250);
+t('le choix survit à un rendu', (await pg.inputValue('#progSel')) === 'Tapis de course', await pg.inputValue('#progSel'));
+await cProg.close();
+
+console.log('=== une machine inconnue se cherche, et se retient ===');
+const cAppr = await b.newContext({ viewport: { width: 1100, height: 1000 }, ignoreHTTPSErrors: true });
+const pa = await cAppr.newPage();
+pa.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+pa.on('dialog', d => { ko++; console.log('  ÉCHEC boîte native demandée'); d.dismiss(); });
+await pa.addInitScript(([d]) => {
+  localStorage.setItem('suz-forme-onglet', 'sport');
+  localStorage.setItem('suz-forme-v1', JSON.stringify({
+    profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:d,
+              fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+    jours: { [d]: { date:d, poids:77, heure:'07:30', eau:0,
+      sport:[{ n:'Musculation', m:60, met:0, k:0, ex:[] }],
+      repas:{ petitdej:[], dejeuner:[], diner:[], collation:[] } } }
+  }));
+  // Le canal de Claude, simulé : une fiche plausible, et rien d'autre.
+  window.__demandes = [];
+  window.claude = { use: function (n) {
+    if (n !== 'sample') return Promise.resolve(null);
+    return Promise.resolve({ json: function (q) {
+      window.__demandes.push(q);
+      return Promise.resolve({ type: 'fonte', zone: 'Dos', amplitude_m: 0.55,
+                               part_du_corps: 0.3, met: 6, note: 'Un tirage.' });
+    } });
+  } };
+}, [auj]);
+await pa.goto('file:///home/user/Suz/perte-de-poids.html');
+await pa.waitForTimeout(900);
+await pa.click('[data-exo-seance="0"]');
+await pa.waitForTimeout(250);
+await pa.fill('#exoNom', 'Tirage Bidule 3000');
+await pa.fill('#exoSeries', '4');
+await pa.fill('#exoReps', '12');
+await pa.fill('#exoPoids', '35');
+await pa.click('[data-exo-ok]');
+await pa.waitForTimeout(700);
+t('la machine inconnue est cherchée', (await pa.evaluate(() => window.__demandes.length)) === 1,
+  String(await pa.evaluate(() => window.__demandes.length)));
+t('la demande décrit ce qu\'on attend',
+  (await pa.evaluate(() => window.__demandes[0] || '')).includes('Tirage Bidule 3000'), '');
+const fiche = await pa.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.machines);
+t('la fiche est retenue dans le profil', !!(fiche && fiche['Tirage Bidule 3000']), JSON.stringify(fiche));
+t('avec son amplitude et sa part de corps',
+  fiche['Tirage Bidule 3000'].h === 0.55 && fiche['Tirage Bidule 3000'].c === 0.3,
+  JSON.stringify(fiche['Tirage Bidule 3000']));
+const kAppris = await pa.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0].k, auj);
+// 48 répétitions, 35 kg plus 30 % du corps sur 0,55 m : 22 kcal de travail,
+// plus 7:24 de séries et de repos à 3,5 MET, 33 kcal. Au neutre ce serait 45.
+t('la dépense se recalcule avec la fiche apprise', kAppris === 55, String(kAppris));
+t('le carnet dit que la fiche vient de Claude',
+  (await pa.textContent('.exo-appris')).includes('retrouvée par Claude'), await pa.textContent('.exo-appris'));
+t('et ce qu\'elle contient', (await pa.textContent('.exo-appris')).includes('0,55 m'),
+  await pa.textContent('.exo-appris'));
+t('elle n\'est plus annoncée comme inconnue',
+  !(await pa.textContent('.exo-vol')).includes('pas dans la liste'), await pa.textContent('.exo-vol'));
+t('elle entre dans les suggestions',
+  (await pa.$$eval('#exoListe option', e => e.map(o => o.value))).includes('Tirage Bidule 3000'), '');
+t('elle apparaît dans les progrès',
+  (await pa.$$eval('#progSel option', e => e.map(o => o.value))).includes('Tirage Bidule 3000'), '');
+// Une fiche fausse doit pouvoir partir.
+await pa.click('[data-oublie-machine]');
+await pa.waitForTimeout(500);
+const apresOubli = await pa.evaluate(() => JSON.parse(localStorage.getItem('suz-forme-v1')).profil.machines);
+t('oublier une fiche la retire', !apresOubli['Tirage Bidule 3000'], JSON.stringify(apresOubli));
+t('et la dépense repasse au neutre',
+  (await pa.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0].k, auj)) !== kAppris, '');
+t('la mention disparaît', !(await pa.$('.exo-appris')));
+t('une seule recherche par machine, pas une par frappe',
+  (await pa.evaluate(() => window.__demandes.length)) === 1,
+  String(await pa.evaluate(() => window.__demandes.length)));
+await cAppr.close();
+
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');
 process.exit(ko ? 1 : 0);

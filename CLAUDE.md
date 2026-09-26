@@ -274,6 +274,41 @@ elle est comptée à `MET_CARDIO_INCONNU`, 6 MET sur la durée, la distance
 étant ignorée faute de savoir ce qu'elle veut dire, trois kilomètres au
 rameur ne coûtant pas trois kilomètres de course.
 
+**Mais une machine inconnue ne le reste pas.** Une salle a toujours un
+appareil que la liste ignore. À la première fois qu'un nom inconnu est noté,
+`apprendMachine()` demande à Claude, par la capacité `sample`, ce que c'est :
+fonte ou cardio, zone du corps, amplitude en mètres, part du poids du corps
+déplacée, MET pour un cardio. La fiche est retenue **dans le profil**,
+`profil.machines[nom] = { t, z, h, c, met, ia: 1 }`, donc pour toujours et
+sur tous les appareils. `profilExercice()`, `cardioSalle()` et
+`exerciceConnu()` la lisent comme n'importe quelle fiche en dur, et les
+suggestions du formulaire la proposent.
+
+La réponse vient de la mémoire de Claude, pas d'un catalogue : **elle est
+bornée de partout**. Une amplitude hors de 0,05 à 1,2 m, une part de corps
+au-dessus de 1, un MET hors de 2 à 16 sont refusés, et on retombe sur le
+neutre. Deux cents fiches au maximum. La recherche est **muette en cas
+d'échec** : ne pas savoir n'empêche rien, le neutre fait le travail. Une
+recherche par machine, `apprentissageEnCours` empêchant les doublons.
+
+Une fiche apprise **se voit et se retire**. Le carnet dit sous la séance ce
+qu'elle contient, « fiche retrouvée par Claude, dos, amplitude 0,55 m, 30 %
+du poids du corps déplacé », et porte « Oublier cette fiche » :
+`oublieMachine()` la supprime et la séance repasse au neutre. Sans ça, une
+valeur inventée resterait dans le calcul sans que personne puisse la voir.
+
+**Les progrès se lisent machine par machine.** Une carte « Mes progrès »
+dans l'onglet Sport, sous « Ma semaine ». `historiqueMachines()` parcourt
+tous les jours enregistrés et regroupe les lignes `ex` par nom ; pour chaque
+jour on garde la charge la plus lourde et le volume en fonte, la durée et la
+distance en cardio. La première dit la force, le second dit le travail. Le
+menu propose chaque machine notée, la plus récemment travaillée d'abord, et
+le choix vit dans `progChoix`, **pas dans le `<select>`** : une rediffusion
+du serveur redessine la carte et ramènerait la première machine. La courbe
+(`courbeProgres`) relie une valeur par jour et n'apparaît qu'à partir de
+deux séances ; le tableau montre les dix dernières, la plus récente en haut.
+La carte est masquée tant qu'aucune ligne d'exercice n'existe.
+
 **Une ligne d'exercice se corrige sans se supprimer** : la ligne entière est
 un bouton qui ouvre le formulaire à sa place (`exoDepuisLigne`,
 `exoSaisie.edit`). Une correction referme le formulaire, un ajout le laisse
@@ -529,7 +564,8 @@ node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # 59 contrôles
 node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
                                   # dedans, correction d'une ligne, masse
-                                  # déplacée, 41 contrôles
+                                  # déplacée, progrès par machine, fiche
+                                  # apprise puis oubliée, 69 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la
