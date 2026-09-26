@@ -7663,28 +7663,41 @@ var SPORTS = [
 
   /* ==================== LA DÉPENSE D'UNE SÉANCE DE SALLE ====================
      « Musculation modérée » ou « intense » : personne ne sait trancher, et
-     l'écart valait du simple au double, 3,5 MET contre 6. Le choix disparaît.
-     La dépense se calcule maintenant depuis ce qui a été noté et le temps
-     passé sur place.
+     l'écart valait du simple au double, 3,5 MET contre 6. Le choix disparaît,
+     la dépense se calcule depuis ce qui a été noté.
 
-     Les lignes de cardio consomment leurs propres minutes à leur propre
-     coût : tapis de course et tapis de marche par les équations de l'ACSM,
-     vélo par son MET de vitesse, le reste par son MET du compendium.
+     Trois morceaux.
 
-     Le temps restant est celui de la fonte et des repos entre les séries.
-     Il est facturé à un MET interpolé entre les deux valeurs publiées du
-     compendium pour la musculation, 3,5 pour un effort léger et 6,0 pour un
-     effort soutenu. Ce qui situe la séance entre les deux est la densité du
-     travail : le temps réellement sous la charge, estimé à trois secondes
-     par répétition, rapporté au temps de fonte. Sous 15 % de densité, on
-     souffle beaucoup, c'est léger ; au-delà de 40 %, ça enchaîne, c'est
-     soutenu. Entre les deux, l'interpolation est linéaire.
+     1. Les lignes de cardio consomment leurs propres minutes à leur propre
+        coût : tapis de course et tapis de marche par les équations de
+        l'ACSM, vélo par son MET de vitesse, le reste par son MET du
+        compendium des activités physiques.
 
-     Ce n'est pas une mesure, c'est une estimation, mais elle repose sur ce
-     qui a été fait au lieu d'un adjectif choisi au hasard. */
-  var MET_FONTE_LEGER = 3.5, MET_FONTE_SOUTENU = 6.0;
-  var DENSITE_LEGER = 0.15, DENSITE_SOUTENU = 0.40;
-  var SECONDES_PAR_REP = 3;
+     2. Le temps qui reste, fonte et repos entre les séries, au MET publié du
+        compendium pour la musculation à effort léger ou modéré, 3,5. C'est
+        une moyenne de séance, repos compris, et c'est le plancher : détailler
+        une séance ne doit jamais faire baisser son estimation.
+
+     3. Le travail mécanique de la fonte réellement déplacée, qui est ce que
+        le MET ignore et ce qui fait qu'une presse à 80 kg ne vaut pas une
+        presse à 20 kg. Soulever une masse m sur une amplitude h coûte m·g·h ;
+        la phase de descente ajoute environ un tiers, et le rendement
+        musculaire tourne autour de 22 %. Avec une amplitude moyenne de 0,5 m
+        sur les machines, cela fait
+            9,81 × 0,5 × 4/3 ÷ 0,22 ÷ 4184 = 0,0071 kcal
+        par kilogramme et par répétition. Mille kilos soulevés valent donc
+        sept calories : c'est peu, et c'est la vérité.
+
+     Le tout est plafonné à 6 MET, la valeur publiée pour une musculation
+     soutenue : au-delà, ce ne serait plus une estimation mais une promesse.
+
+     Une première version faisait varier le MET selon la densité du travail.
+     Elle avait deux défauts que Suzon a vus tout de suite : sous un certain
+     seuil rien ne bougeait, donc les deux premières machines notées ne
+     changeaient rien, et le poids saisi ne comptait nulle part. */
+  var MET_FONTE = 3.5;
+  var MET_PLAFOND = 6.0;
+  var KCAL_PAR_KG_LEVE = 0.0071;
 
   function estCardio(e) { return e && e.t === "cardio"; }
 
@@ -7708,27 +7721,30 @@ var SPORTS = [
   function detailSalle(x, poids) {
     var ex = x.ex || [];
     var minTot = x.m || 0;
-    var kcalCardio = 0, minCardio = 0, reps = 0, nFonte = 0;
+    var kcalCardio = 0, minCardio = 0, reps = 0, tonnage = 0;
     ex.forEach(function (e) {
       if (estCardio(e)) {
         minCardio += e.m || 0;
         kcalCardio += kcalLigneCardio(e, poids);
       } else {
-        nFonte++;
-        reps += (e.s || 0) * (e.r || 0);
+        var n = (e.s || 0) * (e.r || 0);
+        reps += n;
+        tonnage += n * (e.kg || 0);
       }
     });
     var minFonte = Math.max(0, minTot - minCardio);
-    var sousCharge = reps * SECONDES_PAR_REP / 60;
-    var densite = minFonte > 0 ? sousCharge / minFonte : 0;
-    var f = clamp((densite - DENSITE_LEGER) / (DENSITE_SOUTENU - DENSITE_LEGER), 0, 1);
-    var met = MET_FONTE_LEGER + (MET_FONTE_SOUTENU - MET_FONTE_LEGER) * f;
-    var kcalFonte = poids ? Math.round(met * poids * minFonte / 60) : 0;
+    var kcalTemps = poids ? MET_FONTE * poids * minFonte / 60 : 0;
+    var kcalCharge = poids ? tonnage * KCAL_PAR_KG_LEVE : 0;
+    var plafond = poids ? MET_PLAFOND * poids * minFonte / 60 : 0;
+    var kcalFonte = Math.min(kcalTemps + kcalCharge, plafond);
     return {
       minTot: minTot, minCardio: minCardio, minFonte: minFonte,
-      kcalCardio: kcalCardio, kcalFonte: kcalFonte,
-      kcal: kcalCardio + kcalFonte,
-      reps: reps, nFonte: nFonte, densite: densite, met: met,
+      kcalCardio: kcalCardio,
+      kcalTemps: Math.round(kcalTemps), kcalCharge: Math.round(kcalCharge),
+      kcalFonte: Math.round(kcalFonte),
+      kcal: kcalCardio + Math.round(kcalFonte),
+      reps: reps, tonnage: tonnage,
+      plafonne: kcalTemps + kcalCharge > plafond + 0.5,
       trop: minCardio > minTot
     };
   }
@@ -7815,12 +7831,15 @@ var SPORTS = [
     if (ex.length) {
       h += '<ul class="plat-lignes">' + ex.map(function (e, i) { return ligneExercice(e, i, s); }).join("") + '</ul>';
       var notes = [];
-      if (vol > 0) notes.push(ni(vol) + " kg soulevés");
       if (estSeanceSalle(x)) {
         var d = detailSalle(x, poidsA(dateCourante));
         if (d.minCardio > 0) notes.push(fmtDuree(d.minCardio) + " de cardio pour " + ni(d.kcalCardio) + " kcal");
-        if (d.minFonte > 0) notes.push(fmtDuree(d.minFonte) + " de fonte à " + nf(d.met, 1) + " MET pour " + ni(d.kcalFonte) + " kcal");
+        if (d.minFonte > 0) notes.push(fmtDuree(d.minFonte) + " de fonte pour " + ni(d.kcalTemps) + " kcal");
+        if (d.tonnage > 0) notes.push(ni(d.tonnage) + " kg soulevés pour " + ni(d.kcalCharge) + " kcal de plus");
+        if (d.plafonne) notes.push("plafonné à 6 MET, la valeur d'une musculation soutenue");
         if (d.trop) notes.push("les durées de cardio dépassent celle de la séance, corrige l'une ou l'autre");
+      } else if (vol > 0) {
+        notes.push(ni(vol) + " kg soulevés");
       }
       if (notes.length) h += '<p class="sub-note exo-vol">' + esc(notes.join(" · ") + ".") + '</p>';
     }
@@ -8207,8 +8226,11 @@ var SPORTS = [
           if (x.jour) bits.push("tout au long de la journée");
           else {
             bits.push(fmtDuree(x.m));
+            // Pas de MET sur une séance de salle : la moyenne d'un tapis à
+            // 9,8 et d'une fonte plafonnée à 6 ne veut rien dire, et elle
+            // contredirait le plafond annoncé juste en dessous.
             if (x.d > 0 && x.m > 0) bits.push(uniteAllure(t, x.d / (x.m / 60)));
-            else bits.push("intensité " + nf(x.met, 1) + " MET");
+            else if (!estSeanceSalle(x)) bits.push("intensité " + nf(x.met, 1) + " MET");
           }
           if (x.ex && x.ex.length) bits.push(x.ex.length + (x.ex.length > 1 ? " exercices" : " exercice"));
           return '<li' + (seanceDetaillable(x) ? ' class="avec-exos"' : '') + '>' +

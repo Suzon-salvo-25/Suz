@@ -47,6 +47,7 @@ t('les machines sont suggérées', (await p.$$eval('#exoListe option', e => e.ma
 
 console.log('=== la fonte ===');
 // 4 x 12 + 3 x 12 + 3 x 10 + 3 x 10 = 144 répétitions
+const paliers = [];
 for (const [nom, se, re, kg] of [['Presse à cuisses','4','12','45'], ['Leg extension','3','12','30'],
                                  ['Tirage vertical','3','10','35'], ['Développé couché','3','10','25']]) {
   await p.fill('#exoNom', nom);
@@ -55,12 +56,14 @@ for (const [nom, se, re, kg] of [['Presse à cuisses','4','12','45'], ['Leg exte
   await p.fill('#exoPoids', kg);
   await p.click('[data-exo-ok]');
   await p.waitForTimeout(300);
+  paliers.push(await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0].k, auj));
 }
 const s1 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
 t('les quatre machines sont notées', s1.ex.length === 4, JSON.stringify(s1.ex.map(x => x.n)));
-// 144 reps x 3 s = 7,2 min sur 60 min de fonte, densité 0,12 : sous le seuil,
-// donc 3,5 MET. 3,5 x 77 x 1 h = 270 kcal.
-t('sans cardio, tout le temps est de la fonte', s1.k === 270, String(s1.k));
+// 60 min à 3,5 MET pour 77 kg = 270 kcal, plus 5 040 kg soulevés à
+// 0,0071 kcal/kg = 36 kcal. Total 305.
+t('la dépense vaut le temps plus la fonte déplacée', s1.k === 305, String(s1.k));
+t('chaque machine a compté dès la première', paliers[0] > 270 && paliers.every((v, i) => i === 0 || v >= paliers[i - 1]), JSON.stringify(paliers));
 
 console.log('=== le cardio dans la séance ===');
 await p.fill('#exoNom', 'Tapis de course');
@@ -77,12 +80,11 @@ const s2 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')
 const c = s2.ex.find(x => x.t === 'cardio');
 t('la ligne de cardio est enregistrée', !!c && c.m === 20 && c.d === 3, JSON.stringify(c));
 // 3 km en 20 min = 9 km/h. ACSM : (0,2 x 150 + 3,5) x 77 / 1000 x 5 x 20 = 258 kcal.
-// Reste 40 min de fonte, 144 reps = 7,2 min sous charge, densité 0,18,
-// MET 3,8, soit 195 kcal. Total 453.
-t('la dépense se recalcule depuis le contenu', s2.k === 453, String(s2.k));
+// Reste 40 min de fonte à 3,5 MET = 180, plus 36 de fonte déplacée = 215.
+t('la dépense se recalcule depuis le contenu', s2.k === 473, String(s2.k));
 const resume = await p.textContent('.exo-vol');
 t('le résumé dit le partage', resume.includes('20:00 de cardio') && resume.includes('258 kcal'), resume);
-t('et le MET retenu pour la fonte', resume.includes('3,8 MET'), resume);
+t('et ce que la fonte déplacée ajoute', resume.includes('5 040 kg soulevés pour 36 kcal'), resume);
 
 console.log('=== l\'allure seule suffit ===');
 await p.fill('#exoNom', 'Tapis de course');
@@ -99,9 +101,9 @@ await p.fill('.salle-duree', '1:30:00');
 await p.dispatchEvent('.salle-duree', 'change');
 await p.waitForTimeout(400);
 const s3 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
-// 90 min dont 20 de cardio : 70 min de fonte, densité 0,103, sous le seuil,
-// donc 3,5 MET, soit 314 kcal. Avec les 258 du tapis : 572.
-t('rallonger la séance rallonge la fonte', s3.k === 572, String(s3.k));
+// 90 min dont 20 de cardio : 70 min de fonte à 3,5 MET = 314, plus 36 = 350.
+// Avec les 258 du tapis : 608.
+t('rallonger la séance rallonge la fonte', s3.k === 608, String(s3.k));
 t('et la durée est retenue', s3.m === 90, String(s3.m));
 
 console.log('=== retirer une ligne recompte ===');
@@ -109,23 +111,35 @@ await p.click('[data-del-exo="0"][data-i="4"]');
 await p.waitForTimeout(400);
 const s4 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
 t('le cardio retiré, la séance redevient de la fonte', s4.ex.length === 4 && !s4.ex.some(x => x.t === 'cardio'), JSON.stringify(s4.ex.length));
-// 90 min de fonte, densité 0,08 : 3,5 MET, 404 kcal.
-t('et la dépense suit', s4.k === 404, String(s4.k));
+// 90 min de fonte à 3,5 MET = 404, plus 36 de fonte déplacée = 440.
+t('et la dépense suit', s4.k === 440, String(s4.k));
 
-console.log('=== une séance dense monte le MET ===');
+console.log('=== le poids du corps, et le plafond ===');
 await p.click('[data-exo-seance="0"]');
 await p.waitForTimeout(250);
-await p.fill('#exoNom', 'Crunch');
-await p.fill('#exoSeries', '20');
-await p.fill('#exoReps', '40');
+await p.fill('#exoNom', 'Gainage');
+await p.fill('#exoSeries', '3');
+await p.fill('#exoReps', '30');
 await p.fill('#exoPoids', '');
 await p.click('[data-exo-ok]');
 await p.waitForTimeout(400);
 const s5 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
-// 144 + 800 = 944 reps, 47,2 min sous charge sur 90, densité 0,524 : plafond
-// à 6 MET, soit 693 kcal.
-t('au-delà du seuil, le MET plafonne à 6', s5.k === 693, String(s5.k));
 t('le poids du corps reste accepté', s5.ex[4].kg === 0, JSON.stringify(s5.ex[4]));
+// Rien de déplacé : la dépense ne bouge pas, le temps le comptait déjà.
+t('sans charge, le temps suffisait déjà', s5.k === 440, String(s5.k));
+
+// une séance énorme se fait plafonner
+await p.fill('#exoNom', 'Squat à la barre');
+await p.fill('#exoSeries', '25');
+await p.fill('#exoReps', '10');
+await p.fill('#exoPoids', '200');
+await p.click('[data-exo-ok]');
+await p.waitForTimeout(400);
+const s6 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
+// 404 + (5 040 + 50 000) x 0,0071 = 795, au-dessus du plafond de 6 MET
+// sur 90 min, 693 kcal.
+t('le plafond de 6 MET tient', s6.k === 693, String(s6.k));
+t('et il est annoncé', (await p.textContent('.exo-vol')).includes('plafonné à 6 MET'), await p.textContent('.exo-vol'));
 
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');

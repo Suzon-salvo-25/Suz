@@ -216,21 +216,43 @@ le drapeau `"masque"`, hors du menu : sans eux, les séances déjà
 enregistrées perdraient leur catégorie et leur carnet.
 
 **La dépense d'une séance de salle se calcule depuis son contenu**
-(`detailSalle`, `recalculeSalle`). Les lignes de cardio consomment leurs
-propres minutes à leur propre coût, ACSM pour les tapis, MET de vitesse pour
-les vélos, MET du compendium pour le reste. **Le temps restant est celui de
-la fonte et des repos**, facturé à un MET interpolé entre les deux valeurs
-publiées du compendium, 3,5 léger et 6,0 soutenu, selon la **densité** du
-travail : temps sous charge, estimé à trois secondes par répétition, rapporté
-au temps de fonte. Sous 15 % c'est léger, au-delà de 40 % c'est soutenu,
-linéaire entre les deux. Ce n'est pas une mesure, c'est une estimation, mais
-elle repose sur ce qui a été fait au lieu d'un adjectif tiré au sort. **Le
-temps passé sur place se corrige dans le carnet** (`.salle-duree`) : il
-porte la moitié du calcul. Toute retouche, ligne ajoutée, ligne retirée ou
+(`detailSalle`, `recalculeSalle`), en trois morceaux.
+
+1. Les lignes de cardio consomment leurs propres minutes à leur propre coût,
+   ACSM pour les tapis, MET de vitesse pour les vélos, MET du compendium
+   pour le reste.
+2. Le temps restant, fonte et repos, au **MET publié pour la musculation à
+   effort léger ou modéré, 3,5**. C'est une moyenne de séance repos compris,
+   et c'est le **plancher** : détailler une séance ne doit jamais faire
+   baisser son estimation.
+3. **Le travail mécanique de la fonte réellement déplacée**, ce que le MET
+   ignore et ce qui fait qu'une presse à 80 kg ne vaut pas une presse à
+   20 kg. `m·g·h`, la descente ajoutant un tiers, rendement musculaire 22 %,
+   amplitude moyenne 0,5 m, soit `9,81 × 0,5 × 4/3 ÷ 0,22 ÷ 4184 =`
+   **0,0071 kcal par kilogramme et par répétition**. Mille kilos soulevés
+   valent sept calories : c'est peu, et c'est la vérité.
+
+Le tout est plafonné à **6 MET**, la valeur publiée pour une musculation
+soutenue. Le résumé sous le carnet dit les trois morceaux séparément, et
+annonce le plafond quand il joue. **La ligne de séance n'affiche pas de
+MET** pour une séance de salle : la moyenne d'un tapis à 9,8 et d'une fonte
+plafonnée à 6 ne veut rien dire et contredirait le plafond.
+
+**Première version rejetée, et pourquoi.** Elle faisait varier le MET selon
+la densité du travail, temps sous charge rapporté au temps de fonte. Suzon a
+vu les deux défauts tout de suite : sous le seuil bas rien ne bougeait, donc
+les deux premières machines notées ne changeaient **rien** au chiffre, et le
+poids saisi ne comptait nulle part. Toute reprise du modèle doit garder ces
+deux propriétés : **chaque machine notée fait bouger le chiffre dès la
+première**, et **le poids compte**.
+
+**Le temps passé sur place se corrige dans le carnet** (`.salle-duree`) : il
+porte l'essentiel du calcul. Toute retouche, ligne ajoutée, ligne retirée ou
 durée changée, repasse par `recalculeSalle`.
 
-Repère de contrôle, 77 kg sur 1 h : 20 min de tapis à 9 km/h plus 144
-répétitions de fonte donnent 258 + 195 = 453 kcal.
+Repères de contrôle, 77 kg : 1 h avec 20 min de tapis à 9 km/h et 5 040 kg
+soulevés donnent 258 + 179 + 36 = 473 kcal. Sans cardio, la même heure vaut
+270 + 36 = 305 kcal.
 
 **Le tour de taille a été retiré de l'interface.** « Je ne le ferai
 jamais. » Le champ, sa tuile et sa lecture sont partis ; le champ `tour`
@@ -471,7 +493,7 @@ node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # 59 contrôles
 node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
                                   # dedans, dépense calculée depuis le
-                                  # contenu, 24 contrôles
+                                  # contenu, 27 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la
