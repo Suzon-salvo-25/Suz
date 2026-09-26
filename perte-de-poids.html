@@ -7662,42 +7662,56 @@ var SPORTS = [
 
 
   /* ==================== LA DÉPENSE D'UNE SÉANCE DE SALLE ====================
-     « Musculation modérée » ou « intense » : personne ne sait trancher, et
-     l'écart valait du simple au double, 3,5 MET contre 6. Le choix disparaît,
-     la dépense se calcule depuis ce qui a été noté.
+     Rester trois heures sur place en faisant un seul exercice n'a rien à
+     voir avec trois heures de travail. C'est ce que Suzon a relevé, et le
+     calcul doit le dire.
 
-     Trois morceaux.
+     Ce n'est donc pas le temps passé à la salle qui compte, mais **le temps
+     réellement travaillé**, déduit des séries notées : chaque série coûte
+     ses répétitions, trois secondes l'une, plus le repos qui la suit, pris
+     à soixante-quinze secondes, la moyenne d'un repos entre deux séries.
+     Les minutes qui restent, celles où l'on traîne entre deux machines ou
+     l'on discute, **ne comptent pas** : le niveau d'activité du profil les
+     compte déjà comme des minutes de vie ordinaire, et les compter deux
+     fois gonflerait la journée pour rien.
 
-     1. Les lignes de cardio consomment leurs propres minutes à leur propre
-        coût : tapis de course et tapis de marche par les équations de
-        l'ACSM, vélo par son MET de vitesse, le reste par son MET du
-        compendium des activités physiques.
+     Sur ce temps travaillé, trois choses s'additionnent.
 
-     2. Le temps qui reste, fonte et repos entre les séries, au MET publié du
-        compendium pour la musculation à effort léger ou modéré, 3,5. C'est
-        une moyenne de séance, repos compris, et c'est le plancher : détailler
-        une séance ne doit jamais faire baisser son estimation.
+     1. Les lignes de cardio, à leur propre coût et sur leurs propres
+        minutes : équations de l'ACSM pour les tapis, MET de vitesse pour les
+        vélos, MET du compendium des activités physiques pour le reste.
 
-     3. Le travail mécanique de la fonte réellement déplacée, qui est ce que
-        le MET ignore et ce qui fait qu'une presse à 80 kg ne vaut pas une
-        presse à 20 kg. Soulever une masse m sur une amplitude h coûte m·g·h ;
-        la phase de descente ajoute environ un tiers, et le rendement
-        musculaire tourne autour de 22 %. Avec une amplitude moyenne de 0,5 m
-        sur les machines, cela fait
+     2. Le temps de fonte au MET publié du compendium pour la musculation à
+        effort léger ou modéré, 3,5, repos entre séries compris.
+
+     3. Le travail mécanique de la fonte réellement déplacée, que le MET
+        ignore et qui fait qu'une presse à 80 kg ne vaut pas une presse à
+        20 kg. Soulever une masse m sur une amplitude h coûte m·g·h ; la
+        descente ajoute environ un tiers, le rendement musculaire tourne
+        autour de 22 %, et l'amplitude moyenne d'une machine vaut 0,5 m :
             9,81 × 0,5 × 4/3 ÷ 0,22 ÷ 4184 = 0,0071 kcal
-        par kilogramme et par répétition. Mille kilos soulevés valent donc
-        sept calories : c'est peu, et c'est la vérité.
+        par kilogramme et par répétition. Mille kilos soulevés valent sept
+        calories : c'est peu, et c'est la vérité.
 
-     Le tout est plafonné à 6 MET, la valeur publiée pour une musculation
-     soutenue : au-delà, ce ne serait plus une estimation mais une promesse.
+     Le temps travaillé ne peut pas dépasser le temps passé sur place, et la
+     dépense de fonte est plafonnée à 6 MET, la valeur publiée pour une
+     musculation soutenue.
 
-     Une première version faisait varier le MET selon la densité du travail.
-     Elle avait deux défauts que Suzon a vus tout de suite : sous un certain
-     seuil rien ne bougeait, donc les deux premières machines notées ne
-     changeaient rien, et le poids saisi ne comptait nulle part. */
+     Tant qu'aucune ligne n'est notée, on ne sait rien : la séance vaut
+     provisoirement tout son temps à 3,5 MET, et le carnet le dit. La
+     première ligne notée remplace cette estimation par le calcul, et le
+     chiffre peut alors descendre : c'est normal, il devient vrai.
+
+     Deux versions ont été rejetées avant celle-ci. L'une faisait varier le
+     MET selon la densité du travail : sous un seuil, les premières machines
+     notées ne changeaient rien, et le poids ne comptait nulle part. L'autre
+     facturait tout le temps passé sur place : trois heures à ne rien faire
+     valaient presque trois heures de travail. */
   var MET_FONTE = 3.5;
   var MET_PLAFOND = 6.0;
   var KCAL_PAR_KG_LEVE = 0.0071;
+  var SECONDES_PAR_REP = 3;
+  var REPOS_PAR_SERIE = 75;
 
   function estCardio(e) { return e && e.t === "cardio"; }
 
@@ -7721,29 +7735,37 @@ var SPORTS = [
   function detailSalle(x, poids) {
     var ex = x.ex || [];
     var minTot = x.m || 0;
-    var kcalCardio = 0, minCardio = 0, reps = 0, tonnage = 0;
+    var kcalCardio = 0, minCardio = 0, reps = 0, tonnage = 0, minSeries = 0, nFonte = 0;
     ex.forEach(function (e) {
       if (estCardio(e)) {
         minCardio += e.m || 0;
         kcalCardio += kcalLigneCardio(e, poids);
       } else {
-        var n = (e.s || 0) * (e.r || 0);
-        reps += n;
-        tonnage += n * (e.kg || 0);
+        nFonte++;
+        var ser = e.s || 0, rep = e.r || 0;
+        reps += ser * rep;
+        tonnage += ser * rep * (e.kg || 0);
+        minSeries += ser * (rep * SECONDES_PAR_REP + REPOS_PAR_SERIE) / 60;
       }
     });
-    var minFonte = Math.max(0, minTot - minCardio);
+    var dispo = Math.max(0, minTot - minCardio);
+    // Sans rien de noté, on n'a que la durée : estimation provisoire.
+    var provisoire = nFonte === 0 && minCardio === 0;
+    var minFonte = provisoire ? dispo : Math.min(minSeries, dispo);
+    var minTraine = Math.max(0, dispo - minFonte);
+
     var kcalTemps = poids ? MET_FONTE * poids * minFonte / 60 : 0;
     var kcalCharge = poids ? tonnage * KCAL_PAR_KG_LEVE : 0;
     var plafond = poids ? MET_PLAFOND * poids * minFonte / 60 : 0;
     var kcalFonte = Math.min(kcalTemps + kcalCharge, plafond);
     return {
-      minTot: minTot, minCardio: minCardio, minFonte: minFonte,
+      minTot: minTot, minCardio: minCardio, minFonte: minFonte, minTraine: minTraine,
       kcalCardio: kcalCardio,
       kcalTemps: Math.round(kcalTemps), kcalCharge: Math.round(kcalCharge),
       kcalFonte: Math.round(kcalFonte),
       kcal: kcalCardio + Math.round(kcalFonte),
-      reps: reps, tonnage: tonnage,
+      reps: reps, tonnage: tonnage, nFonte: nFonte, provisoire: provisoire,
+      deborde: minSeries > dispo + 0.5,
       plafonne: kcalTemps + kcalCharge > plafond + 0.5,
       trop: minCardio > minTot
     };
@@ -7828,16 +7850,27 @@ var SPORTS = [
         '<input type="text" id="salleDuree' + s + '" class="salle-duree" data-salle="' + s +
         '" inputmode="numeric" autocomplete="off" value="' + esc(fmtDuree(x.m || 0)) + '"></div></div>';
     }
-    if (ex.length) {
-      h += '<ul class="plat-lignes">' + ex.map(function (e, i) { return ligneExercice(e, i, s); }).join("") + '</ul>';
+    if (ex.length || estSeanceSalle(x)) {
+      if (ex.length) {
+        h += '<ul class="plat-lignes">' + ex.map(function (e, i) { return ligneExercice(e, i, s); }).join("") + '</ul>';
+      }
       var notes = [];
       if (estSeanceSalle(x)) {
         var d = detailSalle(x, poidsA(dateCourante));
         if (d.minCardio > 0) notes.push(fmtDuree(d.minCardio) + " de cardio pour " + ni(d.kcalCardio) + " kcal");
-        if (d.minFonte > 0) notes.push(fmtDuree(d.minFonte) + " de fonte pour " + ni(d.kcalTemps) + " kcal");
+        if (d.minFonte > 0) {
+          notes.push(fmtDuree(d.minFonte) + (d.provisoire ? " de fonte estimée" : " de séries et de repos") +
+            " pour " + ni(d.kcalTemps) + " kcal");
+        }
         if (d.tonnage > 0) notes.push(ni(d.tonnage) + " kg soulevés pour " + ni(d.kcalCharge) + " kcal de plus");
+        if (d.minTraine > 1) {
+          notes.push(fmtDuree(d.minTraine) + " sur place sans rien soulever, qui ne comptent pas : " +
+            "ton niveau d'activité les compte déjà");
+        }
         if (d.plafonne) notes.push("plafonné à 6 MET, la valeur d'une musculation soutenue");
+        if (d.deborde) notes.push("tes séries durent plus longtemps que la séance, allonge le temps à la salle");
         if (d.trop) notes.push("les durées de cardio dépassent celle de la séance, corrige l'une ou l'autre");
+        if (d.provisoire) notes.push("estimation provisoire, détaille la séance pour qu'elle devienne juste");
       } else if (vol > 0) {
         notes.push(ni(vol) + " kg soulevés");
       }
