@@ -196,15 +196,41 @@ lui redemander. Les séances de sport, elles, restent une addition à part.
 
 **Une séance de salle se détaille machine par machine.** Sous une séance
 dont la catégorie `SPORTS` est `renfo`, et seulement celle-là, un carnet
-d'exercices : nom de la machine, séries, répétitions, poids. Les exercices
-vivent dans `ex` sur l'entrée de séance, `{ n, s, r, kg }`. Le poids vide
-vaut « poids du corps ». **Ces lignes ne changent pas les calories**, qui
-restent celles de la durée et du MET : c'est un carnet d'entraînement, pas
-un second calcul, et le formulaire le dit. Le total affiché est le tonnage,
-`séries × répétitions × poids`, la seule mesure de progression lisible d'un
-coup d'œil. Le formulaire **reste ouvert après chaque ajout**, en gardant le
-nombre de séries et le poids : on enchaîne rarement un seul exercice. La
-saisie vit dans `exoSaisie`, jamais dans le DOM seul.
+d'exercices. Les lignes vivent dans `ex` sur l'entrée de séance : de la
+fonte, `{ n, s, r, kg }`, le poids vide valant « poids du corps », ou du
+cardio, `{ t:"cardio", n, m, d }`. Le formulaire bascule **tout seul** entre
+les deux quand le nom tapé est celui d'une machine de `CARDIO_SALLE`, et un
+lien force le mode quand le nom est inconnu. Pour le cardio, durée plus
+distance **ou** allure : celle des deux qui manque se déduit de l'autre. Les
+suggestions viennent de `EXERCICES` (environ 70 machines de fonte, par zone
+du corps) et de `CARDIO_SALLE`, nomenclature française usuelle vérifiée sur
+les catalogues d'équipementiers. Le formulaire **reste ouvert après chaque
+ajout** en gardant séries et poids : on enchaîne rarement un seul exercice.
+La saisie vit dans `exoSaisie`, jamais dans le DOM seul.
+
+**« Musculation modérée » et « intense » ont disparu**, remplacées par une
+seule **« Musculation »** portant le drapeau `"salle"` en cinquième champ de
+`SPORTS`. Personne ne savait trancher, et l'écart valait du simple au
+double, 3,5 MET contre 6. Les deux anciens noms restent dans `SPORTS` avec
+le drapeau `"masque"`, hors du menu : sans eux, les séances déjà
+enregistrées perdraient leur catégorie et leur carnet.
+
+**La dépense d'une séance de salle se calcule depuis son contenu**
+(`detailSalle`, `recalculeSalle`). Les lignes de cardio consomment leurs
+propres minutes à leur propre coût, ACSM pour les tapis, MET de vitesse pour
+les vélos, MET du compendium pour le reste. **Le temps restant est celui de
+la fonte et des repos**, facturé à un MET interpolé entre les deux valeurs
+publiées du compendium, 3,5 léger et 6,0 soutenu, selon la **densité** du
+travail : temps sous charge, estimé à trois secondes par répétition, rapporté
+au temps de fonte. Sous 15 % c'est léger, au-delà de 40 % c'est soutenu,
+linéaire entre les deux. Ce n'est pas une mesure, c'est une estimation, mais
+elle repose sur ce qui a été fait au lieu d'un adjectif tiré au sort. **Le
+temps passé sur place se corrige dans le carnet** (`.salle-duree`) : il
+porte la moitié du calcul. Toute retouche, ligne ajoutée, ligne retirée ou
+durée changée, repasse par `recalculeSalle`.
+
+Repère de contrôle, 77 kg sur 1 h : 20 min de tapis à 9 km/h plus 144
+répétitions de fonte donnent 258 + 195 = 453 kcal.
 
 **Le tour de taille a été retiré de l'interface.** « Je ne le ferai
 jamais. » Le champ, sa tuile et sa lecture sont partis ; le champ `tour`
@@ -443,8 +469,9 @@ node outils/verifie-edition.mjs   # correction d'une ligne, changement de
 node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
                                   # 59 contrôles
-node outils/verifie-muscu.mjs     # carnet d'exercices d'une séance de
-                                  # renforcement, 20 contrôles
+node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
+                                  # dedans, dépense calculée depuis le
+                                  # contenu, 24 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

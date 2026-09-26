@@ -1348,6 +1348,7 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
   margin: 7px 0 9px; font-size: .76rem; color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
 }
+.exo-duree { margin-bottom: 11px; }
 .exo-form {
   border: 1px solid var(--line); border-radius: var(--r-md);
   background: var(--panel-2); padding: 12px 13px 14px; margin-top: 4px;
@@ -5350,13 +5351,16 @@ var SPORTS = [
   ["Elliptique", 5.0, "cardio"],
   ["Corde à sauter", 12.3, "cardio"],
   ["Escaliers / stepper", 9.0, "cardio"],
-  ["Musculation modérée", 3.5, "renfo"],
-  ["Musculation intense", 6.0, "renfo"],
+  ["Musculation", 3.5, "renfo", null, "salle"],
   ["Circuit training", 8.0, "renfo"],
   ["HIIT", 10.0, "renfo"],
   ["Pompes / abdos", 8.0, "renfo"],
   ["Gainage / core", 4.0, "renfo"],
   ["CrossFit", 9.0, "renfo"],
+  /* Gardées pour que les séances déjà enregistrées sous ces noms retrouvent
+     leur catégorie ; elles ne sont plus proposées au choix. */
+  ["Musculation modérée", 3.5, "renfo", null, "masque"],
+  ["Musculation intense", 6.0, "renfo", null, "masque"],
   ["Pilates", 3.0, "souplesse"],
   ["Yoga doux", 2.5, "souplesse"],
   ["Yoga dynamique", 4.0, "souplesse"],
@@ -7580,7 +7584,176 @@ var SPORTS = [
      C'est un carnet d'entraînement, pas un second calcul. Le volume affiché
      (séries × répétitions × poids, le tonnage) est la seule mesure de
      progression qui se lise d'un coup d'œil. */
-  var exoSaisie = null;   // { i, nom, series, reps, poids }
+
+  /* ==================== LES EXERCICES DE SALLE ====================
+     Nomenclature française usuelle des salles, vérifiée sur les catalogues
+     d'équipementiers et les guides de salle. Chaque entrée porte sa zone,
+     pour que le menu se lise. La liste sert de suggestions : on peut taper
+     n'importe quel nom, elle ne contraint rien. */
+  var EXERCICES = [
+    ["Presse à cuisses", "Jambes"], ["Leg extension", "Jambes"],
+    ["Leg curl assis", "Jambes"], ["Leg curl allongé", "Jambes"],
+    ["Hack squat", "Jambes"], ["Squat à la barre", "Jambes"],
+    ["Squat guidé (Smith)", "Jambes"], ["Fentes", "Jambes"],
+    ["Soulevé de terre", "Jambes"], ["Soulevé de terre roumain", "Jambes"],
+    ["Adducteurs", "Jambes"], ["Abducteurs", "Jambes"],
+    ["Mollets debout", "Jambes"], ["Mollets assis", "Jambes"],
+    ["Presse à mollets", "Jambes"], ["Hip thrust", "Jambes"],
+    ["Kickback fessier", "Jambes"], ["Machine à fessiers", "Jambes"],
+    ["Chaise romaine", "Jambes"],
+
+    ["Développé couché", "Pectoraux"], ["Développé incliné", "Pectoraux"],
+    ["Développé décliné", "Pectoraux"], ["Développé couché guidé", "Pectoraux"],
+    ["Chest press", "Pectoraux"], ["Pec deck", "Pectoraux"],
+    ["Butterfly", "Pectoraux"], ["Écarté aux haltères", "Pectoraux"],
+    ["Écarté à la poulie", "Pectoraux"], ["Pompes", "Pectoraux"],
+    ["Dips", "Pectoraux"],
+
+    ["Tirage vertical", "Dos"], ["Tirage vertical prise serrée", "Dos"],
+    ["Tirage horizontal", "Dos"], ["Rowing barre", "Dos"],
+    ["Rowing haltère", "Dos"], ["Rowing T-bar", "Dos"],
+    ["Rowing machine", "Dos"], ["Pull-over", "Dos"],
+    ["Tractions", "Dos"], ["Tractions assistées", "Dos"],
+    ["Banc à lombaires", "Dos"], ["Haussements d'épaules", "Dos"],
+
+    ["Développé épaules", "Épaules"], ["Développé militaire", "Épaules"],
+    ["Élévations latérales", "Épaules"], ["Élévations frontales", "Épaules"],
+    ["Oiseau", "Épaules"], ["Pec deck inversé", "Épaules"],
+    ["Rowing menton", "Épaules"],
+
+    ["Curl biceps barre", "Bras"], ["Curl biceps haltères", "Bras"],
+    ["Curl pupitre", "Bras"], ["Curl marteau", "Bras"],
+    ["Curl à la poulie", "Bras"], ["Machine à biceps", "Bras"],
+    ["Extension triceps poulie", "Bras"], ["Extension triceps nuque", "Bras"],
+    ["Barre au front", "Bras"], ["Dips triceps", "Bras"],
+    ["Kickback triceps", "Bras"], ["Machine à triceps", "Bras"],
+
+    ["Crunch", "Abdominaux"], ["Crunch machine", "Abdominaux"],
+    ["Relevé de jambes", "Abdominaux"], ["Relevé de jambes suspendu", "Abdominaux"],
+    ["Gainage", "Abdominaux"], ["Planche latérale", "Abdominaux"],
+    ["Russian twist", "Abdominaux"], ["Roue abdominale", "Abdominaux"],
+    ["Machine à abdominaux", "Abdominaux"]
+  ];
+
+  /* Les machines de cardio de la salle. Le quatrième champ dit comment se
+     calcule la dépense : « course », « marche » et « velo » passent par les
+     équations de l'ACSM comme une sortie dehors, les autres par leur MET du
+     compendium des activités physiques. */
+  var CARDIO_SALLE = [
+    ["Tapis de course", 9.8, "course"],
+    ["Tapis de marche", 3.5, "marche"],
+    ["Vélo d'appartement", 7.0, "velo"],
+    ["Vélo de biking", 8.5, "velo"],
+    ["Vélo elliptique", 5.0, null],
+    ["Rameur", 7.0, null],
+    ["SkiErg", 7.0, null],
+    ["Air bike", 8.0, null],
+    ["Stepper", 7.0, null],
+    ["Escalier mécanique", 9.0, null],
+    ["Corde à sauter", 11.8, null]
+  ];
+
+  function cardioSalle(nom) {
+    for (var i = 0; i < CARDIO_SALLE.length; i++) {
+      if (CARDIO_SALLE[i][0] === nom) return CARDIO_SALLE[i];
+    }
+    return null;
+  }
+
+
+  /* ==================== LA DÉPENSE D'UNE SÉANCE DE SALLE ====================
+     « Musculation modérée » ou « intense » : personne ne sait trancher, et
+     l'écart valait du simple au double, 3,5 MET contre 6. Le choix disparaît.
+     La dépense se calcule maintenant depuis ce qui a été noté et le temps
+     passé sur place.
+
+     Les lignes de cardio consomment leurs propres minutes à leur propre
+     coût : tapis de course et tapis de marche par les équations de l'ACSM,
+     vélo par son MET de vitesse, le reste par son MET du compendium.
+
+     Le temps restant est celui de la fonte et des repos entre les séries.
+     Il est facturé à un MET interpolé entre les deux valeurs publiées du
+     compendium pour la musculation, 3,5 pour un effort léger et 6,0 pour un
+     effort soutenu. Ce qui situe la séance entre les deux est la densité du
+     travail : le temps réellement sous la charge, estimé à trois secondes
+     par répétition, rapporté au temps de fonte. Sous 15 % de densité, on
+     souffle beaucoup, c'est léger ; au-delà de 40 %, ça enchaîne, c'est
+     soutenu. Entre les deux, l'interpolation est linéaire.
+
+     Ce n'est pas une mesure, c'est une estimation, mais elle repose sur ce
+     qui a été fait au lieu d'un adjectif choisi au hasard. */
+  var MET_FONTE_LEGER = 3.5, MET_FONTE_SOUTENU = 6.0;
+  var DENSITE_LEGER = 0.15, DENSITE_SOUTENU = 0.40;
+  var SECONDES_PAR_REP = 3;
+
+  function estCardio(e) { return e && e.t === "cardio"; }
+
+  // Dépense d'une ligne de cardio, depuis sa durée et sa distance.
+  function kcalLigneCardio(e, poids) {
+    var min = e.m || 0;
+    if (!min || !poids) return 0;
+    var c = cardioSalle(e.n);
+    var type = c ? c[2] : null;
+    var kmh = (e.d > 0) ? e.d / (min / 60) : 0;
+    if (type && kmh > 0) {
+      if (type === "course" || type === "marche") {
+        return Math.round(kcalParVitesse(type, kmh, poids, min));
+      }
+      if (type === "velo") return Math.round(metVelo(kmh) * poids * min / 60);
+    }
+    var met = c ? c[1] : 6.0;
+    return Math.round(met * poids * min / 60);
+  }
+
+  function detailSalle(x, poids) {
+    var ex = x.ex || [];
+    var minTot = x.m || 0;
+    var kcalCardio = 0, minCardio = 0, reps = 0, nFonte = 0;
+    ex.forEach(function (e) {
+      if (estCardio(e)) {
+        minCardio += e.m || 0;
+        kcalCardio += kcalLigneCardio(e, poids);
+      } else {
+        nFonte++;
+        reps += (e.s || 0) * (e.r || 0);
+      }
+    });
+    var minFonte = Math.max(0, minTot - minCardio);
+    var sousCharge = reps * SECONDES_PAR_REP / 60;
+    var densite = minFonte > 0 ? sousCharge / minFonte : 0;
+    var f = clamp((densite - DENSITE_LEGER) / (DENSITE_SOUTENU - DENSITE_LEGER), 0, 1);
+    var met = MET_FONTE_LEGER + (MET_FONTE_SOUTENU - MET_FONTE_LEGER) * f;
+    var kcalFonte = poids ? Math.round(met * poids * minFonte / 60) : 0;
+    return {
+      minTot: minTot, minCardio: minCardio, minFonte: minFonte,
+      kcalCardio: kcalCardio, kcalFonte: kcalFonte,
+      kcal: kcalCardio + kcalFonte,
+      reps: reps, nFonte: nFonte, densite: densite, met: met,
+      trop: minCardio > minTot
+    };
+  }
+
+  function estSeanceSalle(x) {
+    if (!x || x.jour) return false;
+    for (var i = 0; i < SPORTS.length; i++) {
+      if (SPORTS[i][0] === x.n) return SPORTS[i][4] === "salle";
+    }
+    return false;
+  }
+
+  // Après toute retouche du carnet ou de la durée, la séance revaut ce que
+  // son contenu dit qu'elle vaut.
+  function recalculeSalle(x, poids) {
+    if (!estSeanceSalle(x)) return;
+    var d = detailSalle(x, poids);
+    x.k = d.kcal;
+    x.met = d.minTot > 0 && poids ? +(d.kcal / (poids * d.minTot / 60)).toFixed(1) : 0;
+  }
+
+  // { i, nom, series, reps, poids, duree, dist, allure, mode }
+  // `mode` vaut "fonte" ou "cardio" ; il bascule tout seul quand le nom
+  // tapé est celui d'une machine de cardio connue.
+  var exoSaisie = null;
 
   var ICONE_HALTERE = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" ' +
     'stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
@@ -7594,53 +7767,139 @@ var SPORTS = [
 
   function ligneExercice(e, i, s) {
     var bits = [];
-    if (e.s > 0 && e.r > 0) bits.push(e.s + " × " + e.r);
-    else if (e.r > 0) bits.push(e.r + (e.r > 1 ? " répétitions" : " répétition"));
-    if (e.kg > 0) bits.push(nf(e.kg, e.kg % 1 ? 1 : 0) + " kg");
-    else bits.push("poids du corps");
+    if (estCardio(e)) {
+      if (e.m > 0) bits.push(fmtDuree(e.m));
+      if (e.d > 0) {
+        bits.push(fmtKm(e.d));
+        if (e.m > 0) bits.push(fmtAllure(e.m / e.d) + " /km");
+      }
+    } else {
+      if (e.s > 0 && e.r > 0) bits.push(e.s + " × " + e.r);
+      else if (e.r > 0) bits.push(e.r + (e.r > 1 ? " répétitions" : " répétition"));
+      if (e.kg > 0) bits.push(nf(e.kg, e.kg % 1 ? 1 : 0) + " kg");
+      else bits.push("poids du corps");
+    }
     return '<li><span>' + esc(e.n) + '</span><b>' + esc(bits.join(" · ")) + '</b>' +
       '<button type="button" class="del" data-del-exo="' + s + '" data-i="' + i +
       '" aria-label="Retirer ' + esc(e.n) + '">\u2715</button></li>';
   }
 
+  // Le menu de suggestions : les machines de cardio d'abord, puis la fonte
+  // par zone du corps.
+  var LISTE_EXOS = (function () {
+    var h = '<datalist id="exoListe">';
+    h += CARDIO_SALLE.map(function (c) {
+      return '<option value="' + esc(c[0]) + '" label="Cardio"></option>';
+    }).join("");
+    var zones = {};
+    EXERCICES.forEach(function (e) { (zones[e[1]] = zones[e[1]] || []).push(e[0]); });
+    Object.keys(zones).forEach(function (z) {
+      h += zones[z].map(function (n) {
+        return '<option value="' + esc(n) + '" label="' + esc(z) + '"></option>';
+      }).join("");
+    });
+    return h + '</datalist>';
+  })();
+
   function blocExercices(x, s) {
     var ex = x.ex || [];
     var vol = volumeExercices(ex);
     var h = '<div class="exos">';
+    // La durée porte la moitié du calcul : elle doit rester corrigeable.
+    if (estSeanceSalle(x)) {
+      h += '<div class="row-inline exo-duree">' +
+        '<div class="field" style="flex:0 1 150px"><label for="salleDuree' + s + '">Temps à la salle</label>' +
+        '<input type="text" id="salleDuree' + s + '" class="salle-duree" data-salle="' + s +
+        '" inputmode="numeric" autocomplete="off" value="' + esc(fmtDuree(x.m || 0)) + '"></div></div>';
+    }
     if (ex.length) {
       h += '<ul class="plat-lignes">' + ex.map(function (e, i) { return ligneExercice(e, i, s); }).join("") + '</ul>';
-      if (vol > 0) h += '<p class="sub-note exo-vol">Volume total : ' + ni(vol) + ' kg soulevés.</p>';
+      var notes = [];
+      if (vol > 0) notes.push(ni(vol) + " kg soulevés");
+      if (estSeanceSalle(x)) {
+        var d = detailSalle(x, poidsA(dateCourante));
+        if (d.minCardio > 0) notes.push(fmtDuree(d.minCardio) + " de cardio pour " + ni(d.kcalCardio) + " kcal");
+        if (d.minFonte > 0) notes.push(fmtDuree(d.minFonte) + " de fonte à " + nf(d.met, 1) + " MET pour " + ni(d.kcalFonte) + " kcal");
+        if (d.trop) notes.push("les durées de cardio dépassent celle de la séance, corrige l'une ou l'autre");
+      }
+      if (notes.length) h += '<p class="sub-note exo-vol">' + esc(notes.join(" · ") + ".") + '</p>';
     }
     h += (exoSaisie && exoSaisie.i === s)
-      ? formulaireExercice()
+      ? formulaireExercice(x)
       : '<button type="button" class="lien-edit exo-ajout" data-exo-seance="' + s + '">' +
         ICONE_HALTERE + '<span>' + (ex.length ? "Ajouter un exercice" : "Détailler cette séance") + '</span></button>';
     return h + '</div>';
   }
 
-  function formulaireExercice() {
+  function exoVide(i) {
+    return { i: i, nom: "", series: "", reps: "", poids: "",
+             duree: "", dist: "", allure: "", mode: "fonte", force: 0 };
+  }
+
+  function focusFin(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.focus();
+    try { el.setSelectionRange(el.value.length, el.value.length); } catch (err) {}
+  }
+
+  /* Durée, distance et allure : deux suffisent, la troisième se déduit. On
+     recalcule celle que l'on n'a pas touchée en dernier. */
+  function majAllureExo(champModifie) {
     var e = exoSaisie;
-    var champ3 = function (id, lab, val, mode) {
-      return '<div class="field" style="flex:1 1 84px"><label for="' + id + '">' + lab + '</label>' +
-        '<input type="text" id="' + id + '" inputmode="' + mode + '" autocomplete="off" value="' + esc(val) + '"></div>';
+    if (!e) return;
+    var min = parseDuree(e.duree);
+    var km = nombre(e.dist);
+    var all = parseDuree(e.allure);
+    var pose = function (id, val) {
+      var el = document.getElementById(id);
+      if (el && document.activeElement !== el) el.value = val;
     };
-    return '<div class="exo-form">' +
+    if (champModifie !== "allure" && min > 0 && isFinite(km) && km > 0) {
+      e.allure = fmtAllure(min / km);
+      pose("exoAllure", e.allure);
+    } else if (champModifie !== "dist" && min > 0 && all > 0) {
+      e.dist = String(Math.round(min / all * 100) / 100).replace(".", ",");
+      pose("exoDist", e.dist);
+    }
+  }
+
+  function formulaireExercice(x) {
+    var e = exoSaisie;
+    var champ3 = function (id, lab, val, mode, ph) {
+      return '<div class="field" style="flex:1 1 84px"><label for="' + id + '">' + lab + '</label>' +
+        '<input type="text" id="' + id + '" inputmode="' + mode + '" autocomplete="off"' +
+        (ph ? ' placeholder="' + esc(ph) + '"' : '') + ' value="' + esc(val) + '"></div>';
+    };
+    var cardio = e.mode === "cardio";
+    return '<div class="exo-form">' + LISTE_EXOS +
       '<div class="row-inline">' +
         '<div class="field" style="flex:3 1 170px"><label for="exoNom">Machine ou exercice</label>' +
-        '<input type="text" id="exoNom" autocomplete="off" placeholder="Presse à cuisses" value="' + esc(e.nom) + '"></div>' +
+        '<input type="text" id="exoNom" list="exoListe" autocomplete="off" placeholder="Presse à cuisses" value="' + esc(e.nom) + '"></div>' +
       '</div>' +
       '<div class="row-inline" style="margin-top:9px">' +
-        champ3("exoSeries", "Séries", e.series, "numeric") +
-        champ3("exoReps", "Répétitions", e.reps, "numeric") +
-        champ3("exoPoids", "Poids (kg)", e.poids, "decimal") +
+        (cardio
+          ? champ3("exoDuree", "Durée", e.duree, "numeric", "20:00") +
+            champ3("exoDist", "Distance (km)", e.dist, "decimal", "3,2") +
+            champ3("exoAllure", "Allure (min/km)", e.allure, "numeric", "6:15")
+          : champ3("exoSeries", "Séries", e.series, "numeric", "") +
+            champ3("exoReps", "Répétitions", e.reps, "numeric", "") +
+            champ3("exoPoids", "Poids (kg)", e.poids, "decimal", "")) +
       '</div>' +
       '<div class="row-inline" style="margin-top:11px">' +
         '<button type="button" class="btn go sm" data-exo-ok="1">Ajouter</button>' +
         '<button type="button" class="btn ghost sm" data-exo-annule="1">Annuler</button>' +
+        '<button type="button" class="lien" data-exo-bascule="1">' +
+          (cardio ? "C'est de la fonte, pas du cardio" : "C'est du cardio, pas de la fonte") + '</button>' +
       '</div>' +
-      '<p class="sub-note edit-aide">Laisse le poids vide pour un exercice au poids du corps. ' +
-      'Ces lignes ne changent pas les calories de la séance, qui viennent de sa durée.</p>' +
-      '</div>';
+      '<p class="sub-note edit-aide">' +
+      (cardio
+        ? "Donne la distance ou l'allure, l'autre se calcule depuis la durée. Ces minutes sortent du temps de fonte et sont comptées à leur propre coût."
+        : "Laisse le poids vide pour un exercice au poids du corps.") +
+      (estSeanceSalle(x)
+        ? " Ce que tu notes ici fait la dépense de la séance, avec le temps passé sur place."
+        : " Ces lignes ne changent pas les calories de la séance, qui viennent de sa durée.") +
+      '</p></div>';
   }
 
   // Allures proposées, dans l'unité que Strava affiche pour chaque sport :
@@ -7841,7 +8100,11 @@ var SPORTS = [
                  : "Saisis une allure au format minutes deux-points secondes, par exemple " +
                    (type === "nage" ? "1:52 aux cent mètres." : "5:22 au kilomètre.")))
             : "Reprends les chiffres de ta montre ou de Strava : distance et durée suffisent, l'allure en découle.")
-          : "Calcul basé sur " + nf(poids, 1) + " kg. La dépense baisse à mesure que tu perds du poids."));
+          : (SPORTS[i] && SPORTS[i][4] === "salle"
+            ? "Donne le temps passé à la salle, puis détaille machine par machine sous la séance : "
+              + "la dépense se recalcule depuis ce que tu as fait. Tant que rien n'est détaillé, "
+              + "c'est l'estimation basse d'une séance de fonte."
+            : "Calcul basé sur " + nf(poids, 1) + " kg. La dépense baisse à mesure que tu perds du poids.")));
   }
 
   /* ==================== LES KILOMÈTRES DU JOUR ====================
@@ -8766,6 +9029,7 @@ var SPORTS = [
     var e = { n: SPORTS[idx][0], m: Math.round(min * 100) / 100, met: r.met, k: r.kcal };
     var kmFinal = r.mesure ? km : (r.kmh ? r.kmh * min / 60 : 0);
     if (kmFinal > 0) { e.d = Math.round(kmFinal * 100) / 100; e.est = r.mesure ? 0 : 1; }
+    recalculeSalle(e, poids);
     J().sport.push(e);
     document.getElementById("sportDist").value = "";
     Store.sauveJour(dateCourante);
@@ -8785,7 +9049,7 @@ var SPORTS = [
 
     var ouvre = e.target.closest("[data-exo-seance]");
     if (ouvre) {
-      exoSaisie = { i: +ouvre.dataset.exoSeance, nom: "", series: "", reps: "", poids: "" };
+      exoSaisie = exoVide(+ouvre.dataset.exoSeance);
       renderSport();
       var ch = document.getElementById("exoNom");
       if (ch) ch.focus();
@@ -8793,12 +9057,22 @@ var SPORTS = [
     }
     if (e.target.closest("[data-exo-annule]")) { exoSaisie = null; renderSport(); return; }
 
+    if (e.target.closest("[data-exo-bascule]") && exoSaisie) {
+      exoSaisie.mode = exoSaisie.mode === "cardio" ? "fonte" : "cardio";
+      exoSaisie.force = 1;   // choix explicite : le nom ne le défait plus
+      renderSport();
+      var cb = document.getElementById("exoNom");
+      if (cb) cb.focus();
+      return;
+    }
+
     var sup = e.target.closest("[data-del-exo]");
     if (sup) {
       var se = J().sport[+sup.dataset.delExo];
       if (se && se.ex) se.ex.splice(+sup.dataset.i, 1);
+      recalculeSalle(se, poidsA(dateCourante));
       Store.sauveJour(dateCourante);
-      renderSport();
+      renderSport(); renderBandeau(); renderAlim(); majDiag();
       return;
     }
 
@@ -8811,17 +9085,38 @@ var SPORTS = [
         var x = nombre(v);
         return (isFinite(x) && x > 0 && x <= max) ? x : 0;
       };
-      var ser = Math.round(lu(exoSaisie.series, 50));
-      var rep = Math.round(lu(exoSaisie.reps, 500));
-      var kg = Math.round(lu(exoSaisie.poids, 500) * 10) / 10;
-      if (!rep) { toast("Indique au moins un nombre de répétitions.", true); return; }
       if (!s.ex) s.ex = [];
       if (s.ex.length >= 30) { toast("Trente exercices par séance, c'est déjà beaucoup.", true); return; }
-      s.ex.push({ n: nom, s: ser || 1, r: rep, kg: kg });
+
+      var ligne, garde;
+      if (exoSaisie.mode === "cardio") {
+        var min = parseDuree(exoSaisie.duree);
+        if (!(min > 0)) { toast("Indique la durée de ce cardio, par exemple 20:00.", true); return; }
+        var km = lu(exoSaisie.dist, 200);
+        if (!km) {
+          var all = parseDuree(exoSaisie.allure);
+          if (all > 0) km = Math.round(min / all * 100) / 100;
+        }
+        ligne = { t: "cardio", n: nom, m: Math.round(min * 100) / 100, d: km };
+        garde = { duree: "", dist: "", allure: exoSaisie.allure };
+      } else {
+        var ser = Math.round(lu(exoSaisie.series, 50));
+        var rep = Math.round(lu(exoSaisie.reps, 500));
+        var kg = Math.round(lu(exoSaisie.poids, 500) * 10) / 10;
+        if (!rep) { toast("Indique au moins un nombre de répétitions.", true); return; }
+        ligne = { n: nom, s: ser || 1, r: rep, kg: kg };
+        garde = { series: String(ser || ""), reps: "", poids: String(kg || "") };
+      }
+      s.ex.push(ligne);
+      recalculeSalle(s, poidsA(dateCourante));
+
       // On garde le formulaire ouvert : on enchaîne rarement un seul exercice.
-      exoSaisie = { i: exoSaisie.i, nom: "", series: String(ser || ""), reps: "", poids: String(kg || "") };
+      var suivant = exoVide(exoSaisie.i);
+      suivant.mode = exoSaisie.mode;
+      Object.keys(garde).forEach(function (k) { suivant[k] = garde[k]; });
+      exoSaisie = suivant;
       Store.sauveJour(dateCourante);
-      renderSport();
+      renderSport(); renderBandeau(); renderAlim(); majDiag();
       var c2 = document.getElementById("exoNom");
       if (c2) c2.focus();
       toast(nom + " noté");
@@ -8829,13 +9124,38 @@ var SPORTS = [
     }
   }));
 
+  document.getElementById("sportListe").addEventListener("change", protege("durée de séance", function (e) {
+    var ch = e.target.closest(".salle-duree");
+    if (!ch) return;
+    var se = J().sport[+ch.dataset.salle];
+    if (!se) return;
+    var min = parseDuree(ch.value);
+    if (!(min > 0) || min > 600) { toast("Donne une durée, par exemple 1:05:00.", true); renderSport(); return; }
+    se.m = Math.round(min * 100) / 100;
+    recalculeSalle(se, poidsA(dateCourante));
+    Store.sauveJour(dateCourante);
+    renderSport(); renderBandeau(); renderAlim(); majDiag();
+  }));
+
   document.getElementById("sportListe").addEventListener("input", function (e) {
     if (!exoSaisie) return;
-    var id = e.target.id;
-    if (id === "exoNom") exoSaisie.nom = e.target.value;
-    else if (id === "exoSeries") exoSaisie.series = e.target.value;
-    else if (id === "exoReps") exoSaisie.reps = e.target.value;
-    else if (id === "exoPoids") exoSaisie.poids = e.target.value;
+    var id = e.target.id, v = e.target.value;
+    if (id === "exoNom") {
+      exoSaisie.nom = v;
+      // Taper « Tapis de course » bascule le formulaire sans rien demander,
+      // sauf si on a déjà choisi le mode à la main.
+      if (!exoSaisie.force) {
+        var voulu = cardioSalle(v.trim()) ? "cardio" : "fonte";
+        if (voulu !== exoSaisie.mode) { exoSaisie.mode = voulu; renderSport(); focusFin("exoNom"); }
+      }
+      return;
+    }
+    if (id === "exoSeries") exoSaisie.series = v;
+    else if (id === "exoReps") exoSaisie.reps = v;
+    else if (id === "exoPoids") exoSaisie.poids = v;
+    else if (id === "exoDuree") { exoSaisie.duree = v; majAllureExo("duree"); }
+    else if (id === "exoDist") { exoSaisie.dist = v; majAllureExo("dist"); }
+    else if (id === "exoAllure") { exoSaisie.allure = v; majAllureExo("allure"); }
   });
 
   /* --- export --- */
@@ -8898,7 +9218,7 @@ var SPORTS = [
   document.getElementById("nbAliments").textContent = ALIMENTS.length;
 
   var groupes = {};
-  SPORTS.forEach(function (s, i) { (groupes[s[2]] = groupes[s[2]] || []).push(i); });
+  SPORTS.forEach(function (s, i) { if (s[4] !== "masque") (groupes[s[2]] = groupes[s[2]] || []).push(i); });
   var LIB = { cardio: "Cardio", renfo: "Renforcement", souplesse: "Souplesse", "sport co": "Sports collectifs", raquette: "Raquettes", combat: "Sports de combat", autre: "Autres", quotidien: "Vie courante" };
   document.getElementById("sportSel").innerHTML = Object.keys(groupes).map(function (g) {
     return '<optgroup label="' + esc(LIB[g] || g) + '">' + groupes[g].map(function (i) {
