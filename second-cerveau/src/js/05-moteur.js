@@ -222,6 +222,24 @@ document.addEventListener("click", function (ev) {
       });
       supprimerCollDoc(d.id); ICI.collEdit = null; journal("Collection « " + cn + " » supprimée."); break;
 
+    case "ouvrir-insta":
+      if (!it || !lienAppli(it)) break;
+      var profond = lienAppli(it);
+      var montrer = function (copie) {
+        var n = $("#notice");
+        // Une fiche ouverte passe au-dessus de tout : le message doit vivre dedans.
+        (document.querySelector("dialog[open]") || document.body).appendChild(n);
+        n.innerHTML = '<div class="notice-t"><b>' + (copie ? "Lien copié." : "Copie ce lien :") + '</b> Ouvre <b>Safari</b>, colle-le dans la barre d\'adresse, touche <b>Aller</b>, puis <b>Ouvrir</b> : Instagram s\'ouvre sur ce Reel.</div>' +
+          '<input type="text" id="noticeLien" readonly value="' + esc(profond) + '" aria-label="Lien vers le Reel dans Instagram">' +
+          '<button type="button" class="btn ghost sm" data-action="fermer-notice">OK</button>';
+        n.hidden = false;
+        if (!copie) { var c = $("#noticeLien"); c.focus(); c.select(); }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(profond).then(function () { montrer(true); }, function () { montrer(false); });
+      } else montrer(false);
+      break;
+    case "fermer-notice": $("#notice").hidden = true; break;
     case "copier-lien":
       if (!it || !it.url) break;
       var lien = it.url;

@@ -296,6 +296,9 @@ function lienAppli(it) {
 }
 function lienOrig(it, classe) {
   if (!it.url) return "";
+  // Instagram : l'appli Claude laisse Instagram détourner les liens web vers un
+  // Reel au hasard. On copie le lien instagram://media?id=… à coller dans Safari.
+  if (lienAppli(it)) return '<button type="button" class="' + (classe || "lien-orig") + '" data-action="ouvrir-insta" data-id="' + esc(it.id) + '">Ouvrir ↗</button>';
   return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
 }
 function badgePlat(it) {

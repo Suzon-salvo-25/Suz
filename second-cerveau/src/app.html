@@ -620,6 +620,16 @@ body.selection .fab { display: none; }
   max-width: min(440px, calc(100vw - 32px)); text-align: center;
 }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
+.notice {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 70;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(460px, calc(100vw - 24px)); display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  background: var(--ink); color: var(--ground); border-radius: 18px; padding: 14px 16px;
+  box-shadow: 0 10px 34px rgba(61,31,20,.35); font-size: .9rem; line-height: 1.45;
+}
+.notice-t { flex-basis: 100%; }
+.notice input { flex: 1 1 200px; height: 38px; background: var(--ground); color: var(--ink); border-color: transparent; font-size: .8rem; }
+.notice .btn { background: var(--peche); color: var(--ink); border: 0; }
 .toast.bad { background: var(--crit); color: #fff; }
 
 .foot { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 18px; font-size: .82rem; color: var(--ink-faint); line-height: 1.5; }
@@ -736,6 +746,7 @@ body.selection .fab { display: none; }
 <dialog class="feuille" id="ajout" aria-labelledby="ajoutTitre"></dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="notice" id="notice" role="status" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>

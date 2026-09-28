@@ -23,7 +23,8 @@ function ficheHTML(it) {
     (it.resume ? '<p class="resume">' + esc(it.resume) + '</p>' : "") +
     (it.demo ? '<p class="aide" style="margin-top:10px">Exemple de démonstration : il ne correspond à aucune publication réelle.</p>' : "") +
     '<div class="fiche-actions">' +
-      (it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">' + (codeInstagram(it) ? "Voir le Reel ↗" : "Ouvrir sur " + esc(nomPlat(it.plateforme)) + " ↗") + '</a>' : "") +
+      (lienAppli(it) ? '<button type="button" class="btn go sm" data-action="ouvrir-insta" data-id="' + esc(it.id) + '">Ouvrir dans Instagram</button>'
+        : it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir sur ' + esc(nomPlat(it.plateforme)) + ' ↗</a>' : "") +
       (it.url ? '<button type="button" class="btn ghost sm" data-action="copier-lien" data-id="' + esc(it.id) + '">Copier le lien</button>' : "") +
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +
       (ICI.ficheTitre ? "" : '<button type="button" class="btn ghost sm" data-action="edit-titre">Renommer</button>') +
