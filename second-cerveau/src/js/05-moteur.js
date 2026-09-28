@@ -33,7 +33,7 @@ function avecFocus(racineEl, fn) {
   }
 }
 
-var VUES = { accueil: vueAccueil, recettes: vueRecettes, tout: vueTout, categories: vueCategories, reglages: vueReglages };
+var VUES = { accueil: vueAccueil, recettes: vueRecettes, collections: vueCollections, tout: vueTout, categories: vueCategories, reglages: vueReglages };
 
 function banniereAnalyse() {
   var b = $("#banniere");
@@ -97,20 +97,22 @@ function rendre() {
   outils.style.visibility = "";
   if (!Store.reg.onboarde) {
     tabs.hidden = true; fab.hidden = true;
-    $("#ajoutBtn").hidden = true; $("#reglagesBtn").hidden = true;
+    $("#ajoutBtn").hidden = true; $("#reglagesBtn").hidden = true; $("#catBtn").hidden = true;
     $("#banniere").innerHTML = "";
     avecFocus(vue, function () { vue.innerHTML = vueOnboarding(); });
     return;
   }
   tabs.hidden = false; fab.hidden = false;
-  $("#ajoutBtn").hidden = false; $("#reglagesBtn").hidden = false;
+  $("#ajoutBtn").hidden = false; $("#reglagesBtn").hidden = false; $("#catBtn").hidden = false;
   $("#brandSub").textContent = Store.reg.prenom ? "Le second cerveau de " + Store.reg.prenom : "Second cerveau · Instagram & TikTok";
   var items = tousItems();
-  $("#nbTout").textContent = items.length || "";
+  var nbColl = Object.keys(Store.colls).length;
+  $("#nbColl").textContent = nbColl || "";
   var nr = items.filter(estRecette).length;
   $("#nbRec").textContent = nr || "";
   $$("#tabs .tab").forEach(function (t) { t.setAttribute("aria-selected", String(t.getAttribute("data-vue") === ICI.vue)); });
   $("#reglagesBtn").setAttribute("aria-pressed", String(ICI.vue === "reglages"));
+  $("#catBtn").setAttribute("aria-pressed", String(ICI.vue === "categories"));
   banniereAnalyse();
   avecFocus(vue, function () { vue.innerHTML = (VUES[ICI.vue] || vueAccueil)(); });
   barreSelection();
@@ -172,6 +174,7 @@ document.addEventListener("click", function (ev) {
     case "voir-coll": voirTout({ coll: d.id }); break;
     case "voir-acompleter": voirTout({ acompleter: true }); break;
     case "voir-favoris": voirTout({ fav: true }); break;
+    case "voir-tout": voirTout({}); break;
 
     case "filtre-rec":
       var f = ICI.rec.filtres, i = f.indexOf(d.f);
@@ -513,6 +516,7 @@ document.addEventListener("paste", function (ev) {
 
 $$("#tabs .tab").forEach(function (t) { t.addEventListener("click", function () { allerA(t.getAttribute("data-vue")); }); });
 $("#reglagesBtn").addEventListener("click", function () { allerA(ICI.vue === "reglages" ? "accueil" : "reglages"); });
+$("#catBtn").addEventListener("click", function () { allerA(ICI.vue === "categories" ? "accueil" : "categories"); });
 $("#ajoutBtn").addEventListener("click", function () { ouvrirAjout("liens"); });
 $("#fab").addEventListener("click", function () { ouvrirAjout("liens"); });
 $("#fiche").addEventListener("close", function () { ICI.fiche = null; ICI.ficheConfirm = false; ICI.ficheTitre = false; });

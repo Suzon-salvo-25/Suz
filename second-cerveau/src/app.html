@@ -205,7 +205,7 @@ a { color: inherit; }
 
 /* ---------- onglets ---------- */
 .tabs {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 4px; margin-bottom: 26px; padding: 4px;
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
 }
@@ -380,6 +380,38 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
 body.selection .coche { display: grid; }
 .pep.choisi { box-shadow: 0 0 0 3px var(--peche), var(--shadow-lg); }
 .pep.choisi .coche { background: var(--peche); color: var(--ink); }
+
+/* ---------- rangée compacte (accueil) ---------- */
+.rangee {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 150px; gap: 12px;
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity;
+  margin-inline: -18px; padding: 2px 18px 10px; scrollbar-width: none;
+}
+.rangee::-webkit-scrollbar { display: none; }
+.rangee .pep { margin: 0; scroll-snap-align: start; }
+.rangee .pep:hover { transform: none; }
+.rangee .pep-vis { aspect-ratio: 1 / 1 !important; }
+.rangee .pep-vis .illu { width: 40%; height: 40%; }
+.rangee .pep-vis .etat { top: 6px; right: 6px; font-size: 9px; padding: 1px 7px; }
+.rangee .pep-corps { padding: 8px 10px 2px; }
+.rangee .pep h3 { font-size: .86rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rangee .pep .cats { font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rangee .pep-pied { padding: 4px 10px 8px; gap: 6px; }
+.rangee .pep-pied .qui { display: none; }
+.rangee .lien-orig { padding: 2px 8px; font-size: .72rem; }
+
+/* ---------- collections ---------- */
+.colls { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.coll {
+  display: flex; flex-direction: column; text-align: left; padding: 0; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow);
+}
+.coll .couv { display: grid; place-items: center; aspect-ratio: 4 / 3; background: var(--teinte, var(--panel-2)); overflow: hidden; }
+.coll .couv img { width: 100%; height: 100%; object-fit: cover; }
+.coll .couv .illu { width: 42%; height: 42%; }
+.coll-nom { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 2px; }
+.coll-nom h3 { font-size: 1rem; }
+.coll-nom .n { font-size: .8rem; color: var(--ink-faint); }
 
 /* ---------- barre de filtres ---------- */
 .filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
@@ -609,6 +641,8 @@ body.selection .fab { display: none; }
   .pep-pied .qui { flex-basis: calc(100% - 70px); }
   .pep h3 { font-size: .92rem; }
   .univers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .rangee { grid-auto-columns: 132px; gap: 10px; }
+  .colls { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .histo li { grid-template-columns: 1fr; gap: 2px; }
   .card .body { padding: 15px; }
   .fab { padding: 13px 17px; }
@@ -634,6 +668,9 @@ body.selection .fab { display: none; }
       <button type="button" class="icon-btn" id="ajoutBtn" aria-label="Ajouter un contenu" title="Ajouter un contenu">
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       </button>
+      <button type="button" class="icon-btn" id="catBtn" aria-label="Catégories" title="Catégories" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
+      </button>
       <button type="button" class="icon-btn" id="themeBtn" aria-label="Changer de thème" title="Changer de thème">
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 3.6a8.4 8.4 0 0 1 0 16.8z" fill="currentColor"/></svg>
       </button>
@@ -646,8 +683,7 @@ body.selection .fab { display: none; }
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button type="button" class="tab" role="tab" data-vue="accueil" aria-selected="true"><span class="txt">Accueil</span></button>
     <button type="button" class="tab" role="tab" data-vue="recettes" aria-selected="false"><span class="txt">Recettes</span><span class="compte" id="nbRec"></span></button>
-    <button type="button" class="tab" role="tab" data-vue="tout" aria-selected="false"><span class="txt">Tout</span><span class="compte" id="nbTout"></span></button>
-    <button type="button" class="tab" role="tab" data-vue="categories" aria-selected="false"><span class="txt">Catégories</span></button>
+    <button type="button" class="tab" role="tab" data-vue="collections" aria-selected="false"><span class="txt">Collections</span><span class="compte" id="nbColl"></span></button>
   </nav>
 
   <div id="banniere"></div>

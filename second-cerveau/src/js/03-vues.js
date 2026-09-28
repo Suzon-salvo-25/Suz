@@ -316,6 +316,11 @@ function carte(it) {
     '<div class="pep-pied">' + badgePlat(it) + '<span class="qui">' + (it.createur ? "@" + esc(it.createur.replace(/^@/, "")) : "") + '</span>' + lienOrig(it) + '</div>' +
   '</article>';
 }
+// Une ligne de petites vignettes qui défile de côté : l'accueil reste compact.
+function rangee(liste) {
+  if (!liste.length) return "";
+  return '<div class="rangee">' + liste.map(carte).join("") + '</div>';
+}
 function mur(liste) {
   if (!liste.length) return "";
   return '<div class="mur">' + liste.map(carte).join("") + '</div>';
@@ -378,10 +383,10 @@ function vueAccueil() {
   h += '</div>';
 
   var rec = recents(items).slice(0, 12);
-  h += '<div class="titre-sec"><h2>Ajoutés récemment</h2><button type="button" class="lien" data-action="vue" data-vue="tout">Tout voir</button></div>' + mur(rec);
+  h += '<div class="titre-sec"><h2>Ajoutés récemment</h2><button type="button" class="lien" data-action="voir-tout">Tout voir</button></div>' + rangee(rec);
 
   var favs = recents(items.filter(function (it) { return it.favori; })).slice(0, 8);
-  if (favs.length) h += '<div class="titre-sec"><h2>Mes favoris</h2><button type="button" class="lien" data-action="voir-favoris">Tous les favoris</button></div>' + mur(favs);
+  if (favs.length) h += '<div class="titre-sec"><h2>Mes favoris</h2><button type="button" class="lien" data-action="voir-favoris">Tous les favoris</button></div>' + rangee(favs);
   return h;
 }
 
@@ -531,7 +536,12 @@ function vueTout() {
   var listeCreateurs = Object.keys(createurs).sort(function (a, b) { return createurs[b] - createurs[a] || a.localeCompare(b); }).slice(0, 300);
   var colls = Object.keys(Store.colls).map(function (k) { return Store.colls[k]; }).sort(function (a, b) { return a.nom.localeCompare(b.nom, "fr"); });
 
-  var h = '<div class="filtres">' +
+  var titre = t.coll && Store.colls[t.coll] ? Store.colls[t.coll].nom
+    : t.cat === "__non" ? "Non classés"
+    : t.cat && Store.cats[t.cat] ? (Store.cats[t.cat].parent && Store.cats[Store.cats[t.cat].parent] ? Store.cats[Store.cats[t.cat].parent].nom + " › " : "") + Store.cats[t.cat].nom
+    : t.fav ? "Mes favoris" : t.acompleter ? "À compléter" : "Toutes mes pépites";
+  var h = '<div class="titre-sec" style="margin-top:0"><h2>' + esc(titre) + '</h2><button type="button" class="lien" data-action="vue" data-vue="' + (t.coll ? "collections" : "accueil") + '">‹ Retour</button></div>' +
+    '<div class="filtres">' +
     '<input type="text" id="toutTexte" autocomplete="off" aria-label="Filtrer par mots" placeholder="Filtrer par mots…" value="' + esc(t.texte) + '">' +
     '<select id="fPlat" aria-label="Plateforme"><option value="">Toutes les plateformes</option>' + options(Object.keys(plats).map(function (k) { return [k, nomPlat(k)]; }), t.plat) + '</select>' +
     '<select id="fCat" aria-label="Catégorie"><option value="">Toutes les catégories</option>' + optionsCats(t.cat, true) + '</select>' +
@@ -612,7 +622,8 @@ function blocEditionCat(e) {
 
 function vueCategories() {
   var e = ICI.catEdit;
-  var h = '<div class="card"><header><span class="tache t-lavande b3"><span class="illu st-coquillage" aria-hidden="true"></span></span><h2>Mes catégories</h2>' +
+  var h = '<div class="titre-sec" style="margin-top:0"><h2>Catégories</h2><button type="button" class="lien" data-action="vue" data-vue="accueil">‹ Retour</button></div>' +
+    '<div class="card"><header><span class="tache t-lavande b3"><span class="illu st-coquillage" aria-hidden="true"></span></span><h2>Mes catégories</h2>' +
     '<button type="button" class="btn go sm" data-action="cat-mode" data-mode="nouvelle">Nouvelle catégorie</button></header><div class="body tight">';
   if (e && e.mode === "nouvelle") h += blocEditionCat(e);
   parents().forEach(function (p, i) {
@@ -633,9 +644,27 @@ function vueCategories() {
   });
   h += '</div></div>';
 
+  return h;
+}
+
+function couverture(c) {
+  var avec = recents(tousItems().filter(function (it) { return (it.collections || []).indexOf(c.id) >= 0 && it.vignette; }))[0];
+  return avec ? '<span class="couv"><img src="' + esc(avec.vignette) + '" alt=""></span>'
+    : '<span class="couv t-rose"><span class="illu st-noeud" aria-hidden="true"></span></span>';
+}
+
+function vueCollections() {
   var colls = Object.keys(Store.colls).map(function (k) { return Store.colls[k]; }).sort(function (a, b) { return a.nom.localeCompare(b.nom, "fr"); });
   var ce = ICI.collEdit;
-  h += '<div class="card"><header><span class="tache t-rose b2"><span class="illu st-noeud" aria-hidden="true"></span></span><h2>Mes collections</h2><span class="hint">Tes sélections, à la main</span></header><div class="body tight">';
+  var h = '';
+  if (colls.length) {
+    h += '<div class="colls">' + colls.map(function (c) {
+      var n = tousItems().filter(function (it) { return (it.collections || []).indexOf(c.id) >= 0; }).length;
+      return '<button type="button" class="coll" data-action="voir-coll" data-id="' + esc(c.id) + '">' + couverture(c) +
+        '<span class="coll-nom"><h3>' + esc(c.nom) + '</h3><span class="n">' + pluriel(n, "pépite") + '</span></span></button>';
+    }).join("") + '</div>';
+  }
+  h += '<div class="card"' + (colls.length ? ' style="margin-top:22px"' : "") + '><header><span class="tache t-rose b2"><span class="illu st-noeud" aria-hidden="true"></span></span><h2>' + (colls.length ? "Gérer mes collections" : "Mes collections") + '</h2><span class="hint">Tes sélections, à la main</span></header><div class="body tight">';
   colls.forEach(function (c) {
     var n = tousItems().filter(function (it) { return (it.collections || []).indexOf(c.id) >= 0; }).length;
     h += '<div class="cat-ligne"><div class="nom"><h3>' + esc(c.nom) + '</h3><p>' + pluriel(n, "contenu") + '</p></div><div class="actions">' +
@@ -653,7 +682,7 @@ function vueCategories() {
   });
   h += '<form class="edit-bloc" data-form="coll-creer" style="border-bottom:0"><div class="field"><label for="collNouveau">Nouvelle collection</label>' +
     '<input type="text" id="collNouveau" maxlength="50" autocomplete="off" placeholder="Ex. Week-end à Lisbonne"></div><button type="submit" class="btn go">Créer</button></form>';
-  if (!colls.length) h += '<p class="aide" style="padding:0 18px 16px">Une collection regroupe des pépites de toutes catégories : un voyage, un dîner à préparer, une liste d\'envies. Ajoute-les depuis une fiche ou par sélection dans « Tout ».</p>';
+  if (!colls.length) h += '<p class="aide" style="padding:0 18px 16px">Une collection regroupe des pépites de toutes catégories : un voyage, un dîner à préparer, une liste d\'envies. Crée-en une ici, puis ajoute des pépites depuis leur fiche (« Ajouter à une collection »).</p>';
   h += '</div></div>';
   return h;
 }

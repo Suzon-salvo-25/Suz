@@ -217,7 +217,7 @@ a { color: inherit; }
 
 /* ---------- onglets ---------- */
 .tabs {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 4px; margin-bottom: 26px; padding: 4px;
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
 }
@@ -392,6 +392,38 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
 body.selection .coche { display: grid; }
 .pep.choisi { box-shadow: 0 0 0 3px var(--peche), var(--shadow-lg); }
 .pep.choisi .coche { background: var(--peche); color: var(--ink); }
+
+/* ---------- rangée compacte (accueil) ---------- */
+.rangee {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 150px; gap: 12px;
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity;
+  margin-inline: -18px; padding: 2px 18px 10px; scrollbar-width: none;
+}
+.rangee::-webkit-scrollbar { display: none; }
+.rangee .pep { margin: 0; scroll-snap-align: start; }
+.rangee .pep:hover { transform: none; }
+.rangee .pep-vis { aspect-ratio: 1 / 1 !important; }
+.rangee .pep-vis .illu { width: 40%; height: 40%; }
+.rangee .pep-vis .etat { top: 6px; right: 6px; font-size: 9px; padding: 1px 7px; }
+.rangee .pep-corps { padding: 8px 10px 2px; }
+.rangee .pep h3 { font-size: .86rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rangee .pep .cats { font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rangee .pep-pied { padding: 4px 10px 8px; gap: 6px; }
+.rangee .pep-pied .qui { display: none; }
+.rangee .lien-orig { padding: 2px 8px; font-size: .72rem; }
+
+/* ---------- collections ---------- */
+.colls { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.coll {
+  display: flex; flex-direction: column; text-align: left; padding: 0; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow);
+}
+.coll .couv { display: grid; place-items: center; aspect-ratio: 4 / 3; background: var(--teinte, var(--panel-2)); overflow: hidden; }
+.coll .couv img { width: 100%; height: 100%; object-fit: cover; }
+.coll .couv .illu { width: 42%; height: 42%; }
+.coll-nom { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 2px; }
+.coll-nom h3 { font-size: 1rem; }
+.coll-nom .n { font-size: .8rem; color: var(--ink-faint); }
 
 /* ---------- barre de filtres ---------- */
 .filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
@@ -621,6 +653,8 @@ body.selection .fab { display: none; }
   .pep-pied .qui { flex-basis: calc(100% - 70px); }
   .pep h3 { font-size: .92rem; }
   .univers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .rangee { grid-auto-columns: 132px; gap: 10px; }
+  .colls { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .histo li { grid-template-columns: 1fr; gap: 2px; }
   .card .body { padding: 15px; }
   .fab { padding: 13px 17px; }
@@ -668,6 +702,9 @@ body.selection .fab { display: none; }
       <button type="button" class="icon-btn" id="ajoutBtn" aria-label="Ajouter un contenu" title="Ajouter un contenu">
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       </button>
+      <button type="button" class="icon-btn" id="catBtn" aria-label="Catégories" title="Catégories" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
+      </button>
       <button type="button" class="icon-btn" id="themeBtn" aria-label="Changer de thème" title="Changer de thème">
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 3.6a8.4 8.4 0 0 1 0 16.8z" fill="currentColor"/></svg>
       </button>
@@ -680,8 +717,7 @@ body.selection .fab { display: none; }
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button type="button" class="tab" role="tab" data-vue="accueil" aria-selected="true"><span class="txt">Accueil</span></button>
     <button type="button" class="tab" role="tab" data-vue="recettes" aria-selected="false"><span class="txt">Recettes</span><span class="compte" id="nbRec"></span></button>
-    <button type="button" class="tab" role="tab" data-vue="tout" aria-selected="false"><span class="txt">Tout</span><span class="compte" id="nbTout"></span></button>
-    <button type="button" class="tab" role="tab" data-vue="categories" aria-selected="false"><span class="txt">Catégories</span></button>
+    <button type="button" class="tab" role="tab" data-vue="collections" aria-selected="false"><span class="txt">Collections</span><span class="compte" id="nbColl"></span></button>
   </nav>
 
   <div id="banniere"></div>
@@ -2179,6 +2215,11 @@ function carte(it) {
     '<div class="pep-pied">' + badgePlat(it) + '<span class="qui">' + (it.createur ? "@" + esc(it.createur.replace(/^@/, "")) : "") + '</span>' + lienOrig(it) + '</div>' +
   '</article>';
 }
+// Une ligne de petites vignettes qui défile de côté : l'accueil reste compact.
+function rangee(liste) {
+  if (!liste.length) return "";
+  return '<div class="rangee">' + liste.map(carte).join("") + '</div>';
+}
 function mur(liste) {
   if (!liste.length) return "";
   return '<div class="mur">' + liste.map(carte).join("") + '</div>';
@@ -2241,10 +2282,10 @@ function vueAccueil() {
   h += '</div>';
 
   var rec = recents(items).slice(0, 12);
-  h += '<div class="titre-sec"><h2>Ajoutés récemment</h2><button type="button" class="lien" data-action="vue" data-vue="tout">Tout voir</button></div>' + mur(rec);
+  h += '<div class="titre-sec"><h2>Ajoutés récemment</h2><button type="button" class="lien" data-action="voir-tout">Tout voir</button></div>' + rangee(rec);
 
   var favs = recents(items.filter(function (it) { return it.favori; })).slice(0, 8);
-  if (favs.length) h += '<div class="titre-sec"><h2>Mes favoris</h2><button type="button" class="lien" data-action="voir-favoris">Tous les favoris</button></div>' + mur(favs);
+  if (favs.length) h += '<div class="titre-sec"><h2>Mes favoris</h2><button type="button" class="lien" data-action="voir-favoris">Tous les favoris</button></div>' + rangee(favs);
   return h;
 }
 
@@ -2394,7 +2435,12 @@ function vueTout() {
   var listeCreateurs = Object.keys(createurs).sort(function (a, b) { return createurs[b] - createurs[a] || a.localeCompare(b); }).slice(0, 300);
   var colls = Object.keys(Store.colls).map(function (k) { return Store.colls[k]; }).sort(function (a, b) { return a.nom.localeCompare(b.nom, "fr"); });
 
-  var h = '<div class="filtres">' +
+  var titre = t.coll && Store.colls[t.coll] ? Store.colls[t.coll].nom
+    : t.cat === "__non" ? "Non classés"
+    : t.cat && Store.cats[t.cat] ? (Store.cats[t.cat].parent && Store.cats[Store.cats[t.cat].parent] ? Store.cats[Store.cats[t.cat].parent].nom + " › " : "") + Store.cats[t.cat].nom
+    : t.fav ? "Mes favoris" : t.acompleter ? "À compléter" : "Toutes mes pépites";
+  var h = '<div class="titre-sec" style="margin-top:0"><h2>' + esc(titre) + '</h2><button type="button" class="lien" data-action="vue" data-vue="' + (t.coll ? "collections" : "accueil") + '">‹ Retour</button></div>' +
+    '<div class="filtres">' +
     '<input type="text" id="toutTexte" autocomplete="off" aria-label="Filtrer par mots" placeholder="Filtrer par mots…" value="' + esc(t.texte) + '">' +
     '<select id="fPlat" aria-label="Plateforme"><option value="">Toutes les plateformes</option>' + options(Object.keys(plats).map(function (k) { return [k, nomPlat(k)]; }), t.plat) + '</select>' +
     '<select id="fCat" aria-label="Catégorie"><option value="">Toutes les catégories</option>' + optionsCats(t.cat, true) + '</select>' +
@@ -2475,7 +2521,8 @@ function blocEditionCat(e) {
 
 function vueCategories() {
   var e = ICI.catEdit;
-  var h = '<div class="card"><header><span class="tache t-lavande b3"><span class="illu st-coquillage" aria-hidden="true"></span></span><h2>Mes catégories</h2>' +
+  var h = '<div class="titre-sec" style="margin-top:0"><h2>Catégories</h2><button type="button" class="lien" data-action="vue" data-vue="accueil">‹ Retour</button></div>' +
+    '<div class="card"><header><span class="tache t-lavande b3"><span class="illu st-coquillage" aria-hidden="true"></span></span><h2>Mes catégories</h2>' +
     '<button type="button" class="btn go sm" data-action="cat-mode" data-mode="nouvelle">Nouvelle catégorie</button></header><div class="body tight">';
   if (e && e.mode === "nouvelle") h += blocEditionCat(e);
   parents().forEach(function (p, i) {
@@ -2496,9 +2543,27 @@ function vueCategories() {
   });
   h += '</div></div>';
 
+  return h;
+}
+
+function couverture(c) {
+  var avec = recents(tousItems().filter(function (it) { return (it.collections || []).indexOf(c.id) >= 0 && it.vignette; }))[0];
+  return avec ? '<span class="couv"><img src="' + esc(avec.vignette) + '" alt=""></span>'
+    : '<span class="couv t-rose"><span class="illu st-noeud" aria-hidden="true"></span></span>';
+}
+
+function vueCollections() {
   var colls = Object.keys(Store.colls).map(function (k) { return Store.colls[k]; }).sort(function (a, b) { return a.nom.localeCompare(b.nom, "fr"); });
   var ce = ICI.collEdit;
-  h += '<div class="card"><header><span class="tache t-rose b2"><span class="illu st-noeud" aria-hidden="true"></span></span><h2>Mes collections</h2><span class="hint">Tes sélections, à la main</span></header><div class="body tight">';
+  var h = '';
+  if (colls.length) {
+    h += '<div class="colls">' + colls.map(function (c) {
+      var n = tousItems().filter(function (it) { return (it.collections || []).indexOf(c.id) >= 0; }).length;
+      return '<button type="button" class="coll" data-action="voir-coll" data-id="' + esc(c.id) + '">' + couverture(c) +
+        '<span class="coll-nom"><h3>' + esc(c.nom) + '</h3><span class="n">' + pluriel(n, "pépite") + '</span></span></button>';
+    }).join("") + '</div>';
+  }
+  h += '<div class="card"' + (colls.length ? ' style="margin-top:22px"' : "") + '><header><span class="tache t-rose b2"><span class="illu st-noeud" aria-hidden="true"></span></span><h2>' + (colls.length ? "Gérer mes collections" : "Mes collections") + '</h2><span class="hint">Tes sélections, à la main</span></header><div class="body tight">';
   colls.forEach(function (c) {
     var n = tousItems().filter(function (it) { return (it.collections || []).indexOf(c.id) >= 0; }).length;
     h += '<div class="cat-ligne"><div class="nom"><h3>' + esc(c.nom) + '</h3><p>' + pluriel(n, "contenu") + '</p></div><div class="actions">' +
@@ -2516,7 +2581,7 @@ function vueCategories() {
   });
   h += '<form class="edit-bloc" data-form="coll-creer" style="border-bottom:0"><div class="field"><label for="collNouveau">Nouvelle collection</label>' +
     '<input type="text" id="collNouveau" maxlength="50" autocomplete="off" placeholder="Ex. Week-end à Lisbonne"></div><button type="submit" class="btn go">Créer</button></form>';
-  if (!colls.length) h += '<p class="aide" style="padding:0 18px 16px">Une collection regroupe des pépites de toutes catégories : un voyage, un dîner à préparer, une liste d\'envies. Ajoute-les depuis une fiche ou par sélection dans « Tout ».</p>';
+  if (!colls.length) h += '<p class="aide" style="padding:0 18px 16px">Une collection regroupe des pépites de toutes catégories : un voyage, un dîner à préparer, une liste d\'envies. Crée-en une ici, puis ajoute des pépites depuis leur fiche (« Ajouter à une collection »).</p>';
   h += '</div></div>';
   return h;
 }
@@ -3376,7 +3441,7 @@ function avecFocus(racineEl, fn) {
   }
 }
 
-var VUES = { accueil: vueAccueil, recettes: vueRecettes, tout: vueTout, categories: vueCategories, reglages: vueReglages };
+var VUES = { accueil: vueAccueil, recettes: vueRecettes, collections: vueCollections, tout: vueTout, categories: vueCategories, reglages: vueReglages };
 
 function banniereAnalyse() {
   var b = $("#banniere");
@@ -3440,20 +3505,22 @@ function rendre() {
   outils.style.visibility = "";
   if (!Store.reg.onboarde) {
     tabs.hidden = true; fab.hidden = true;
-    $("#ajoutBtn").hidden = true; $("#reglagesBtn").hidden = true;
+    $("#ajoutBtn").hidden = true; $("#reglagesBtn").hidden = true; $("#catBtn").hidden = true;
     $("#banniere").innerHTML = "";
     avecFocus(vue, function () { vue.innerHTML = vueOnboarding(); });
     return;
   }
   tabs.hidden = false; fab.hidden = false;
-  $("#ajoutBtn").hidden = false; $("#reglagesBtn").hidden = false;
+  $("#ajoutBtn").hidden = false; $("#reglagesBtn").hidden = false; $("#catBtn").hidden = false;
   $("#brandSub").textContent = Store.reg.prenom ? "Le second cerveau de " + Store.reg.prenom : "Second cerveau · Instagram & TikTok";
   var items = tousItems();
-  $("#nbTout").textContent = items.length || "";
+  var nbColl = Object.keys(Store.colls).length;
+  $("#nbColl").textContent = nbColl || "";
   var nr = items.filter(estRecette).length;
   $("#nbRec").textContent = nr || "";
   $$("#tabs .tab").forEach(function (t) { t.setAttribute("aria-selected", String(t.getAttribute("data-vue") === ICI.vue)); });
   $("#reglagesBtn").setAttribute("aria-pressed", String(ICI.vue === "reglages"));
+  $("#catBtn").setAttribute("aria-pressed", String(ICI.vue === "categories"));
   banniereAnalyse();
   avecFocus(vue, function () { vue.innerHTML = (VUES[ICI.vue] || vueAccueil)(); });
   barreSelection();
@@ -3515,6 +3582,7 @@ document.addEventListener("click", function (ev) {
     case "voir-coll": voirTout({ coll: d.id }); break;
     case "voir-acompleter": voirTout({ acompleter: true }); break;
     case "voir-favoris": voirTout({ fav: true }); break;
+    case "voir-tout": voirTout({}); break;
 
     case "filtre-rec":
       var f = ICI.rec.filtres, i = f.indexOf(d.f);
@@ -3856,6 +3924,7 @@ document.addEventListener("paste", function (ev) {
 
 $$("#tabs .tab").forEach(function (t) { t.addEventListener("click", function () { allerA(t.getAttribute("data-vue")); }); });
 $("#reglagesBtn").addEventListener("click", function () { allerA(ICI.vue === "reglages" ? "accueil" : "reglages"); });
+$("#catBtn").addEventListener("click", function () { allerA(ICI.vue === "categories" ? "accueil" : "categories"); });
 $("#ajoutBtn").addEventListener("click", function () { ouvrirAjout("liens"); });
 $("#fab").addEventListener("click", function () { ouvrirAjout("liens"); });
 $("#fiche").addEventListener("close", function () { ICI.fiche = null; ICI.ficheConfirm = false; ICI.ficheTitre = false; });
