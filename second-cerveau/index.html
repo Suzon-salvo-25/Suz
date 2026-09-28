@@ -2857,6 +2857,7 @@ function ficheHTML(it) {
         : it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">' +
           (it.conseil || it.source === "conseil" ? (it.plateforme === "youtube" ? "Voir la vidéo ↗" : "Voir la recette d'origine ↗") : "Ouvrir sur " + esc(nomPlat(it.plateforme)) + " ↗") + '</a>' : "") +
       (it.url ? '<button type="button" class="btn ghost sm" data-action="copier-lien" data-id="' + esc(it.id) + '">Copier le lien</button>' : "") +
+      '<a class="btn ghost sm" href="' + esc(lienGoogle(it)) + '" target="_blank" rel="noopener noreferrer">Chercher sur Google ↗</a>' +
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +
       (ICI.ficheTitre ? "" : '<button type="button" class="btn ghost sm" data-action="edit-titre">Renommer</button>') +
       (iaDispo() ? '<button type="button" class="btn ghost sm" data-action="reanalyser" data-id="' + esc(it.id) + '">' + (IA.file.indexOf(it.id) >= 0 ? "Analyse en cours…" : "Réanalyser avec Claude") + '</button>' : "") +
@@ -2999,6 +3000,15 @@ function ficheHTML(it) {
       '<div class="boutons"><button type="button" class="btn danger sm" data-action="retirer-item" data-id="' + esc(it.id) + '">Retirer</button><button type="button" class="btn ghost sm" data-action="annuler-retrait">Annuler</button></div></div>'
     : '<div><button type="button" class="btn ghost sm" data-action="demander-retrait">Retirer de l\'appli</button></div>';
   return h + '</div>';
+}
+
+// Recherche Google adaptée au contenu : la recette, la séance, le lieu, sinon le titre.
+function lienGoogle(it) {
+  var q = it.recette && it.recette.nom ? "recette " + it.recette.nom
+    : it.seance && it.seance.nom ? it.seance.nom + " exercices"
+    : it.lieu ? [it.lieu.nom, it.lieu.ville, it.lieu.pays].filter(Boolean).join(" ")
+    : it.titre || it.legende || "";
+  return "https://www.google.com/search?q=" + encodeURIComponent(sansEmoji(q).slice(0, 120));
 }
 
 function ouvrirFiche(id) {
