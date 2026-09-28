@@ -116,6 +116,11 @@ function rendre() {
   barreSelection();
   rendreFiche();
   rendreAjout();
+  if (ICI.ouvrirPartage) {
+    ICI.ouvrirPartage = false;
+    try { history.replaceState(null, "", "#" + ICI.vue); } catch (e) {}
+    ouvrirAjout("liens");
+  }
 }
 
 function allerA(v) {
@@ -517,6 +522,7 @@ $("#fiche").addEventListener("close", function () { ICI.fiche = null; ICI.ficheC
 });
 window.addEventListener("hashchange", function () {
   var v = location.hash.slice(1);
+  if (v === "ajout") { ICI.ouvrirPartage = true; rendreBientot(); return; }
   if (VUES[v] && v !== ICI.vue) allerA(v);
 });
 
@@ -549,6 +555,9 @@ try {
   var h = location.hash.slice(1), v = null;
   try { v = localStorage.getItem(LS_VUE); } catch (e) {}
   ICI.vue = VUES[h] ? h : VUES[v] ? v : "accueil";
+  // Le raccourci iPhone ouvre la page avec #ajout : la fenêtre d'ajout s'ouvre,
+  // prête à recevoir le lien copié (appui long dans la case › Coller).
+  if (h === "ajout") ICI.ouvrirPartage = true;
 
   // Version installée (hors claude.ai) : un lien partagé depuis Instagram
   // ou TikTok arrive dans l'adresse (?url=… ou ?text=…).
@@ -574,7 +583,7 @@ try {
     var d = catsParDefaut(); Object.keys(d).forEach(function (k) { sauverCat(d[k]); });
   }
   rendre();
-  if (ICI.ouvrirPartage && Store.reg.onboarde) ouvrirAjout("liens");
+
 
   if (!EN_ARTIFACT) {
     if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});

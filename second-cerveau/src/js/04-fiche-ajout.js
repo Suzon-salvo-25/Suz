@@ -174,7 +174,7 @@ function ajoutHTML() {
     var deja = liens.filter(function (r) { return Store.items[r.cle]; }).length;
     var parPlat = {};
     liens.forEach(function (r) { parPlat[r.plateforme] = (parPlat[r.plateforme] || 0) + 1; });
-    h += '<p class="prose">Dans Instagram ou TikTok : <b>Partager › Copier le lien</b>, puis colle-le ici. Tu peux en coller plusieurs d\'un coup, ou tout un texte qui en contient.</p>' +
+    h += '<p class="prose">Dans Instagram ou TikTok : <b>Partager › Copier le lien</b>. Puis ici, <b>appui long dans la case › Coller</b>. Tu peux en coller plusieurs d\'un coup.</p>' +
       '<div class="field"><label for="ajLiens">Lien ou liens</label><textarea id="ajLiens" rows="4" placeholder="https://www.instagram.com/reel/…&#10;https://www.tiktok.com/@…/video/…">' + esc(a.liens) + '</textarea>' +
       (a.liens.trim() ? '<p class="aide">' + (liens.length
         ? pluriel(liens.length, "lien") + ' reconnu' + (liens.length > 1 ? "s" : "") + ' : ' + Object.keys(parPlat).map(function (k) { return parPlat[k] + " " + nomPlat(k); }).join(", ") + (deja ? " · " + deja + " déjà dans l'appli (non dupliqué" + (deja > 1 ? "s" : "") + ")" : "")
