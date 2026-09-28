@@ -294,11 +294,18 @@ function lienAppli(it) {
   var n = numeroInstagram(codeInstagram(it));
   return n ? "instagram://media?id=" + n : null;
 }
+// L'appli Claude bloque les liens instagram:// et laisse Instagram détourner les
+// liens web. Le relais « ouvrir » (fonction Supabase publique) reçoit un lien
+// https ordinaire et redirige vers instagram://media?id=… : une seule touche.
+var RELAIS_OUVRIR = "https://roxsrrscddkeibiqrxxp.supabase.co/functions/v1/ouvrir?id=";
+function lienRelais(it) {
+  var n = numeroInstagram(codeInstagram(it));
+  return n ? RELAIS_OUVRIR + n : null;
+}
 function lienOrig(it, classe) {
   if (!it.url) return "";
-  // Instagram : l'appli Claude laisse Instagram détourner les liens web vers un
-  // Reel au hasard. On copie le lien instagram://media?id=… à coller dans Safari.
-  if (lienAppli(it)) return '<button type="button" class="' + (classe || "lien-orig") + '" data-action="ouvrir-insta" data-id="' + esc(it.id) + '">Ouvrir ↗</button>';
+  // Instagram : passage par le relais, qui renvoie vers instagram://media?id=….
+  if (lienRelais(it)) return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienRelais(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
   return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
 }
 function badgePlat(it) {
