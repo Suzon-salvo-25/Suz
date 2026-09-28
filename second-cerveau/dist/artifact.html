@@ -205,7 +205,7 @@ a { color: inherit; }
 
 /* ---------- onglets ---------- */
 .tabs {
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 4px; margin-bottom: 26px; padding: 4px;
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
 }
@@ -541,6 +541,10 @@ dialog.feuille::backdrop { background: var(--voile); }
 .ingr-liste input:checked + span { text-decoration: line-through; color: var(--ink-faint); }
 .ingr-liste .q { color: var(--ink-faint); font-size: .84rem; margin-left: auto; white-space: nowrap; }
 .etapes { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: .94rem; line-height: 1.5; }
+.exos-liste { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 9px; }
+.exos-liste li::marker { font-family: var(--f-display); font-weight: 700; color: var(--peche); }
+.exo-l { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: .94rem; }
+.exo-l .dose { font-size: .84rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .etapes li::marker { font-family: var(--f-display); font-weight: 700; color: var(--peche); }
 .nutri { font-size: .86rem; color: var(--ink-soft); display: flex; gap: 6px 16px; flex-wrap: wrap; align-items: center; font-variant-numeric: tabular-nums; }
 .nutri b { color: var(--ink); }
@@ -654,7 +658,9 @@ body.selection .fab { display: none; }
 }
 @media (max-width: 540px) {
   body { font-size: 15px; }
-  .tab { font-size: .8rem; padding: 9px 2px; gap: 4px; }
+  .tab { font-size: .76rem; padding: 9px 1px; gap: 4px; letter-spacing: -.01em; }
+  .tabs { gap: 2px; padding: 3px; }
+  .rec-chiffres div:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .tab .compte { display: none; }
   .mur { column-width: 108px; column-gap: 8px; }
   .mur .pep-vis { max-height: 150px; }
@@ -745,6 +751,7 @@ body.selection .fab { display: none; }
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button type="button" class="tab" role="tab" data-vue="accueil" aria-selected="true"><span class="txt">Accueil</span></button>
     <button type="button" class="tab" role="tab" data-vue="recettes" aria-selected="false"><span class="txt">Recettes</span><span class="compte" id="nbRec"></span></button>
+    <button type="button" class="tab" role="tab" data-vue="sport" aria-selected="false"><span class="txt">Sport</span></button>
     <button type="button" class="tab" role="tab" data-vue="collections" aria-selected="false"><span class="txt">Collections</span><span class="compte" id="nbColl"></span></button>
   </nav>
 
@@ -1521,6 +1528,7 @@ var CONSIGNE_ANALYSE = [
   "Tu ranges les contenus qu'une personne francophone a enregistrés sur les réseaux sociaux (Instagram, TikTok…), pour qu'elle les retrouve sans les revoir.",
   "Pour chaque élément, déduis de quoi il parle à partir des seules informations fournies : lien, plateforme, type, créateur, légende, note personnelle, collection d'origine, image éventuelle.",
   "N'invente aucun fait. Si l'information manque (souvent : seul le lien et le créateur sont connus), reste général, laisse les champs incertains à null et baisse la confiance.",
+  "Tout ce que tu écris est en français, même quand la légende est en anglais ou dans une autre langue : traduis le titre, le résumé, la recette (nom, ingrédients, quantités en unités françaises, étapes) et la séance de sport.",
   "",
   "Catégories existantes (Parent > sous-catégories) :",
   "@@TAXO@@",
@@ -1533,11 +1541,12 @@ var CONSIGNE_ANALYSE = [
   "- resume : une ou deux phrases utiles (ce qu'on y apprend), ou null.",
   "- tags : 3 à 8 mots-clés en minuscules (ingrédients, lieux, styles, marques citées…).",
   "- recette : seulement si c'est une recette, sinon null. {\"nom\", \"ingredients\": [{\"nom\", \"qte\"}], \"etapes\": [phrases courtes à l'impératif], \"temps\": minutes au total ou null, \"difficulte\": \"Facile\"|\"Moyen\"|\"Difficile\"|null, \"repas\": sous-ensemble de [\"petit-dejeuner\",\"dejeuner\",\"diner\",\"dessert\",\"aperitif\",\"gouter\"], \"portions\": nombre ou null, \"vegetarien\": bool ou null, \"healthy\": bool ou null, \"nutrition\": {\"kcal\",\"proteines\",\"glucides\",\"lipides\"} par portion en estimation grossière ou null si trop incertain, \"source\": \"legende\" si la recette est écrite dans la légende ou visible sur l'image, \"deduit\" si tu la reconstitues à partir du nom du plat}.",
+  "- seance : seulement pour un contenu de sport (exercices, entraînement, programme, étirements), sinon null. {\"nom\", \"type\": \"Renforcement\"|\"Cardio\"|\"HIIT\"|\"Yoga\"|\"Pilates\"|\"Mobilité\"|\"Course\"|\"Autre\", \"duree\": minutes au total ou null, \"niveau\": \"Débutant\"|\"Intermédiaire\"|\"Avancé\"|null, \"materiel\": [\"…\"] ([] si sans matériel), \"muscles\": [zones travaillées], \"echauffement\": phrase ou null, \"exercices\": [{\"nom\", \"series\": nombre ou null, \"reps\": \"12\" ou \"30 s\" ou null, \"repos\": \"30 s\" ou null, \"conseil\": phrase courte ou null}], \"tours\": nombre de tours du circuit ou null, \"source\": \"legende\" si c'est écrit dans la légende ou visible sur l'image, \"deduit\" sinon}.",
   "- lieu : pour un restaurant, un hôtel, une adresse : {\"nom\", \"ville\", \"pays\"} (champs inconnus à null), sinon null.",
   "- type : garde celui fourni sauf si l'image montre clairement autre chose (\"reel\", \"publication\", \"carrousel\", \"video\", \"short\").",
   "- confiance : \"haute\", \"moyenne\" ou \"basse\".",
   "",
-  "Réponds uniquement en JSON : {\"resultats\": [{\"id\", \"titre\", \"resume\", \"type\", \"categories\", \"tags\", \"recette\", \"lieu\", \"confiance\"}]}, un résultat par élément, avec l'id reçu.",
+  "Réponds uniquement en JSON : {\"resultats\": [{\"id\", \"titre\", \"resume\", \"type\", \"categories\", \"tags\", \"recette\", \"seance\", \"lieu\", \"confiance\"}]}, un résultat par élément, avec l'id reçu.",
   "",
   "Éléments :"
 ].join("\n");
@@ -1667,9 +1676,25 @@ function appliquerAnalyse(r) {
   if (r.type && TYPES[r.type]) it.type = r.type;
   it.tagsAuto = (r.tags || []).map(function (t) { return norm(t).replace(/[^a-z0-9 -]/g, "").trim(); }).filter(Boolean).slice(0, 8);
   it.recette = r.recette && r.recette.ingredients ? nettoyerRecette(r.recette) : (cats.some(function (c) { return parentDe(c) === "recettes"; }) ? it.recette || null : null);
+  it.seance = r.seance && r.seance.exercices && r.seance.exercices.length ? nettoyerSeance(r.seance) : (it.seance || null);
   it.lieu = r.lieu && (r.lieu.nom || r.lieu.ville) ? { nom: r.lieu.nom || null, ville: r.lieu.ville || null, pays: r.lieu.pays || null } : null;
   it.analyse = { etat: it.cats.length ? "fait" : "vide", par: "ia", conf: r.confiance || "moyenne", date: Date.now(), titreManuel: it.analyse && it.analyse.titreManuel };
   sauverItem(it);
+}
+
+function nettoyerSeance(s) {
+  var num = function (x) { var n = parseFloat(x); return isFinite(n) && n > 0 ? Math.round(n) : null; };
+  var txt = function (x, n) { return x == null ? null : String(x).slice(0, n || 120); };
+  return {
+    nom: sansEmoji(s.nom || "").slice(0, 80), type: txt(s.type, 30), duree: num(s.duree), niveau: txt(s.niveau, 20),
+    materiel: (s.materiel || []).slice(0, 10).map(function (m) { return String(m).slice(0, 40); }),
+    muscles: (s.muscles || []).slice(0, 10).map(function (m) { return String(m).slice(0, 40); }),
+    echauffement: txt(s.echauffement, 300), tours: num(s.tours),
+    exercices: (s.exercices || []).slice(0, 30).map(function (e) {
+      return typeof e === "string" ? { nom: e } : { nom: txt(e.nom, 80) || "", series: num(e.series), reps: txt(e.reps, 30), repos: txt(e.repos, 30), conseil: txt(e.conseil, 200) };
+    }).filter(function (e) { return e.nom; }),
+    source: s.source === "legende" ? "legende" : "deduit"
+  };
 }
 
 function nettoyerRecette(r) {
@@ -2095,17 +2120,6 @@ function aCat(it, nomSous) {
   return c ? catsValides(it).indexOf(c.id) >= 0 : false;
 }
 function aRepas(it, r) { return !!(it.recette && (it.recette.repas || []).indexOf(r) >= 0); }
-var FILTRES_REC = [
-  ["petit-dejeuner", "Petit-déjeuner", function (it) { return aRepas(it, "petit-dejeuner") || aCat(it, "Petit-déjeuner"); }],
-  ["dejeuner", "Déjeuner", function (it) { return aRepas(it, "dejeuner") || aCat(it, "Déjeuner"); }],
-  ["diner", "Dîner", function (it) { return aRepas(it, "diner") || aCat(it, "Dîner"); }],
-  ["dessert", "Dessert", function (it) { return aRepas(it, "dessert") || aCat(it, "Desserts"); }],
-  ["aperitif", "Apéritif", function (it) { return aRepas(it, "aperitif") || aCat(it, "Apéritifs"); }],
-  ["healthy", "Healthy", function (it) { return (it.recette && it.recette.healthy === true) || aCat(it, "Healthy"); }],
-  ["rapide", "Rapide", function (it) { return aCat(it, "Recettes rapides") || !!(it.recette && it.recette.temps && it.recette.temps <= 20); }],
-  ["vegetarien", "Végétarien", function (it) { return !!(it.recette && it.recette.vegetarien === true); }],
-  ["moins30", "Moins de 30 min", function (it) { return !!(it.recette && it.recette.temps && it.recette.temps < 30); }]
-];
 
 // « J'ai du poulet, des courgettes et du parmesan » → [poulet, courgette, parmesan]
 function ingredientsDemandes(txt) {
@@ -2144,7 +2158,7 @@ var ICI = {
   tout: { texte: "", plat: "", cat: "", createur: "", type: "", periode: "", coll: "", fav: false, acompleter: false, doublons: false, tri: "recent" },
   limite: 60,
   sel: new Set(), modeSel: false, barre: null,
-  rec: { filtres: [], frigo: "" },
+  rec: { onglet: "miennes", frigo: "" },
   catEdit: null, collEdit: null,
   confirm: null,
   onb: 1,
@@ -2152,7 +2166,10 @@ var ICI = {
   ajout: { onglet: "liens", plat: "instagram", liens: "", legende: "", note: "", capture: null, lecture: null, likes: false }
 };
 
-function tousItems() { return Object.keys(Store.items).map(function (k) { return Store.items[k]; }); }
+// Les recettes conseillées par Claude vivent à part : elles n'apparaissent que
+// dans Recettes › Conseillées, tant qu'on ne les garde pas.
+function tousItems() { return Object.keys(Store.items).map(function (k) { return Store.items[k]; }).filter(function (it) { return !it.conseil; }); }
+function conseils() { return Object.keys(Store.items).map(function (k) { return Store.items[k]; }).filter(function (it) { return it.conseil; }); }
 function recents(liste) { return liste.slice().sort(function (a, b) { return (b.importe || 0) - (a.importe || 0) || (b.ajoute || 0) - (a.ajoute || 0); }); }
 function aCompleter(it) { return !catsValides(it).length || (it.analyse && it.analyse.etat === "vide"); }
 
@@ -2185,6 +2202,7 @@ function vis(it, ratio) {
   var etat = "";
   if (IA.file.indexOf(it.id) >= 0 || (it.analyse && it.analyse.etat === "attente" && IA.enCours)) etat = '<span class="etat ia">Analyse…</span>';
   else if (it.demo) etat = '<span class="etat">Exemple</span>';
+  else if (it.conseil) etat = '<span class="etat">' + (/youtube\.com/.test(it.url || "") ? "▶ Vidéo" : "Conseillée") + '</span>';
   else if (aCompleter(it)) etat = '<span class="etat">À compléter</span>';
   return '<span class="pep-vis t-' + teinteCat(c) + '" style="--ar:' + ar + '">' +
     (it.vignette ? '<img src="' + esc(it.vignette) + '" alt="" loading="lazy">' : '<span class="illu st-' + stickerItem(it, c) + '" aria-hidden="true"></span>') +
@@ -2372,31 +2390,94 @@ function resultatsRecherche() {
    RECETTES
    ================================================================== */
 
+// Une recette est « en anglais » quand ses ingrédients et étapes en ont l'air.
+var MOTS_ANGLAIS = " the and with add mix bake oven cup cups tbsp tsp until into then heat stir serve chopped minced sliced flour sugar butter eggs chicken salt pepper water ";
+function estAnglais(it) {
+  var r = it.recette;
+  if (!r) return false;
+  var m = mots([r.nom, (r.ingredients || []).map(function (i) { return i.nom + " " + i.qte; }).join(" "), (r.etapes || []).join(" ")].join(" "));
+  var n = 0;
+  m.forEach(function (w) { if (MOTS_ANGLAIS.indexOf(" " + w + " ") >= 0) n++; });
+  return m.length > 0 && n / m.length > .08 && n >= 3;
+}
+
 function vueRecettes() {
+  var onglet = ICI.rec.onglet || "miennes";
+  var h = '<div class="seg" style="margin-bottom:18px" role="tablist">' +
+    '<button type="button" data-action="rec-onglet" data-o="miennes" aria-pressed="' + (onglet === "miennes") + '">Mes recettes</button>' +
+    '<button type="button" data-action="rec-onglet" data-o="conseils" aria-pressed="' + (onglet === "conseils") + '">Conseillées healthy</button></div>';
+  return h + (onglet === "conseils" ? vueConseils() : vueMesRecettes());
+}
+
+function vueMesRecettes() {
   var toutes = recents(tousItems().filter(estRecette));
-  var f = ICI.rec.filtres;
-  var liste = toutes.filter(function (it) {
-    return f.every(function (k) { var d = FILTRES_REC.filter(function (x) { return x[0] === k; })[0]; return d ? d[2](it) : true; });
-  });
   var demandes = ingredientsDemandes(ICI.rec.frigo);
   var avecFrigo = demandes.length > 0;
-  var lignes = liste.map(function (it) { return { it: it, m: avecFrigo ? correspondanceFrigo(it, demandes) : null }; });
+  var lignes = toutes.map(function (it) { return { it: it, m: avecFrigo ? correspondanceFrigo(it, demandes) : null }; });
   if (avecFrigo) {
     lignes = lignes.filter(function (l) { return l.m; });
     lignes.sort(function (a, b) { return b.m.nbUtilises - a.m.nbUtilises || a.m.manque.length - b.m.manque.length; });
   }
-  var h = '<div class="card"><header><span class="tache t-peche"><span class="illu st-pasteque" aria-hidden="true"></span></span><h2>Qu\'est-ce que je cuisine ?</h2><span class="hint">Parmi mes recettes</span></header><div class="body">' +
-    '<form class="frigo" id="formFrigo"><input type="text" id="frigo" autocomplete="off" aria-label="Ingrédients disponibles" placeholder="J\'ai du poulet, des courgettes et du parmesan" value="' + esc(ICI.rec.frigo) + '">' +
-    (ICI.rec.frigo ? '<button type="button" class="btn ghost" data-action="effacer-frigo">Effacer</button>' : "") + '</form>' +
-    '<p class="aide" style="margin-top:8px">Sel, poivre, huile, sucre, farine et beurre sont comptés comme déjà dans le placard.</p>' +
-    '<div class="chips" style="margin-top:14px">' + FILTRES_REC.map(function (x) {
-      return '<button type="button" class="chip" data-action="filtre-rec" data-f="' + x[0] + '" aria-pressed="' + (f.indexOf(x[0]) >= 0) + '">' + x[1] + '</button>';
-    }).join("") + '</div></div></div>';
-
+  var h = '<form class="frigo" id="formFrigo" style="margin-bottom:6px"><input type="text" id="frigo" autocomplete="off" aria-label="Ingrédients disponibles" placeholder="J\'ai du poulet, des courgettes…" value="' + esc(ICI.rec.frigo) + '">' +
+    (ICI.rec.frigo ? '<button type="button" class="btn ghost" data-action="effacer-frigo">Effacer</button>' : "") + '</form>';
+  var sansImage = apercusDispo() ? toutes.filter(function (it) { return apercuPossible(it); }).length : 0;
+  var anglais = iaDispo() ? toutes.filter(estAnglais).length : 0;
+  if (sansImage && !(Apercus.enCours || Apercus.file.length)) {
+    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-poisson" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(sansImage, "recette") + ' sans photo.</span>' +
+      '<button type="button" class="btn go sm" data-action="apercus-recettes">Récupérer les photos</button></div>';
+  }
+  if (anglais && !IA.enCours) {
+    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-etoile" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(anglais, "recette") + ' en anglais.</span>' +
+      '<button type="button" class="btn go sm" data-action="traduire-recettes">Traduire en français</button></div>';
+  }
   h += '<div class="titre-sec"><h2>' + (avecFrigo ? "Avec ce que tu as" : "Mes recettes") + '</h2><span class="lab">' + pluriel(lignes.length, "recette") + (toutes.length !== lignes.length ? " sur " + toutes.length : "") + '</span></div>';
   if (!toutes.length) return h + vide("fraise", "Aucune recette pour l'instant. Enregistre une vidéo de cuisine, elle arrivera ici avec ses ingrédients.");
-  if (!lignes.length) return h + vide("framboise", avecFrigo ? "Aucune de tes recettes n'utilise ces ingrédients." : "Aucune recette ne coche tous ces filtres.");
+  if (!lignes.length) return h + vide("framboise", "Aucune de tes recettes n'utilise ces ingrédients.");
   return h + '<div class="grille-rec">' + lignes.map(function (l) { return carteRecette(l.it, l.m); }).join("") + '</div>';
+}
+
+function vueConseils() {
+  var liste = recents(conseils());
+  var h = '<p class="prose" style="margin-bottom:14px">Des recettes healthy choisies par Claude dans une base de vraies recettes, avec photo et vidéo quand il y en a, traduites et adaptées. Garde celles qui te plaisent : elles rejoignent tes recettes.</p>';
+  if (!iaDispo()) return h + vide("verre", "Claude n'est pas disponible dans cette vue : il en faut un pour choisir et traduire les recettes.");
+  h += '<div class="boutons" style="margin:0 0 6px">' + (Conseils.enCours
+      ? '<button type="button" class="btn go" disabled>Claude choisit tes recettes…</button>'
+      : '<button type="button" class="btn go" data-action="proposer-recettes">' + (liste.length ? "M'en proposer d'autres" : "Me proposer des recettes healthy") + '</button>') +
+    (liste.length && !Conseils.enCours ? '<button type="button" class="btn ghost" data-action="vider-conseils">Tout effacer</button>' : "") + '</div>';
+  if (Conseils.erreur) h += '<div class="ia-bloc erreur"><span class="illu-mini st-grenade" aria-hidden="true"></span><span>' + esc(Conseils.erreur) + '</span></div>';
+  if (!liste.length) return h + (Conseils.enCours ? "" : vide("pamplemousse", "Touche le bouton : Claude t'en propose quelques-unes, en tenant compte de tes goûts."));
+  return h + '<div class="grille-rec" style="margin-top:16px">' + liste.map(function (it) { return carteRecette(it); }).join("") + '</div>';
+}
+
+/* ==================================================================
+   SPORT
+   ================================================================== */
+
+function estSport(it) { return !!it.seance || parentsItem(it).indexOf("sport") >= 0; }
+
+function vueSport() {
+  var toutes = recents(tousItems().filter(estSport));
+  var h = '';
+  var sansDetail = iaDispo() ? toutes.filter(function (it) { return !it.seance; }).length : 0;
+  if (sansDetail && !IA.enCours) {
+    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap;margin-top:0"><span class="illu-mini st-ballon" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(sansDetail, "séance") + ' sans le détail des exercices.</span>' +
+      '<button type="button" class="btn go sm" data-action="detailler-seances">Détailler avec Claude</button></div>';
+  }
+  h += '<div class="titre-sec"' + (h ? "" : ' style="margin-top:0"') + '><h2>Mes séances</h2><span class="lab">' + pluriel(toutes.length, "séance") + '</span></div>';
+  if (!toutes.length) return h + vide("ballon", "Aucune séance pour l'instant. Enregistre une vidéo d'exercices, elle arrivera ici avec le détail.");
+  return h + '<div class="grille-rec">' + toutes.map(carteSeance).join("") + '</div>';
+}
+
+function carteSeance(it) {
+  var s = it.seance || {};
+  var ex = (s.exercices || []).map(function (e) { return e.nom; }).slice(0, 4);
+  return '<button type="button" class="rec" data-action="fiche" data-id="' + esc(it.id) + '">' + vis(it, "4 / 3") +
+    '<span class="corps"><h3>' + esc(s.nom || it.titre) + '</h3><span class="infos">' +
+      (s.duree ? '<span><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/></svg>' + s.duree + ' min</span>' : "") +
+      (s.niveau ? '<span>' + esc(s.niveau) + '</span>' : "") + (s.type ? '<span>' + esc(s.type) + '</span>' : "") +
+    '</span>' +
+    (ex.length ? '<span class="ingr">' + esc(ex.join(" · ")) + '</span>' : '<span class="ingr">Exercices pas encore détaillés.</span>') +
+    '</span></button>';
 }
 
 function carteRecette(it, m) {
@@ -2751,11 +2832,14 @@ function ficheHTML(it) {
     '<div class="meta">' + badgePlat(it) + (it.createur ? '<span>@' + esc(it.createur.replace(/^@/, "")) + '</span>' : "") +
       (it.ajoute ? '<span>· enregistré le ' + dateCourte(it.ajoute) + '</span>' : '<span>· ajouté le ' + dateCourte(it.importe) + '</span>') + '</div>' +
     (it.resume ? '<p class="resume">' + esc(it.resume) + '</p>' : "") +
+    (it.conseil ? '<p class="aide" style="margin-top:10px">Recette conseillée par Claude' + (it.origine ? ' (cuisine ' + esc(it.origine) + ')' : "") + ', issue de TheMealDB.</p>' +
+      '<div class="fiche-actions" style="margin-top:10px"><button type="button" class="btn go sm" data-action="garder-conseil" data-id="' + esc(it.id) + '">Garder dans mes recettes</button></div>' : "") +
     (it.demo ? '<p class="aide" style="margin-top:10px">Exemple de démonstration : il ne correspond à aucune publication réelle.</p>' : "") +
     '<div class="fiche-actions">' +
       (codeInstagram(it) ? '<a class="btn go sm" href="' + esc(lienOuvrir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir dans Instagram ↗</a>' +
           '<a class="btn ghost sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Voir le Reel ↗</a>'
-        : it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir sur ' + esc(nomPlat(it.plateforme)) + ' ↗</a>' : "") +
+        : it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">' +
+          (it.conseil || it.source === "conseil" ? (it.plateforme === "youtube" ? "Voir la vidéo ↗" : "Voir la recette d'origine ↗") : "Ouvrir sur " + esc(nomPlat(it.plateforme)) + " ↗") + '</a>' : "") +
       (it.url ? '<button type="button" class="btn ghost sm" data-action="copier-lien" data-id="' + esc(it.id) + '">Copier le lien</button>' : "") +
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +
       (ICI.ficheTitre ? "" : '<button type="button" class="btn ghost sm" data-action="edit-titre">Renommer</button>') +
@@ -2767,6 +2851,7 @@ function ficheHTML(it) {
   if (r) {
     h += '<section class="bloc recette"><h3><span class="illu-mini st-fraise" aria-hidden="true" style="margin:0"></span>' + esc(r.nom || "La recette") +
       (r.source === "deduit" ? ' <span class="tag estime">reconstituée</span>' : "") + '</h3>';
+    if (it.astuce) h += '<p style="font-size:.9rem"><b>Astuce healthy :</b> ' + esc(it.astuce) + '</p>';
     if (r.source === "deduit") h += '<p class="avert">Recette reconstituée par Claude à partir du nom du plat : la vidéo peut différer. Colle la légende pour une version fidèle.</p>';
     var chiffres = [];
     if (r.temps) chiffres.push(["Temps", r.temps + " min"]);
@@ -2792,6 +2877,34 @@ function ficheHTML(it) {
         (n.lipides ? '<span><b>' + n.lipides + '</b> g lipides</span>' : "") + '<span class="aide">par portion, ordre de grandeur calculé sans pesée</span></p>';
     }
     h += '</section>';
+  }
+
+  // --- la séance de sport
+  var s = it.seance;
+  if (s) {
+    h += '<section class="bloc recette"><h3><span class="illu-mini st-ballon" aria-hidden="true" style="margin:0"></span>' + esc(s.nom || "La séance") +
+      (s.source === "deduit" ? ' <span class="tag estime">reconstituée</span>' : "") + '</h3>';
+    var cs = [];
+    if (s.duree) cs.push(["Durée", s.duree + " min"]);
+    if (s.niveau) cs.push(["Niveau", s.niveau]);
+    if (s.type) cs.push(["Type", s.type]);
+    if (s.tours) cs.push(["Tours", s.tours]);
+    cs.push(["Matériel", (s.materiel || []).length ? s.materiel.join(", ") : "Aucun"]);
+    h += '<div class="rec-chiffres">' + cs.map(function (x) { return '<div><span class="lab">' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>'; }).join("") + '</div>';
+    if ((s.muscles || []).length) h += '<div class="chips">' + s.muscles.map(function (m) { return '<span class="chip doux">' + esc(m) + '</span>'; }).join("") + '</div>';
+    if (s.echauffement) h += '<p style="font-size:.92rem"><b>Échauffement :</b> ' + esc(s.echauffement) + '</p>';
+    if ((s.exercices || []).length) {
+      h += '<div><p class="lab" style="margin-bottom:6px">Exercices</p><ol class="exos-liste">' + s.exercices.map(function (e) {
+        var dose = [e.series ? e.series + " × " + (e.reps || "") : e.reps, e.repos ? "repos " + e.repos : null].filter(Boolean).join(" · ");
+        return '<li><div class="exo-l"><b>' + esc(e.nom) + '</b>' + (dose ? '<span class="dose">' + esc(dose) + '</span>' : "") + '</div>' +
+          (e.conseil ? '<p class="aide" style="margin-top:2px">' + esc(e.conseil) + '</p>' : "") + '</li>';
+      }).join("") + '</ol></div>';
+    }
+    if (s.source === "deduit") h += '<p class="avert">Séance reconstituée par Claude : la vidéo peut différer. Colle la légende pour une version fidèle.</p>';
+    h += '</section>';
+  } else if (parentsItem(it).indexOf("sport") >= 0 && iaDispo()) {
+    h += '<section class="bloc"><h3>La séance</h3><p class="aide">Le détail des exercices n\'a pas encore été extrait.</p>' +
+      '<div><button type="button" class="btn go sm" data-action="reanalyser" data-id="' + esc(it.id) + '">Détailler avec Claude</button></div></section>';
   }
 
   // --- le lieu
@@ -3230,7 +3343,16 @@ function exemples() {
       resume: "Robe noire en satin : avec baskets le jour, blazer au bureau, sandales à talons le soir.", tagsAuto: ["robe noire", "satin", "capsule"]
     }),
     E("abdos", "tiktok", "video", "exemple.sport", 4, "10 minutes d'abdos sans matériel", ["sport:exercices", "sport:programmes"], {
-      resume: "Gainage, crunchs, relevés de jambes et mountain climbers : 40 secondes d'effort, 20 de repos.", tagsAuto: ["abdos", "gainage", "sans materiel", "maison"]
+      resume: "Gainage, crunchs, relevés de jambes et mountain climbers : 40 secondes d'effort, 20 de repos.", tagsAuto: ["abdos", "gainage", "sans materiel", "maison"],
+      seance: { nom: "Abdos express sans matériel", type: "Renforcement", duree: 10, niveau: "Débutant", materiel: [], muscles: ["Abdominaux", "Obliques", "Gainage"],
+        echauffement: "1 minute de montées de genoux sur place.", tours: 2, source: "legende",
+        exercices: [
+          { nom: "Planche", series: null, reps: "40 s", repos: "20 s", conseil: "Bassin aligné, ne creuse pas le dos." },
+          { nom: "Crunchs", series: null, reps: "40 s", repos: "20 s", conseil: null },
+          { nom: "Relevés de jambes", series: null, reps: "40 s", repos: "20 s", conseil: "Plaque le bas du dos au sol." },
+          { nom: "Mountain climbers", series: null, reps: "40 s", repos: "20 s", conseil: null },
+          { nom: "Planche latérale", series: null, reps: "20 s par côté", repos: "20 s", conseil: null }
+        ] }
     }),
     E("boucles", "instagram", "reel", "exemple.beaute", 11, "Routine pour cheveux bouclés", ["beaute:cheveux"], {
       tagsAuto: ["boucles", "cheveux", "routine"]
@@ -3462,6 +3584,128 @@ function traiterNouveaux(ids) {
 }
 
 /* ==================================================================
+   RECETTES CONSEILLÉES
+   Le serveur (fonction « idees ») tire de vraies recettes de TheMealDB,
+   avec photo et vidéo quand il y en a. Claude garde les plus healthy,
+   les traduit et les détaille en français, en tenant compte des goûts
+   que révèlent les recettes déjà enregistrées.
+   ================================================================== */
+
+var Conseils = { enCours: false, erreur: "" };
+
+async function demanderIdees(n, exclure) {
+  if (Apercus.mcp) {
+    var q = "select 'idees' as id, pepites.idees(" + (n | 0) + ", array[" +
+      exclure.filter(function (x) { return /^\d+$/.test(x); }).map(function (x) { return "'" + x + "'"; }).join(",") + "]::text[]) as r;";
+    var res = await Apercus.mcp.callTool(APERCU.serveur, APERCU.outil, { project_id: APERCU.projet, query: q });
+    var lignes = lignesSql(res.payload != null ? res.payload : res);
+    return lignes[0] && lignes[0].r;
+  }
+  var rep = await fetch(APERCU.url.replace(/apercu$/, "idees"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + APERCU.cle, apikey: APERCU.cle },
+    body: JSON.stringify({ n: n, exclure: exclure })
+  });
+  return rep.ok ? await rep.json() : { ok: false, raison: "serveur_" + rep.status };
+}
+
+function gouts() {
+  var rec = recents(tousItems().filter(estRecette)).slice(0, 30);
+  return rec.map(function (it) { return (it.recette && it.recette.nom) || it.titre; }).filter(Boolean);
+}
+
+async function proposerRecettes() {
+  if (Conseils.enCours || !iaDispo()) return;
+  Conseils.enCours = true; Conseils.erreur = "";
+  rendreBientot();
+  try {
+    var deja = Object.keys(Store.items).filter(function (k) { return /^conseil-\d+$/.test(k); }).map(function (k) { return k.slice(8); });
+    var idees = await demanderIdees(10, deja);
+    if (!idees || !idees.ok || !(idees.recettes || []).length) throw { code: "source", message: idees && idees.raison };
+    var candidates = idees.recettes.map(function (r) {
+      return { id: r.id, nom: r.nom, categorie: r.categorie, origine: r.origine, ingredients: r.ingredients, instructions: String(r.instructions || "").slice(0, 1800) };
+    });
+    var prompt = [
+      "Tu conseilles des recettes healthy à une personne francophone.",
+      "Ses recettes enregistrées (pour deviner ses goûts) : " + (gouts().join(" ; ") || "aucune pour l'instant") + ".",
+      "Voici des recettes candidates (en anglais) :",
+      JSON.stringify(candidates),
+      "",
+      "Garde les 4 à 6 plus saines, ou faciles à rendre saines, en privilégiant celles qui correspondent à ses goûts.",
+      "Pour chacune, écris tout en français : traduis le nom et les ingrédients, convertis les quantités en unités françaises (g, ml, c. à s., c. à c.), réécris les étapes en phrases courtes à l'impératif.",
+      "Tu peux alléger un ingrédient (crème → yaourt grec, friture → four…) : dis-le dans « astuce ».",
+      "Réponds uniquement en JSON : {\"recettes\": [{\"id\", \"nom\", \"pourquoi\": une phrase sur ce qui la rend healthy, \"astuce\": phrase ou null, \"temps\": minutes ou null, \"difficulte\": \"Facile\"|\"Moyen\"|\"Difficile\", \"portions\": nombre ou null, \"repas\": sous-ensemble de [\"petit-dejeuner\",\"dejeuner\",\"diner\",\"dessert\",\"aperitif\",\"gouter\"], \"vegetarien\": bool, \"ingredients\": [{\"nom\", \"qte\"}], \"etapes\": [\"…\"], \"nutrition\": {\"kcal\",\"proteines\",\"glucides\",\"lipides\"} par portion, estimation grossière}]}."
+    ].join("\n");
+    var rep = await IA.sample.json(prompt, { modelTier: "default" });
+    var parId = {};
+    idees.recettes.forEach(function (r) { parId[String(r.id)] = r; });
+    var ajoutees = 0;
+    for (var i = 0; i < ((rep && rep.recettes) || []).length; i++) {
+      var c = rep.recettes[i], src = parId[String(c.id)];
+      if (!src) continue;
+      var img = null;
+      if (src.image) { var b = await dataUrlVersBlob(src.image); img = b ? await preparerImage(b) : null; }
+      var r = nettoyerRecette(Object.assign({}, c, { source: "conseil" }));
+      r.source = "conseil";
+      r.healthy = true;
+      var cat = trouverCat("Healthy", "recettes");
+      var it = nouvelItem({ cle: "conseil-" + src.id, url: src.video || src.source || "https://www.themealdb.com/meal/" + src.id,
+        plateforme: src.video ? "youtube" : "web", type: src.video ? "video" : "lien" }, {
+        conseil: true, source: "conseil", createur: "", titre: r.nom || src.nom, resume: String(c.pourquoi || "").slice(0, 300),
+        astuce: c.astuce ? String(c.astuce).slice(0, 300) : null, origine: src.origine || null,
+        vignette: img ? img.vignette : null, ratio: img ? img.ratio : null,
+        recette: r, cats: cat ? [cat.id] : ["recettes"], tagsAuto: ["healthy"].concat(src.origine ? [norm(src.origine)] : []),
+        analyse: { etat: "fait", par: "ia", conf: "haute", date: Date.now() }
+      });
+      sauverItem(it);
+      ajoutees++;
+    }
+    if (!ajoutees) Conseils.erreur = "Claude n'a retenu aucune recette cette fois. Réessaie pour en tirer d'autres.";
+    else journal(pluriel(ajoutees, "recette conseillée", "recettes conseillées") + " par Claude.");
+  } catch (e) {
+    if (e && e.code === "source") Conseils.erreur = "La base de recettes n'a pas répondu. Réessaie dans un instant.";
+    else if (e && MESSAGES_APERCU[e.code]) Conseils.erreur = MESSAGES_APERCU[e.code];
+    else { iaFatal(e); Conseils.erreur = messageIA(e); }
+  }
+  Conseils.enCours = false;
+  rendreBientot();
+}
+
+function garderConseil(it) {
+  it.conseil = false;
+  it.importe = Date.now();
+  sauverItem(it);
+  journal("« " + it.titre + " » ajoutée à mes recettes.");
+}
+
+/* --- déclenchements à l'ouverture des onglets --- */
+
+// Recettes : photos manquantes (dont celles ratées avant la correction des
+// images Instagram) et traduction des recettes en anglais, une fois chacune.
+var CORRECTION_IMAGES = 1790633028429;
+function autoRecettes() {
+  var rec = tousItems().filter(estRecette);
+  if (apercusDispo()) {
+    var ids = rec.filter(function (it) { return apercuPossible(it) && (!it.apercu || (it.apercu.date || 0) < CORRECTION_IMAGES); })
+      .map(function (it) { return it.id; });
+    if (ids.length) lancerApercus(ids);
+  }
+  if (iaDispo()) {
+    var ang = rec.filter(function (it) { return estAnglais(it) && !it.tradTentee; });
+    ang.forEach(function (it) { it.tradTentee = true; sauverItem(it); });
+    if (ang.length) lancerAnalyse(ang.map(function (it) { return it.id; }));
+  }
+}
+
+// Sport : détail des exercices pour les séances qui ne l'ont pas, une fois chacune.
+function autoSport() {
+  if (!iaDispo()) return;
+  var s = tousItems().filter(function (it) { return estSport(it) && !it.seance && !it.seanceTentee; });
+  s.forEach(function (it) { it.seanceTentee = true; sauverItem(it); });
+  if (s.length) lancerAnalyse(s.map(function (it) { return it.id; }));
+}
+
+/* ==================================================================
    RENDU
    ================================================================== */
 
@@ -3495,7 +3739,7 @@ function avecFocus(racineEl, fn) {
   }
 }
 
-var VUES = { accueil: vueAccueil, recettes: vueRecettes, collections: vueCollections, tout: vueTout, categories: vueCategories, reglages: vueReglages };
+var VUES = { accueil: vueAccueil, recettes: vueRecettes, sport: vueSport, collections: vueCollections, tout: vueTout, categories: vueCategories, reglages: vueReglages };
 
 function banniereAnalyse() {
   var b = $("#banniere");
@@ -3596,6 +3840,9 @@ function allerA(v) {
     window.scrollTo(0, 0);
   }
   try { localStorage.setItem(LS_VUE, v); } catch (e) {}
+  // À l'ouverture : photos et traductions des recettes, détail des séances.
+  if (v === "recettes" && Store.pret) setTimeout(autoRecettes, 300);
+  if (v === "sport" && Store.pret) setTimeout(autoSport, 300);
   if (location.hash !== "#" + v) { try { history.replaceState(null, "", "#" + v); } catch (e) {} }
   rendreBientot();
 }
@@ -3638,10 +3885,18 @@ document.addEventListener("click", function (ev) {
     case "voir-favoris": voirTout({ fav: true }); break;
     case "voir-tout": voirTout({}); break;
 
-    case "filtre-rec":
-      var f = ICI.rec.filtres, i = f.indexOf(d.f);
-      if (i >= 0) f.splice(i, 1); else f.push(d.f);
-      rendreBientot(); break;
+    case "rec-onglet": ICI.rec.onglet = d.o; rendreBientot(); break;
+    case "apercus-recettes": lancerApercus(tousItems().filter(function (x) { return estRecette(x) && apercuPossible(x); }).map(function (x) { return x.id; })); break;
+    case "traduire-recettes":
+      var ang = tousItems().filter(estAnglais);
+      ang.forEach(function (x) { x.tradTentee = true; });
+      lancerAnalyse(ang.map(function (x) { return x.id; })); toast("Claude traduit " + pluriel(ang.length, "recette") + "…"); break;
+    case "detailler-seances":
+      lancerAnalyse(tousItems().filter(function (x) { return estSport(x) && !x.seance; }).map(function (x) { return x.id; }));
+      toast("Claude détaille tes séances…"); break;
+    case "proposer-recettes": proposerRecettes(); break;
+    case "vider-conseils": conseils().forEach(function (x) { supprimerItem(x.id); }); break;
+    case "garder-conseil": if (it) { garderConseil(it); toast("Ajoutée à tes recettes"); } break;
     case "effacer-frigo": ICI.rec.frigo = ""; rendreBientot(); break;
 
     case "toggle-tout": ICI.tout[d.k] = !ICI.tout[d.k]; ICI.limite = 60; rendreBientot(); break;

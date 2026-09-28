@@ -33,7 +33,7 @@ function avecFocus(racineEl, fn) {
   }
 }
 
-var VUES = { accueil: vueAccueil, recettes: vueRecettes, collections: vueCollections, tout: vueTout, categories: vueCategories, reglages: vueReglages };
+var VUES = { accueil: vueAccueil, recettes: vueRecettes, sport: vueSport, collections: vueCollections, tout: vueTout, categories: vueCategories, reglages: vueReglages };
 
 function banniereAnalyse() {
   var b = $("#banniere");
@@ -134,6 +134,9 @@ function allerA(v) {
     window.scrollTo(0, 0);
   }
   try { localStorage.setItem(LS_VUE, v); } catch (e) {}
+  // À l'ouverture : photos et traductions des recettes, détail des séances.
+  if (v === "recettes" && Store.pret) setTimeout(autoRecettes, 300);
+  if (v === "sport" && Store.pret) setTimeout(autoSport, 300);
   if (location.hash !== "#" + v) { try { history.replaceState(null, "", "#" + v); } catch (e) {} }
   rendreBientot();
 }
@@ -176,10 +179,18 @@ document.addEventListener("click", function (ev) {
     case "voir-favoris": voirTout({ fav: true }); break;
     case "voir-tout": voirTout({}); break;
 
-    case "filtre-rec":
-      var f = ICI.rec.filtres, i = f.indexOf(d.f);
-      if (i >= 0) f.splice(i, 1); else f.push(d.f);
-      rendreBientot(); break;
+    case "rec-onglet": ICI.rec.onglet = d.o; rendreBientot(); break;
+    case "apercus-recettes": lancerApercus(tousItems().filter(function (x) { return estRecette(x) && apercuPossible(x); }).map(function (x) { return x.id; })); break;
+    case "traduire-recettes":
+      var ang = tousItems().filter(estAnglais);
+      ang.forEach(function (x) { x.tradTentee = true; });
+      lancerAnalyse(ang.map(function (x) { return x.id; })); toast("Claude traduit " + pluriel(ang.length, "recette") + "…"); break;
+    case "detailler-seances":
+      lancerAnalyse(tousItems().filter(function (x) { return estSport(x) && !x.seance; }).map(function (x) { return x.id; }));
+      toast("Claude détaille tes séances…"); break;
+    case "proposer-recettes": proposerRecettes(); break;
+    case "vider-conseils": conseils().forEach(function (x) { supprimerItem(x.id); }); break;
+    case "garder-conseil": if (it) { garderConseil(it); toast("Ajoutée à tes recettes"); } break;
     case "effacer-frigo": ICI.rec.frigo = ""; rendreBientot(); break;
 
     case "toggle-tout": ICI.tout[d.k] = !ICI.tout[d.k]; ICI.limite = 60; rendreBientot(); break;

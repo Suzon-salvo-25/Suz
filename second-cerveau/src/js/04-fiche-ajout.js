@@ -21,11 +21,14 @@ function ficheHTML(it) {
     '<div class="meta">' + badgePlat(it) + (it.createur ? '<span>@' + esc(it.createur.replace(/^@/, "")) + '</span>' : "") +
       (it.ajoute ? '<span>· enregistré le ' + dateCourte(it.ajoute) + '</span>' : '<span>· ajouté le ' + dateCourte(it.importe) + '</span>') + '</div>' +
     (it.resume ? '<p class="resume">' + esc(it.resume) + '</p>' : "") +
+    (it.conseil ? '<p class="aide" style="margin-top:10px">Recette conseillée par Claude' + (it.origine ? ' (cuisine ' + esc(it.origine) + ')' : "") + ', issue de TheMealDB.</p>' +
+      '<div class="fiche-actions" style="margin-top:10px"><button type="button" class="btn go sm" data-action="garder-conseil" data-id="' + esc(it.id) + '">Garder dans mes recettes</button></div>' : "") +
     (it.demo ? '<p class="aide" style="margin-top:10px">Exemple de démonstration : il ne correspond à aucune publication réelle.</p>' : "") +
     '<div class="fiche-actions">' +
       (codeInstagram(it) ? '<a class="btn go sm" href="' + esc(lienOuvrir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir dans Instagram ↗</a>' +
           '<a class="btn ghost sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Voir le Reel ↗</a>'
-        : it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir sur ' + esc(nomPlat(it.plateforme)) + ' ↗</a>' : "") +
+        : it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">' +
+          (it.conseil || it.source === "conseil" ? (it.plateforme === "youtube" ? "Voir la vidéo ↗" : "Voir la recette d'origine ↗") : "Ouvrir sur " + esc(nomPlat(it.plateforme)) + " ↗") + '</a>' : "") +
       (it.url ? '<button type="button" class="btn ghost sm" data-action="copier-lien" data-id="' + esc(it.id) + '">Copier le lien</button>' : "") +
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +
       (ICI.ficheTitre ? "" : '<button type="button" class="btn ghost sm" data-action="edit-titre">Renommer</button>') +
@@ -37,6 +40,7 @@ function ficheHTML(it) {
   if (r) {
     h += '<section class="bloc recette"><h3><span class="illu-mini st-fraise" aria-hidden="true" style="margin:0"></span>' + esc(r.nom || "La recette") +
       (r.source === "deduit" ? ' <span class="tag estime">reconstituée</span>' : "") + '</h3>';
+    if (it.astuce) h += '<p style="font-size:.9rem"><b>Astuce healthy :</b> ' + esc(it.astuce) + '</p>';
     if (r.source === "deduit") h += '<p class="avert">Recette reconstituée par Claude à partir du nom du plat : la vidéo peut différer. Colle la légende pour une version fidèle.</p>';
     var chiffres = [];
     if (r.temps) chiffres.push(["Temps", r.temps + " min"]);
@@ -62,6 +66,34 @@ function ficheHTML(it) {
         (n.lipides ? '<span><b>' + n.lipides + '</b> g lipides</span>' : "") + '<span class="aide">par portion, ordre de grandeur calculé sans pesée</span></p>';
     }
     h += '</section>';
+  }
+
+  // --- la séance de sport
+  var s = it.seance;
+  if (s) {
+    h += '<section class="bloc recette"><h3><span class="illu-mini st-ballon" aria-hidden="true" style="margin:0"></span>' + esc(s.nom || "La séance") +
+      (s.source === "deduit" ? ' <span class="tag estime">reconstituée</span>' : "") + '</h3>';
+    var cs = [];
+    if (s.duree) cs.push(["Durée", s.duree + " min"]);
+    if (s.niveau) cs.push(["Niveau", s.niveau]);
+    if (s.type) cs.push(["Type", s.type]);
+    if (s.tours) cs.push(["Tours", s.tours]);
+    cs.push(["Matériel", (s.materiel || []).length ? s.materiel.join(", ") : "Aucun"]);
+    h += '<div class="rec-chiffres">' + cs.map(function (x) { return '<div><span class="lab">' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>'; }).join("") + '</div>';
+    if ((s.muscles || []).length) h += '<div class="chips">' + s.muscles.map(function (m) { return '<span class="chip doux">' + esc(m) + '</span>'; }).join("") + '</div>';
+    if (s.echauffement) h += '<p style="font-size:.92rem"><b>Échauffement :</b> ' + esc(s.echauffement) + '</p>';
+    if ((s.exercices || []).length) {
+      h += '<div><p class="lab" style="margin-bottom:6px">Exercices</p><ol class="exos-liste">' + s.exercices.map(function (e) {
+        var dose = [e.series ? e.series + " × " + (e.reps || "") : e.reps, e.repos ? "repos " + e.repos : null].filter(Boolean).join(" · ");
+        return '<li><div class="exo-l"><b>' + esc(e.nom) + '</b>' + (dose ? '<span class="dose">' + esc(dose) + '</span>' : "") + '</div>' +
+          (e.conseil ? '<p class="aide" style="margin-top:2px">' + esc(e.conseil) + '</p>' : "") + '</li>';
+      }).join("") + '</ol></div>';
+    }
+    if (s.source === "deduit") h += '<p class="avert">Séance reconstituée par Claude : la vidéo peut différer. Colle la légende pour une version fidèle.</p>';
+    h += '</section>';
+  } else if (parentsItem(it).indexOf("sport") >= 0 && iaDispo()) {
+    h += '<section class="bloc"><h3>La séance</h3><p class="aide">Le détail des exercices n\'a pas encore été extrait.</p>' +
+      '<div><button type="button" class="btn go sm" data-action="reanalyser" data-id="' + esc(it.id) + '">Détailler avec Claude</button></div></section>';
   }
 
   // --- le lieu
@@ -500,7 +532,16 @@ function exemples() {
       resume: "Robe noire en satin : avec baskets le jour, blazer au bureau, sandales à talons le soir.", tagsAuto: ["robe noire", "satin", "capsule"]
     }),
     E("abdos", "tiktok", "video", "exemple.sport", 4, "10 minutes d'abdos sans matériel", ["sport:exercices", "sport:programmes"], {
-      resume: "Gainage, crunchs, relevés de jambes et mountain climbers : 40 secondes d'effort, 20 de repos.", tagsAuto: ["abdos", "gainage", "sans materiel", "maison"]
+      resume: "Gainage, crunchs, relevés de jambes et mountain climbers : 40 secondes d'effort, 20 de repos.", tagsAuto: ["abdos", "gainage", "sans materiel", "maison"],
+      seance: { nom: "Abdos express sans matériel", type: "Renforcement", duree: 10, niveau: "Débutant", materiel: [], muscles: ["Abdominaux", "Obliques", "Gainage"],
+        echauffement: "1 minute de montées de genoux sur place.", tours: 2, source: "legende",
+        exercices: [
+          { nom: "Planche", series: null, reps: "40 s", repos: "20 s", conseil: "Bassin aligné, ne creuse pas le dos." },
+          { nom: "Crunchs", series: null, reps: "40 s", repos: "20 s", conseil: null },
+          { nom: "Relevés de jambes", series: null, reps: "40 s", repos: "20 s", conseil: "Plaque le bas du dos au sol." },
+          { nom: "Mountain climbers", series: null, reps: "40 s", repos: "20 s", conseil: null },
+          { nom: "Planche latérale", series: null, reps: "20 s par côté", repos: "20 s", conseil: null }
+        ] }
     }),
     E("boucles", "instagram", "reel", "exemple.beaute", 11, "Routine pour cheveux bouclés", ["beaute:cheveux"], {
       tagsAuto: ["boucles", "cheveux", "routine"]

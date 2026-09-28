@@ -167,17 +167,6 @@ function aCat(it, nomSous) {
   return c ? catsValides(it).indexOf(c.id) >= 0 : false;
 }
 function aRepas(it, r) { return !!(it.recette && (it.recette.repas || []).indexOf(r) >= 0); }
-var FILTRES_REC = [
-  ["petit-dejeuner", "Petit-déjeuner", function (it) { return aRepas(it, "petit-dejeuner") || aCat(it, "Petit-déjeuner"); }],
-  ["dejeuner", "Déjeuner", function (it) { return aRepas(it, "dejeuner") || aCat(it, "Déjeuner"); }],
-  ["diner", "Dîner", function (it) { return aRepas(it, "diner") || aCat(it, "Dîner"); }],
-  ["dessert", "Dessert", function (it) { return aRepas(it, "dessert") || aCat(it, "Desserts"); }],
-  ["aperitif", "Apéritif", function (it) { return aRepas(it, "aperitif") || aCat(it, "Apéritifs"); }],
-  ["healthy", "Healthy", function (it) { return (it.recette && it.recette.healthy === true) || aCat(it, "Healthy"); }],
-  ["rapide", "Rapide", function (it) { return aCat(it, "Recettes rapides") || !!(it.recette && it.recette.temps && it.recette.temps <= 20); }],
-  ["vegetarien", "Végétarien", function (it) { return !!(it.recette && it.recette.vegetarien === true); }],
-  ["moins30", "Moins de 30 min", function (it) { return !!(it.recette && it.recette.temps && it.recette.temps < 30); }]
-];
 
 // « J'ai du poulet, des courgettes et du parmesan » → [poulet, courgette, parmesan]
 function ingredientsDemandes(txt) {
@@ -216,7 +205,7 @@ var ICI = {
   tout: { texte: "", plat: "", cat: "", createur: "", type: "", periode: "", coll: "", fav: false, acompleter: false, doublons: false, tri: "recent" },
   limite: 60,
   sel: new Set(), modeSel: false, barre: null,
-  rec: { filtres: [], frigo: "" },
+  rec: { onglet: "miennes", frigo: "" },
   catEdit: null, collEdit: null,
   confirm: null,
   onb: 1,
@@ -224,7 +213,10 @@ var ICI = {
   ajout: { onglet: "liens", plat: "instagram", liens: "", legende: "", note: "", capture: null, lecture: null, likes: false }
 };
 
-function tousItems() { return Object.keys(Store.items).map(function (k) { return Store.items[k]; }); }
+// Les recettes conseillées par Claude vivent à part : elles n'apparaissent que
+// dans Recettes › Conseillées, tant qu'on ne les garde pas.
+function tousItems() { return Object.keys(Store.items).map(function (k) { return Store.items[k]; }).filter(function (it) { return !it.conseil; }); }
+function conseils() { return Object.keys(Store.items).map(function (k) { return Store.items[k]; }).filter(function (it) { return it.conseil; }); }
 function recents(liste) { return liste.slice().sort(function (a, b) { return (b.importe || 0) - (a.importe || 0) || (b.ajoute || 0) - (a.ajoute || 0); }); }
 function aCompleter(it) { return !catsValides(it).length || (it.analyse && it.analyse.etat === "vide"); }
 
@@ -257,6 +249,7 @@ function vis(it, ratio) {
   var etat = "";
   if (IA.file.indexOf(it.id) >= 0 || (it.analyse && it.analyse.etat === "attente" && IA.enCours)) etat = '<span class="etat ia">Analyse…</span>';
   else if (it.demo) etat = '<span class="etat">Exemple</span>';
+  else if (it.conseil) etat = '<span class="etat">' + (/youtube\.com/.test(it.url || "") ? "▶ Vidéo" : "Conseillée") + '</span>';
   else if (aCompleter(it)) etat = '<span class="etat">À compléter</span>';
   return '<span class="pep-vis t-' + teinteCat(c) + '" style="--ar:' + ar + '">' +
     (it.vignette ? '<img src="' + esc(it.vignette) + '" alt="" loading="lazy">' : '<span class="illu st-' + stickerItem(it, c) + '" aria-hidden="true"></span>') +
@@ -444,31 +437,94 @@ function resultatsRecherche() {
    RECETTES
    ================================================================== */
 
+// Une recette est « en anglais » quand ses ingrédients et étapes en ont l'air.
+var MOTS_ANGLAIS = " the and with add mix bake oven cup cups tbsp tsp until into then heat stir serve chopped minced sliced flour sugar butter eggs chicken salt pepper water ";
+function estAnglais(it) {
+  var r = it.recette;
+  if (!r) return false;
+  var m = mots([r.nom, (r.ingredients || []).map(function (i) { return i.nom + " " + i.qte; }).join(" "), (r.etapes || []).join(" ")].join(" "));
+  var n = 0;
+  m.forEach(function (w) { if (MOTS_ANGLAIS.indexOf(" " + w + " ") >= 0) n++; });
+  return m.length > 0 && n / m.length > .08 && n >= 3;
+}
+
 function vueRecettes() {
+  var onglet = ICI.rec.onglet || "miennes";
+  var h = '<div class="seg" style="margin-bottom:18px" role="tablist">' +
+    '<button type="button" data-action="rec-onglet" data-o="miennes" aria-pressed="' + (onglet === "miennes") + '">Mes recettes</button>' +
+    '<button type="button" data-action="rec-onglet" data-o="conseils" aria-pressed="' + (onglet === "conseils") + '">Conseillées healthy</button></div>';
+  return h + (onglet === "conseils" ? vueConseils() : vueMesRecettes());
+}
+
+function vueMesRecettes() {
   var toutes = recents(tousItems().filter(estRecette));
-  var f = ICI.rec.filtres;
-  var liste = toutes.filter(function (it) {
-    return f.every(function (k) { var d = FILTRES_REC.filter(function (x) { return x[0] === k; })[0]; return d ? d[2](it) : true; });
-  });
   var demandes = ingredientsDemandes(ICI.rec.frigo);
   var avecFrigo = demandes.length > 0;
-  var lignes = liste.map(function (it) { return { it: it, m: avecFrigo ? correspondanceFrigo(it, demandes) : null }; });
+  var lignes = toutes.map(function (it) { return { it: it, m: avecFrigo ? correspondanceFrigo(it, demandes) : null }; });
   if (avecFrigo) {
     lignes = lignes.filter(function (l) { return l.m; });
     lignes.sort(function (a, b) { return b.m.nbUtilises - a.m.nbUtilises || a.m.manque.length - b.m.manque.length; });
   }
-  var h = '<div class="card"><header><span class="tache t-peche"><span class="illu st-pasteque" aria-hidden="true"></span></span><h2>Qu\'est-ce que je cuisine ?</h2><span class="hint">Parmi mes recettes</span></header><div class="body">' +
-    '<form class="frigo" id="formFrigo"><input type="text" id="frigo" autocomplete="off" aria-label="Ingrédients disponibles" placeholder="J\'ai du poulet, des courgettes et du parmesan" value="' + esc(ICI.rec.frigo) + '">' +
-    (ICI.rec.frigo ? '<button type="button" class="btn ghost" data-action="effacer-frigo">Effacer</button>' : "") + '</form>' +
-    '<p class="aide" style="margin-top:8px">Sel, poivre, huile, sucre, farine et beurre sont comptés comme déjà dans le placard.</p>' +
-    '<div class="chips" style="margin-top:14px">' + FILTRES_REC.map(function (x) {
-      return '<button type="button" class="chip" data-action="filtre-rec" data-f="' + x[0] + '" aria-pressed="' + (f.indexOf(x[0]) >= 0) + '">' + x[1] + '</button>';
-    }).join("") + '</div></div></div>';
-
+  var h = '<form class="frigo" id="formFrigo" style="margin-bottom:6px"><input type="text" id="frigo" autocomplete="off" aria-label="Ingrédients disponibles" placeholder="J\'ai du poulet, des courgettes…" value="' + esc(ICI.rec.frigo) + '">' +
+    (ICI.rec.frigo ? '<button type="button" class="btn ghost" data-action="effacer-frigo">Effacer</button>' : "") + '</form>';
+  var sansImage = apercusDispo() ? toutes.filter(function (it) { return apercuPossible(it); }).length : 0;
+  var anglais = iaDispo() ? toutes.filter(estAnglais).length : 0;
+  if (sansImage && !(Apercus.enCours || Apercus.file.length)) {
+    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-poisson" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(sansImage, "recette") + ' sans photo.</span>' +
+      '<button type="button" class="btn go sm" data-action="apercus-recettes">Récupérer les photos</button></div>';
+  }
+  if (anglais && !IA.enCours) {
+    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-etoile" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(anglais, "recette") + ' en anglais.</span>' +
+      '<button type="button" class="btn go sm" data-action="traduire-recettes">Traduire en français</button></div>';
+  }
   h += '<div class="titre-sec"><h2>' + (avecFrigo ? "Avec ce que tu as" : "Mes recettes") + '</h2><span class="lab">' + pluriel(lignes.length, "recette") + (toutes.length !== lignes.length ? " sur " + toutes.length : "") + '</span></div>';
   if (!toutes.length) return h + vide("fraise", "Aucune recette pour l'instant. Enregistre une vidéo de cuisine, elle arrivera ici avec ses ingrédients.");
-  if (!lignes.length) return h + vide("framboise", avecFrigo ? "Aucune de tes recettes n'utilise ces ingrédients." : "Aucune recette ne coche tous ces filtres.");
+  if (!lignes.length) return h + vide("framboise", "Aucune de tes recettes n'utilise ces ingrédients.");
   return h + '<div class="grille-rec">' + lignes.map(function (l) { return carteRecette(l.it, l.m); }).join("") + '</div>';
+}
+
+function vueConseils() {
+  var liste = recents(conseils());
+  var h = '<p class="prose" style="margin-bottom:14px">Des recettes healthy choisies par Claude dans une base de vraies recettes, avec photo et vidéo quand il y en a, traduites et adaptées. Garde celles qui te plaisent : elles rejoignent tes recettes.</p>';
+  if (!iaDispo()) return h + vide("verre", "Claude n'est pas disponible dans cette vue : il en faut un pour choisir et traduire les recettes.");
+  h += '<div class="boutons" style="margin:0 0 6px">' + (Conseils.enCours
+      ? '<button type="button" class="btn go" disabled>Claude choisit tes recettes…</button>'
+      : '<button type="button" class="btn go" data-action="proposer-recettes">' + (liste.length ? "M'en proposer d'autres" : "Me proposer des recettes healthy") + '</button>') +
+    (liste.length && !Conseils.enCours ? '<button type="button" class="btn ghost" data-action="vider-conseils">Tout effacer</button>' : "") + '</div>';
+  if (Conseils.erreur) h += '<div class="ia-bloc erreur"><span class="illu-mini st-grenade" aria-hidden="true"></span><span>' + esc(Conseils.erreur) + '</span></div>';
+  if (!liste.length) return h + (Conseils.enCours ? "" : vide("pamplemousse", "Touche le bouton : Claude t'en propose quelques-unes, en tenant compte de tes goûts."));
+  return h + '<div class="grille-rec" style="margin-top:16px">' + liste.map(function (it) { return carteRecette(it); }).join("") + '</div>';
+}
+
+/* ==================================================================
+   SPORT
+   ================================================================== */
+
+function estSport(it) { return !!it.seance || parentsItem(it).indexOf("sport") >= 0; }
+
+function vueSport() {
+  var toutes = recents(tousItems().filter(estSport));
+  var h = '';
+  var sansDetail = iaDispo() ? toutes.filter(function (it) { return !it.seance; }).length : 0;
+  if (sansDetail && !IA.enCours) {
+    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap;margin-top:0"><span class="illu-mini st-ballon" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(sansDetail, "séance") + ' sans le détail des exercices.</span>' +
+      '<button type="button" class="btn go sm" data-action="detailler-seances">Détailler avec Claude</button></div>';
+  }
+  h += '<div class="titre-sec"' + (h ? "" : ' style="margin-top:0"') + '><h2>Mes séances</h2><span class="lab">' + pluriel(toutes.length, "séance") + '</span></div>';
+  if (!toutes.length) return h + vide("ballon", "Aucune séance pour l'instant. Enregistre une vidéo d'exercices, elle arrivera ici avec le détail.");
+  return h + '<div class="grille-rec">' + toutes.map(carteSeance).join("") + '</div>';
+}
+
+function carteSeance(it) {
+  var s = it.seance || {};
+  var ex = (s.exercices || []).map(function (e) { return e.nom; }).slice(0, 4);
+  return '<button type="button" class="rec" data-action="fiche" data-id="' + esc(it.id) + '">' + vis(it, "4 / 3") +
+    '<span class="corps"><h3>' + esc(s.nom || it.titre) + '</h3><span class="infos">' +
+      (s.duree ? '<span><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/></svg>' + s.duree + ' min</span>' : "") +
+      (s.niveau ? '<span>' + esc(s.niveau) + '</span>' : "") + (s.type ? '<span>' + esc(s.type) + '</span>' : "") +
+    '</span>' +
+    (ex.length ? '<span class="ingr">' + esc(ex.join(" · ")) + '</span>' : '<span class="ingr">Exercices pas encore détaillés.</span>') +
+    '</span></button>';
 }
 
 function carteRecette(it, m) {

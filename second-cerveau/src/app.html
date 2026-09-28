@@ -205,7 +205,7 @@ a { color: inherit; }
 
 /* ---------- onglets ---------- */
 .tabs {
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 4px; margin-bottom: 26px; padding: 4px;
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
 }
@@ -541,6 +541,10 @@ dialog.feuille::backdrop { background: var(--voile); }
 .ingr-liste input:checked + span { text-decoration: line-through; color: var(--ink-faint); }
 .ingr-liste .q { color: var(--ink-faint); font-size: .84rem; margin-left: auto; white-space: nowrap; }
 .etapes { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: .94rem; line-height: 1.5; }
+.exos-liste { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 9px; }
+.exos-liste li::marker { font-family: var(--f-display); font-weight: 700; color: var(--peche); }
+.exo-l { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: .94rem; }
+.exo-l .dose { font-size: .84rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .etapes li::marker { font-family: var(--f-display); font-weight: 700; color: var(--peche); }
 .nutri { font-size: .86rem; color: var(--ink-soft); display: flex; gap: 6px 16px; flex-wrap: wrap; align-items: center; font-variant-numeric: tabular-nums; }
 .nutri b { color: var(--ink); }
@@ -654,7 +658,9 @@ body.selection .fab { display: none; }
 }
 @media (max-width: 540px) {
   body { font-size: 15px; }
-  .tab { font-size: .8rem; padding: 9px 2px; gap: 4px; }
+  .tab { font-size: .76rem; padding: 9px 1px; gap: 4px; letter-spacing: -.01em; }
+  .tabs { gap: 2px; padding: 3px; }
+  .rec-chiffres div:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .tab .compte { display: none; }
   .mur { column-width: 108px; column-gap: 8px; }
   .mur .pep-vis { max-height: 150px; }
@@ -723,6 +729,7 @@ body.selection .fab { display: none; }
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button type="button" class="tab" role="tab" data-vue="accueil" aria-selected="true"><span class="txt">Accueil</span></button>
     <button type="button" class="tab" role="tab" data-vue="recettes" aria-selected="false"><span class="txt">Recettes</span><span class="compte" id="nbRec"></span></button>
+    <button type="button" class="tab" role="tab" data-vue="sport" aria-selected="false"><span class="txt">Sport</span></button>
     <button type="button" class="tab" role="tab" data-vue="collections" aria-selected="false"><span class="txt">Collections</span><span class="compte" id="nbColl"></span></button>
   </nav>
 

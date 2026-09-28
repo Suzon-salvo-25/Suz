@@ -299,6 +299,7 @@ var CONSIGNE_ANALYSE = [
   "Tu ranges les contenus qu'une personne francophone a enregistrés sur les réseaux sociaux (Instagram, TikTok…), pour qu'elle les retrouve sans les revoir.",
   "Pour chaque élément, déduis de quoi il parle à partir des seules informations fournies : lien, plateforme, type, créateur, légende, note personnelle, collection d'origine, image éventuelle.",
   "N'invente aucun fait. Si l'information manque (souvent : seul le lien et le créateur sont connus), reste général, laisse les champs incertains à null et baisse la confiance.",
+  "Tout ce que tu écris est en français, même quand la légende est en anglais ou dans une autre langue : traduis le titre, le résumé, la recette (nom, ingrédients, quantités en unités françaises, étapes) et la séance de sport.",
   "",
   "Catégories existantes (Parent > sous-catégories) :",
   "@@TAXO@@",
@@ -311,11 +312,12 @@ var CONSIGNE_ANALYSE = [
   "- resume : une ou deux phrases utiles (ce qu'on y apprend), ou null.",
   "- tags : 3 à 8 mots-clés en minuscules (ingrédients, lieux, styles, marques citées…).",
   "- recette : seulement si c'est une recette, sinon null. {\"nom\", \"ingredients\": [{\"nom\", \"qte\"}], \"etapes\": [phrases courtes à l'impératif], \"temps\": minutes au total ou null, \"difficulte\": \"Facile\"|\"Moyen\"|\"Difficile\"|null, \"repas\": sous-ensemble de [\"petit-dejeuner\",\"dejeuner\",\"diner\",\"dessert\",\"aperitif\",\"gouter\"], \"portions\": nombre ou null, \"vegetarien\": bool ou null, \"healthy\": bool ou null, \"nutrition\": {\"kcal\",\"proteines\",\"glucides\",\"lipides\"} par portion en estimation grossière ou null si trop incertain, \"source\": \"legende\" si la recette est écrite dans la légende ou visible sur l'image, \"deduit\" si tu la reconstitues à partir du nom du plat}.",
+  "- seance : seulement pour un contenu de sport (exercices, entraînement, programme, étirements), sinon null. {\"nom\", \"type\": \"Renforcement\"|\"Cardio\"|\"HIIT\"|\"Yoga\"|\"Pilates\"|\"Mobilité\"|\"Course\"|\"Autre\", \"duree\": minutes au total ou null, \"niveau\": \"Débutant\"|\"Intermédiaire\"|\"Avancé\"|null, \"materiel\": [\"…\"] ([] si sans matériel), \"muscles\": [zones travaillées], \"echauffement\": phrase ou null, \"exercices\": [{\"nom\", \"series\": nombre ou null, \"reps\": \"12\" ou \"30 s\" ou null, \"repos\": \"30 s\" ou null, \"conseil\": phrase courte ou null}], \"tours\": nombre de tours du circuit ou null, \"source\": \"legende\" si c'est écrit dans la légende ou visible sur l'image, \"deduit\" sinon}.",
   "- lieu : pour un restaurant, un hôtel, une adresse : {\"nom\", \"ville\", \"pays\"} (champs inconnus à null), sinon null.",
   "- type : garde celui fourni sauf si l'image montre clairement autre chose (\"reel\", \"publication\", \"carrousel\", \"video\", \"short\").",
   "- confiance : \"haute\", \"moyenne\" ou \"basse\".",
   "",
-  "Réponds uniquement en JSON : {\"resultats\": [{\"id\", \"titre\", \"resume\", \"type\", \"categories\", \"tags\", \"recette\", \"lieu\", \"confiance\"}]}, un résultat par élément, avec l'id reçu.",
+  "Réponds uniquement en JSON : {\"resultats\": [{\"id\", \"titre\", \"resume\", \"type\", \"categories\", \"tags\", \"recette\", \"seance\", \"lieu\", \"confiance\"}]}, un résultat par élément, avec l'id reçu.",
   "",
   "Éléments :"
 ].join("\n");
@@ -445,9 +447,25 @@ function appliquerAnalyse(r) {
   if (r.type && TYPES[r.type]) it.type = r.type;
   it.tagsAuto = (r.tags || []).map(function (t) { return norm(t).replace(/[^a-z0-9 -]/g, "").trim(); }).filter(Boolean).slice(0, 8);
   it.recette = r.recette && r.recette.ingredients ? nettoyerRecette(r.recette) : (cats.some(function (c) { return parentDe(c) === "recettes"; }) ? it.recette || null : null);
+  it.seance = r.seance && r.seance.exercices && r.seance.exercices.length ? nettoyerSeance(r.seance) : (it.seance || null);
   it.lieu = r.lieu && (r.lieu.nom || r.lieu.ville) ? { nom: r.lieu.nom || null, ville: r.lieu.ville || null, pays: r.lieu.pays || null } : null;
   it.analyse = { etat: it.cats.length ? "fait" : "vide", par: "ia", conf: r.confiance || "moyenne", date: Date.now(), titreManuel: it.analyse && it.analyse.titreManuel };
   sauverItem(it);
+}
+
+function nettoyerSeance(s) {
+  var num = function (x) { var n = parseFloat(x); return isFinite(n) && n > 0 ? Math.round(n) : null; };
+  var txt = function (x, n) { return x == null ? null : String(x).slice(0, n || 120); };
+  return {
+    nom: sansEmoji(s.nom || "").slice(0, 80), type: txt(s.type, 30), duree: num(s.duree), niveau: txt(s.niveau, 20),
+    materiel: (s.materiel || []).slice(0, 10).map(function (m) { return String(m).slice(0, 40); }),
+    muscles: (s.muscles || []).slice(0, 10).map(function (m) { return String(m).slice(0, 40); }),
+    echauffement: txt(s.echauffement, 300), tours: num(s.tours),
+    exercices: (s.exercices || []).slice(0, 30).map(function (e) {
+      return typeof e === "string" ? { nom: e } : { nom: txt(e.nom, 80) || "", series: num(e.series), reps: txt(e.reps, 30), repos: txt(e.repos, 30), conseil: txt(e.conseil, 200) };
+    }).filter(function (e) { return e.nom; }),
+    source: s.source === "legende" ? "legende" : "deduit"
+  };
 }
 
 function nettoyerRecette(r) {
