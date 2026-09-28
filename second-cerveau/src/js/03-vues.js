@@ -328,7 +328,6 @@ function vide(sticker, texte) {
    ACCUEIL
    ================================================================== */
 
-var EXEMPLES_Q = ["recette avec des noisettes", "pâtes au poulet", "restaurant italien à Chicago", "robe noire", "exercices pour les abdos", "hôtel avec piscine", "truc que j'avais enregistré sur TikTok avec de l'avocat"];
 
 function vueAccueil() {
   var items = tousItems();
@@ -342,10 +341,7 @@ function vueAccueil() {
       '<button type="submit" class="btn go sm"' + (iaDispo() ? "" : ' title="Recherche locale"') + '>' + (iaDispo() ? "Demander" : "Chercher") + '</button>' +
     '</form>';
   if (!ICI.q) {
-    h += '<div class="exemples">' + EXEMPLES_Q.map(function (e) {
-      return '<button type="button" class="chip" data-action="exemple-q" data-q="' + esc(e) + '">« ' + esc(e) + ' »</button>';
-    }).join("") + '</div>';
-    h += '<p class="resume-ligne"><span><b>' + items.length + '</b> ' + (items.length > 1 ? "pépites" : "pépite") + '</span>' +
+    h += '<p class="resume-ligne" style="margin-top:12px"><span><b>' + items.length + '</b> ' + (items.length > 1 ? "pépites" : "pépite") + '</span>' +
       '<span><b>' + nbRec + '</b> ' + (nbRec > 1 ? "recettes" : "recette") + '</span>' +
       (nbAC ? '<button type="button" data-action="voir-acompleter">' + nbAC + ' à compléter</button>' : "") +
       '<span>' + (iaDispo() ? "Classement par Claude" : "Classement par règles locales") + '</span></p>';
