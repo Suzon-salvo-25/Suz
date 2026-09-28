@@ -541,8 +541,9 @@ function vueTout() {
     : t.cat && Store.cats[t.cat] ? (Store.cats[t.cat].parent && Store.cats[Store.cats[t.cat].parent] ? Store.cats[Store.cats[t.cat].parent].nom + " › " : "") + Store.cats[t.cat].nom
     : t.fav ? "Mes favoris" : t.acompleter ? "À compléter" : "Toutes mes pépites";
   var h = '<div class="titre-sec" style="margin-top:0"><h2>' + esc(titre) + '</h2><button type="button" class="lien" data-action="vue" data-vue="' + (t.coll ? "collections" : "accueil") + '">‹ Retour</button></div>' +
+    '<input type="text" id="toutTexte" class="filtre-mots" autocomplete="off" aria-label="Filtrer par mots" placeholder="Filtrer par mots…" value="' + esc(t.texte) + '">' +
+    '<details class="plus-filtres"' + (t.plat || t.createur || t.type || t.periode || t.tri !== "recent" ? " open" : "") + '><summary>Filtres et tri</summary>' +
     '<div class="filtres">' +
-    '<input type="text" id="toutTexte" autocomplete="off" aria-label="Filtrer par mots" placeholder="Filtrer par mots…" value="' + esc(t.texte) + '">' +
     '<select id="fPlat" aria-label="Plateforme"><option value="">Toutes les plateformes</option>' + options(Object.keys(plats).map(function (k) { return [k, nomPlat(k)]; }), t.plat) + '</select>' +
     '<select id="fCat" aria-label="Catégorie"><option value="">Toutes les catégories</option>' + optionsCats(t.cat, true) + '</select>' +
     '<select id="fCreateur" aria-label="Créateur"><option value="">Tous les créateurs</option>' + options(listeCreateurs.map(function (c) { return [c, "@" + c + " (" + createurs[c] + ")"]; }), t.createur) + '</select>' +
@@ -550,7 +551,7 @@ function vueTout() {
     '<select id="fPeriode" aria-label="Date"><option value="">Toutes les dates</option>' + options([["7", "7 derniers jours"], ["30", "30 derniers jours"], ["365", "Cette année"], ["vieux", "Il y a plus d'un an"]], t.periode) + '</select>' +
     (colls.length ? '<select id="fColl" aria-label="Collection"><option value="">Toutes les collections</option>' + options(colls.map(function (c) { return [c.id, c.nom]; }), t.coll) + '</select>' : "") +
     '<select id="fTri" aria-label="Tri">' + options([["recent", "Plus récents"], ["ancien", "Plus anciens"], ["titre", "Par titre"]], t.tri) + '</select>' +
-  '</div>' +
+  '</div></details>' +
   '<div class="chips" style="margin-bottom:16px">' +
     '<button type="button" class="chip" data-action="toggle-tout" data-k="fav" aria-pressed="' + t.fav + '">Favoris</button>' +
     '<button type="button" class="chip" data-action="toggle-tout" data-k="acompleter" aria-pressed="' + t.acompleter + '">À compléter</button>' +
