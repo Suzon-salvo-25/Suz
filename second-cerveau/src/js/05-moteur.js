@@ -214,6 +214,13 @@ document.addEventListener("click", function (ev) {
       });
       supprimerCollDoc(d.id); ICI.collEdit = null; journal("Collection « " + cn + " » supprimée."); break;
 
+    case "copier-lien":
+      if (!it || !it.url) break;
+      var lien = it.url;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(lien).then(function () { toast("Lien copié"); }, function () { toast(lien); });
+      } else toast(lien);
+      break;
     case "favori":
       if (!it) break;
       it.favori = !it.favori; sauverItem(it); break;

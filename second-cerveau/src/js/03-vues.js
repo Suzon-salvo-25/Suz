@@ -264,9 +264,39 @@ function vis(it, ratio) {
     (it.favori ? '<span class="fav" aria-label="Favori"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7C19.5 15.9 12 20.5 12 20.5z"/></svg></span>' : "") +
     '</span>';
 }
+// Liens Instagram : un lien instagram.com/reel/… passe par l'appli Instagram,
+// qui ouvre souvent son fil de Reels au lieu du bon. Deux contournements :
+// - « #weblink » : Instagram l'exclut de ses liens universels, la page
+//   d'intégration du Reel s'ouvre donc dans le navigateur, sans connexion ;
+// - instagram://media?id=… : le numéro du Reel, tiré de son code, ouvre
+//   l'appli directement sur lui.
+var ALPHABET_IG = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function codeInstagram(it) {
+  if (!it || it.plateforme !== "instagram") return null;
+  var m = String(it.url || "").match(/instagram\.com\/(?:[\w.]+\/)?(?:p|reel|reels|tv)\/([\w-]+)/i);
+  return m ? m[1] : (/^ig-/.test(it.id) ? it.id.slice(3) : null);
+}
+function numeroInstagram(code) {
+  if (typeof BigInt !== "function" || !code) return null;
+  var n = BigInt(0), b = BigInt(64);
+  for (var i = 0; i < Math.min(code.length, 11); i++) {
+    var k = ALPHABET_IG.indexOf(code[i]);
+    if (k < 0) return null;
+    n = n * b + BigInt(k);
+  }
+  return n.toString();
+}
+function lienVoir(it) {
+  var c = codeInstagram(it);
+  return c ? "https://www.instagram.com/p/" + c + "/embed/captioned/#weblink" : it.url;
+}
+function lienAppli(it) {
+  var n = numeroInstagram(codeInstagram(it));
+  return n ? "instagram://media?id=" + n : null;
+}
 function lienOrig(it, classe) {
   if (!it.url) return "";
-  return '<a class="' + (classe || "lien-orig") + '" href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
+  return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
 }
 function badgePlat(it) {
   var p = PLATEFORMES[it.plateforme] || PLATEFORMES.web;
