@@ -268,8 +268,8 @@ function vis(it, ratio) {
 // qui ouvre souvent son fil de Reels au lieu du bon. Deux contournements :
 // - « #weblink » : Instagram l'exclut de ses liens universels, la page
 //   d'intégration du Reel s'ouvre donc dans le navigateur, sans connexion ;
-// - instagram://media?id=… : le numéro du Reel, tiré de son code, ouvre
-//   l'appli directement sur lui.
+// - instagram://media?id=… (lienAppli) ouvrirait l'appli sur le bon Reel, mais
+//   l'appli Claude bloque ces liens vers une autre appli : il n'est pas affiché.
 var ALPHABET_IG = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 function codeInstagram(it) {
   if (!it || it.plateforme !== "instagram") return null;

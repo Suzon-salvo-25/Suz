@@ -2119,8 +2119,8 @@ function vis(it, ratio) {
 // qui ouvre souvent son fil de Reels au lieu du bon. Deux contournements :
 // - « #weblink » : Instagram l'exclut de ses liens universels, la page
 //   d'intégration du Reel s'ouvre donc dans le navigateur, sans connexion ;
-// - instagram://media?id=… : le numéro du Reel, tiré de son code, ouvre
-//   l'appli directement sur lui.
+// - instagram://media?id=… (lienAppli) ouvrirait l'appli sur le bon Reel, mais
+//   l'appli Claude bloque ces liens vers une autre appli : il n'est pas affiché.
 var ALPHABET_IG = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 function codeInstagram(it) {
   if (!it || it.plateforme !== "instagram") return null;
@@ -2629,7 +2629,6 @@ function ficheHTML(it) {
     (it.demo ? '<p class="aide" style="margin-top:10px">Exemple de démonstration : il ne correspond à aucune publication réelle.</p>' : "") +
     '<div class="fiche-actions">' +
       (it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">' + (codeInstagram(it) ? "Voir le Reel ↗" : "Ouvrir sur " + esc(nomPlat(it.plateforme)) + " ↗") + '</a>' : "") +
-      (lienAppli(it) ? '<a class="btn ghost sm" href="' + esc(lienAppli(it)) + '">Ouvrir dans l\'appli Instagram</a>' : "") +
       (it.url ? '<button type="button" class="btn ghost sm" data-action="copier-lien" data-id="' + esc(it.id) + '">Copier le lien</button>' : "") +
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +
       (ICI.ficheTitre ? "" : '<button type="button" class="btn ghost sm" data-action="edit-titre">Renommer</button>') +
