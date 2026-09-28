@@ -788,7 +788,7 @@ var PLATEFORMES = {
     api: [
       ["partiel", "Connexion officielle (OAuth)", "L'API Instagram n'accepte que les comptes professionnels (Business ou Créateur). Les comptes personnels ne peuvent plus se connecter depuis la fin de l'API Basic Display, le 4 décembre 2024."],
       ["non", "Publications enregistrées et collections", "Aucun point d'accès de l'API ne les expose, même pour un compte professionnel. Aucune appli ne peut les synchroniser automatiquement aujourd'hui."],
-      ["partiel", "Légende et miniature d'un post", "Possibles via oEmbed avec une appli Meta validée et un serveur. Cette page ne peut pas appeler Instagram elle-même."],
+      ["partiel", "Légende et image d'un post", "L'oEmbed officiel demande une appli Meta validée. L'appli lit à la place la page d'intégration publique du Reel via son serveur : auteur, légende et image, hors API officielle."],
       ["ok", "Export « Exporter vos informations »", "Donne le lien de chaque publication enregistrée, son auteur, la date et tes collections. Pas de légende ni d'image."],
       ["ok", "Partage d'un lien", "Partager › Copier le lien, puis coller ici. Tu peux ajouter la légende ou une capture pour une analyse complète."]
     ],
@@ -2173,6 +2173,12 @@ function vueAccueil() {
       '<button type="button" class="btn ghost" data-action="charger-exemples">Voir avec des exemples</button></div></div></div>';
   }
 
+  var sansApercu = apercusDispo() && !(Apercus.enCours || Apercus.file.length) ? aApercuManquant().length : 0;
+  if (sansApercu) {
+    h += '<div class="ia-bloc" style="margin-top:22px;align-items:center;flex-wrap:wrap"><span class="illu-mini st-poisson" aria-hidden="true"></span>' +
+      '<span style="flex:1 1 220px"><b>' + pluriel(sansApercu, "pépite") + ' sans image ni légende.</b> L\'appli peut les récupérer, puis les classer.</span>' +
+      '<button type="button" class="btn go sm" data-action="apercus-tous">Récupérer et classer</button></div>';
+  }
   var ps = parents();
   h += '<div class="titre-sec"><h2>Mes univers</h2><button type="button" class="lien" data-action="vue" data-vue="categories">Gérer les catégories</button></div>';
   h += '<div class="univers">' + ps.map(function (p, i) {
@@ -2508,9 +2514,8 @@ function vueReglages() {
 
   var manquants = aApercuManquant().length;
   h += '<div class="card"><header><span class="tache t-lavande b2"><span class="illu st-poisson" aria-hidden="true"></span></span><h2>Miniatures et légendes</h2><span class="hint">' + (apercusDispo() ? "Serveur actif" : "Indisponible ici") + '</span></header><div class="body">' +
-    '<p class="prose">Pour chaque vidéo TikTok, un petit serveur (projet Supabase « mes-pepites ») récupère la miniature, l\'auteur et la légende complète via le service oEmbed public de TikTok. Sur claude.ai, il passe par ton connecteur Supabase : la page n\'y lance qu\'une seule requête, celle des aperçus. ' +
-    'Pour Instagram, Meta exige une appli validée et un jeton : le serveur est prêt, il manque ce jeton.</p>' +
-    (apercusDispo() ? (manquants ? '<div class="boutons"><button type="button" class="btn go sm" data-action="apercus-tous">Récupérer ' + pluriel(manquants, "miniature") + '</button></div>' : '<p class="aide" style="margin-top:10px">Toutes tes vidéos TikTok ont déjà leur aperçu.</p>')
+    '<p class="prose">Un petit serveur (projet Supabase « mes-pepites ») récupère l\'image, l\'auteur et la légende complète de chaque contenu : pour TikTok via son service oEmbed public, pour Instagram via la page d\'intégration publique du Reel (hors API officielle : si Instagram la bloque un jour, l\'appli garde ce qu\'elle a). Sur claude.ai, il passe par ton connecteur Supabase, où la page ne lance qu\'une seule requête, celle des aperçus.</p>' +
+    (apercusDispo() ? (manquants ? '<div class="boutons"><button type="button" class="btn go sm" data-action="apercus-tous">Récupérer ' + pluriel(manquants, "légende et image", "légendes et images") + '</button></div>' : '<p class="aide" style="margin-top:10px">Tous tes contenus ont déjà leur aperçu.</p>')
       : '<p class="aide" style="margin-top:10px">Le connecteur Supabase n\'est pas disponible dans cette vue.</p>') +
     '</div></div>';
 
@@ -3140,11 +3145,12 @@ function finirOnboarding(suite) {
    fonction Edge « apercu », qui interroge l'oEmbed public de TikTok et
    rapporte la miniature. Sur claude.ai, l'appel passe par le connecteur
    Supabase de la personne ; en version autonome, directement en HTTPS.
-   Instagram suivra le même chemin dès qu'un jeton Meta sera posé côté
-   serveur ; d'ici là le serveur répond « instagram_sans_jeton ».
+   Pour Instagram, le serveur lit la page d'intégration publique du Reel
+   (auteur, légende, image) : ce n'est pas l'API officielle de Meta.
    ================================================================== */
 
 var APERCU = {
+  lot: 2,
   projet: "roxsrrscddkeibiqrxxp",
   serveur: "Supabase",
   outil: "execute_sql",
@@ -3153,7 +3159,7 @@ var APERCU = {
   cle: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveHNycnNjZGRrZWliaXFyeHhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjkzNDcsImV4cCI6MjEwNTg0NTM0N30.I4dCySQo-HdCY750XvQ1DlSnki7HBEsqfYINHV5_RB4"
 };
 
-var Apercus = { mcp: null, file: [], enCours: false, fait: 0, total: 0, erreur: "", instagramOff: true, suite: null, ids: [] };
+var Apercus = { mcp: null, file: [], enCours: false, fait: 0, total: 0, erreur: "", instagramOff: false, suite: null, ids: [] };
 
 function apercusDispo() { return !!Apercus.mcp || !EN_ARTIFACT; }
 function apercuPossible(it) {
@@ -3219,6 +3225,8 @@ async function appliquerApercu(id, r) {
   it.apercu = { ok: !!r.ok, raison: r.raison || null, date: Date.now() };
   if (r.raison === "instagram_sans_jeton") Apercus.instagramOff = true;
   if (r.ok) {
+    // Le lien avec le nom du compte ouvre plus souvent le bon Reel dans l'appli Instagram.
+    if (r.url_finale && /^https:\/\//.test(r.url_finale) && r.url_finale.indexOf("/@/") < 0) it.url = r.url_finale;
     if (r.auteur && !it.createur) it.createur = String(r.auteur).replace(/^@/, "");
     // Sur TikTok, le « titre » oEmbed est la légende complète de la vidéo.
     if (r.titre && !it.legende) it.legende = String(r.titre).slice(0, 2500);
@@ -3248,7 +3256,7 @@ async function boucleApercus() {
   Apercus.enCours = true;
   rendreBientot();
   while (Apercus.file.length) {
-    var lot = Apercus.file.splice(0, 3).map(function (id) { return Store.items[id]; }).filter(Boolean);
+    var lot = Apercus.file.splice(0, APERCU.lot).map(function (id) { return Store.items[id]; }).filter(Boolean);
     if (!lot.length) continue;
     try {
       var lignes = await demanderApercus(lot);
@@ -3321,7 +3329,7 @@ function banniereAnalyse() {
     b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-poisson" aria-hidden="true" style="margin:0"></span>' +
       (Apercus.erreur
         ? '<span style="flex:1 1 200px">' + esc(Apercus.erreur) + '</span><button type="button" class="btn ghost sm" data-action="reprendre-apercus">Reprendre</button><button type="button" class="btn ghost sm" data-action="fermer-apercus">Plus tard</button>'
-        : '<span>Récupération des miniatures TikTok · <b>' + Apercus.fait + ' / ' + Apercus.total + '</b></span><span class="jauge"><i style="width:' + p + '%"></i></span><button type="button" class="btn ghost sm" data-action="arreter-apercus">Arrêter</button>') +
+        : '<span>Récupération des légendes et images · <b>' + Apercus.fait + ' / ' + Apercus.total + '</b></span><span class="jauge"><i style="width:' + p + '%"></i></span><button type="button" class="btn ghost sm" data-action="arreter-apercus">Arrêter</button>') +
       '</div>';
     return;
   }

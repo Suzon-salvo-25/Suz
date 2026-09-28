@@ -42,7 +42,7 @@ function banniereAnalyse() {
     b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-poisson" aria-hidden="true" style="margin:0"></span>' +
       (Apercus.erreur
         ? '<span style="flex:1 1 200px">' + esc(Apercus.erreur) + '</span><button type="button" class="btn ghost sm" data-action="reprendre-apercus">Reprendre</button><button type="button" class="btn ghost sm" data-action="fermer-apercus">Plus tard</button>'
-        : '<span>Récupération des miniatures TikTok · <b>' + Apercus.fait + ' / ' + Apercus.total + '</b></span><span class="jauge"><i style="width:' + p + '%"></i></span><button type="button" class="btn ghost sm" data-action="arreter-apercus">Arrêter</button>') +
+        : '<span>Récupération des légendes et images · <b>' + Apercus.fait + ' / ' + Apercus.total + '</b></span><span class="jauge"><i style="width:' + p + '%"></i></span><button type="button" class="btn ghost sm" data-action="arreter-apercus">Arrêter</button>') +
       '</div>';
     return;
   }

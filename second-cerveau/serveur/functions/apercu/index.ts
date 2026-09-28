@@ -1,9 +1,8 @@
 // Mes Pépites — aperçu d'une publication : titre, auteur, miniature.
 //
 // TikTok : oEmbed public (https://www.tiktok.com/oembed), sans clé.
-// Instagram : oEmbed de Meta, seulement si le secret META_OEMBED_TOKEN est
-// posé (jeton « id-app|jeton-client » d'une appli Meta validée pour
-// « oEmbed Read »). Sans lui, la fonction le dit au lieu de deviner.
+// Instagram : oEmbed de Meta si le secret META_OEMBED_TOKEN est posé (appli
+// Meta validée pour « oEmbed Read ») ; sinon la page d'intégration publique.
 //
 // Entrée : POST {"url": "..."}   Sortie : JSON (voir `Apercu`).
 // Les liens et les images sont limités à une liste d'hôtes connus, pour que
@@ -95,23 +94,66 @@ async function tiktok(u: string): Promise<Apercu> {
   };
 }
 
-async function instagram(u: string): Promise<Apercu> {
-  const jeton = Deno.env.get("META_OEMBED_TOKEN");
-  if (!jeton) return { ok: false, plateforme: "instagram", raison: "instagram_sans_jeton" };
-  const api = "https://graph.facebook.com/v23.0/instagram_oembed?omitscript=true&url=" + encodeURIComponent(u.split("?")[0]) +
-    "&access_token=" + encodeURIComponent(jeton);
-  const r = await avecDelai(api);
-  if (!r.ok) return { ok: false, plateforme: "instagram", raison: `oembed_${r.status}` };
-  const d = await r.json();
-  // Meta a retiré certains champs d'oEmbed selon les versions : on prend ce qui vient.
+function decoderEntites(t: string): string {
+  return t
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
+}
+
+// Sans jeton Meta : la page d'intégration publique (celle qu'utilise tout site
+// qui affiche une publication Instagram) donne l'auteur, la légende et l'image.
+// Ce n'est pas l'API officielle : si Instagram la ferme ou la bloque, la
+// fonction répond « embed_vide » et l'appli garde ce qu'elle avait.
+async function instagramEmbed(code: string): Promise<Apercu> {
+  const r = await avecDelai(`https://www.instagram.com/p/${code}/embed/captioned/`, {}, 10000);
+  if (!r.ok) return { ok: false, plateforme: "instagram", raison: `embed_${r.status}` };
+  const html = await r.text();
+  const auteur = html.match(/class="UsernameText"[^>]*>([^<]+)</)?.[1] ||
+    html.match(/class="CaptionUsername"[^>]*>([^<]+)</)?.[1] || null;
+  let legende: string | null = null;
+  const bloc = html.match(/class="Caption"[^>]*>([\s\S]*?)<div class="CaptionComments"/)?.[1];
+  if (bloc) {
+    legende = decoderEntites(
+      bloc.replace(/<a class="CaptionUsername"[\s\S]*?<\/a>/, "").replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, ""),
+    ).replace(/\n{3,}/g, "\n\n").trim() || null;
+  }
+  const img = html.match(/<img[^>]+class="EmbeddedMediaImage"[^>]+src="([^"]+)"/)?.[1] ||
+    html.match(/class="EmbeddedMediaImage"[^>]*src="([^"]+)"/)?.[1];
+  if (!auteur && !legende && !img) return { ok: false, plateforme: "instagram", raison: "embed_vide" };
+  const nom = auteur ? decoderEntites(auteur).trim() : null;
   return {
     ok: true,
     plateforme: "instagram",
-    url_finale: u.split("?")[0],
-    titre: d.title || null,
-    auteur: d.author_name || null,
-    miniature: await miniature(d.thumbnail_url),
+    // Avec le nom du compte, l'appli Instagram ouvre plus souvent le bon Reel.
+    url_finale: nom ? `https://www.instagram.com/${nom}/reel/${code}/` : `https://www.instagram.com/reel/${code}/`,
+    titre: legende,
+    auteur: nom,
+    miniature: await miniature(img ? decoderEntites(img) : null),
   };
+}
+
+async function instagram(u: string): Promise<Apercu> {
+  const code = u.match(/instagram\.com\/(?:[\w.]+\/)?(?:p|reel|reels|tv)\/([\w-]+)/i)?.[1];
+  if (!code) return { ok: false, plateforme: "instagram", raison: "lien_inconnu" };
+  const jeton = Deno.env.get("META_OEMBED_TOKEN");
+  if (jeton) {
+    const api = "https://graph.facebook.com/v23.0/instagram_oembed?omitscript=true&url=" +
+      encodeURIComponent(`https://www.instagram.com/p/${code}/`) + "&access_token=" + encodeURIComponent(jeton);
+    const r = await avecDelai(api);
+    if (r.ok) {
+      const d = await r.json();
+      if (d.author_name || d.thumbnail_url) {
+        return {
+          ok: true, plateforme: "instagram",
+          url_finale: d.author_name ? `https://www.instagram.com/${d.author_name}/reel/${code}/` : `https://www.instagram.com/reel/${code}/`,
+          titre: d.title || null, auteur: d.author_name || null, miniature: await miniature(d.thumbnail_url),
+        };
+      }
+    }
+  }
+  return await instagramEmbed(code);
 }
 
 // La version autonome de l'appli appelle la fonction depuis le navigateur.

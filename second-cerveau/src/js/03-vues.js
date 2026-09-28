@@ -333,6 +333,12 @@ function vueAccueil() {
       '<button type="button" class="btn ghost" data-action="charger-exemples">Voir avec des exemples</button></div></div></div>';
   }
 
+  var sansApercu = apercusDispo() && !(Apercus.enCours || Apercus.file.length) ? aApercuManquant().length : 0;
+  if (sansApercu) {
+    h += '<div class="ia-bloc" style="margin-top:22px;align-items:center;flex-wrap:wrap"><span class="illu-mini st-poisson" aria-hidden="true"></span>' +
+      '<span style="flex:1 1 220px"><b>' + pluriel(sansApercu, "pépite") + ' sans image ni légende.</b> L\'appli peut les récupérer, puis les classer.</span>' +
+      '<button type="button" class="btn go sm" data-action="apercus-tous">Récupérer et classer</button></div>';
+  }
   var ps = parents();
   h += '<div class="titre-sec"><h2>Mes univers</h2><button type="button" class="lien" data-action="vue" data-vue="categories">Gérer les catégories</button></div>';
   h += '<div class="univers">' + ps.map(function (p, i) {
@@ -668,9 +674,8 @@ function vueReglages() {
 
   var manquants = aApercuManquant().length;
   h += '<div class="card"><header><span class="tache t-lavande b2"><span class="illu st-poisson" aria-hidden="true"></span></span><h2>Miniatures et légendes</h2><span class="hint">' + (apercusDispo() ? "Serveur actif" : "Indisponible ici") + '</span></header><div class="body">' +
-    '<p class="prose">Pour chaque vidéo TikTok, un petit serveur (projet Supabase « mes-pepites ») récupère la miniature, l\'auteur et la légende complète via le service oEmbed public de TikTok. Sur claude.ai, il passe par ton connecteur Supabase : la page n\'y lance qu\'une seule requête, celle des aperçus. ' +
-    'Pour Instagram, Meta exige une appli validée et un jeton : le serveur est prêt, il manque ce jeton.</p>' +
-    (apercusDispo() ? (manquants ? '<div class="boutons"><button type="button" class="btn go sm" data-action="apercus-tous">Récupérer ' + pluriel(manquants, "miniature") + '</button></div>' : '<p class="aide" style="margin-top:10px">Toutes tes vidéos TikTok ont déjà leur aperçu.</p>')
+    '<p class="prose">Un petit serveur (projet Supabase « mes-pepites ») récupère l\'image, l\'auteur et la légende complète de chaque contenu : pour TikTok via son service oEmbed public, pour Instagram via la page d\'intégration publique du Reel (hors API officielle : si Instagram la bloque un jour, l\'appli garde ce qu\'elle a). Sur claude.ai, il passe par ton connecteur Supabase, où la page ne lance qu\'une seule requête, celle des aperçus.</p>' +
+    (apercusDispo() ? (manquants ? '<div class="boutons"><button type="button" class="btn go sm" data-action="apercus-tous">Récupérer ' + pluriel(manquants, "légende et image", "légendes et images") + '</button></div>' : '<p class="aide" style="margin-top:10px">Tous tes contenus ont déjà leur aperçu.</p>')
       : '<p class="aide" style="margin-top:10px">Le connecteur Supabase n\'est pas disponible dans cette vue.</p>') +
     '</div></div>';
 

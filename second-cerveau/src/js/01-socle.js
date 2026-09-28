@@ -91,7 +91,7 @@ var PLATEFORMES = {
     api: [
       ["partiel", "Connexion officielle (OAuth)", "L'API Instagram n'accepte que les comptes professionnels (Business ou Créateur). Les comptes personnels ne peuvent plus se connecter depuis la fin de l'API Basic Display, le 4 décembre 2024."],
       ["non", "Publications enregistrées et collections", "Aucun point d'accès de l'API ne les expose, même pour un compte professionnel. Aucune appli ne peut les synchroniser automatiquement aujourd'hui."],
-      ["partiel", "Légende et miniature d'un post", "Possibles via oEmbed avec une appli Meta validée et un serveur. Cette page ne peut pas appeler Instagram elle-même."],
+      ["partiel", "Légende et image d'un post", "L'oEmbed officiel demande une appli Meta validée. L'appli lit à la place la page d'intégration publique du Reel via son serveur : auteur, légende et image, hors API officielle."],
       ["ok", "Export « Exporter vos informations »", "Donne le lien de chaque publication enregistrée, son auteur, la date et tes collections. Pas de légende ni d'image."],
       ["ok", "Partage d'un lien", "Partager › Copier le lien, puis coller ici. Tu peux ajouter la légende ou une capture pour une analyse complète."]
     ],

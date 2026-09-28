@@ -6,11 +6,12 @@
    fonction Edge « apercu », qui interroge l'oEmbed public de TikTok et
    rapporte la miniature. Sur claude.ai, l'appel passe par le connecteur
    Supabase de la personne ; en version autonome, directement en HTTPS.
-   Instagram suivra le même chemin dès qu'un jeton Meta sera posé côté
-   serveur ; d'ici là le serveur répond « instagram_sans_jeton ».
+   Pour Instagram, le serveur lit la page d'intégration publique du Reel
+   (auteur, légende, image) : ce n'est pas l'API officielle de Meta.
    ================================================================== */
 
 var APERCU = {
+  lot: 2,
   projet: "roxsrrscddkeibiqrxxp",
   serveur: "Supabase",
   outil: "execute_sql",
@@ -19,7 +20,7 @@ var APERCU = {
   cle: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveHNycnNjZGRrZWliaXFyeHhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjkzNDcsImV4cCI6MjEwNTg0NTM0N30.I4dCySQo-HdCY750XvQ1DlSnki7HBEsqfYINHV5_RB4"
 };
 
-var Apercus = { mcp: null, file: [], enCours: false, fait: 0, total: 0, erreur: "", instagramOff: true, suite: null, ids: [] };
+var Apercus = { mcp: null, file: [], enCours: false, fait: 0, total: 0, erreur: "", instagramOff: false, suite: null, ids: [] };
 
 function apercusDispo() { return !!Apercus.mcp || !EN_ARTIFACT; }
 function apercuPossible(it) {
@@ -85,6 +86,8 @@ async function appliquerApercu(id, r) {
   it.apercu = { ok: !!r.ok, raison: r.raison || null, date: Date.now() };
   if (r.raison === "instagram_sans_jeton") Apercus.instagramOff = true;
   if (r.ok) {
+    // Le lien avec le nom du compte ouvre plus souvent le bon Reel dans l'appli Instagram.
+    if (r.url_finale && /^https:\/\//.test(r.url_finale) && r.url_finale.indexOf("/@/") < 0) it.url = r.url_finale;
     if (r.auteur && !it.createur) it.createur = String(r.auteur).replace(/^@/, "");
     // Sur TikTok, le « titre » oEmbed est la légende complète de la vidéo.
     if (r.titre && !it.legende) it.legende = String(r.titre).slice(0, 2500);
@@ -114,7 +117,7 @@ async function boucleApercus() {
   Apercus.enCours = true;
   rendreBientot();
   while (Apercus.file.length) {
-    var lot = Apercus.file.splice(0, 3).map(function (id) { return Store.items[id]; }).filter(Boolean);
+    var lot = Apercus.file.splice(0, APERCU.lot).map(function (id) { return Store.items[id]; }).filter(Boolean);
     if (!lot.length) continue;
     try {
       var lignes = await demanderApercus(lot);
