@@ -265,6 +265,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
 .chip:hover { color: var(--ink); border-color: var(--ink-faint); }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
 .chip .x { font-size: 1rem; line-height: 1; opacity: .6; }
+.chip-duo { display: inline-flex; align-items: stretch; }
+.chip-duo .chip { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 0; }
+.chip-x {
+  border: 1px solid var(--line); border-left: 1px dashed var(--line); border-radius: 0 999px 999px 0; background: var(--panel);
+  color: var(--ink-faint); padding: 0 11px 0 9px; font-size: 1.05rem; line-height: 1;
+}
+.chip-x:hover { color: var(--crit); border-color: var(--crit); }
 .chip.doux { background: var(--panel-2); cursor: default; }
 .chip.doux button { border: 0; background: none; padding: 0 0 0 2px; color: inherit; font-size: 1rem; line-height: 1; opacity: .6; }
 .chip.doux button:hover { opacity: 1; }
@@ -477,7 +484,7 @@ body.selection .coche { display: grid; }
 .cat-ligne .nom h3 { font-size: 1.08rem; }
 .cat-ligne .nom p { font-size: .8rem; color: var(--ink-faint); }
 .cat-ligne .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-.sous-liste { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 18px 16px 94px; border-bottom: 1px solid var(--line); }
+.sous-liste { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 18px 16px 94px; border-bottom: 1px solid var(--line); }
 .edit-bloc { padding: 14px 18px; background: var(--panel-2); border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
 .edit-bloc .field { flex: 1 1 200px; }
 .edit-bloc input, .edit-bloc select { background: var(--panel); height: 42px; }

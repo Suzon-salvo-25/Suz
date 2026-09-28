@@ -716,7 +716,8 @@ function vueCategories() {
     if (e && e.id === p.id && e.mode !== "nouvelle-sous") h += blocEditionCat(e);
     h += '<div class="sous-liste">' + subs.map(function (s) {
       var n = nbDansCat(s.id);
-      return '<button type="button" class="chip" data-action="cat-mode" data-id="' + esc(s.id) + '" data-mode="menu" aria-pressed="' + !!(e && e.id === s.id) + '">' + esc(s.nom) + ' <b style="opacity:.6;font-weight:600">' + n + '</b></button>';
+      return '<span class="chip-duo"><button type="button" class="chip" data-action="cat-mode" data-id="' + esc(s.id) + '" data-mode="menu" aria-pressed="' + !!(e && e.id === s.id && e.mode === "menu") + '">' + esc(s.nom) + ' <b style="opacity:.6;font-weight:600">' + n + '</b></button>' +
+        '<button type="button" class="chip-x" data-action="cat-mode" data-id="' + esc(s.id) + '" data-mode="supprimer" aria-label="Supprimer la sous-catégorie ' + esc(s.nom) + '" title="Supprimer">×</button></span>';
     }).join("") + '<button type="button" class="chip" data-action="cat-mode" data-id="' + esc(p.id) + '" data-mode="nouvelle-sous"><span class="x">+</span>Sous-catégorie</button></div>';
     subs.forEach(function (s) { if (e && e.id === s.id) h += blocEditionCat(e); });
     if (e && e.id === p.id && e.mode === "nouvelle-sous") h += blocEditionCat(e);
