@@ -25,7 +25,7 @@ var Apercus = { mcp: null, file: [], enCours: false, fait: 0, total: 0, erreur: 
 function apercusDispo() { return !!Apercus.mcp || !EN_ARTIFACT; }
 function apercuPossible(it) {
   if (!it || !it.url || it.vignette || it.demo) return false;
-  if (it.apercu && it.apercu.ok) return false;
+  // Un aperçu réussi mais sans image peut être retenté (image trop lourde, etc.).
   if (it.plateforme === "tiktok") return true;
   return it.plateforme === "instagram" && !Apercus.instagramOff;
 }

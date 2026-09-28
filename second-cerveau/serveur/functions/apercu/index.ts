@@ -21,7 +21,7 @@ type Apercu = {
 const HOTES_LIENS = [/(^|\.)tiktok\.com$/i, /(^|\.)tiktokv\.com$/i, /(^|\.)instagram\.com$/i];
 const HOTES_IMAGES = [/(^|\.)tiktokcdn\.com$/i, /(^|\.)tiktokcdn-us\.com$/i, /(^|\.)tiktokcdn-eu\.com$/i, /(^|\.)ibyteimg\.com$/i,
   /(^|\.)cdninstagram\.com$/i, /(^|\.)fbcdn\.net$/i];
-const MINIATURE_MAX = 450_000; // octets
+const MINIATURE_MAX = 900_000; // octets
 
 const UA = "Mozilla/5.0 (compatible; MesPepites/1.0; +https://github.com/Suzon-salvo-25/Suz)";
 
@@ -119,8 +119,15 @@ async function instagramEmbed(code: string): Promise<Apercu> {
       bloc.replace(/<a class="CaptionUsername"[\s\S]*?<\/a>/, "").replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, ""),
     ).replace(/\n{3,}/g, "\n\n").trim() || null;
   }
-  const img = html.match(/<img[^>]+class="EmbeddedMediaImage"[^>]+src="([^"]+)"/)?.[1] ||
-    html.match(/class="EmbeddedMediaImage"[^>]*src="([^"]+)"/)?.[1];
+  // L'image existe en plusieurs largeurs (srcset) : la plus petite suffit et
+  // reste sous la limite de taille ; sinon on prend l'image principale.
+  const balise = html.match(/<img[^>]*class="EmbeddedMediaImage"[^>]*>/)?.[0] || "";
+  const variantes = (balise.match(/srcset="([^"]+)"/)?.[1] || "").split(",")
+    .map((v) => v.trim().match(/^(\S+)\s+(\d+)w$/)).filter(Boolean)
+    .map((m) => ({ url: m![1], largeur: parseInt(m![2], 10) }))
+    .sort((a, b) => a.largeur - b.largeur);
+  const img = (variantes.find((v) => v.largeur >= 320) || variantes[0])?.url ||
+    balise.match(/src="([^"]+)"/)?.[1];
   if (!auteur && !legende && !img) return { ok: false, plateforme: "instagram", raison: "embed_vide" };
   const nom = auteur ? decoderEntites(auteur).trim() : null;
   return {
