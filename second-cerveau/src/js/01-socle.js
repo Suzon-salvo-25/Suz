@@ -80,11 +80,11 @@ var PLATEFORMES = {
   instagram: {
     nom: "Instagram", classe: "instagram", importable: true,
     reconnaitre: function (u) {
-      var m = u.match(/instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv)\/([\w-]+)/i);
+      var m = u.match(/instagram\.com\/(?:([\w.]+)\/)?(p|reel|reels|tv)\/([\w-]+)/i);
       if (!m) return null;
-      var t = m[1].toLowerCase();
-      return { cle: "ig-" + m[2], type: t === "p" ? "publication" : t === "tv" ? "video" : "reel",
-        url: "https://www.instagram.com/" + (t === "reels" ? "reel" : t) + "/" + m[2] + "/" };
+      var t = m[2].toLowerCase(), compte = m[1] && ["p", "reel", "reels", "tv", "share"].indexOf(m[1].toLowerCase()) < 0 ? m[1] : "";
+      return { cle: "ig-" + m[3], type: t === "p" ? "publication" : t === "tv" ? "video" : "reel", createur: compte,
+        url: "https://www.instagram.com/" + (compte ? compte + "/" : "") + (t === "reels" || t === "tv" ? "reel" : t) + "/" + m[3] + "/" };
     },
     // État connu de la documentation publique de Meta. À revérifier avant
     // d'écrire la version serveur : ces règles changent.

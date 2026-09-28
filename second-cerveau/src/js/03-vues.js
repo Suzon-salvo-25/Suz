@@ -303,9 +303,22 @@ function lienRelais(it) {
   var n = numeroInstagram(codeInstagram(it));
   return n ? RELAIS_OUVRIR + n : null;
 }
+// Le lien avec le nom du compte (instagram.com/<compte>/reel/<code>/) est celui
+// qui ouvre le bon Reel dans l'appli Instagram : Instagram ne le fait pas passer
+// par son fil de Reels. Il arrive avec l'aperçu ; sans lui, la page du Reel.
+function lienOuvrir(it) {
+  var c = codeInstagram(it);
+  if (!c) return it.url;
+  var avecCompte = String(it.url || "").match(/instagram\.com\/([\w.]+)\/(?:reel|p)\/[\w-]+/i);
+  if (avecCompte && ["p", "reel", "reels", "tv"].indexOf(avecCompte[1].toLowerCase()) < 0) {
+    return "https://www.instagram.com/" + avecCompte[1] + "/reel/" + c + "/";
+  }
+  if (it.createur) return "https://www.instagram.com/" + it.createur.replace(/^@/, "") + "/reel/" + c + "/";
+  return lienVoir(it);
+}
 function lienOrig(it, classe) {
   if (!it.url) return "";
-  return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
+  return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienOuvrir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
 }
 function badgePlat(it) {
   var p = PLATEFORMES[it.plateforme] || PLATEFORMES.web;
