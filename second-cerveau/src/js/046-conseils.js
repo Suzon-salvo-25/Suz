@@ -107,6 +107,10 @@ function autoRecettes() {
     if (ids.length) lancerApercus(ids);
   }
   if (iaDispo()) {
+    // Recettes jamais lues par Claude (titre = légende brute) : une analyse, une fois.
+    var aLire = rec.filter(function (it) { return !(it.analyse && (it.analyse.par === "ia" || it.analyse.par === "manuel")) && !it.demo && !it.iaTentee; });
+    aLire.forEach(function (it) { it.iaTentee = true; sauverItem(it); });
+    if (aLire.length) lancerAnalyse(aLire.map(function (it) { return it.id; }));
     var ang = rec.filter(function (it) { return estAnglais(it) && !it.tradTentee; });
     ang.forEach(function (it) { it.tradTentee = true; sauverItem(it); });
     if (ang.length) lancerAnalyse(ang.map(function (it) { return it.id; }));

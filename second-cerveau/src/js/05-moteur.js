@@ -182,7 +182,7 @@ document.addEventListener("click", function (ev) {
     case "rec-onglet": ICI.rec.onglet = d.o; rendreBientot(); break;
     case "apercus-recettes": lancerApercus(tousItems().filter(function (x) { return estRecette(x) && apercuPossible(x); }).map(function (x) { return x.id; })); break;
     case "traduire-recettes":
-      var ang = tousItems().filter(estAnglais);
+      var ang = tousItems().filter(function (x) { return estRecette(x) && (estAnglais(x) || !(x.analyse && (x.analyse.par === "ia" || x.analyse.par === "manuel"))) && !x.demo; });
       ang.forEach(function (x) { x.tradTentee = true; });
       lancerAnalyse(ang.map(function (x) { return x.id; })); toast("Claude traduit " + pluriel(ang.length, "recette") + "…"); break;
     case "detailler-seances":

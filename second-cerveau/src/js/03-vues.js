@@ -468,14 +468,14 @@ function vueMesRecettes() {
   var h = '<form class="frigo" id="formFrigo" style="margin-bottom:6px"><input type="text" id="frigo" autocomplete="off" aria-label="Ingrédients disponibles" placeholder="J\'ai du poulet, des courgettes…" value="' + esc(ICI.rec.frigo) + '">' +
     (ICI.rec.frigo ? '<button type="button" class="btn ghost" data-action="effacer-frigo">Effacer</button>' : "") + '</form>';
   var sansImage = apercusDispo() ? toutes.filter(function (it) { return apercuPossible(it); }).length : 0;
-  var anglais = iaDispo() ? toutes.filter(estAnglais).length : 0;
+  var anglais = iaDispo() ? toutes.filter(function (it) { return estAnglais(it) || !(it.analyse && (it.analyse.par === "ia" || it.analyse.par === "manuel")) && !it.demo; }).length : 0;
   if (sansImage && !(Apercus.enCours || Apercus.file.length)) {
     h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-poisson" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(sansImage, "recette") + ' sans photo.</span>' +
       '<button type="button" class="btn go sm" data-action="apercus-recettes">Récupérer les photos</button></div>';
   }
   if (anglais && !IA.enCours) {
-    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-etoile" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(anglais, "recette") + ' en anglais.</span>' +
-      '<button type="button" class="btn go sm" data-action="traduire-recettes">Traduire en français</button></div>';
+    h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-etoile" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(anglais, "recette") + ' pas encore lue' + (anglais > 1 ? "s" : "") + ' ou traduite' + (anglais > 1 ? "s" : "") + ' par Claude.</span>' +
+      '<button type="button" class="btn go sm" data-action="traduire-recettes">Analyser et traduire</button></div>';
   }
   h += '<div class="titre-sec"><h2>' + (avecFrigo ? "Avec ce que tu as" : "Mes recettes") + '</h2><span class="lab">' + pluriel(lignes.length, "recette") + (toutes.length !== lignes.length ? " sur " + toutes.length : "") + '</span></div>';
   if (!toutes.length) return h + vide("fraise", "Aucune recette pour l'instant. Enregistre une vidéo de cuisine, elle arrivera ici avec ses ingrédients.");
