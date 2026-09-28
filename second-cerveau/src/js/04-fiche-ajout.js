@@ -23,8 +23,7 @@ function ficheHTML(it) {
     (it.resume ? '<p class="resume">' + esc(it.resume) + '</p>' : "") +
     (it.demo ? '<p class="aide" style="margin-top:10px">Exemple de démonstration : il ne correspond à aucune publication réelle.</p>' : "") +
     '<div class="fiche-actions">' +
-      (lienRelais(it) ? '<a class="btn go sm" href="' + esc(lienRelais(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir dans Instagram</a>' +
-          '<a class="btn ghost sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Voir le Reel ↗</a>'
+      (codeInstagram(it) ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Voir le Reel ↗</a>'
         : it.url ? '<a class="btn go sm" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir sur ' + esc(nomPlat(it.plateforme)) + ' ↗</a>' : "") +
       (it.url ? '<button type="button" class="btn ghost sm" data-action="copier-lien" data-id="' + esc(it.id) + '">Copier le lien</button>' : "") +
       '<button type="button" class="btn ghost sm" data-action="favori" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.favori + '">' + (it.favori ? "♥ Favori" : "♡ Favori") + '</button>' +

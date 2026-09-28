@@ -294,9 +294,10 @@ function lienAppli(it) {
   var n = numeroInstagram(codeInstagram(it));
   return n ? "instagram://media?id=" + n : null;
 }
-// L'appli Claude bloque les liens instagram:// et laisse Instagram détourner les
-// liens web. Le relais « ouvrir » (fonction Supabase publique) reçoit un lien
-// https ordinaire et redirige vers instagram://media?id=… : une seule touche.
+// Relais « ouvrir » (fonction Supabase publique) : redirige vers
+// instagram://media?id=…. Il marche dans Safari, mais la fenêtre de
+// navigation de l'appli Claude ne suit pas cette redirection : non utilisé
+// dans la page, gardé pour la version installable.
 var RELAIS_OUVRIR = "https://roxsrrscddkeibiqrxxp.supabase.co/functions/v1/ouvrir?id=";
 function lienRelais(it) {
   var n = numeroInstagram(codeInstagram(it));
@@ -304,8 +305,6 @@ function lienRelais(it) {
 }
 function lienOrig(it, classe) {
   if (!it.url) return "";
-  // Instagram : passage par le relais, qui renvoie vers instagram://media?id=….
-  if (lienRelais(it)) return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienRelais(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
   return '<a class="' + (classe || "lien-orig") + '" href="' + esc(lienVoir(it)) + '" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>';
 }
 function badgePlat(it) {
