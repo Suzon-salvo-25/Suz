@@ -543,7 +543,7 @@ input[type="range"] { width: 100%; accent-color: var(--orange); }
   list-style: none; margin: 6px 0 0; padding: 0;
   border: 2px solid var(--line-hard); border-radius: var(--r-md);
   background: var(--panel);
-  max-height: 260px; overflow-y: auto;
+  max-height: min(58vh, 460px); overflow-y: auto;
   box-shadow: var(--shadow);
 }
 .results:empty { display: none; }
@@ -551,11 +551,16 @@ input[type="range"] { width: 100%; accent-color: var(--orange); }
 .results li:last-child { border-bottom: 0; }
 .results button {
   width: 100%; text-align: left; background: transparent; border: 0;
-  padding: 9px 13px; display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
+  padding: 10px 13px;
+  display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; align-items: baseline;
 }
 .results button:hover, .results button:focus-visible { background: var(--panel-2); outline: none; }
-.results .rn { font-weight: 600; font-size: .9rem; }
+/* Le nom prend la ligne entière et va au bout : tronqué, on ne sait pas
+   sur quoi on clique, « Pâtes sèches, st… » ne distingue rien. */
+.results .rn { grid-column: 1 / -1; font-weight: 600; font-size: .92rem; line-height: 1.3; }
 .results .rk { font-family: var(--f-mono); font-size: .78rem; color: var(--ink-faint); white-space: nowrap; }
+.results .rk { grid-column: 2; justify-self: end; }
+.results .rq { grid-column: 1; font-size: .76rem; color: var(--ink-faint); min-width: 0; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chip-food {
@@ -594,8 +599,9 @@ input[type="range"] { width: 100%; accent-color: var(--orange); }
 .tag.generique  { color: var(--ink-faint); }
 .tag.estime     { color: var(--warn); border-style: dashed; }
 
-.results .rn { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
-.results .rn i { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.results .rn { display: block; min-width: 0; }
+.results .rn i { font-style: normal; overflow-wrap: anywhere; }
+.results .rq .tag { margin-right: 7px; }
 
 /* ---------- eau ---------- */
 
@@ -6743,9 +6749,18 @@ var SPORTS = [
     document.getElementById("bilanChecks").innerHTML = checks.join("");
   }
 
+  /* Un aliment cru passe après le même aliment cuit : on note ce qu'on a
+     mangé, pas ce qu'il y avait dans le paquet. Des pâtes sèches crues à
+     364 kcal proposées avant des pâtes cuites à 131, c'est une erreur de
+     saisie qui attend. « Sèches » ne compte pas : des pâtes sèches cuites
+     restent des pâtes normales, c'est « crues » qui trie. */
+  var RE_CRU = /\bcrue?s?\b|\bdeshydratee?s?\b/;
+
   function chercheAliments(q) {
-    var mots = plie(q).trim().split(/\s+/).filter(Boolean);
+    var qp = plie(q).trim();
+    var mots = qp.split(/\s+/).filter(Boolean);
     if (!mots.length || mots.join("").length < 2) return [];
+    var veutCru = RE_CRU.test(qp);
     var freq = P().freq || {};
     var res = [];
     for (var i = 0; i < ALIM_PLIE.length; i++) {
@@ -6756,10 +6771,12 @@ var SPORTS = [
         if (k === -1) { ok = false; break; }
         if (m === 0) pos = k;
       }
-      if (ok) res.push({ i: i, pos: pos, len: n.length, f: freq[ALIMENTS[i][0]] || 0 });
+      if (ok) res.push({ i: i, pos: pos, len: n.length, f: freq[ALIMENTS[i][0]] || 0,
+                         cru: (!veutCru && RE_CRU.test(n)) ? 1 : 0 });
     }
     res.sort(function (a, b) {
       if (a.f !== b.f) return b.f - a.f;
+      if (a.cru !== b.cru) return a.cru - b.cru;
       if (a.pos !== b.pos) return a.pos - b.pos;
       return a.len - b.len;
     });
@@ -6783,8 +6800,10 @@ var SPORTS = [
     }
     document.getElementById("foodResults").innerHTML = res.map(function (r) {
       var a = ALIMENTS[r.i];
+      var part = a[7] && a[7] !== "100 g" ? a[7] + ", " + ni(a[6]) + " g" : "";
       return '<li><button type="button" data-food="' + r.i + '">' +
-        '<span class="rn">' + badge(a[0]) + '<i>' + esc(a[0]) + '</i></span>' +
+        '<span class="rn"><i>' + esc(a[0]) + '</i></span>' +
+        '<span class="rq">' + badge(a[0]) + (part ? esc(part) : "") + '</span>' +
         '<span class="rk">' + a[1] + ' kcal / 100 g</span></button></li>';
     }).join("");
   }

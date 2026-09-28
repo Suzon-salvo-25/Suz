@@ -90,6 +90,23 @@ for (const largeur of [1000, 390]) {
   const total = () => pg.evaluate(() => document.getElementById('kcalMange').textContent);
   const contient = (t) => pg.evaluate((x) => document.getElementById('repasListe').textContent.includes(x), t);
 
+  /* Une ligne de résultat doit se lire en entier : « Pâtes sèches, st… »
+     ne dit pas sur quoi on clique. Et ce qu'on mange passe avant ce qu'il y
+     avait dans le paquet. */
+  await pg.fill('#foodSearch', 'pates');
+  await pg.waitForTimeout(350);
+  const noms = await pg.$$eval('#foodResults .rn', (e) => e.map((x) => x.textContent.trim()));
+  verifie('le premier résultat est l\'aliment de base', noms[0] === 'Pâtes cuites', noms[0]);
+  const iCuites = noms.findIndex((n) => /cuites/.test(n));
+  const iCrues = noms.findIndex((n) => /crues/.test(n));
+  verifie('le cuit passe avant le cru', iCuites !== -1 && (iCrues === -1 || iCuites < iCrues),
+          iCuites + ' contre ' + iCrues);
+  verifie('aucun nom n\'est tronqué', await pg.$$eval('#foodResults .rn',
+    (e) => e.every((x) => x.scrollWidth <= x.clientWidth + 1)), '');
+  verifie('la portion est dite quand elle n\'est pas 100 g',
+    (await pg.textContent('#foodResults li:first-child .rq')).includes('1 assiette'),
+    await pg.textContent('#foodResults li:first-child .rq'));
+
   // ajout depuis la recherche, avec des favoris venus du serveur gelé
   await pg.fill('#foodSearch', 'blanc de poulet');
   await pg.waitForTimeout(350);

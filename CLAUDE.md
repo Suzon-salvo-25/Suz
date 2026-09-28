@@ -148,6 +148,22 @@ comprises. La recherche, elle, continue de voir toute la base. « Mes
 plats » est à côté ; les deux se remettent sur « Choisir… » après usage, et
 la rangée disparaît quand les deux sont vides.
 
+**Un résultat de recherche se lit en entier.** Le nom prenait une seule
+ligne avec des points de suspension : « Pâtes sèches, st… » quatre fois de
+suite, « on ne sait pas sur quoi on clique ». Le nom occupe maintenant toute
+la largeur de la ligne et va au bout, quitte à passer sur deux lignes ;
+l'étiquette et la portion (« Générique · 1 assiette, 200 g ») descendent en
+dessous à gauche, les calories à droite. La liste monte à 58 % de la hauteur
+d'écran : à 260 px elle ne montrait que trois lignes et demie.
+
+**Le cuit passe avant le cru.** « Pâtes sèches, standard, crues » à
+364 kcal proposée avant « Pâtes cuites » à 131, c'est une erreur de saisie
+qui attend : on note ce qu'on a mangé, pas ce qu'il y avait dans le paquet.
+`RE_CRU` repousse en fin de liste tout nom contenant « crue(s) » ou
+« déshydratée(s) », sauf si la recherche les demande. **« Sèches » ne compte
+pas** : des pâtes sèches cuites sont des pâtes normales, et les inclure
+faisait tomber toute la famille d'un coup.
+
 **Le filtre « Type de produit » a été retiré.** Quatre boutons Tout / Maison
 / Marques / Industriel, jamais utilisés, qui prenaient une rangée entière.
 La recherche cherche dans tout.
@@ -555,7 +571,8 @@ la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 
 ```bash
 node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1])"
-node outils/verifie.mjs           # stockage et mise en page, 20 contrôles
+node outils/verifie.mjs           # stockage, mise en page et lisibilité de
+                                  # la recherche, 28 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres et étages du jour,
                                   # 34 contrôles
