@@ -7718,17 +7718,71 @@ var SPORTS = [
     ["Corde à sauter", 11.8, null]
   ];
 
+  /* ==================== UNE MACHINE, UN SEUL NOM ====================
+     « Presse à cuisses », « presse a cuisses » et « PRESSE A CUISSES » sont
+     la même machine. Tapées différemment, elles faisaient trois entrées
+     distinctes dans les progrès, trois apprentissages et trois historiques.
+     Tout passe donc par une clé repliée : accents, majuscules, ponctuation,
+     espaces et tirets disparaissent, et chaque mot de plus de trois lettres
+     perd son s ou son x final, « Presse à cuisse » valant « Presse à
+     cuisses ». Sur les 81 noms de la liste, cette clé ne confond aucune
+     paire. Le nom affiché, lui, reste celui de la liste quand elle le
+     connaît. */
+  function cleExo(nom) {
+    return plie(nom).split(/[^a-z0-9]+/).filter(Boolean).map(function (w) {
+      return w.length > 3 ? w.replace(/[sx]$/, "") : w;
+    }).join("");
+  }
+
+  var EXO_CANON = (function () {
+    var t = {};
+    CARDIO_SALLE.forEach(function (c) { t[cleExo(c[0])] = c[0]; });
+    EXERCICES.forEach(function (e) { if (!t[cleExo(e[0])]) t[cleExo(e[0])] = e[0]; });
+    return t;
+  })();
+
+  // La fiche apprise, retrouvée quelle que soit la façon dont c'est tapé.
   function machineApprise(nom) {
     var m = P().machines || {};
-    return m[nom] || null;
+    if (m[nom]) return m[nom];
+    var k = cleExo(nom);
+    if (!k) return null;
+    var cles = Object.keys(m);
+    for (var i = 0; i < cles.length; i++) {
+      if (cleExo(cles[i]) === k) return m[cles[i]];
+    }
+    return null;
+  }
+
+  // Le nom sous lequel la fiche apprise est rangée, pour la retirer.
+  function cleApprise(nom) {
+    var m = P().machines || {};
+    if (m[nom]) return nom;
+    var k = cleExo(nom), cles = Object.keys(m);
+    for (var i = 0; i < cles.length; i++) {
+      if (cleExo(cles[i]) === k) return cles[i];
+    }
+    return null;
+  }
+
+  /* L'orthographe de référence : celle de la liste si elle connaît, sinon
+     celle de la fiche apprise, sinon ce qui a été tapé. */
+  function nomCanonique(nom) {
+    var brut = String(nom || "").trim();
+    var k = cleExo(brut);
+    if (!k) return brut;
+    if (EXO_CANON[k]) return EXO_CANON[k];
+    var appris = cleApprise(brut);
+    return appris || brut;
   }
 
   function cardioSalle(nom) {
+    var k = cleExo(nom);
     for (var i = 0; i < CARDIO_SALLE.length; i++) {
-      if (CARDIO_SALLE[i][0] === nom) return CARDIO_SALLE[i];
+      if (cleExo(CARDIO_SALLE[i][0]) === k) return CARDIO_SALLE[i];
     }
     var a = machineApprise(nom);
-    if (a && a.t === "cardio") return [nom, a.met, null];
+    if (a && a.t === "cardio") return [nomCanonique(nom), a.met, null];
     return null;
   }
 
@@ -7852,23 +7906,32 @@ var SPORTS = [
     "Gainage": [0.00, 0.00], "Planche latérale": [0.00, 0.00]
   };
 
+  // Les deux tables sont indexées par clé repliée : une majuscule de trop
+  // ne doit pas rendre une machine connue inconnue.
   var ZONE_EXO = (function () {
     var z = {};
-    EXERCICES.forEach(function (e) { z[e[0]] = e[1]; });
+    EXERCICES.forEach(function (e) { z[cleExo(e[0])] = e[1]; });
     return z;
+  })();
+  var PROFIL_EXO_CLE = (function () {
+    var t = {};
+    Object.keys(PROFIL_EXO).forEach(function (n) { t[cleExo(n)] = PROFIL_EXO[n]; });
+    return t;
   })();
 
   // Amplitude et part du corps pour un exercice, connu ou non.
   function profilExercice(nom) {
-    if (PROFIL_EXO[nom]) return PROFIL_EXO[nom];
-    var z = ZONE_EXO[nom];
+    var k = cleExo(nom);
+    if (PROFIL_EXO_CLE[k]) return PROFIL_EXO_CLE[k];
+    var z = ZONE_EXO[k];
     if (z && PROFIL_ZONE[z]) return PROFIL_ZONE[z];
     var a = machineApprise(nom);
     if (a && a.t === "fonte") return [a.h, a.c];
     return PROFIL_NEUTRE;
   }
   function exerciceConnu(nom) {
-    return !!(PROFIL_EXO[nom] || ZONE_EXO[nom] || machineApprise(nom));
+    var k = cleExo(nom);
+    return !!(PROFIL_EXO_CLE[k] || ZONE_EXO[k] || machineApprise(nom));
   }
 
   var MET_CARDIO_INCONNU = 6.0;
@@ -7907,7 +7970,10 @@ var SPORTS = [
     var travail = 0, inconnues = [], apprises = [];
     ex.forEach(function (e) {
       var ap = machineApprise(e.n);
-      if (ap && ap.ia && apprises.indexOf(e.n) === -1) apprises.push(e.n);
+      if (ap && ap.ia) {
+        var cn = nomCanonique(e.n);
+        if (apprises.indexOf(cn) === -1) apprises.push(cn);
+      }
       if (estCardio(e)) {
         minCardio += e.m || 0;
         kcalCardio += kcalLigneCardio(e, poids);
@@ -7986,8 +8052,10 @@ var SPORTS = [
     nom = String(nom || "").trim();
     if (!nom || !Claude_sample) return;
     if (exerciceConnu(nom) || cardioSalle(nom)) return;
-    if (apprentissageEnCours[nom]) return;
-    apprentissageEnCours[nom] = 1;
+    // Une machine par clé, pas une par orthographe.
+    var cle = cleExo(nom);
+    if (apprentissageEnCours[cle]) return;
+    apprentissageEnCours[cle] = 1;
     try {
       var d = await Claude_sample.json(promptMachine(nom), { modelTier: "default" });
       var t = (d && d.type === "cardio") ? "cardio" : "fonte";
@@ -8021,17 +8089,18 @@ var SPORTS = [
     } catch (e) {
       // Muet : ne pas savoir n'empêche rien, le neutre fait le travail.
     } finally {
-      delete apprentissageEnCours[nom];
+      delete apprentissageEnCours[cle];
     }
   }
 
   function oublieMachine(nom) {
     var p = P();
-    if (!p.machines || !p.machines[nom]) return;
+    var cle = p.machines ? cleApprise(nom) : null;
+    if (!cle) return;
     if (Object.isFrozen(p.machines) || !Object.isExtensible(p.machines)) {
       p.machines = Object.assign({}, p.machines);
     }
-    delete p.machines[nom];
+    delete p.machines[cle];
     Store.sauveProfil();
     (J().sport || []).forEach(function (se) { recalculeSalle(se, poidsA(dateCourante)); });
     Store.sauveJour(dateCourante);
@@ -8659,13 +8728,19 @@ var SPORTS = [
      second dit le travail. En cardio, la durée, la distance et l'allure. */
   var progChoix = null;
 
+  /* Le regroupement se fait sur la clé repliée : les lignes déjà notées
+     « presse a cuisses » rejoignent « Presse à cuisses » sans qu'on
+     réécrive l'historique. Le nom affiché est celui de la liste si elle
+     connaît, sinon l'orthographe la plus souvent employée. */
   function historiqueMachines() {
     var par = {};
     Object.keys(Store.jours).sort().forEach(function (d) {
       (Store.jours[d].sport || []).forEach(function (se) {
         (se.ex || []).forEach(function (e) {
           if (!e || !e.n) return;
-          var m = par[e.n] || (par[e.n] = { nom: e.n, cardio: estCardio(e), jours: {} });
+          var k = cleExo(e.n) || e.n;
+          var m = par[k] || (par[k] = { nom: e.n, cardio: estCardio(e), jours: {}, graphies: {} });
+          m.graphies[e.n] = (m.graphies[e.n] || 0) + 1;
           var j = m.jours[d] || (m.jours[d] = { date: d, kgMax: 0, volume: 0, reps: 0, min: 0, km: 0, series: 0 });
           if (estCardio(e)) {
             m.cardio = true;
@@ -8685,6 +8760,11 @@ var SPORTS = [
       var m = par[n];
       m.liste = Object.keys(m.jours).sort().map(function (d) { return m.jours[d]; });
       m.dernier = m.liste[m.liste.length - 1].date;
+      var g = Object.keys(m.graphies).sort(function (a, b) {
+        return m.graphies[b] - m.graphies[a] || a.localeCompare(b, "fr");
+      });
+      m.nom = nomCanonique(g[0]);
+      m.variantes = g.length;
     });
     return par;
   }
@@ -8731,8 +8811,10 @@ var SPORTS = [
 
   function renderProgres() {
     var par = historiqueMachines();
+    // Les clés sont repliées ; c'est le nom de référence qui s'affiche.
     var noms = Object.keys(par).sort(function (a, b) {
-      return par[b].dernier.localeCompare(par[a].dernier) || a.localeCompare(b, "fr");
+      return par[b].dernier.localeCompare(par[a].dernier) ||
+             par[a].nom.localeCompare(par[b].nom, "fr");
     });
     var carte = document.getElementById("progCard");
     carte.hidden = !noms.length;
@@ -8742,12 +8824,13 @@ var SPORTS = [
     document.getElementById("progSel").innerHTML = noms.map(function (n) {
       var nb = par[n].liste.length;
       return '<option value="' + esc(n) + '"' + (n === progChoix ? " selected" : "") + '>' +
-        esc(n) + ' · ' + nb + (nb > 1 ? " séances" : " séance") + '</option>';
+        esc(par[n].nom) + ' · ' + nb + (nb > 1 ? " séances" : " séance") + '</option>';
     }).join("");
 
     var m = par[progChoix], l = m.liste, der = l[l.length - 1], prem = l[0];
     document.getElementById("progHint").textContent =
-      l.length + (l.length > 1 ? " séances notées" : " séance notée");
+      l.length + (l.length > 1 ? " séances notées" : " séance notée") +
+      (m.variantes > 1 ? " · " + m.variantes + " orthographes réunies" : "");
 
     var cartes = [], pts, unite;
     if (m.cardio) {
@@ -9646,7 +9729,10 @@ var SPORTS = [
     if (e.target.closest("[data-exo-ok]") && exoSaisie) {
       var s = J().sport[exoSaisie.i];
       if (!s) { exoSaisie = null; renderSport(); return; }
-      var nom = String(exoSaisie.nom || "").trim().slice(0, 50);
+      /* Le nom se recale sur l'orthographe de référence : « presse a
+         cuisses » entre comme « Presse à cuisses », et les progrès ne
+         comptent plus la même machine deux fois. */
+      var nom = nomCanonique(String(exoSaisie.nom || "").trim().slice(0, 50));
       if (!nom) { toast("Donne un nom à cet exercice.", true); return; }
       var lu = function (v, max) {
         var x = nombre(v);

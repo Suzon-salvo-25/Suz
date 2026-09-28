@@ -271,7 +271,7 @@ t('le tableau porte une ligne par séance', (await pg.$$eval('#progTable tbody t
 t('le plus récent est en haut', (await pg.textContent('#progTable tbody tr:first-child')).includes('50 kg'),
   await pg.textContent('#progTable tbody tr:first-child'));
 
-await pg.selectOption('#progSel', 'Tapis de course');
+await pg.selectOption('#progSel', 'tapidecourse');
 await pg.waitForTimeout(300);
 const statsCardio = await pg.textContent('#progStats');
 t('changer de machine change la lecture', statsCardio.includes('Distance cumulée'), statsCardio.slice(0, 160));
@@ -283,8 +283,56 @@ t('et une allure calculée', (await pg.textContent('#progTable tbody tr:first-ch
 // Une rediffusion ne doit pas ramener la carte sur la première machine.
 await pg.evaluate(() => window.dispatchEvent(new Event('focus')));
 await pg.waitForTimeout(250);
-t('le choix survit à un rendu', (await pg.inputValue('#progSel')) === 'Tapis de course', await pg.inputValue('#progSel'));
+t('le choix survit à un rendu', (await pg.inputValue('#progSel')) === 'tapidecourse', await pg.inputValue('#progSel'));
 await cProg.close();
+
+console.log('=== une machine, une seule entrée, quelle que soit la frappe ===');
+const cOrth = await b.newContext({ viewport: { width: 1100, height: 1000 }, ignoreHTTPSErrors: true });
+const po = await cOrth.newPage();
+po.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+po.on('dialog', d => { ko++; console.log('  ÉCHEC boîte native demandée'); d.dismiss(); });
+await po.addInitScript(([d, a, bb]) => {
+  localStorage.setItem('suz-forme-onglet', 'sport');
+  const seance = ex => ({ date: '', poids: 77, heure: '07:30', eau: 0,
+    sport: [{ n: 'Musculation', m: 60, met: 0, k: 0, ex: ex }],
+    repas: { petitdej: [], dejeuner: [], diner: [], collation: [] } });
+  const jours = {};
+  jours[a] = seance([{ n: 'presse a cuisses', s: 3, r: 12, kg: 40 }]);
+  jours[bb] = seance([{ n: 'PRESSE À CUISSES', s: 4, r: 12, kg: 45 }]);
+  jours[d] = seance([{ n: 'Presse-à  cuisse', s: 4, r: 10, kg: 50 }]);
+  Object.keys(jours).forEach(k => { jours[k].date = k; });
+  localStorage.setItem('suz-forme-v1', JSON.stringify({
+    profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:a,
+              fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+    jours: jours
+  }));
+}, [auj, j14, j7]);
+await po.goto('file:///home/user/Suz/perte-de-poids.html');
+await po.waitForTimeout(900);
+const orth = await po.$$eval('#progSel option', e => e.map(o => o.textContent));
+t('trois frappes ne font qu\'une entrée', orth.length === 1, JSON.stringify(orth));
+t('sous l\'orthographe de la liste', orth[0].startsWith('Presse à cuisses ·'), orth[0]);
+t('les trois séances sont réunies', orth[0].includes('3 séances'), orth[0]);
+t('et le regroupement est dit',
+  (await po.textContent('#progHint')).includes('3 orthographes réunies'), await po.textContent('#progHint'));
+t('la courbe relie bien les trois', (await po.$$eval('#progChart circle', e => e.length)) === 3,
+  String(await po.$$eval('#progChart circle', e => e.length)));
+// Et une nouvelle saisie ne recrée pas la variante.
+await po.click('[data-exo-seance="0"]');
+await po.waitForTimeout(250);
+await po.fill('#exoNom', 'presse A  CUISSES');
+await po.fill('#exoSeries', '3');
+await po.fill('#exoReps', '10');
+await po.fill('#exoPoids', '55');
+await po.click('[data-exo-ok]');
+await po.waitForTimeout(500);
+const nomsEx = await po.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0].ex.map(x => x.n), auj);
+t('une saisie se recale sur l\'orthographe de référence',
+  nomsEx[nomsEx.length - 1] === 'Presse à cuisses', JSON.stringify(nomsEx));
+t('et la liste des progrès ne gagne pas de ligne',
+  (await po.$$eval('#progSel option', e => e.length)) === 1,
+  String(await po.$$eval('#progSel option', e => e.length)));
+await cOrth.close();
 
 console.log('=== une machine inconnue se cherche, et se retient ===');
 const cAppr = await b.newContext({ viewport: { width: 1100, height: 1000 }, ignoreHTTPSErrors: true });
@@ -343,7 +391,8 @@ t('elle n\'est plus annoncée comme inconnue',
 t('elle entre dans les suggestions',
   (await pa.$$eval('#exoListe option', e => e.map(o => o.value))).includes('Tirage Bidule 3000'), '');
 t('elle apparaît dans les progrès',
-  (await pa.$$eval('#progSel option', e => e.map(o => o.value))).includes('Tirage Bidule 3000'), '');
+  (await pa.$$eval('#progSel option', e => e.map(o => o.textContent)))
+    .some(x => x.startsWith('Tirage Bidule 3000')), '');
 // Une fiche fausse doit pouvoir partir.
 await pa.click('[data-oublie-machine]');
 await pa.waitForTimeout(500);

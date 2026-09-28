@@ -325,6 +325,23 @@ du serveur redessine la carte et ramènerait la première machine. La courbe
 deux séances ; le tableau montre les dix dernières, la plus récente en haut.
 La carte est masquée tant qu'aucune ligne d'exercice n'existe.
 
+**Une machine n'a qu'un nom, quelle que soit la frappe.** « presse a
+cuisses », « PRESSE À CUISSES » et « Presse-à cuisse » faisaient trois
+entrées dans les progrès. Tout passe par `cleExo()` : accents, majuscules,
+ponctuation, espaces et tirets disparaissent, et chaque mot de plus de trois
+lettres perd son s ou son x final. **Sur les 81 noms de la liste, cette clé
+ne confond aucune paire** : la revérifier si on en ajoute. Trois effets.
+À l'enregistrement, `nomCanonique()` recale le nom tapé sur l'orthographe de
+la liste, ou de la fiche apprise, donc aucune variante nouvelle ne se crée.
+`historiqueMachines()` regroupe par clé, ce qui réunit **sans réécrire
+l'historique** les lignes déjà notées autrement ; le menu affiche le nom de
+référence, sinon l'orthographe la plus employée, et l'en-tête dit
+« 3 orthographes réunies ». Enfin `profilExercice()`, `cardioSalle()`,
+`exerciceConnu()` et `machineApprise()` cherchent par clé : une majuscule de
+trop ne rend plus une machine connue inconnue, et ne relance plus une
+recherche auprès de Claude. Les valeurs du `<select>` des progrès sont ces
+clés, pas les noms.
+
 **Une ligne d'exercice se corrige sans se supprimer** : la ligne entière est
 un bouton qui ouvre le formulaire à sa place (`exoDepuisLigne`,
 `exoSaisie.edit`). Une correction referme le formulaire, un ajout le laisse
@@ -581,8 +598,9 @@ node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # 59 contrôles
 node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
                                   # dedans, correction d'une ligne, masse
-                                  # déplacée, progrès par machine, fiche
-                                  # apprise puis oubliée, 69 contrôles
+                                  # déplacée, progrès par machine,
+                                  # orthographes réunies, fiche apprise
+                                  # puis oubliée, 76 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la
