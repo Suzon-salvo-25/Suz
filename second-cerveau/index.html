@@ -1822,6 +1822,17 @@ function interpreterExport(docs, plateforme, avecLikes) {
         info.fichiers.push(nom);
       }
       if (/saved_posts/i.test(nom) || json.saved_saved_media || json.saved_saved_collections) {
+        // Diagnostic : entrées présentes dans le fichier, et liens Instagram non reconnus.
+        if (Array.isArray(json.saved_saved_media)) info.entrees = (info.entrees || 0) + json.saved_saved_media.length;
+        else Object.keys(json).forEach(function (k) { if (Array.isArray(json[k])) info.entrees = (info.entrees || 0) + json[k].length; });
+        (d.texte.match(/https?:\\?\/\\?\/[^"\s]*instagram\.com[^"\s]*/gi) || []).forEach(function (u) {
+          u = u.replace(/\\\//g, "/");
+          var r = reconnaitre(u);
+          if (!r || r.plateforme !== "instagram") {
+            info.nonReconnus = info.nonReconnus || [];
+            if (info.nonReconnus.indexOf(u) < 0 && !/instagram\.com\/[\w.]+\/?(\?|$)/.test(u)) info.nonReconnus.push(u);
+          }
+        });
         collecterLiens(json).forEach(function (e) {
           if (e.r.plateforme === "instagram" && !parCle[e.r.cle]) parCle[e.r.cle] = e;
         });
@@ -2816,6 +2827,12 @@ function ajoutHTML() {
       var appels = Math.ceil(nouveaux / 16);
       h += '<div class="apercu-import"><b>' + pluriel(L.liste.length, a.plat === "tiktok" ? "vidéo trouvée" : "publication enregistrée trouvée", a.plat === "tiktok" ? "vidéos trouvées" : "publications enregistrées trouvées") + '</b>' +
         '<ul><li>Fichiers lus : ' + esc(L.info.fichiers.join(", ") || "aucun") + '</li>' +
+        (L.info.entrees != null ? '<li>Le fichier contient ' + pluriel(L.info.entrees, "entrée") + '.' + (L.info.entrees < 1.2 * L.liste.length ? " Si Instagram en affiche davantage, l'export ne les contient pas : refais-le avec la période « Depuis le début »." : "") + '</li>' : "") +
+        (function () {
+          var d = L.liste.map(function (e) { return e.ajoute; }).filter(Boolean).sort(function (a, b) { return a - b; });
+          return d.length ? '<li>Enregistrés du ' + dateCourte(d[0]) + ' au ' + dateCourte(d[d.length - 1]) + '.</li>' : "";
+        })() +
+        (L.info.nonReconnus && L.info.nonReconnus.length ? '<li>' + pluriel(L.info.nonReconnus.length, "lien non reconnu") + ', par ex. <code style="overflow-wrap:anywhere">' + esc(L.info.nonReconnus[0].slice(0, 90)) + '</code></li>' : "") +
         (L.liste.length - nouveaux ? '<li>' + (L.liste.length - nouveaux) + ' déjà dans l\'appli : complétés, jamais dupliqués</li>' : "") +
         (L.nbCollections ? '<li>' + pluriel(L.nbCollections, "collection") + ' Instagram, utilisées comme indice de classement</li>' : "") +
         (L.info.likesIgnores ? '<li>' + pluriel(L.info.likesIgnores, "vidéo likée laissée", "vidéos likées laissées") + ' de côté</li>' : "") +

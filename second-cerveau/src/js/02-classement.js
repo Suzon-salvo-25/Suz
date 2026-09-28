@@ -665,6 +665,17 @@ function interpreterExport(docs, plateforme, avecLikes) {
         info.fichiers.push(nom);
       }
       if (/saved_posts/i.test(nom) || json.saved_saved_media || json.saved_saved_collections) {
+        // Diagnostic : entrées présentes dans le fichier, et liens Instagram non reconnus.
+        if (Array.isArray(json.saved_saved_media)) info.entrees = (info.entrees || 0) + json.saved_saved_media.length;
+        else Object.keys(json).forEach(function (k) { if (Array.isArray(json[k])) info.entrees = (info.entrees || 0) + json[k].length; });
+        (d.texte.match(/https?:\\?\/\\?\/[^"\s]*instagram\.com[^"\s]*/gi) || []).forEach(function (u) {
+          u = u.replace(/\\\//g, "/");
+          var r = reconnaitre(u);
+          if (!r || r.plateforme !== "instagram") {
+            info.nonReconnus = info.nonReconnus || [];
+            if (info.nonReconnus.indexOf(u) < 0 && !/instagram\.com\/[\w.]+\/?(\?|$)/.test(u)) info.nonReconnus.push(u);
+          }
+        });
         collecterLiens(json).forEach(function (e) {
           if (e.r.plateforme === "instagram" && !parCle[e.r.cle]) parCle[e.r.cle] = e;
         });

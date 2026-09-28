@@ -210,6 +210,12 @@ function ajoutHTML() {
       var appels = Math.ceil(nouveaux / 16);
       h += '<div class="apercu-import"><b>' + pluriel(L.liste.length, a.plat === "tiktok" ? "vidéo trouvée" : "publication enregistrée trouvée", a.plat === "tiktok" ? "vidéos trouvées" : "publications enregistrées trouvées") + '</b>' +
         '<ul><li>Fichiers lus : ' + esc(L.info.fichiers.join(", ") || "aucun") + '</li>' +
+        (L.info.entrees != null ? '<li>Le fichier contient ' + pluriel(L.info.entrees, "entrée") + '.' + (L.info.entrees < 1.2 * L.liste.length ? " Si Instagram en affiche davantage, l'export ne les contient pas : refais-le avec la période « Depuis le début »." : "") + '</li>' : "") +
+        (function () {
+          var d = L.liste.map(function (e) { return e.ajoute; }).filter(Boolean).sort(function (a, b) { return a - b; });
+          return d.length ? '<li>Enregistrés du ' + dateCourte(d[0]) + ' au ' + dateCourte(d[d.length - 1]) + '.</li>' : "";
+        })() +
+        (L.info.nonReconnus && L.info.nonReconnus.length ? '<li>' + pluriel(L.info.nonReconnus.length, "lien non reconnu") + ', par ex. <code style="overflow-wrap:anywhere">' + esc(L.info.nonReconnus[0].slice(0, 90)) + '</code></li>' : "") +
         (L.liste.length - nouveaux ? '<li>' + (L.liste.length - nouveaux) + ' déjà dans l\'appli : complétés, jamais dupliqués</li>' : "") +
         (L.nbCollections ? '<li>' + pluriel(L.nbCollections, "collection") + ' Instagram, utilisées comme indice de classement</li>' : "") +
         (L.info.likesIgnores ? '<li>' + pluriel(L.info.likesIgnores, "vidéo likée laissée", "vidéos likées laissées") + ' de côté</li>' : "") +
