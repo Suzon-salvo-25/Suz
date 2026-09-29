@@ -342,7 +342,8 @@ document.addEventListener("click", function (ev) {
 
     case "arreter-analyse": arreterAnalyse(); break;
     case "retirer-pas-aime":
-      Store.reg.pasAime = pasAime().filter(function (x) { return x !== d.v; }); sauverReg(); break;
+      Store.reg.pasAime = pasAime().filter(function (x) { return x !== d.v; }); sauverReg(); reappliquerPasAime(); break;
+    case "voir-cachees": ICI.rec.voirCachees = !ICI.rec.voirCachees; rendreBientot(); break;
     case "fermer-seances": Seances.erreur = ""; Seances.file = []; Seances.fait = 0; Seances.total = 0; rendreBientot(); break;
     case "autoriser":
       if (!Diag.P) { toast("La demande d'autorisation n'est pas disponible ici : recharge la page.", true); break; }
@@ -531,12 +532,13 @@ document.addEventListener("submit", function (ev) {
       if (co && cn) sauverColl(Object.assign({}, co, { nom: cn }));
       ICI.collEdit = null; rendreBientot(); break;
     case "pas-aime":
-      var nv = sansEmoji(val("pasAime")).toLowerCase().slice(0, 40);
-      if (nv && pasAime().indexOf(nv) < 0) {
-        Store.reg.pasAime = pasAime().concat(nv);
-        // Les recettes conseillées qui en contiennent disparaissent tout de suite.
-        conseils().forEach(function (x) { if (contientPasAime(x.recette)) supprimerItem(x.id); });
+      // Plusieurs d'un coup possibles : « coriandre, thon et champignons ».
+      var nouveaux = sansEmoji(val("pasAime")).toLowerCase().split(/,|;|\bet\b/).map(function (x) { return x.trim().slice(0, 40); }).filter(Boolean);
+      var ajout = nouveaux.filter(function (x) { return pasAime().indexOf(x) < 0; });
+      if (ajout.length) {
+        Store.reg.pasAime = pasAime().concat(ajout);
         sauverReg();
+        reappliquerPasAime();
       }
       var ch = $("#pasAime"); if (ch) ch.value = "";
       break;
@@ -546,6 +548,11 @@ document.addEventListener("submit", function (ev) {
       Store.reg.prenom = val("onbPrenom").slice(0, 40); ICI.onb = 3; rendreBientot(); break;
   }
 });
+
+// Mémorise l'ouverture de « Je n'aime pas » pour qu'un nouveau rendu ne la referme pas.
+document.addEventListener("toggle", function (ev) {
+  if (ev.target && ev.target.id === "blocPasAime") ICI.rec.paOuvert = ev.target.open;
+}, true);
 
 document.addEventListener("keydown", function (ev) {
   if (ev.key === "Escape" && ICI.modeSel && !$("#fiche").open && !$("#ajout").open) { ICI.modeSel = false; ICI.sel.clear(); ICI.barre = null; rendreBientot(); }

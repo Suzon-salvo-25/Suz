@@ -35,8 +35,110 @@ function pasAime() { return (Store.reg.pasAime || []).filter(Boolean); }
 function contientPasAime(r) {
   var liste = pasAime().map(function (x) { return mots(x).map(racine); }).filter(function (m) { return m.length; });
   if (!liste.length || !r) return false;
-  var texte = mots([r.nom, (r.ingredients || []).map(function (i) { return i.nom; }).join(" ")].join(" ")).map(racine);
+  var texte = mots([r.nom, (r.ingredients || []).map(function (i) { return i.nom; }).join(" "), (r.etapes || []).join(" ")].join(" ")).map(racine);
   return liste.some(function (m) { return m.every(function (w) { return motCorrespond(texte, w); }); });
+}
+
+function sigPasAime() { return pasAime().map(norm).sort().join("|"); }
+// Une recette à cacher : elle contient encore ce qu'elle n'aime pas (en attente
+// d'adaptation), ou Claude a jugé l'aliment impossible à remplacer.
+function recetteCachee(it) {
+  if (!it.recette || !pasAime().length) return false;
+  if (it.masquePasAime && it.recette.adapteePour === sigPasAime()) return true;
+  return contientPasAime(it.recette);
+}
+
+/* --- adaptation des recettes à ce qu'elle n'aime pas --- */
+
+var Adapt = { file: [], enCours: false };
+
+function adapterRecettes(ids) {
+  ids.forEach(function (id) { if (Adapt.file.indexOf(id) < 0) Adapt.file.push(id); });
+  if (!Adapt.enCours && iaDispo()) boucleAdapt();
+}
+
+async function boucleAdapt() {
+  Adapt.enCours = true;
+  rendreBientot();
+  while (Adapt.file.length && iaDispo()) {
+    var lot = Adapt.file.splice(0, 6).map(function (id) { return Store.items[id]; }).filter(function (it) { return it && it.recette; });
+    if (!lot.length) continue;
+    var sig = sigPasAime();
+    var prompt = [
+      "Une personne n'aime pas : " + pasAime().join(", ") + " (sous toutes leurs formes : frais, séché, en poudre, en sauce, en anglais…).",
+      "Pour chaque recette ci-dessous :",
+      "- si chaque ingrédient qu'elle n'aime pas peut être remplacé sans dénaturer le plat, remplace-le partout (nom, titre, résumé, ingrédients, étapes) par un bon substitut, en adaptant les quantités. N'écris JAMAIS l'ingrédient d'origine, ni « remplacé », ni « sans » : la recette doit se lire comme si elle avait toujours été ainsi ;",
+      "- si l'un d'eux est l'élément central du plat (ex. le thon d'une salade de thon), réponds remplacable = false.",
+      "Tout en français. Réponds uniquement en JSON : {\"resultats\": [{\"id\", \"remplacable\": bool, \"nom\", \"titre\", \"resume\": phrase ou null, \"ingredients\": [{\"nom\", \"qte\"}], \"etapes\": [\"…\"]}]}.",
+      "",
+      JSON.stringify(lot.map(function (it) {
+        var r = it.recetteOrigine || it.recette;
+        return { id: it.id, titre: it.titreOrigine || it.titre, resume: it.resumeOrigine || it.resume || null, nom: r.nom, ingredients: r.ingredients, etapes: r.etapes };
+      }))
+    ].join("\n");
+    try {
+      var rep = await IA.sample.json(prompt, { modelTier: "default" });
+      var demandes = lot.map(function (it) { return it.id; });
+      ((rep && rep.resultats) || []).forEach(function (x) { if (x && demandes.indexOf(x.id) >= 0) appliquerAdaptation(x, sig); });
+      // Ceux que Claude a oubliés restent cachés s'ils contiennent encore l'aliment.
+      lot.forEach(function (it) { if (it.recette.adapteePour !== sig) { it.recette.adapteePour = sig; it.masquePasAime = contientPasAime(it.recette); if (it.conseil && it.masquePasAime) supprimerItem(it.id); else sauverItem(it); } });
+    } catch (e) {
+      Diag.erreurClaude = (e && e.code) || String(e && e.message || e);
+      iaFatal(e);
+      break;
+    }
+    rendreBientot();
+  }
+  Adapt.enCours = false;
+  rendreBientot();
+}
+
+function appliquerAdaptation(x, sig) {
+  var it = x && Store.items[x.id];
+  if (!it || !it.recette) return;
+  if (x.remplacable === false) {
+    if (it.conseil) { supprimerItem(it.id); return; }
+    it.masquePasAime = true;
+    it.recette.adapteePour = sig;
+    sauverItem(it);
+    return;
+  }
+  // La version d'origine est gardée pour pouvoir revenir en arrière.
+  if (!it.recetteOrigine && !it.conseil) { it.recetteOrigine = copie(it.recette); it.titreOrigine = it.titre; it.resumeOrigine = it.resume || null; }
+  var r = Object.assign({}, it.recette, {
+    nom: sansEmoji(x.nom || it.recette.nom || "").slice(0, 80),
+    ingredients: (x.ingredients || it.recette.ingredients || []).map(function (i) { return typeof i === "string" ? { nom: i, qte: "" } : { nom: String(i.nom || ""), qte: String(i.qte || "") }; }).filter(function (i) { return i.nom; }),
+    etapes: (x.etapes || it.recette.etapes || []).map(String),
+    adapteePour: sig, adaptee: true
+  });
+  it.recette = r;
+  if (x.titre && !(it.analyse && it.analyse.titreManuel)) it.titre = sansEmoji(x.titre).slice(0, 80);
+  if (x.resume) it.resume = String(x.resume).slice(0, 400);
+  it.masquePasAime = contientPasAime(r);
+  if (it.conseil && it.masquePasAime) { supprimerItem(it.id); return; }
+  sauverItem(it);
+}
+
+// Quand la liste change : on repart des versions d'origine, puis on réadapte.
+function reappliquerPasAime() {
+  var sig = sigPasAime();
+  Object.keys(Store.items).forEach(function (k) {
+    var it = Store.items[k];
+    if (!it.recette) return;
+    if (it.recetteOrigine && it.recette.adapteePour !== sig) {
+      it.recette = copie(it.recetteOrigine); it.titre = it.titreOrigine || it.titre; it.resume = it.resumeOrigine || it.resume;
+      delete it.recetteOrigine; delete it.titreOrigine; delete it.resumeOrigine;
+      it.masquePasAime = false;
+      sauverItem(it);
+    } else if (it.masquePasAime && it.recette.adapteePour !== sig) {
+      it.masquePasAime = false;
+      sauverItem(it);
+    }
+  });
+  var aAdapter = Object.keys(Store.items).map(function (k) { return Store.items[k]; })
+    .filter(function (it) { return it.recette && it.recette.adapteePour !== sig && contientPasAime(it.recette); });
+  if (aAdapter.length) adapterRecettes(aAdapter.map(function (it) { return it.id; }));
+  rendreBientot();
 }
 
 function gouts() {
@@ -66,7 +168,7 @@ async function proposerRecettes() {
     var prompt = [
       "Tu conseilles des recettes healthy à une personne francophone, pour toute sa journée.",
       "Ses recettes enregistrées (pour deviner ses goûts) : " + (gouts().join(" ; ") || "aucune pour l'instant") + ".",
-      interdits.length ? "ELLE N'AIME PAS : " + interdits.join(", ") + ". Écarte toute recette qui en contient, même en petite quantité, sous n'importe quelle forme ou traduction (ex. « coriander » = coriandre)." : "",
+      interdits.length ? "ELLE N'AIME PAS : " + interdits.join(", ") + " (sous toutes leurs formes et traductions, ex. « coriander » = coriandre). Si l'un d'eux peut être remplacé sans dénaturer le plat, remplace-le directement dans la recette sans jamais le mentionner ; s'il est au cœur du plat, écarte la recette." : "",
       "Voici des recettes candidates (en anglais) :",
       JSON.stringify(candidates),
       "",
@@ -90,6 +192,7 @@ async function proposerRecettes() {
       r.repasPrincipal = principal;
       // Double contrôle : rien de ce qu'elle n'aime pas, même si Claude l'a laissé passer.
       if (contientPasAime(r)) continue;
+      r.adapteePour = sigPasAime();
       r.healthy = true;
       var cat = trouverCat("Healthy", "recettes");
       var it = nouvelItem({ cle: "conseil-" + src.id, url: src.video || src.source || "https://www.themealdb.com/meal/" + src.id,
@@ -135,6 +238,12 @@ function autoRecettes() {
     var ids = rec.filter(function (it) { return apercuPossible(it) && (!it.apercu || (it.apercu.date || 0) < CORRECTION_IMAGES); })
       .map(function (it) { return it.id; });
     if (ids.length) lancerApercus(ids);
+  }
+  if (iaDispo() && pasAime().length) {
+    var sig = sigPasAime();
+    var aAdapter = Object.keys(Store.items).map(function (k) { return Store.items[k]; })
+      .filter(function (it) { return it.recette && it.recette.adapteePour !== sig && contientPasAime(it.recette); });
+    if (aAdapter.length) adapterRecettes(aAdapter.map(function (it) { return it.id; }));
   }
   if (iaDispo()) {
     // Recettes jamais lues par Claude (titre = légende brute) : une analyse, une fois.

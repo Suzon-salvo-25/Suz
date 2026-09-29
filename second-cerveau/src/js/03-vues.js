@@ -448,9 +448,21 @@ function estAnglais(it) {
   return m.length > 0 && n / m.length > .08 && n >= 3;
 }
 
+function blocPasAime() {
+  var pa = pasAime();
+  // Fermé par défaut : seul le nombre d'aliments se voit.
+  return '<details class="pas-aime" id="blocPasAime"' + (ICI.rec.paOuvert ? " open" : "") + '><summary>Je n\'aime pas' + (pa.length ? ' <span class="n">' + pluriel(pa.length, "aliment") + '</span>' : ' <span class="n">à remplir</span>') + '</summary>' +
+    '<div class="chips" style="margin:10px 0">' + (pa.length ? pa.map(function (x) {
+      return '<span class="chip doux">' + esc(x) + '<button type="button" data-action="retirer-pas-aime" data-v="' + esc(x) + '" aria-label="Retirer ' + esc(x) + '">×</button></span>';
+    }).join("") : '<span class="aide">Rien pour l\'instant.</span>') + '</div>' +
+    '<form class="ajout-ligne" data-form="pas-aime"><input type="text" id="pasAime" maxlength="60" autocomplete="off" placeholder="Ex. coriandre, champignons, thon" aria-label="Aliment que je n\'aime pas"><button type="submit" class="btn ghost sm">Ajouter</button></form>' +
+    '<p class="aide" style="margin-top:8px">Dans toutes tes recettes, Claude remplace ces aliments quand c\'est possible ; sinon la recette est retirée de la liste.' +
+    (Adapt.enCours ? ' <b>Adaptation en cours…</b>' : "") + '</p></details>';
+}
+
 function vueRecettes() {
   var onglet = ICI.rec.onglet || "miennes";
-  var h = '<div class="seg" style="margin-bottom:18px" role="tablist">' +
+  var h = blocPasAime() + '<div class="seg" style="margin-bottom:18px" role="tablist">' +
     '<button type="button" data-action="rec-onglet" data-o="miennes" aria-pressed="' + (onglet === "miennes") + '">Mes recettes</button>' +
     '<button type="button" data-action="rec-onglet" data-o="conseils" aria-pressed="' + (onglet === "conseils") + '">Conseillées healthy</button></div>';
   return h + (onglet === "conseils" ? vueConseils() : vueMesRecettes());
@@ -458,6 +470,8 @@ function vueRecettes() {
 
 function vueMesRecettes() {
   var toutes = recents(tousItems().filter(estRecette));
+  var cachees = toutes.filter(recetteCachee).length;
+  if (!ICI.rec.voirCachees) toutes = toutes.filter(function (it) { return !recetteCachee(it); });
   var demandes = ingredientsDemandes(ICI.rec.frigo);
   var avecFrigo = demandes.length > 0;
   var lignes = toutes.map(function (it) { return { it: it, m: avecFrigo ? correspondanceFrigo(it, demandes) : null }; });
@@ -478,6 +492,8 @@ function vueMesRecettes() {
     h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap"><span class="illu-mini st-etoile" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(anglais, "recette") + ' pas encore lue' + (anglais > 1 ? "s" : "") + ' ou traduite' + (anglais > 1 ? "s" : "") + ' par Claude.</span>' +
       '<button type="button" class="btn go sm" data-action="traduire-recettes">Analyser et traduire</button></div>';
   }
+  if (cachees) h += '<p class="aide" style="margin-top:10px">' + pluriel(cachees, "recette masquée", "recettes masquées") + ' : ' + (cachees > 1 ? "elles contiennent" : "elle contient") + ' ce que tu n\'aimes pas. ' +
+    '<button type="button" class="lien-mini" data-action="voir-cachees">' + (ICI.rec.voirCachees ? "Les cacher" : "Les afficher quand même") + '</button></p>';
   h += '<div class="titre-sec"><h2>' + (avecFrigo ? "Avec ce que tu as" : "Mes recettes") + '</h2><span class="lab">' + pluriel(lignes.length, "recette") + (toutes.length !== lignes.length ? " sur " + toutes.length : "") + '</span></div>';
   if (!toutes.length) return h + vide("fraise", "Aucune recette pour l'instant. Enregistre une vidéo de cuisine, elle arrivera ici avec ses ingrédients.");
   if (!lignes.length) return h + vide("framboise", "Aucune de tes recettes n'utilise ces ingrédients.");
@@ -512,15 +528,7 @@ function vueConseils() {
       : '<button type="button" class="btn go" data-action="proposer-recettes">' + (liste.length ? "M'en proposer d'autres" : "Me proposer des recettes healthy") + '</button>') +
     (liste.length && !Conseils.enCours ? '<button type="button" class="btn ghost" data-action="vider-conseils">Tout effacer</button>' : "") + '</div>';
   if (Conseils.erreur) h += '<div class="ia-bloc erreur"><span class="illu-mini st-grenade" aria-hidden="true"></span><span>' + esc(Conseils.erreur) + '</span></div>';
-  // Ce qu'elle n'aime pas : jamais dans les recettes conseillées.
-  var pa = pasAime();
-  h += '<div class="bloc" style="margin-top:14px"><h3>Je n\'aime pas</h3>' +
-    '<div class="chips">' + (pa.length ? pa.map(function (x) {
-      return '<span class="chip doux">' + esc(x) + '<button type="button" data-action="retirer-pas-aime" data-v="' + esc(x) + '" aria-label="Retirer ' + esc(x) + '">×</button></span>';
-    }).join("") : '<span class="aide">Rien pour l\'instant.</span>') + '</div>' +
-    '<form class="ajout-ligne" data-form="pas-aime"><input type="text" id="pasAime" maxlength="40" autocomplete="off" placeholder="Ex. coriandre, champignons, thon" aria-label="Ingrédient que je n\'aime pas"><button type="submit" class="btn ghost sm">Ajouter</button></form>' +
-    '<p class="aide">Claude écarte toute recette qui en contient, et l\'appli revérifie derrière lui.</p></div>';
-  liste = liste.filter(function (it) { return !contientPasAime(it.recette); });
+  liste = liste.filter(function (it) { return !recetteCachee(it); });
   if (!liste.length) return h + (Conseils.enCours ? "" : vide("pamplemousse", "Touche le bouton : Claude te propose une dizaine de recettes pour toute la journée, selon tes goûts."));
   var REPAS = [["petit-dejeuner", "Petit-déjeuner"], ["dejeuner", "Déjeuner"], ["diner", "Dîner"], ["collation", "Collation & dessert"]];
   var principal = function (it) {
