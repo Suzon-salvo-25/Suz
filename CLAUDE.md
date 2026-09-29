@@ -81,14 +81,26 @@ réellement observé, et le rythme visé des réglages. Seule la deuxième est u
 mesure, les autres sont des intentions.
 
 **« Où j'en suis » doit passer par ses points.** Une seule fonction,
-`serieMesuree()`, décide de ce qu'on affiche comme poids réel, et toute la
-page la lit : la courbe d'évolution, celle de la projection, le parcours et
-la carte de projection. Sous quatre pesées ou moins d'une semaine d'écart,
+`serieMesuree()`, décide de ce qu'on affiche comme poids réel, et la page la
+lit : la courbe d'évolution, celle de la projection, la carte de projection
+et le verdict du parcours. Sous quatre pesées ou moins d'une semaine d'écart,
 elle relie les pesées elles-mêmes ; au-delà elle lisse sur sept jours, et la
 légende dit alors qu'elle lisse. Avant cette correction, la courbe traçait la
 moyenne dès la deuxième pesée : elle affichait 77,1 kg quand la pesée du jour
 disait 76,9, sans rien expliquer. Elle partait en plus du deuxième point, si
 bien qu'avec deux pesées il n'y avait aucun trait, juste des points.
+
+**Mais « toi », dans le parcours, c'est la balance.** Suzon s'est pesée à
+76,0 et lisait « toi 76,3 kg » : la barre affichait la moyenne sur sept
+jours sous le mot « toi », sans le dire, pendant que « Depuis le départ »
+comptait depuis 76,0. « Je comprends pas. » La barre, les kilos restants et
+le chemin parcouru partent donc de **la dernière pesée**. Seul le verdict
+(pile, en avance, en retard) se juge sur la moyenne, parce qu'une pesée
+isolée bouge de près d'un kilo, et **la phrase donne les deux chiffres
+nommés** : « ta pesée du jour : 76,0 kg · ta moyenne sur 7 jours :
+76,3 kg ». La règle générale : **jamais un chiffre de poids qui diffère de
+la balance sans dire que c'est une moyenne.** La carte de projection le
+respecte déjà (« moyenne actuelle »).
 
 **Sous la moyenne, les pesées elles-mêmes.** Dès que la courbe lisse, un
 trait orange pâle (`--peche` à 55 %, 1,5 px, plein) relie les pesées une à
@@ -599,7 +611,7 @@ la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1])"
 node outils/verifie.mjs           # stockage, mise en page, lisibilité de
                                   # la recherche, courbe pesée par pesée,
-                                  # 33 contrôles
+                                  # parcours depuis la balance, 38 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres et étages du jour,
                                   # 34 contrôles

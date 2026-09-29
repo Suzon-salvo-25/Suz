@@ -212,6 +212,45 @@ verifie('pas de doublon tant que la courbe ne lisse pas', courte.pts === 0 &&
 verifie('aucune erreur sur la courbe', !longue.erreurs.length && !courte.erreurs.length,
         longue.erreurs.concat(courte.erreurs).join(' | '));
 
+/* « Je me suis pesée ce matin à 76,0, pourquoi on me dit 76,3 ? » La barre
+   de parcours affichait la moyenne sous le mot « toi », sans le dire. Les
+   pesées ci-dessous sont celles de Suzon : 76,0 le jour même, 76,3 de
+   moyenne sur sept jours. */
+console.log('\n=== mon parcours part de la balance ===');
+{
+  const ctx = await nav.newContext({ viewport: { width: 430, height: 1000 } });
+  const pg = await ctx.newPage();
+  const erreurs = [];
+  pg.on('pageerror', (e) => erreurs.push(e.message));
+  await pg.addInitScript(([auj]) => {
+    const jour = (k) => new Date(Date.parse(auj + 'T12:00:00Z') - k * 86400000).toISOString().slice(0, 10);
+    const kgs = [77.2, 76.9, 76.6, 76.5, 76.4, 76.2, 76.3, 76.1, 76.0];
+    const jours = {};
+    kgs.forEach((kg, i) => {
+      const d = jour(8 - i);
+      jours[d] = { date: d, poids: kg, heure: '07:50', eau: 0, sport: [],
+                   repas: { petitdej: [], dejeuner: [], diner: [], collation: [] } };
+    });
+    localStorage.setItem('suz-forme-onglet', 'poids');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom: 'Suzon', sexe: 'f', age: 29, taille: 168, depart: 77.2, objectif: 60, debut: jour(8),
+                fin: '2027-04-08', activite: 1.375, rythme: 0.5, seances: 3, freq: {}, perso: {}, plats: {} },
+      jours }));
+  }, [AUJ]);
+  await pg.goto(PAGE);
+  await pg.waitForTimeout(900);
+  const barre = (await pg.textContent('#parcours')).replace(/\s+/g, ' ');
+  const ecart = (await pg.textContent('#ecartJour')).replace(/\s+/g, ' ');
+  verifie('« toi » est la pesée du jour, pas la moyenne', /toi\s*76,0 kg/.test(barre), barre);
+  verifie('les kilos restants partent de la balance',
+          (await pg.textContent('#parcoursHint')) === '16,0 kg restants', await pg.textContent('#parcoursHint'));
+  verifie('la phrase donne la pesée et la moyenne, nommées',
+          ecart.includes('ta pesée du jour : 76,0 kg') && ecart.includes('ta moyenne sur 7 jours : 76,3 kg'), ecart);
+  verifie('et dit pourquoi le verdict suit la moyenne', ecart.includes('Le verdict suit la moyenne'), ecart);
+  verifie('aucune erreur sur le parcours', !erreurs.length, erreurs.join(' | '));
+  await ctx.close();
+}
+
 await nav.close();
 console.log('\n' + reussis + ' vérifications passées, ' + echecs + ' en échec');
 process.exit(echecs ? 1 : 0);
