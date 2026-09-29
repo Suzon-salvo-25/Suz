@@ -757,7 +757,10 @@ function vueCategories() {
     var subs = enfants(p.id);
     h += '<div class="cat-ligne"><span class="tache t-' + teinteCat(p) + ' b' + (i % 4 + 1) + '"><span class="illu st-' + stickerCat(p) + '" aria-hidden="true"></span></span>' +
       '<div class="nom"><h3>' + esc(p.nom) + '</h3><p>' + pluriel(nbDansCat(p.id), "contenu") + ' · ' + pluriel(subs.length, "sous-catégorie") + (p.auto ? " · créée par l'analyse" : "") + '</p></div>' +
-      '<div class="actions"><button type="button" class="btn ghost sm" data-action="voir-cat" data-cat="' + esc(p.id) + '">Voir</button>' +
+      '<div class="actions">' +
+      (i > 0 ? '<button type="button" class="btn ghost sm" data-action="cat-monter" data-id="' + esc(p.id) + '" aria-label="Monter ' + esc(p.nom) + '">↑</button>' : "") +
+      (i < parents().length - 1 ? '<button type="button" class="btn ghost sm" data-action="cat-descendre" data-id="' + esc(p.id) + '" aria-label="Descendre ' + esc(p.nom) + '">↓</button>' : "") +
+      '<button type="button" class="btn ghost sm" data-action="voir-cat" data-cat="' + esc(p.id) + '">Voir</button>' +
       '<button type="button" class="btn ghost sm" data-action="cat-mode" data-id="' + esc(p.id) + '" data-mode="renommer">Renommer</button>' +
       '<button type="button" class="btn ghost sm" data-action="cat-mode" data-id="' + esc(p.id) + '" data-mode="fusionner">Fusionner</button>' +
       '<button type="button" class="btn ghost sm" data-action="cat-mode" data-id="' + esc(p.id) + '" data-mode="supprimer">Supprimer</button></div></div>';

@@ -222,9 +222,9 @@ var TEINTES = ["peche", "rose", "lavande", "jaune"];
 
 var CATS_DEFAUT = [
   ["recettes", "Recettes", "pasteque", "peche", ["Petit-déjeuner", "Déjeuner", "Dîner", "Desserts", "Apéritifs", "Healthy", "Pâtes", "Poulet", "Recettes rapides"]],
-  ["voyages", "Voyages", "tortue", "lavande", ["Destinations", "Hôtels", "Restaurants", "Activités", "Bons plans"]],
   ["mode", "Mode", "noeud", "rose", ["Tenues", "Chaussures", "Sacs", "Bijoux", "Inspirations"]],
   ["sport", "Sport", "ballon", "jaune", ["Salle", "Running", "Exercices", "Programmes"]],
+  ["voyages", "Voyages", "tortue", "lavande", ["Destinations", "Hôtels", "Restaurants", "Activités", "Bons plans"]],
   ["beaute", "Beauté", "lys", "rose", ["Maquillage", "Soins", "Cheveux", "Ongles"]],
   ["maison", "Maison", "coquillage", "lavande", ["Décoration", "Rangement", "DIY", "Plantes"]],
   ["films", "Films & séries", "etoile", "peche", ["Films", "Séries", "Documentaires"]],

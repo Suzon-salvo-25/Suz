@@ -109,6 +109,7 @@ function rendre() {
     return;
   }
   tabs.hidden = false; fab.hidden = false;
+  if (Store.mode === "cloud" || !EN_ARTIFACT) voyagesApresSport();
   $("#ajoutBtn").hidden = false; $("#reglagesBtn").hidden = false; $("#catBtn").hidden = false;
   $("#brandSub").textContent = Store.reg.prenom ? "Le second cerveau de " + Store.reg.prenom : "Second cerveau · Instagram & TikTok";
   var items = tousItems();
@@ -231,6 +232,8 @@ document.addEventListener("click", function (ev) {
       setTimeout(function () { var c = $("#catNom") || $("#catCible"); if (c) { c.focus(); if (c.select) c.select(); } }, 40);
       break;
     case "cat-annuler": ICI.catEdit = null; rendreBientot(); break;
+    case "cat-monter": case "cat-descendre":
+      deplacerParent(d.id, act === "cat-monter" ? -1 : 1); break;
     case "cat-supprimer": supprimerCat(d.id); ICI.catEdit = null; toast("Catégorie supprimée"); break;
     case "coll-mode": ICI.collEdit = { id: d.id, mode: d.mode }; rendreBientot(); break;
     case "coll-annuler": ICI.collEdit = null; rendreBientot(); break;
@@ -373,6 +376,25 @@ function lirePermissions() {
   if (!Diag.P) return;
   Promise.all([Diag.P.state("sample").catch(function () { return "unavailable"; }), Diag.P.state("mcp:Supabase").catch(function () { return "unavailable"; })])
     .then(function (r) { Diag.perms = { sample: r[0], mcp: r[1] }; rendreBientot(); });
+}
+
+// Change l'ordre des univers : on renumérote tout, puis on échange deux voisins.
+function deplacerParent(id, sens) {
+  var ps = parents(), i = ps.map(function (p) { return p.id; }).indexOf(id), j = i + sens;
+  if (i < 0 || j < 0 || j >= ps.length) return;
+  var t = ps[i]; ps[i] = ps[j]; ps[j] = t;
+  ps.forEach(function (p, k) { if (p.ordre !== k) sauverCat(Object.assign({}, p, { ordre: k })); });
+}
+
+// Demande du 29 sept. : Voyages juste après Sport, une seule fois.
+function voyagesApresSport() {
+  if (Store.reg.ordreVoyages || !Store.cats.voyages || !Store.cats.sport) return;
+  var ps = parents().filter(function (p) { return p.id !== "voyages"; });
+  var k = ps.map(function (p) { return p.id; }).indexOf("sport");
+  ps.splice(k + 1, 0, Store.cats.voyages);
+  ps.forEach(function (p, n) { if (p.ordre !== n) sauverCat(Object.assign({}, p, { ordre: n })); });
+  Store.reg.ordreVoyages = true;
+  sauverReg();
 }
 
 function basculerSel(id) {
