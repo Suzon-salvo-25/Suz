@@ -1,0 +1,79 @@
+[
+  {
+    "nom": "Mayonnaise de Dijon (Amora)",
+    "kcal": 720, "prot": 1.2, "gluc": 1.6, "lip": 76,
+    "cat": "gras", "portion_g": 15, "portion_lib": "1 cuillère à soupe",
+    "source": "https://fr.openfoodfacts.org/produit/8710522918913/la-mayo-de-dijon-amora",
+    "note": "Recette 5 ingrédients sélectionnés, bocal 465 g. Contrôle d'Atwater : 695 kcal calculées pour 720 annoncées."
+  },
+  {
+    "nom": "Mayonnaise légère (Amora)",
+    "kcal": 277, "prot": 1.7, "gluc": 6.7, "lip": 27,
+    "cat": "gras", "portion_g": 15, "portion_lib": "1 cuillère à soupe",
+    "source": "https://fr.openfoodfacts.org/produit/8710908897344/mayonnaise-legere-l-onctueuse-touche-de-fromage-blanc-amora",
+    "note": "L'Onctueuse légère, touche de fromage blanc. Environ 60 % de matières grasses en moins que la mayonnaise classique."
+  },
+  {
+    "nom": "Tomato Ketchup (Amora)",
+    "kcal": 101, "prot": 1.2, "gluc": 24, "lip": 0.4,
+    "cat": "gras", "portion_g": 15, "portion_lib": "1 cuillère à soupe",
+    "source": "https://fr.openfoodfacts.org/produit/8718114770338/tomato-ketchup-amora",
+    "note": "23 g de sucres pour 100 g, sel 2,5 g. Matières grasses étiquetées « < 0,5 g »."
+  },
+  {
+    "nom": "Moutarde de Dijon fine et forte (Amora)",
+    "kcal": 159, "prot": 7.1, "gluc": 6.2, "lip": 11.8,
+    "cat": "gras", "portion_g": 5, "portion_lib": "1 cuillère à café",
+    "source": "https://fr.openfoodfacts.org/produit/3250547014115/moutarde-de-dijon-fine-et-forte-amora",
+    "note": "Contrôle d'Atwater exact (159 kcal calculées)."
+  },
+  {
+    "nom": "Moutarde à l'ancienne (Amora)",
+    "kcal": 144, "prot": 7, "gluc": 4.5, "lip": 9.8,
+    "cat": "gras", "portion_g": 5, "portion_lib": "1 cuillère à café",
+    "source": "https://nutrition.aujourdhui.com/savoir-manger/sauces-et-condiments/491092/moutarde-a-l-ancienne.html",
+    "note": "Les lipides varient selon les fiches (4,5 à 9,8 g) ; 9,8 g est la seule valeur compatible avec les 144 kcal annoncées."
+  },
+  {
+    "nom": "Sauce burger (Amora)",
+    "kcal": 239, "prot": 1.1, "gluc": 11, "lip": 21,
+    "cat": "gras", "portion_g": 15, "portion_lib": "1 cuillère à soupe",
+    "source": "https://informationsnutritionnelles.fr/sauce-burger-amora",
+    "note": "6,9 g de sucres et 1,3 g de sel pour 100 g."
+  },
+  {
+    "nom": "Vinaigrette légère nature (Amora)",
+    "kcal": 248, "prot": 0.5, "gluc": 3, "lip": 26,
+    "cat": "gras", "portion_g": 15, "portion_lib": "1 portion",
+    "source": "https://informationsnutritionnelles.fr/vinaigrette-legere-nature-amora-26-mg-amora",
+    "note": "Version 26 % de matières grasses. Valeurs pour 100 ml."
+  },
+  {
+    "nom": "Vinaigrette légère moutarde (Amora)",
+    "kcal": 262, "prot": 0.6, "gluc": 5.9, "lip": 26,
+    "cat": "gras", "portion_g": 15, "portion_lib": "1 portion",
+    "source": "https://www.bible-marques.fr/produits/amora/vinaigrette-legere-moutarde-amora",
+    "note": "Valeurs pour 100 ml."
+  },
+  {
+    "nom": "Moutarde de Dijon l'Originale (Maille)",
+    "kcal": 150, "prot": 7, "gluc": 3.5, "lip": 11,
+    "cat": "gras", "portion_g": 5, "portion_lib": "1 cuillère à café",
+    "source": "https://informationsnutritionnelles.fr/moutarde-fine-de-dijon-maille",
+    "note": "Moutarde fine de Dijon l'Originale. Sel 5,7 g pour 100 g."
+  },
+  {
+    "nom": "Moutarde à l'ancienne (Maille)",
+    "kcal": 172, "prot": 6.9, "gluc": 9.3, "lip": 10,
+    "cat": "gras", "portion_g": 5, "portion_lib": "1 cuillère à café",
+    "source": "https://fr.openfoodfacts.org/produit/8712566351022/moutarde-a-l-ancienne-maille",
+    "note": "Moutarde en grains, 5,9 g de sucres pour 100 g."
+  },
+  {
+    "nom": "Tomato Ketchup (Heinz)",
+    "kcal": 103, "prot": 0.9, "gluc": 24.1, "lip": 0.1,
+    "cat": "gras", "portion_g": 15, "portion_lib": "1 cuillère à soupe",
+    "source": "https://informationsnutritionnelles.fr/tomato-ketchup-heinz",
+    "note": "Recette vendue en France, environ 24 g de sucres pour 100 g."
+  }
+]

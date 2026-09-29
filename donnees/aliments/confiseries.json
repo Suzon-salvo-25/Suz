@@ -1,0 +1,205 @@
+[
+  {
+    "nom": "Chocolat au lait L'Original (Côte d'Or)",
+    "kcal": 520, "prot": 7.4, "gluc": 57, "lip": 28,
+    "cat": "sucre", "portion_g": 20, "portion_lib": "4 carrés",
+    "source": "Open Food Facts / Carrefour, tablette 200 g (code 5410081200551)",
+    "note": "33 % de cacao minimum. Carré compté à 5 g."
+  },
+  {
+    "nom": "Chocolat noir Noir de Noir (Côte d'Or)",
+    "kcal": 555, "prot": 5.9, "gluc": 47, "lip": 36,
+    "cat": "sucre", "portion_g": 20, "portion_lib": "4 carrés",
+    "source": "informationsnutritionnelles.fr, fiche Côte d'Or Noir de Noir",
+    "note": "Tablette de chocolat noir. Carré compté à 5 g."
+  },
+  {
+    "nom": "Chocolat au lait (Toblerone)",
+    "kcal": 535, "prot": 5.6, "gluc": 60.5, "lip": 29.5,
+    "cat": "sucre", "portion_g": 50, "portion_lib": "1 barre de 50 g",
+    "source": "Open Food Facts, Toblerone chocolat au lait (code 7622210496645)",
+    "note": "Nougat au miel et aux amandes. Format 50 g courant en France."
+  },
+  {
+    "nom": "Chocolat noir pâtissier (Nestlé Dessert)",
+    "kcal": 548, "prot": 5.2, "gluc": 50.3, "lip": 34.5,
+    "cat": "sucre", "portion_g": 20, "portion_lib": "4 carrés",
+    "source": "fatsecret.fr / Open Food Facts, tablette 205 g (code 7613035040823)",
+    "note": "52 % de cacao minimum. Carré compté à 5 g."
+  },
+  {
+    "nom": "Chocolat Noir Extra 47 % (Poulain)",
+    "kcal": 510, "prot": 4.8, "gluc": 55, "lip": 28,
+    "cat": "sucre", "portion_g": 20, "portion_lib": "4 carrés",
+    "source": "chocolatpoulain.fr, fiche Poulain Noir Extra",
+    "note": "Carré compté à 5 g."
+  },
+  {
+    "nom": "Rocher lait fourré au praliné (Suchard)",
+    "kcal": 555, "prot": 5.2, "gluc": 50.5, "lip": 37,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 part de 30 g",
+    "source": "informationsnutritionnelles.fr, fiche Rocher Lait Suchard",
+    "note": "Poids unitaire du rocher non confirmé, portion donnée en grammes."
+  },
+  {
+    "nom": "Kit Kat 4 doigts chocolat au lait (Nestlé)",
+    "kcal": 512, "prot": 6.7, "gluc": 60.5, "lip": 26.4,
+    "cat": "sucre", "portion_g": 41.5, "portion_lib": "1 barre 4 doigts",
+    "source": "Open Food Facts, KITKAT 4 Fingers 41,5 g (code 40052397)",
+    "note": ""
+  },
+  {
+    "nom": "Barre chocolatée caramel nougat (Mars)",
+    "kcal": 449, "prot": 4.1, "gluc": 70.6, "lip": 16.9,
+    "cat": "sucre", "portion_g": 51, "portion_lib": "1 barre",
+    "source": "Open Food Facts, Mars 51 g (code 5000159407236)",
+    "note": "Valeurs recalculées depuis l'étiquette de la barre de 51 g (229 kcal)."
+  },
+  {
+    "nom": "Barre chocolatée cacahuètes (Snickers)",
+    "kcal": 481, "prot": 8.7, "gluc": 60, "lip": 23,
+    "cat": "sucre", "portion_g": 50, "portion_lib": "1 barre",
+    "source": "snickers.fr, fiche SNICKERS Single 50 g",
+    "note": ""
+  },
+  {
+    "nom": "Barre biscuit caramel (Twix)",
+    "kcal": 493, "prot": 4.4, "gluc": 65, "lip": 24,
+    "cat": "sucre", "portion_g": 50, "portion_lib": "1 sachet de 2 barres",
+    "source": "twix.com/fr, fiche TWIX Single 50 g",
+    "note": "Le sachet contient 2 barres de 25 g."
+  },
+  {
+    "nom": "Barre noix de coco (Bounty)",
+    "kcal": 487, "prot": 3.7, "gluc": 59, "lip": 26,
+    "cat": "sucre", "portion_g": 57, "portion_lib": "1 barre",
+    "source": "informationsnutritionnelles.fr / Carrefour, Bounty 57 g (code 5000159557542)",
+    "note": ""
+  },
+  {
+    "nom": "Barre chocolatée céréales caramel (Lion)",
+    "kcal": 483, "prot": 5.4, "gluc": 64.6, "lip": 22.2,
+    "cat": "sucre", "portion_g": 42, "portion_lib": "1 barre",
+    "source": "Open Food Facts, Lion barre chocolatée 42 g (code 7613038316345)",
+    "note": ""
+  },
+  {
+    "nom": "Barre miel et amandes (Balisto)",
+    "kcal": 518, "prot": 6.8, "gluc": 58.5, "lip": 27.7,
+    "cat": "sucre", "portion_g": 18.5, "portion_lib": "1 barre",
+    "source": "Open Food Facts, Balisto miel amandes x10 (code 5000159419291)",
+    "note": "Vendu en lots de barres de 18,5 g."
+  },
+  {
+    "nom": "Kinder Bueno (Kinder)",
+    "kcal": 571, "prot": 9.2, "gluc": 50, "lip": 37,
+    "cat": "sucre", "portion_g": 43, "portion_lib": "1 étui de 2 barres",
+    "source": "informationsnutritionnelles.fr / Open Food Facts, Kinder Bueno 43 g (code 80052760)",
+    "note": ""
+  },
+  {
+    "nom": "Kinder Country (Kinder)",
+    "kcal": 561, "prot": 8.5, "gluc": 54.9, "lip": 33.6,
+    "cat": "sucre", "portion_g": 23.5, "portion_lib": "1 barre",
+    "source": "Open Food Facts, Kinder Country 23,5 g (code 80310266)",
+    "note": "Valeurs pour 100 g recalculées depuis l'étiquette de la barre (132 kcal)."
+  },
+  {
+    "nom": "Dragibus (Haribo)",
+    "kcal": 380, "prot": 0.5, "gluc": 95, "lip": 0.5,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "informationsnutritionnelles.fr, fiche Haribo Dragibus",
+    "note": "Protéines et lipides étiquetés « < 0,5 g »."
+  },
+  {
+    "nom": "Croco (Haribo)",
+    "kcal": 345, "prot": 5.7, "gluc": 79, "lip": 0.5,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "informationsnutritionnelles.fr, fiche Bonbon Haribo Hari Croco",
+    "note": "Lipides étiquetés « < 0,5 g »."
+  },
+  {
+    "nom": "Fraise Tagada (Haribo)",
+    "kcal": 361, "prot": 2.8, "gluc": 87, "lip": 0.5,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "informationsnutritionnelles.fr / Open Food Facts (code 3103224009945)",
+    "note": "Lipides étiquetés « < 0,5 g »."
+  },
+  {
+    "nom": "Chamallows guimauve (Haribo)",
+    "kcal": 326, "prot": 2.6, "gluc": 80, "lip": 0.5,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "Open Food Facts, Chamallows confiserie guimauve fantaisie (code 3103220009512)",
+    "note": ""
+  },
+  {
+    "nom": "Carambar caramel (Carambar)",
+    "kcal": 398, "prot": 3.1, "gluc": 79, "lip": 7.8,
+    "cat": "sucre", "portion_g": 8, "portion_lib": "1 carambar",
+    "source": "informationsnutritionnelles.fr, fiche Carambar Caramel L'Original",
+    "note": "Un carambar pèse environ 8 g, soit 33 kcal."
+  },
+  {
+    "nom": "Michoko caramel enrobé de chocolat (Michoko)",
+    "kcal": 461, "prot": 3.6, "gluc": 63, "lip": 21,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "bible-marques.fr, fiche Bonbons caramel chocolat Michoko",
+    "note": ""
+  },
+  {
+    "nom": "Régal'ad bonbons aux fruits (Krema)",
+    "kcal": 407, "prot": 1.2, "gluc": 83, "lip": 7.4,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "informationsnutritionnelles.fr, fiche Régal'ad Krema",
+    "note": ""
+  },
+  {
+    "nom": "M&M's Peanut cacahuète (M&M's)",
+    "kcal": 495, "prot": 7, "gluc": 65, "lip": 22,
+    "cat": "sucre", "portion_g": 45, "portion_lib": "1 sachet",
+    "source": "Open Food Facts, m&m's Peanut sachets de 45 g (code 5000159303514)",
+    "note": ""
+  },
+  {
+    "nom": "Smarties (Nestlé)",
+    "kcal": 471, "prot": 6.3, "gluc": 67.8, "lip": 18.8,
+    "cat": "sucre", "portion_g": 38, "portion_lib": "1 tube",
+    "source": "informationsnutritionnelles.fr, fiche Chocolat Smarties Nestlé",
+    "note": "Tube individuel de 38 g."
+  },
+  {
+    "nom": "Ferrero Rocher (Ferrero)",
+    "kcal": 603, "prot": 8.2, "gluc": 44.4, "lip": 42.7,
+    "cat": "sucre", "portion_g": 12.5, "portion_lib": "1 rocher",
+    "source": "informationsnutritionnelles.fr, fiche Ferrero Rocher",
+    "note": "Un rocher pèse environ 12,5 g, soit environ 75 kcal."
+  },
+  {
+    "nom": "Mon Chéri (Ferrero)",
+    "kcal": 455, "prot": 3, "gluc": 52.8, "lip": 20.3,
+    "cat": "sucre", "portion_g": 8.8, "portion_lib": "1 bouchée",
+    "source": "fatsecret / fiche produit Ferrero Mon Chéri",
+    "note": "L'écart avec le calcul d'Atwater vient de la liqueur de cerise. 4 bouchées pèsent 35 g."
+  },
+  {
+    "nom": "Tic Tac menthe (Tic Tac)",
+    "kcal": 397, "prot": 0.1, "gluc": 97.5, "lip": 0.5,
+    "cat": "sucre", "portion_g": 18, "portion_lib": "1 boîte",
+    "source": "informationsnutritionnelles.fr / Open Food Facts, Tic Tac menthe 18 g (code 80052043)",
+    "note": "Boîte format poche de 18 g."
+  },
+  {
+    "nom": "Nocciolata pâte à tartiner cacao noisettes (Rigoni di Asiago)",
+    "kcal": 544, "prot": 8.1, "gluc": 54, "lip": 32,
+    "cat": "sucre", "portion_g": 15, "portion_lib": "1 cuillère à soupe",
+    "source": "informationsnutritionnelles.fr / Open Food Facts (code 8001505000764)",
+    "note": "Version bio classique, sans huile de palme."
+  },
+  {
+    "nom": "Pâte à tartiner noisettes et cacao (Bonne Maman)",
+    "kcal": 551, "prot": 6.7, "gluc": 53, "lip": 34,
+    "cat": "sucre", "portion_g": 15, "portion_lib": "1 cuillère à soupe",
+    "source": "bonne-maman.com / Open Food Facts, pot 360 g (code 3608580065340)",
+    "note": ""
+  }
+]
