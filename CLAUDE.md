@@ -90,6 +90,15 @@ moyenne dès la deuxième pesée : elle affichait 77,1 kg quand la pesée du jou
 disait 76,9, sans rien expliquer. Elle partait en plus du deuxième point, si
 bien qu'avec deux pesées il n'y avait aucun trait, juste des points.
 
+**Sous la moyenne, les pesées elles-mêmes.** Dès que la courbe lisse, un
+trait orange pâle (`--peche` à 55 %, 1,5 px, plein) relie les pesées une à
+une sous la courbe violette : on voit ce que la moyenne efface, sans qu'il
+lui vole la vedette. Plein et fin pour ne pas se confondre avec la
+trajectoire visée, orange elle aussi mais en tirets et plus épaisse. La
+légende le nomme « Pesée par pesée ». **Tant que la courbe ne lisse pas, il
+n'est pas tracé** : elle passe déjà par chaque pesée, il serait caché
+dessous.
+
 **Une pente ne se prolonge jamais au-delà de l'objectif.** Prolongée
 bêtement, une bonne pente annonçait 49,9 kg en avril pour un objectif à 66 :
 faux, et malsain à afficher dans une application de perte de poids. La
@@ -588,8 +597,9 @@ la fenêtre, à 390 et 1000 px, et c'est lui qui a attrapé les 8 px de trop.
 
 ```bash
 node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1])"
-node outils/verifie.mjs           # stockage, mise en page et lisibilité de
-                                  # la recherche, 28 contrôles
+node outils/verifie.mjs           # stockage, mise en page, lisibilité de
+                                  # la recherche, courbe pesée par pesée,
+                                  # 33 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres et étages du jour,
                                   # 34 contrôles

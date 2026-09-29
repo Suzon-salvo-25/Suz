@@ -170,6 +170,48 @@ for (const largeur of [1000, 390]) {
   await ctx.close();
 }
 
+/* Sous la moyenne, les pesées reliées une à une, en orange pâle. Tant que la
+   courbe ne lisse pas, elle passe déjà par chaque pesée : pas de doublon. */
+console.log('\n=== la courbe pesée par pesée ===');
+const courbe = async (n) => {
+  const ctx = await nav.newContext({ viewport: { width: 430, height: 1000 } });
+  const pg = await ctx.newPage();
+  const erreurs = [];
+  pg.on('pageerror', (e) => erreurs.push(e.message));
+  await pg.addInitScript(([auj, nb]) => {
+    const jour = (k) => new Date(Date.parse(auj + 'T12:00:00Z') - k * 86400000).toISOString().slice(0, 10);
+    const jours = {};
+    for (let i = 0; i <= nb; i++) {
+      const d = jour(nb - i);
+      jours[d] = { date: d, poids: +(78 - i * 0.07 + Math.sin(i * 1.3) * 0.45).toFixed(1), heure: '07:30',
+                   eau: 0, sport: [], repas: { petitdej: [], dejeuner: [], diner: [], collation: [] } };
+    }
+    localStorage.setItem('suz-forme-onglet', 'poids');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom: 'Suzon', sexe: 'f', age: 29, taille: 168, depart: 78, objectif: 66, debut: jour(nb),
+                fin: '2027-04-08', activite: 1.375, rythme: 0.5, seances: 3, freq: {}, perso: {}, plats: {} },
+      jours }));
+  }, [AUJ, n]);
+  await pg.goto(PAGE);
+  await pg.waitForTimeout(900);
+  const r = await pg.evaluate(() => {
+    const b = document.querySelector('#chartHolder .courbe-brute');
+    return { pts: b ? b.getAttribute('points').trim().split(/\s+/).length : 0,
+             legende: document.getElementById('chartLegend').textContent };
+  });
+  await ctx.close();
+  return Object.assign(r, { erreurs });
+};
+const longue = await courbe(22);
+verifie('la moyenne a sa courbe pesée par pesée', longue.pts === 23, String(longue.pts));
+verifie('et la légende la nomme', longue.legende.includes('Pesée par pesée'), longue.legende);
+verifie('sans tiret cadratin dans la légende', !longue.legende.includes('\u2014'), longue.legende);
+const courte = await courbe(3);
+verifie('pas de doublon tant que la courbe ne lisse pas', courte.pts === 0 &&
+        !courte.legende.includes('Pesée par pesée'), courte.pts + ' / ' + courte.legende);
+verifie('aucune erreur sur la courbe', !longue.erreurs.length && !courte.erreurs.length,
+        longue.erreurs.concat(courte.erreurs).join(' | '));
+
 await nav.close();
 console.log('\n' + reussis + ' vérifications passées, ' + echecs + ' en échec');
 process.exit(echecs ? 1 : 0);

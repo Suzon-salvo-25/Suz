@@ -7230,6 +7230,17 @@ var SPORTS = [
 
     var mesure = serieMesuree(l);
     var moyPts = mesure.pts.map(function (q) { return [X(q.date), Y(q.kg), q.date, q.kg]; });
+    /* Sous la moyenne, les pesées elles-mêmes, reliées une à une : on voit
+       ce que la moyenne lisse, sans que ça lui vole la vedette. Trait plein,
+       fin et pâle, pour ne pas se confondre avec la trajectoire visée, en
+       tirets. Tant que la courbe ne lisse pas, elle passe déjà par chaque
+       pesée : ce trait-là serait caché dessous, on ne le trace pas. */
+    var brut = mesure.lissee && l.length > 1;
+    if (brut) {
+      s += '<polyline class="courbe-brute" fill="none" stroke="var(--peche)" stroke-opacity=".55" ' +
+        'stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="' +
+        l.map(function (e) { return X(e.date).toFixed(1) + "," + Y(e.kg).toFixed(1); }).join(" ") + '"/>';
+    }
     if (moyPts.length > 1) {
       s += '<polyline fill="none" stroke="var(--blue)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="' +
         moyPts.map(function (q) { return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '"/>';
@@ -7274,8 +7285,9 @@ var SPORTS = [
     legend.innerHTML =
       (moyPts.length > 1
         ? '<li><span class="key" style="border-top-color:var(--blue)"></span> Où j\'en suis' +
-          (mesure.lissee ? ' — moyenne sur 7 jours' : '') + '</li>'
+          (mesure.lissee ? ', moyenne sur 7 jours' : '') + '</li>'
         : '<li><span class="key dot" style="color:var(--blue);border-color:var(--blue)"></span> Où j\'en suis</li>') +
+      (brut ? '<li><span class="key" style="border-top-color:var(--peche);border-top-width:2px;opacity:.7"></span> Pesée par pesée</li>' : '') +
       (trajKg.length > 1 ? '<li><span class="key" style="border-top-color:var(--orange);border-top-style:dashed"></span> Où je devrais en être</li>' : '') +
       '<li><span class="key dot" style="color:var(--ink-faint)"></span> Pesée du jour</li>' +
       (chartPts.some(function (q) { return q.atypique; })
