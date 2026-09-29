@@ -264,6 +264,9 @@ function recetteDepuisLegende(leg) {
    ANALYSE PAR CLAUDE (capacité « sample »)
    ================================================================== */
 
+// Ce qu'on sait de Claude et de Supabase dans cette vue, pour l'afficher tel quel.
+var Diag = { sample: "attente", mcp: "attente", perms: {}, erreurClaude: null, erreurSupabase: null, P: null };
+
 var IA = { images: {}, sample: null, limites: null, indispo: false, file: [], enCours: false, fait: 0, total: 0, ctl: null, erreur: "" };
 
 function iaDispo() { return !!IA.sample && !IA.indispo; }
@@ -378,6 +381,7 @@ async function boucleAnalyse() {
       // Le lot revient en tête de file : rien n'est perdu.
       IA.file = lot.concat(IA.file);
       IA.erreur = messageIA(e);
+      Diag.erreurClaude = (e && e.code) || String(e && e.message || e);
       iaFatal(e);
       lot.forEach(function (id) { var it = Store.items[id]; if (it) { it.analyse = Object.assign({}, it.analyse, { etat: it.cats && it.cats.length ? "fait" : "vide" }); } });
       break;

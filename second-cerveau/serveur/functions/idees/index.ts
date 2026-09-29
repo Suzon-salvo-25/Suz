@@ -7,10 +7,12 @@
 // et les renvoie détaillées, avec une petite photo. Claude choisit ensuite,
 // côté appli, celles qui sont vraiment healthy et les traduit en français.
 //
-// Entrée : POST {"n": 8, "exclure": ["52807", ...]}   Sortie : {ok, recettes: [...]}
+// Entrée : POST {"n": 8, "exclure": ["52807", ...], "categories": ["Breakfast", ...]}   Sortie : {ok, recettes: [...]}
 
 const API = "https://www.themealdb.com/api/json/v1/1/";
 const CATEGORIES = ["Vegetarian", "Vegan", "Seafood", "Chicken", "Breakfast", "Side"];
+// Catégories qu'on accepte de l'appli (celles de TheMealDB).
+const PERMISES = ["Breakfast", "Dessert", "Vegan", "Vegetarian", "Seafood", "Chicken", "Side", "Starter", "Pasta", "Miscellaneous", "Beef", "Lamb", "Pork", "Goat"];
 
 type Recette = {
   id: string; nom: string; categorie: string | null; origine: string | null;
@@ -79,14 +81,18 @@ Deno.serve(async (req: Request) => {
   const entetes = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type" };
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: entetes });
-  let n = 8, exclure: string[] = [];
+  let n = 8, exclure: string[] = [], cats = CATEGORIES;
   try {
     const b = req.method === "POST" ? await req.json() : {};
     n = Math.max(1, Math.min(12, parseInt(b.n, 10) || 8));
     exclure = Array.isArray(b.exclure) ? b.exclure.map(String).slice(0, 500) : [];
+    if (Array.isArray(b.categories)) {
+      const c = b.categories.map(String).filter((x: string) => PERMISES.indexOf(x) >= 0);
+      if (c.length) cats = c;
+    }
   } catch { /* valeurs par défaut */ }
   try {
-    const listes = await Promise.all(CATEGORIES.map((c) => json(API + "filter.php?c=" + c)));
+    const listes = await Promise.all(cats.map((c) => json(API + "filter.php?c=" + c)));
     const ids = melange(listes.flatMap((l) => (l?.meals || []).map((m: { idMeal: string }) => String(m.idMeal))))
       .filter((id, i, a) => a.indexOf(id) === i && exclure.indexOf(id) < 0)
       .slice(0, n);

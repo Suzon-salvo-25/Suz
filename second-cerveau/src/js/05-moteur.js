@@ -37,6 +37,12 @@ var VUES = { accueil: vueAccueil, recettes: vueRecettes, sport: vueSport, collec
 
 function banniereAnalyse() {
   var b = $("#banniere");
+  if (Seances.enCours || Seances.file.length || Seances.erreur) {
+    b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-ballon" aria-hidden="true" style="margin:0"></span>' +
+      (Seances.erreur ? '<span style="flex:1 1 200px">' + esc(Seances.erreur) + '</span><button type="button" class="btn ghost sm" data-action="fermer-seances">OK</button>'
+        : '<span>Claude détaille tes séances · <b>' + Seances.fait + ' / ' + Seances.total + '</b></span><span class="jauge"><i style="width:' + (Seances.total ? Math.round(Seances.fait / Seances.total * 100) : 0) + '%"></i></span>') + '</div>';
+    return;
+  }
   if (Apercus.enCours || Apercus.file.length) {
     var p = Apercus.total ? Math.round(Apercus.fait / Apercus.total * 100) : 0;
     b.innerHTML = '<div class="analyse-banniere"><span class="illu-mini st-poisson" aria-hidden="true" style="margin:0"></span>' +
@@ -186,8 +192,11 @@ document.addEventListener("click", function (ev) {
       ang.forEach(function (x) { x.tradTentee = true; });
       lancerAnalyse(ang.map(function (x) { return x.id; })); toast("Claude traduit " + pluriel(ang.length, "recette") + "…"); break;
     case "detailler-seances":
-      lancerAnalyse(tousItems().filter(function (x) { return estSport(x) && !x.seance; }).map(function (x) { return x.id; }));
+      detaillerSeances(tousItems().filter(function (x) { return estSport(x) && !x.seance; }).map(function (x) { return x.id; }));
       toast("Claude détaille tes séances…"); break;
+    case "detailler-seance":
+      if (it) { detaillerSeances([it.id]); toast("Claude reconstitue la séance…"); }
+      break;
     case "proposer-recettes": proposerRecettes(); break;
     case "vider-conseils": conseils().forEach(function (x) { supprimerItem(x.id); }); break;
     case "garder-conseil": if (it) { garderConseil(it); toast("Ajoutée à tes recettes"); } break;
@@ -332,6 +341,17 @@ document.addEventListener("click", function (ev) {
     case "supprimer-compte": supprimerCompte(); break;
 
     case "arreter-analyse": arreterAnalyse(); break;
+    case "retirer-pas-aime":
+      Store.reg.pasAime = pasAime().filter(function (x) { return x !== d.v; }); sauverReg(); break;
+    case "fermer-seances": Seances.erreur = ""; Seances.file = []; Seances.fait = 0; Seances.total = 0; rendreBientot(); break;
+    case "autoriser":
+      if (!Diag.P) { toast("La demande d'autorisation n'est pas disponible ici : recharge la page.", true); break; }
+      Diag.P.request(["sample", "mcp:Supabase"]).then(function (r) {
+        Diag.perms = { sample: r.sample || Diag.perms.sample, mcp: r["mcp:Supabase"] || Diag.perms.mcp };
+        if (r.sample === "granted") { IA.indispo = false; IA.erreur = ""; }
+        rendreBientot();
+      }).catch(function () { lirePermissions(); });
+      break;
     case "apercu-un": if (it) lancerApercus([it.id], function (ids) { if (iaDispo()) lancerAnalyse(ids); }); break;
     case "apercus-tous": traiterNouveaux(aApercuManquant().map(function (x) { return x.id; })); break;
     case "arreter-apercus": Apercus.file = []; Apercus.suite = null; Apercus.ids = []; rendreBientot(); break;
@@ -347,6 +367,12 @@ document.addEventListener("click", function (ev) {
     case "onb-fin": finirOnboarding(d.suite); break;
   }
 });
+
+function lirePermissions() {
+  if (!Diag.P) return;
+  Promise.all([Diag.P.state("sample").catch(function () { return "unavailable"; }), Diag.P.state("mcp:Supabase").catch(function () { return "unavailable"; })])
+    .then(function (r) { Diag.perms = { sample: r[0], mcp: r[1] }; rendreBientot(); });
+}
 
 function basculerSel(id) {
   if (!ICI.modeSel) { ICI.modeSel = true; ICI.sel.clear(); }
@@ -504,6 +530,16 @@ document.addEventListener("submit", function (ev) {
       var co = Store.colls[ICI.collEdit.id], cn = sansEmoji(val("collNom")).slice(0, 50);
       if (co && cn) sauverColl(Object.assign({}, co, { nom: cn }));
       ICI.collEdit = null; rendreBientot(); break;
+    case "pas-aime":
+      var nv = sansEmoji(val("pasAime")).toLowerCase().slice(0, 40);
+      if (nv && pasAime().indexOf(nv) < 0) {
+        Store.reg.pasAime = pasAime().concat(nv);
+        // Les recettes conseillées qui en contiennent disparaissent tout de suite.
+        conseils().forEach(function (x) { if (contientPasAime(x.recette)) supprimerItem(x.id); });
+        sauverReg();
+      }
+      var ch = $("#pasAime"); if (ch) ch.value = "";
+      break;
     case "prenom":
       Store.reg.prenom = val("prenom").slice(0, 40); sauverReg(); toast("Enregistré"); break;
     case "onb-prenom":
@@ -624,7 +660,8 @@ try {
   }
 
   window.claude.use("sample").then(function (sp) {
-    if (!sp) return;
+    Diag.sample = sp ? "ok" : "absent";
+    if (!sp) { rendreBientot(); return; }
     IA.sample = sp;
     sp.limits().then(function (l) { IA.limites = l; }).catch(function () {});
     rendreBientot();
@@ -632,7 +669,12 @@ try {
 
   window.claude.use("downloads").then(function (dl) { Telechargement = dl; }).catch(function () {});
 
-  window.claude.use("mcp").then(function (m) { Apercus.mcp = m; rendreBientot(); }).catch(function () {});
+  window.claude.use("mcp").then(function (m) { Apercus.mcp = m; Diag.mcp = m ? "ok" : "absent"; rendreBientot(); }).catch(function () { Diag.mcp = "absent"; });
+  window.claude.use("permissions").then(function (P) {
+    if (!P) return;
+    Diag.P = P;
+    lirePermissions();
+  }).catch(function () {});
 
   Promise.all([window.claude.use("user"), window.claude.use("db")]).then(function (r) {
     var u = r[0], db = r[1];

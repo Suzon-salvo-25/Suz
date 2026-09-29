@@ -467,6 +467,7 @@ function vueMesRecettes() {
   }
   var h = '<form class="frigo" id="formFrigo" style="margin-bottom:6px"><input type="text" id="frigo" autocomplete="off" aria-label="Ingrédients disponibles" placeholder="J\'ai du poulet, des courgettes…" value="' + esc(ICI.rec.frigo) + '">' +
     (ICI.rec.frigo ? '<button type="button" class="btn ghost" data-action="effacer-frigo">Effacer</button>' : "") + '</form>';
+  if (!iaDispo() || Diag.erreurClaude || Diag.erreurSupabase) h += blocEtatClaude();
   var sansImage = apercusDispo() ? toutes.filter(function (it) { return apercuPossible(it); }).length : 0;
   var anglais = iaDispo() ? toutes.filter(function (it) { return estAnglais(it) || !(it.analyse && (it.analyse.par === "ia" || it.analyse.par === "manuel")) && !it.demo; }).length : 0;
   if (sansImage && !(Apercus.enCours || Apercus.file.length)) {
@@ -483,17 +484,56 @@ function vueMesRecettes() {
   return h + '<div class="grille-rec">' + lignes.map(function (l) { return carteRecette(l.it, l.m); }).join("") + '</div>';
 }
 
+// État de Claude et de Supabase, en clair, avec le bouton pour les autoriser.
+var LIB_PERM = { granted: "autorisé", prompt: "à autoriser", denied: "refusé", unavailable: "indisponible dans cette vue" };
+function blocEtatClaude() {
+  if (!EN_ARTIFACT) return "";
+  var p = Diag.perms || {};
+  var etat = function (nom, cap, perm, erreur) {
+    var t = cap === "absent" ? "indisponible dans cette vue" : LIB_PERM[perm] || (cap === "ok" ? "prêt" : "vérification…");
+    return '<li><b>' + nom + ' :</b> ' + t + (erreur ? ' <span class="aide">(dernière erreur : ' + esc(erreur) + ')</span>' : "") + '</li>';
+  };
+  var aDemander = p.sample === "prompt" || p.mcp === "prompt" || (Diag.sample === "ok" && !iaDispo());
+  return '<div class="ia-bloc" style="flex-direction:column;align-items:stretch;gap:8px"><ul style="margin:0;padding-left:18px">' +
+    etat("Claude", Diag.sample, p.sample, Diag.erreurClaude) + etat("Supabase", Diag.mcp, p.mcp, Diag.erreurSupabase) + '</ul>' +
+    (aDemander ? '<div><button type="button" class="btn go sm" data-action="autoriser">Autoriser Claude et Supabase</button></div>' : "") +
+    (p.sample === "denied" || p.mcp === "denied" ? '<p class="aide">Une autorisation a été refusée : ferme et rouvre Mes Pépites pour qu\'elle soit redemandée.</p>' : "") +
+    (Diag.sample === "absent" ? '<p class="aide">Claude ne répond pas depuis cette vue. Ouvre Mes Pépites dans l\'appli Claude ou sur claude.ai, connectée à ton compte.</p>' : "") +
+    '</div>';
+}
+
 function vueConseils() {
   var liste = recents(conseils());
   var h = '<p class="prose" style="margin-bottom:14px">Des recettes healthy choisies par Claude dans une base de vraies recettes, avec photo et vidéo quand il y en a, traduites et adaptées. Garde celles qui te plaisent : elles rejoignent tes recettes.</p>';
-  if (!iaDispo()) return h + vide("verre", "Claude n'est pas disponible dans cette vue : il en faut un pour choisir et traduire les recettes.");
+  if (!iaDispo() || Diag.mcp !== "ok" || Conseils.erreur) h += blocEtatClaude();
+  if (!iaDispo()) return h;
   h += '<div class="boutons" style="margin:0 0 6px">' + (Conseils.enCours
       ? '<button type="button" class="btn go" disabled>Claude choisit tes recettes…</button>'
       : '<button type="button" class="btn go" data-action="proposer-recettes">' + (liste.length ? "M'en proposer d'autres" : "Me proposer des recettes healthy") + '</button>') +
     (liste.length && !Conseils.enCours ? '<button type="button" class="btn ghost" data-action="vider-conseils">Tout effacer</button>' : "") + '</div>';
   if (Conseils.erreur) h += '<div class="ia-bloc erreur"><span class="illu-mini st-grenade" aria-hidden="true"></span><span>' + esc(Conseils.erreur) + '</span></div>';
-  if (!liste.length) return h + (Conseils.enCours ? "" : vide("pamplemousse", "Touche le bouton : Claude t'en propose quelques-unes, en tenant compte de tes goûts."));
-  return h + '<div class="grille-rec" style="margin-top:16px">' + liste.map(function (it) { return carteRecette(it); }).join("") + '</div>';
+  // Ce qu'elle n'aime pas : jamais dans les recettes conseillées.
+  var pa = pasAime();
+  h += '<div class="bloc" style="margin-top:14px"><h3>Je n\'aime pas</h3>' +
+    '<div class="chips">' + (pa.length ? pa.map(function (x) {
+      return '<span class="chip doux">' + esc(x) + '<button type="button" data-action="retirer-pas-aime" data-v="' + esc(x) + '" aria-label="Retirer ' + esc(x) + '">×</button></span>';
+    }).join("") : '<span class="aide">Rien pour l\'instant.</span>') + '</div>' +
+    '<form class="ajout-ligne" data-form="pas-aime"><input type="text" id="pasAime" maxlength="40" autocomplete="off" placeholder="Ex. coriandre, champignons, thon" aria-label="Ingrédient que je n\'aime pas"><button type="submit" class="btn ghost sm">Ajouter</button></form>' +
+    '<p class="aide">Claude écarte toute recette qui en contient, et l\'appli revérifie derrière lui.</p></div>';
+  liste = liste.filter(function (it) { return !contientPasAime(it.recette); });
+  if (!liste.length) return h + (Conseils.enCours ? "" : vide("pamplemousse", "Touche le bouton : Claude te propose une dizaine de recettes pour toute la journée, selon tes goûts."));
+  var REPAS = [["petit-dejeuner", "Petit-déjeuner"], ["dejeuner", "Déjeuner"], ["diner", "Dîner"], ["collation", "Collation & dessert"]];
+  var principal = function (it) {
+    var r = it.recette || {}, p = r.repasPrincipal || (r.repas || [])[0];
+    return p === "dessert" || p === "gouter" || p === "aperitif" ? "collation" : REPAS.some(function (x) { return x[0] === p; }) ? p : "dejeuner";
+  };
+  REPAS.forEach(function (rp) {
+    var g = liste.filter(function (it) { return principal(it) === rp[0]; });
+    if (!g.length) return;
+    h += '<div class="titre-sec"><h2>' + rp[1] + '</h2><span class="lab">' + pluriel(g.length, "recette") + '</span></div>' +
+      '<div class="grille-rec">' + g.map(function (it) { return carteRecette(it); }).join("") + '</div>';
+  });
+  return h;
 }
 
 /* ==================================================================
@@ -504,7 +544,7 @@ function estSport(it) { return !!it.seance || parentsItem(it).indexOf("sport") >
 
 function vueSport() {
   var toutes = recents(tousItems().filter(estSport));
-  var h = '';
+  var h = !iaDispo() || Diag.erreurClaude ? blocEtatClaude() : '';
   var sansDetail = iaDispo() ? toutes.filter(function (it) { return !it.seance; }).length : 0;
   if (sansDetail && !IA.enCours) {
     h += '<div class="ia-bloc" style="align-items:center;flex-wrap:wrap;margin-top:0"><span class="illu-mini st-ballon" aria-hidden="true"></span><span style="flex:1 1 200px">' + pluriel(sansDetail, "séance") + ' sans le détail des exercices.</span>' +
@@ -537,7 +577,7 @@ function carteRecette(it, m) {
       (r.temps ? '<span><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/></svg>' + r.temps + ' min</span>' : "") +
       (r.difficulte ? '<span>' + esc(r.difficulte) + '</span>' : "") +
       (r.portions ? '<span>' + r.portions + ' pers.</span>' : "") +
-      '<span>' + esc(nomPlat(it.plateforme)) + '</span>' +
+      '<span>' + esc(it.conseil ? (it.origine || "") : nomPlat(it.plateforme)) + '</span>' +
     '</span>' +
     (ingr.length ? '<span class="ingr">' + esc(ingr.join(" · ")) + '</span>' : '<span class="ingr">Ingrédients non détaillés : ouvre la fiche pour les ajouter.</span>');
   if (m) {
@@ -818,6 +858,7 @@ function vueReglages() {
     '<div class="bientot">' + BIENTOT.map(function (b) { return '<div><b>' + esc(b[0]) + '</b>' + esc(b[1]) + '</div>'; }).join("") + '</div></div></div>';
 
   h += '<div class="card"><header><span class="tache t-lavande b3"><span class="illu st-etoile" aria-hidden="true"></span></span><h2>Analyse et classement</h2><span class="hint">' + (iaDispo() ? "Claude actif" : "Règles locales") + '</span></header><div class="body">' +
+    blocEtatClaude() +
     '<p class="prose">' + (iaDispo()
       ? "Claude lit le lien, l'auteur, la légende, ta note et, si tu en ajoutes une, la capture d'écran. Il titre, classe, extrait les recettes et les lieux. Chaque analyse compte sur ton forfait Claude."
       : (EN_ARTIFACT ? "Claude n'est pas disponible dans cette vue. " : "Hors de claude.ai, Claude n'est pas joignable. ") + "Le classement se fait par mots-clés : rapide, mais plus grossier. Les recettes écrites dans la légende sont quand même extraites.") + '</p>' +

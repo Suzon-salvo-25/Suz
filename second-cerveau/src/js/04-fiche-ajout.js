@@ -90,11 +90,12 @@ function ficheHTML(it) {
           (e.conseil ? '<p class="aide" style="margin-top:2px">' + esc(e.conseil) + '</p>' : "") + '</li>';
       }).join("") + '</ol></div>';
     }
-    if (s.source === "deduit") h += '<p class="avert">Séance reconstituée par Claude : la vidéo peut différer. Colle la légende pour une version fidèle.</p>';
+    if (s.source === "deduit") h += '<p class="avert">Séance reconstituée par Claude à partir du titre, de la légende et de l\'image : la vidéo peut différer. Colle la légende complète ou une capture des exercices pour une version fidèle.</p>';
+    if (iaDispo()) h += '<div><button type="button" class="btn ghost sm" data-action="detailler-seance" data-id="' + esc(it.id) + '">' + (Seances.file.indexOf(it.id) >= 0 ? "Claude y travaille…" : "Refaire le détail") + '</button></div>';
     h += '</section>';
   } else if (parentsItem(it).indexOf("sport") >= 0 && iaDispo()) {
     h += '<section class="bloc"><h3>La séance</h3><p class="aide">Le détail des exercices n\'a pas encore été extrait.</p>' +
-      '<div><button type="button" class="btn go sm" data-action="reanalyser" data-id="' + esc(it.id) + '">Détailler avec Claude</button></div></section>';
+      '<div><button type="button" class="btn go sm" data-action="detailler-seance" data-id="' + esc(it.id) + '">' + (Seances.file.indexOf(it.id) >= 0 ? "Claude y travaille…" : "Détailler avec Claude") + '</button></div></section>';
   }
 
   // --- le lieu

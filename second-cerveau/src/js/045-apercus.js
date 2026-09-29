@@ -125,6 +125,7 @@ async function boucleApercus() {
     } catch (e) {
       Apercus.file = lot.map(function (it) { return it.id; }).concat(Apercus.file);
       Apercus.erreur = MESSAGES_APERCU[e && e.code] || "Les aperçus n'ont pas pu être récupérés pour le moment.";
+      Diag.erreurSupabase = (e && e.code) || String(e && e.message || e);
       break;
     }
     Apercus.fait += lot.length;
