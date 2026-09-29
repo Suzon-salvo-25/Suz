@@ -7085,13 +7085,12 @@ var SPORTS = [
   }
 
   /* --- barre de parcours : départ, position réelle, position prévue, objectif ---
-     « toi » est le chiffre de la balance, pas la moyenne. Suzon s'est pesée
+     Tout part du chiffre de la balance, verdict compris. Suzon s'est pesée
      à 76,0 et lisait « toi 76,3 kg », la moyenne sur sept jours, sans que
-     rien ne le dise, pendant que la tuile « Depuis le départ » comptait,
-     elle, depuis 76,0. La barre, les kilos restants et le chemin parcouru
-     partent donc de la dernière pesée. Seul le verdict sur la trajectoire
-     se juge sur la moyenne, une pesée isolée bougeant de près d'un kilo
-     avec l'eau et le sel, et la phrase le dit en donnant les deux chiffres. */
+     rien ne le dise. Une première correction avait gardé la moyenne pour
+     juger de l'avance ou du retard ; elle l'a refusée : « je veux une
+     comparaison à la pesée du jour, pas à la moyenne ». La moyenne reste
+     lisible dans sa tuile, juste en dessous. */
   function renderParcours(l, moy) {
     var p = P();
     var box = document.getElementById("parcours");
@@ -7099,8 +7098,6 @@ var SPORTS = [
     var depart = p.depart, obj = p.objectif;
     var derniere = l.length ? l[l.length - 1] : null;
     var reel = derniere ? derniere.kg : depart;
-    var lissee = serieMesuree(l).lissee;
-    var tendance = lissee ? valeurActuelle(l) : reel;
     var prevu = poidsPlanifie(AUJ);
 
     if (!depart || !obj || reel === null || depart <= obj) {
@@ -7128,30 +7125,21 @@ var SPORTS = [
     document.getElementById("parcoursHint").textContent = nf(Math.max(0, reel - obj), 1) + " kg restants";
 
     if (prevu === null) { ec.innerHTML = ""; return; }
-    // Le verdict se juge sur la tendance : une pesée basse un matin ne met
-    // pas « en avance », une pesée haute ne met pas « en retard ».
-    var d = tendance - prevu;
+    var d = reel - prevu;
     var cls = Math.abs(d) < 0.3 ? "pile" : (d < 0 ? "avance" : "retard");
     var mot = cls === "pile" ? "Pile sur la trajectoire"
       : d < 0 ? "En avance sur la trajectoire" : "En retard sur la trajectoire";
-    var qui = lissee ? "Ta moyenne est" : "Tu es";
     var detail = cls === "pile"
-      ? qui + " là où ton rythme visé te plaçait aujourd'hui."
+      ? "Tu es là où ton rythme visé te plaçait aujourd'hui."
       : d < 0
-        ? qui + " " + nf(Math.abs(d), 1) + " kg sous la courbe prévue. Tu peux tenir ce rythme ou relâcher un peu le déficit."
-        : qui + " " + nf(d, 1) + " kg au-dessus de la courbe prévue. Cela se rattrape sans durcir le déficit : allonge simplement l'échéance.";
+        ? "Tu es " + nf(Math.abs(d), 1) + " kg sous la courbe prévue. Tu peux tenir ce rythme ou relâcher un peu le déficit."
+        : "Tu es " + nf(d, 1) + " kg au-dessus de la courbe prévue. Cela se rattrape sans durcir le déficit : allonge simplement l'échéance.";
     var quand = derniere && derniere.date !== AUJ ? "ta dernière pesée, le " + dateCourte(derniere.date) : "ta pesée du jour";
-    var chiffres = lissee
-      ? "Prévu aujourd'hui : " + nf(prevu, 1) + " kg · " + quand + " : " + nf(reel, 1) +
-        " kg · ta moyenne sur 7 jours : " + nf(tendance, 1) + " kg. "
-      : "Prévu aujourd'hui : " + nf(prevu, 1) + " kg · " + quand + " : " + nf(reel, 1) + " kg. ";
-    var pourquoi = lissee && Math.abs(reel - tendance) >= 0.1
-      ? " Le verdict suit la moyenne : une pesée seule varie de près d'un kilo d'un jour à l'autre."
-      : "";
+    var chiffres = "Prévu aujourd'hui : " + nf(prevu, 1) + " kg · " + quand + " : " + nf(reel, 1) + " kg. ";
     ec.innerHTML = '<div class="ecart-line"><span class="pastille ' + cls + '">' +
       (d > 0 ? "+" : d < 0 ? "−" : "") + nf(Math.abs(d), 1) + ' kg</span>' +
       '<div style="flex:1 1 200px;min-width:0"><b>' + mot + '</b><br>' +
-      '<span style="color:var(--ink-soft)">' + esc(chiffres + detail + pourquoi) + '</span></div></div>';
+      '<span style="color:var(--ink-soft)">' + esc(chiffres + detail) + '</span></div></div>';
   }
 
   function renderNoteCourbe(l, hHab) {

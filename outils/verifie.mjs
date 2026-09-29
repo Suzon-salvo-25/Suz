@@ -244,9 +244,13 @@ console.log('\n=== mon parcours part de la balance ===');
   verifie('« toi » est la pesée du jour, pas la moyenne', /toi\s*76,0 kg/.test(barre), barre);
   verifie('les kilos restants partent de la balance',
           (await pg.textContent('#parcoursHint')) === '16,0 kg restants', await pg.textContent('#parcoursHint'));
-  verifie('la phrase donne la pesée et la moyenne, nommées',
-          ecart.includes('ta pesée du jour : 76,0 kg') && ecart.includes('ta moyenne sur 7 jours : 76,3 kg'), ecart);
-  verifie('et dit pourquoi le verdict suit la moyenne', ecart.includes('Le verdict suit la moyenne'), ecart);
+  // « Je veux une comparaison à la pesée du jour, pas à la moyenne. »
+  // Prévu 76,6 ce jour-là, pesée 76,0 : 0,6 kg d'avance, pas 0,3.
+  verifie('l\'écart se mesure sur la pesée du jour', ecart.startsWith('−0,6 kg'), ecart);
+  verifie('et le verdict aussi', ecart.includes('En avance sur la trajectoire') &&
+          ecart.includes('Tu es 0,6 kg sous la courbe prévue'), ecart);
+  verifie('la phrase nomme la pesée du jour', ecart.includes('ta pesée du jour : 76,0 kg'), ecart);
+  verifie('la moyenne n\'y est plus mêlée', !ecart.includes('moyenne'), ecart);
   verifie('aucune erreur sur le parcours', !erreurs.length, erreurs.join(' | '));
   await ctx.close();
 }
