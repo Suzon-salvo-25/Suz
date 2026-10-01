@@ -406,6 +406,104 @@ t('une seule recherche par machine, pas une par frappe',
   String(await pa.evaluate(() => window.__demandes.length)));
 await cAppr.close();
 
+console.log('=== une séance de plus d\'une heure et demie ===');
+// « Je n'arrive pas à ajouter une séance qui a fait plus d'1 h et demie. »
+// « 110:00 » était refusé : les minutes étaient limitées à deux chiffres.
+const ajoute = async (duree) => {
+  const c2 = await b.newContext({ viewport: { width: 430, height: 1000 }, ignoreHTTPSErrors: true });
+  const p2 = await c2.newPage();
+  p2.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+  await p2.addInitScript(([d]) => {
+    localStorage.setItem('suz-forme-onglet', 'sport');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:d,
+                fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+      jours: { [d]: { date:d, poids:77, heure:'07:30', eau:0, sport:[],
+        repas:{ petitdej:[], dejeuner:[], diner:[], collation:[] } } } }));
+  }, [auj]);
+  await p2.goto('file:///home/user/Suz/perte-de-poids.html');
+  await p2.waitForTimeout(700);
+  await p2.selectOption('#sportSel', { label: 'Musculation' });
+  await p2.fill('#sportDuree', duree);
+  await p2.waitForTimeout(150);
+  const bouton = await p2.textContent('#sportAdd');
+  await p2.click('#sportAdd');
+  await p2.waitForTimeout(400);
+  const sp = await p2.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
+  const msg = await p2.textContent('#toast');
+  await c2.close();
+  return { sp, bouton, msg };
+};
+for (const [txt, min] of [['110:00', 110], ['1:50:00', 110], ['1h50', 110], ['110', 110], ['2h', 120]]) {
+  const r = await ajoute(txt);
+  t('« ' + txt + ' » s\'enregistre en ' + min + ' minutes',
+    r.sp.length === 1 && Math.round(r.sp[0].m) === min && r.sp[0].k > 0, JSON.stringify(r.sp));
+}
+const r110 = await ajoute('110:00');
+t('le bouton annonce une vraie dépense, pas 0 kcal', !/\b0 kcal/.test(r110.bouton), r110.bouton);
+const rKo = await ajoute('n\'importe quoi');
+t('une durée illisible le dit au lieu de ne rien faire',
+  rKo.sp.length === 0 && rKo.msg.includes('Durée non comprise'), rKo.msg);
+
+console.log('=== une machine assistée travaille à l\'envers ===');
+// « Comment calcules-tu la dépense des dips assistés, étant donné que c'est
+// l'inverse ? » Le contrepoids aide : il se retranche, il ne s'ajoute pas.
+const kDips0 = await memeSerie('Dips assistés', 0);
+const kDips20 = await memeSerie('Dips assistés', 20);
+const kDips40 = await memeSerie('Dips assistés', 40);
+const kDipsLibres = await memeSerie('Dips', 0);
+t('plus d\'aide, moins de dépense', kDips0 > kDips20 && kDips20 > kDips40,
+  kDips0 + ' > ' + kDips20 + ' > ' + kDips40);
+t('sans aide, ce sont des dips', kDips0 === kDipsLibres, kDips0 + ' contre ' + kDipsLibres);
+const kTractA = await memeSerie('Tractions assistées', 30);
+t('les tractions assistées suivent la même règle', kTractA < kTract, kTractA + ' contre ' + kTract);
+const kInconnueA = await memeSerie('Machine à pompes assistée', 20);
+t('une machine assistée inconnue ne tombe pas au neutre', kInconnueA > kInconnu * 0.9, kInconnueA + ' contre ' + kInconnu);
+
+const cA = await b.newContext({ viewport: { width: 1100, height: 1200 }, ignoreHTTPSErrors: true });
+const pA = await cA.newPage();
+pA.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+await pA.addInitScript(([d, a, bb]) => {
+  localStorage.setItem('suz-forme-onglet', 'sport');
+  const seance = ex => ({ date: '', poids: 77, heure: '07:30', eau: 0,
+    sport: [{ n: 'Musculation', m: 60, met: 0, k: 0, ex: ex }],
+    repas: { petitdej: [], dejeuner: [], diner: [], collation: [] } });
+  const jours = {};
+  jours[a] = seance([{ n: 'Dips assistés', s: 3, r: 8, kg: 40 }]);
+  jours[bb] = seance([{ n: 'Dips assistés', s: 3, r: 8, kg: 30 }]);
+  jours[d] = seance([{ n: 'Dips assistés', s: 3, r: 10, kg: 25 }]);
+  Object.keys(jours).forEach(k => { jours[k].date = k; });
+  localStorage.setItem('suz-forme-v1', JSON.stringify({
+    profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:a,
+              fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+    jours }));
+}, [auj, j14, j7]);
+await pA.goto('file:///home/user/Suz/perte-de-poids.html');
+await pA.waitForTimeout(900);
+const ligneA = await pA.textContent('#sportListe');
+t('la ligne dit « kg d\'aide »', ligneA.includes("25 kg d'aide"), ligneA.slice(0, 160));
+t('l\'aide ne compte pas comme une charge soulevée', !/kg de charge/.test(await pA.textContent('.exo-vol')),
+  await pA.textContent('.exo-vol'));
+const statsA = (await pA.textContent('#progStats')).replace(/\s+/g, ' ');
+t('les progrès suivent l\'aide du jour', statsA.includes('Aide du jour'), statsA.slice(0, 120));
+t('le record est la plus petite aide', /Record\s*25\s*kg/.test(statsA), statsA);
+t('et le progrès se lit comme de l\'aide retirée',
+  statsA.includes('−15') && statsA.includes('Tu as retiré 15 kg'), statsA);
+t('le tableau parle d\'aide', (await pA.textContent('#progTable thead')).includes('Aide'),
+  await pA.textContent('#progTable thead'));
+await pA.click('[data-exo-seance="0"]');
+await pA.waitForTimeout(250);
+await pA.fill('#exoNom', 'Dips assistés');
+await pA.waitForTimeout(150);
+t('le formulaire demande l\'aide, pas le poids',
+  (await pA.textContent('label[for="exoPoids"]')) === 'Aide (kg)', await pA.textContent('label[for="exoPoids"]'));
+t('et explique le contrepoids', await pA.isVisible('.exo-aide-assist'));
+await pA.fill('#exoNom', 'Développé couché');
+await pA.waitForTimeout(150);
+t('et redevient « Poids » pour une machine normale',
+  (await pA.textContent('label[for="exoPoids"]')) === 'Poids (kg)', await pA.textContent('label[for="exoPoids"]'));
+await cA.close();
+
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');
 process.exit(ko ? 1 : 0);

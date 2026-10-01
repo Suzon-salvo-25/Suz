@@ -352,7 +352,7 @@ La carte est masquée tant qu'aucune ligne d'exercice n'existe.
 cuisses », « PRESSE À CUISSES » et « Presse-à cuisse » faisaient trois
 entrées dans les progrès. Tout passe par `cleExo()` : accents, majuscules,
 ponctuation, espaces et tirets disparaissent, et chaque mot de plus de trois
-lettres perd son s ou son x final. **Sur les 81 noms de la liste, cette clé
+lettres perd son s ou son x final. **Sur les 82 noms de la liste, cette clé
 ne confond aucune paire** : la revérifier si on en ajoute. Trois effets.
 À l'enregistrement, `nomCanonique()` recale le nom tapé sur l'orthographe de
 la liste, ou de la fiche apprise, donc aucune variante nouvelle ne se crée.
@@ -364,6 +364,29 @@ référence, sinon l'orthographe la plus employée, et l'en-tête dit
 trop ne rend plus une machine connue inconnue, et ne relance plus une
 recherche auprès de Claude. Les valeurs du `<select>` des progrès sont ces
 clés, pas les noms.
+
+**Une machine assistée travaille à l'envers.** « Comment calcules-tu les
+dips assistés, étant donné que c'est l'inverse ? » Le poids réglé est un
+contrepoids qui aide : `masseDeplacee()` le **retranche** de la part du
+corps emmenée au lieu de l'ajouter, sans descendre sous zéro. Toute machine
+dont le nom dit « assisté » suit la règle (`estAssiste()`, sur la clé
+repliée), apprise ou non ; sans fiche, elle prend `PROFIL_ASSISTE`
+(0,45 m, 90 % du corps) et pas le neutre, qui ne compte que 10 % du corps.
+« Dips assistés » est entré dans la liste, « Tractions assistées » a repris
+le profil des tractions, l'ancienne valeur figée de 55 % n'ayant plus de
+raison d'être. Repère à 77 kg, 4 × 10 : dips 49 kcal, assistés à 20 kg 44,
+à 40 kg 39. L'aide n'entre pas dans le tonnage. Le formulaire dit « Aide
+(kg) » et l'explique, la ligne dit « 25 kg d'aide », et **les progrès se
+lisent à l'envers** : la courbe trace l'aide, le record est la plus petite,
+et l'écart se dit « tu as retiré 15 kg d'aide ».
+
+**Une durée s'écrit comme on veut.** 90, 90 min, 110:00, 1:50:00, 1h50,
+2h passent tous par `parseDuree()`. « 110:00 » était refusé, les minutes
+étant limitées à deux chiffres : une séance de plus de 99 minutes ne
+s'écrivait pas, le bouton restait grisé sur « Ajouter 0 kcal », sans un
+mot. **Le bouton d'ajout n'est plus jamais grisé** : une saisie
+incomprise s'annonce sous le champ et au clic, avec les formes acceptées.
+« x:y » reste minutes et secondes, comme pour les allures.
 
 **Une ligne d'exercice se corrige sans se supprimer** : la ligne entière est
 un bouton qui ouvre le formulaire à sa place (`exoDepuisLigne`,
@@ -625,7 +648,8 @@ node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
                                   # dedans, correction d'une ligne, masse
                                   # déplacée, progrès par machine,
                                   # orthographes réunies, fiche apprise
-                                  # puis oubliée, 76 contrôles
+                                  # puis oubliée, séances longues,
+                                  # machines assistées, 96 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

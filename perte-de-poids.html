@@ -7605,14 +7605,23 @@ var SPORTS = [
 
   /* --- unités Strava : distance en kilomètres, durée en h:mm:ss, allure en min/km --- */
 
+  /* Une durée se tape de bien des façons, et toutes doivent passer : 90,
+     90 min, 110:00, 1:50:00, 1h50, 1 h. « 110:00 » était refusé, les minutes
+     étant limitées à deux chiffres : une séance de plus de 99 minutes ne
+     pouvait pas s'écrire en minutes, et le bouton restait sur 0 kcal. */
   function parseDuree(txt) {
-    txt = String(txt || "").trim().replace(",", ".");
+    txt = String(txt || "").trim().toLowerCase().replace(",", ".");
     if (!txt) return 0;
-    if (/^\d+(\.\d+)?$/.test(txt)) return parseFloat(txt);           // minutes seules
-    var m = /^(?:(\d+):)?(\d{1,2}):(\d{1,2})$/.exec(txt);
-    if (!m) return 0;
-    var h = m[1] ? +m[1] : 0;
-    return h * 60 + (+m[2]) + (+m[3]) / 60;
+    var m;
+    if ((m = /^(\d+(?:\.\d+)?)\s*(?:min|mn|m)?$/.exec(txt))) return parseFloat(m[1]);
+    if ((m = /^(\d+)\s*h\s*(?:(\d{1,2})\s*(?:min|mn|m)?)?$/.exec(txt))) {
+      return +m[1] * 60 + (m[2] ? +m[2] : 0);
+    }
+    if ((m = /^(\d+):(\d{1,2}):(\d{1,2})$/.exec(txt)) && +m[2] < 60 && +m[3] < 60) {
+      return +m[1] * 60 + (+m[2]) + (+m[3]) / 60;
+    }
+    if ((m = /^(\d+):(\d{1,2})$/.exec(txt)) && +m[2] < 60) return +m[1] + (+m[2]) / 60;
+    return 0;
   }
   function fmtDuree(min) {
     var tot = Math.round(min * 60);
@@ -7692,7 +7701,7 @@ var SPORTS = [
     ["Chest press", "Pectoraux"], ["Pec deck", "Pectoraux"],
     ["Butterfly", "Pectoraux"], ["Écarté aux haltères", "Pectoraux"],
     ["Écarté à la poulie", "Pectoraux"], ["Pompes", "Pectoraux"],
-    ["Dips", "Pectoraux"],
+    ["Dips", "Pectoraux"], ["Dips assistés", "Pectoraux"],
 
     ["Tirage vertical", "Dos"], ["Tirage vertical prise serrée", "Dos"],
     ["Tirage horizontal", "Dos"], ["Rowing barre", "Dos"],
@@ -7891,6 +7900,19 @@ var SPORTS = [
     "Abdominaux": [0.30, 0.30]
   };
   var PROFIL_NEUTRE = [0.40, 0.10];
+  /* Une machine assistée travaille à l'envers : le poids réglé est un
+     contrepoids qui pousse avec toi. Plus il est lourd, moins tu soulèves.
+     La masse déplacée est donc la part du corps que le mouvement emmène,
+     moins l'aide, et jamais en dessous de zéro. Toute machine dont le nom
+     dit « assisté » suit cette règle, apprise ou non ; sans fiche, elle
+     prend le profil d'un mouvement au poids du corps, pas le neutre, qui
+     ne compte que 10 % du corps. */
+  var PROFIL_ASSISTE = [0.45, 0.90];
+  function estAssiste(nom) { return /assist/.test(cleExo(nom)); }
+  function masseDeplacee(e, poids, pr) {
+    var kg = e.kg || 0, corps = pr[1] * (poids || 0);
+    return estAssiste(e.n) ? Math.max(0, corps - kg) : kg + corps;
+  }
 
   // Amplitude en mètres, part du poids du corps déplacée.
   var PROFIL_EXO = {
@@ -7909,7 +7931,8 @@ var SPORTS = [
     "Développé décliné": [0.40, 0.05], "Développé couché guidé": [0.40, 0.05],
     "Pompes": [0.45, 0.65], "Dips": [0.45, 0.90],
 
-    "Tractions": [0.50, 0.95], "Tractions assistées": [0.50, 0.55],
+    "Tractions": [0.50, 0.95], "Tractions assistées": [0.50, 0.95],
+    "Dips assistés": [0.45, 0.90],
     "Rowing barre": [0.40, 0.03], "Rowing haltère": [0.45, 0.03],
     "Pull-over": [0.50, 0.03], "Banc à lombaires": [0.40, 0.45],
     "Haussements d'épaules": [0.15, 0.00],
@@ -7947,6 +7970,7 @@ var SPORTS = [
     if (z && PROFIL_ZONE[z]) return PROFIL_ZONE[z];
     var a = machineApprise(nom);
     if (a && a.t === "fonte") return [a.h, a.c];
+    if (estAssiste(nom)) return PROFIL_ASSISTE;
     return PROFIL_NEUTRE;
   }
   function exerciceConnu(nom) {
@@ -8002,12 +8026,13 @@ var SPORTS = [
         nFonte++;
         var ser = e.s || 0, rep = e.r || 0, n = ser * rep;
         reps += n;
-        tonnage += n * (e.kg || 0);
+        // L'aide d'une machine assistée n'est pas une charge soulevée.
+        if (!estAssiste(e.n)) tonnage += n * (e.kg || 0);
         minSeries += ser * (rep * SECONDES_PAR_REP + REPOS_PAR_SERIE) / 60;
         // Masse réellement déplacée : la charge, plus la part du corps que
         // le mouvement emmène.
         var pr = profilExercice(e.n);
-        var masse = (e.kg || 0) + pr[1] * (poids || 0);
+        var masse = masseDeplacee(e, poids, pr);
         travail += n * masse * pr[0] * KCAL_PAR_KG_METRE_LEVE;
         if (!exerciceConnu(e.n)) inconnues.push(e.n);
       }
@@ -8064,6 +8089,8 @@ var SPORTS = [
       "Un mollet vaut 0,15, un développé couché 0,4, un squat 0,5.\n" +
       "part_du_corps : la fraction du poids du corps que le mouvement soulève, entre 0 et 1. " +
       "Une presse à cuisses vaut 0,15, un squat 0,75, des tractions 0,95, un curl 0,02.\n" +
+      "Pour une machine assistée par contrepoids, donne la part du corps soulevée sans aide : " +
+      "le contrepoids sera retranché ensuite.\n" +
       "met : pour un appareil de cardio seulement, son MET au compendium des activités physiques.\n" +
       "Si tu ne reconnais pas l'appareil, réponds avec des valeurs moyennes plausibles.";
   }
@@ -8155,7 +8182,7 @@ var SPORTS = [
 
   function volumeExercices(ex) {
     return (ex || []).reduce(function (t, e) {
-      return t + (e.s || 0) * (e.r || 0) * (e.kg || 0);
+      return t + (estAssiste(e.n) ? 0 : (e.s || 0) * (e.r || 0) * (e.kg || 0));
     }, 0);
   }
 
@@ -8170,7 +8197,8 @@ var SPORTS = [
     } else {
       if (e.s > 0 && e.r > 0) bits.push(e.s + " × " + e.r);
       else if (e.r > 0) bits.push(e.r + (e.r > 1 ? " répétitions" : " répétition"));
-      if (e.kg > 0) bits.push(nf(e.kg, e.kg % 1 ? 1 : 0) + " kg");
+      if (estAssiste(e.n)) bits.push(e.kg > 0 ? nf(e.kg, e.kg % 1 ? 1 : 0) + " kg d'aide" : "sans aide");
+      else if (e.kg > 0) bits.push(nf(e.kg, e.kg % 1 ? 1 : 0) + " kg");
       else bits.push("poids du corps");
     }
     return '<li><button type="button" class="exo-ligne" data-edit-exo="' + s + '" data-i="' + i +
@@ -8357,7 +8385,7 @@ var SPORTS = [
             champ3("exoAllure", "Allure (min/km)", e.allure, "numeric", "6:15")
           : champ3("exoSeries", "Séries", e.series, "numeric", "") +
             champ3("exoReps", "Répétitions", e.reps, "numeric", "") +
-            champ3("exoPoids", "Poids (kg)", e.poids, "decimal", "")) +
+            champ3("exoPoids", estAssiste(e.nom) ? "Aide (kg)" : "Poids (kg)", e.poids, "decimal", "")) +
       '</div>' +
       '<div class="row-inline" style="margin-top:11px">' +
         '<button type="button" class="btn go sm" data-exo-ok="1">' +
@@ -8370,6 +8398,9 @@ var SPORTS = [
       (cardio
         ? "Donne la distance ou l'allure, l'autre se calcule depuis la durée. Ces minutes sortent du temps de fonte et sont comptées à leur propre coût."
         : "Laisse le poids vide pour un exercice au poids du corps.") +
+      '<span class="exo-aide-assist"' + (!cardio && estAssiste(e.nom) ? '' : ' hidden') + '>' +
+        " Sur une machine assistée, note le contrepoids : il se retranche de ton poids, " +
+        "donc moins d'aide veut dire plus d'effort.</span>" +
       (estSeanceSalle(x)
         ? " Ce que tu notes ici fait la dépense de la séance, avec le temps passé sur place."
         : " Ces lignes ne changent pas les calories de la séance, qui viennent de sa durée.") +
@@ -8544,7 +8575,10 @@ var SPORTS = [
     var r = calcSeance(i, min, poids, km, kmhChoisi);
 
     document.getElementById("sportKcal").textContent = ni(r.kcal);
-    document.getElementById("sportAdd").disabled = !poids || min <= 0 || !allureLisible;
+    /* Le bouton n'est plus grisé : grisé, il ne disait pas pourquoi, et
+       « 110:00 » refusé laissait un bouton mort sur « Ajouter 0 kcal ». Un
+       clic sur une saisie incomplète explique maintenant ce qui manque. */
+    document.getElementById("sportAdd").disabled = false;
 
     var ap = document.getElementById("sportApercu");
     if (min > 0 && type && r.kmh) {
@@ -8558,6 +8592,9 @@ var SPORTS = [
     } else if (min > 0) {
       ap.innerHTML = '<div class="apercu"><span><b>' + fmtDuree(min) + '</b>durée</span>' +
         '<span><b>' + ni(r.kcal) + ' kcal</b>dépense</span></div>';
+    } else if (document.getElementById("sportDuree").value.trim()) {
+      ap.innerHTML = '<p class="sub-note" style="color:var(--crit);margin:9px 0 0">' +
+        'Durée non comprise. Écris par exemple 1:50:00, 110:00, 110 ou 1h50.</p>';
     } else {
       ap.innerHTML = "";
     }
@@ -8759,9 +8796,11 @@ var SPORTS = [
         (se.ex || []).forEach(function (e) {
           if (!e || !e.n) return;
           var k = cleExo(e.n) || e.n;
-          var m = par[k] || (par[k] = { nom: e.n, cardio: estCardio(e), jours: {}, graphies: {} });
+          var m = par[k] || (par[k] = { nom: e.n, cardio: estCardio(e), assiste: estAssiste(e.n),
+                                        jours: {}, graphies: {} });
           m.graphies[e.n] = (m.graphies[e.n] || 0) + 1;
-          var j = m.jours[d] || (m.jours[d] = { date: d, kgMax: 0, volume: 0, reps: 0, min: 0, km: 0, series: 0 });
+          var j = m.jours[d] || (m.jours[d] = { date: d, kgMax: 0, aide: null, volume: 0, reps: 0,
+                                                 min: 0, km: 0, series: 0 });
           if (estCardio(e)) {
             m.cardio = true;
             j.min += e.m || 0;
@@ -8772,6 +8811,9 @@ var SPORTS = [
             j.reps += n;
             j.volume += n * (e.kg || 0);
             if ((e.kg || 0) > j.kgMax) j.kgMax = e.kg || 0;
+            // Sur une machine assistée, le progrès est l'aide qui baisse :
+            // on garde la plus petite du jour.
+            if (j.aide === null || (e.kg || 0) < j.aide) j.aide = e.kg || 0;
           }
         });
       });
@@ -8864,6 +8906,26 @@ var SPORTS = [
       cartes.push(["Meilleure distance", best && best.km > 0 ? nf(best.km, 2) : "—", best && best.km > 0 ? "km" : "",
         best && best.km > 0 ? "Le " + dateCourte(best.date) + "." : "Aucune distance notée."]);
       cartes.push(["Distance cumulée", nf(kmTot, 1), "km", "Sur " + fmtDuree(minTot) + " au total."]);
+    } else if (m.assiste) {
+      /* Une machine assistée se lit à l'envers : moins d'aide, c'est plus de
+         force. La courbe trace l'aide, et elle doit descendre. */
+      unite = "kg d'aide";
+      var fmtKg = function (v) { return nf(v, v % 1 ? 1 : 0); };
+      pts = l.map(function (j) { return { date: j.date, v: j.aide }; });
+      var mieux = l.reduce(function (b, j) { return (!b || j.aide < b.aide) ? j : b; }, null);
+      var baisse = prem.aide - der.aide;
+      var repsTot = l.reduce(function (t, j) { return t + j.reps; }, 0);
+      cartes.push(["Aide du jour", der.aide > 0 ? fmtKg(der.aide) : "0", "kg",
+        "Le " + dateCourte(der.date) + ", " + der.series + (der.series > 1 ? " séries" : " série") +
+        " pour " + ni(der.reps) + " répétitions." + (der.aide > 0 ? "" : " Sans aide !"), "hero"]);
+      cartes.push(["Record", fmtKg(mieux.aide), "kg",
+        "Ta plus petite aide, le " + dateCourte(mieux.date) + "."]);
+      cartes.push(["Depuis la première fois", baisse === 0 ? "0" :
+        (baisse > 0 ? "−" : "+") + fmtKg(Math.abs(baisse)), "kg d'aide",
+        baisse > 0 ? "Tu as retiré " + fmtKg(baisse) + " kg d'aide depuis le " + dateCourte(prem.date) + " : tu soulèves plus de toi-même."
+          : baisse < 0 ? "Plus d'aide qu'au " + dateCourte(prem.date) + ", ça arrive les jours de fatigue."
+          : "Même aide qu'au départ."]);
+      cartes.push(["Répétitions cumulées", ni(repsTot), "", "Toutes séances confondues."]);
     } else {
       unite = "kg";
       pts = l.filter(function (j) { return j.kgMax > 0; }).map(function (j) { return { date: j.date, v: j.kgMax }; });
@@ -8900,7 +8962,7 @@ var SPORTS = [
     document.getElementById("progTable").innerHTML =
       '<table><thead><tr><th>Date</th>' +
       (m.cardio ? '<th>Durée</th><th>Distance</th><th>Allure</th>'
-                : '<th>Séries</th><th>Charge</th>') +
+                : '<th>Séries</th><th>' + (m.assiste ? 'Aide' : 'Charge') + '</th>') +
       '</tr></thead><tbody>' + lignes.map(function (j) {
         return '<tr><td>' + esc(dateCourte(j.date)) + '</td>' + (m.cardio
           ? '<td class="n">' + esc(fmtDuree(j.min)) + '</td><td class="n">' +
@@ -8908,7 +8970,8 @@ var SPORTS = [
             (j.km > 0 && j.min > 0 ? fmtAllure(j.min / j.km) + " /km" : "—") + '</td>'
           : '<td class="n">' + ni(j.series) + ' × ' + ni(j.series ? Math.round(j.reps / j.series) : 0) +
             '</td><td class="n">' +
-            (j.kgMax > 0 ? nf(j.kgMax, j.kgMax % 1 ? 1 : 0) + " kg" : "poids du corps") + '</td>') +
+            (m.assiste ? (j.aide > 0 ? nf(j.aide, j.aide % 1 ? 1 : 0) + " kg" : "sans aide")
+              : j.kgMax > 0 ? nf(j.kgMax, j.kgMax % 1 ? 1 : 0) + " kg" : "poids du corps") + '</td>') +
           '</tr>';
       }).join("") + '</tbody></table>';
   }
@@ -9667,7 +9730,12 @@ var SPORTS = [
     var poids = poidsA(dateCourante);
     var idx = +document.getElementById("sportSel").value;
     var min = parseDuree(document.getElementById("sportDuree").value);
-    if (!poids || min <= 0) return;
+    if (!(min > 0)) {
+      toast("Durée non comprise. Écris par exemple 1:50:00, 110:00, 110 ou 1h50.", true);
+      return;
+    }
+    if (min > 600) { toast("Plus de dix heures, c'est sûrement une faute de frappe.", true); return; }
+    if (!poids) { toast("Note d'abord une pesée ou un poids de départ : la dépense en dépend.", true); return; }
     var type = typeSport(idx);
     var km = 0;
     if (type && !modeAllure) {
@@ -9833,8 +9901,13 @@ var SPORTS = [
       // sauf si on a déjà choisi le mode à la main.
       if (!exoSaisie.force) {
         var voulu = cardioSalle(v.trim()) ? "cardio" : "fonte";
-        if (voulu !== exoSaisie.mode) { exoSaisie.mode = voulu; renderSport(); focusFin("exoNom"); }
+        if (voulu !== exoSaisie.mode) { exoSaisie.mode = voulu; renderSport(); focusFin("exoNom"); return; }
       }
+      // Le libellé suit la frappe sans redessiner, sinon le champ perdrait le curseur.
+      var labPoids = document.querySelector('label[for="exoPoids"]');
+      if (labPoids) labPoids.textContent = estAssiste(v) ? "Aide (kg)" : "Poids (kg)";
+      var noteAssist = document.querySelector(".exo-aide-assist");
+      if (noteAssist) noteAssist.hidden = !estAssiste(v);
       return;
     }
     if (id === "exoSeries") exoSaisie.series = v;
