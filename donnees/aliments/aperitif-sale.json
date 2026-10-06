@@ -1,0 +1,37 @@
+[
+  {
+    "nom": "Chips Nature (Lay's)",
+    "kcal": 541, "prot": 6.1, "gluc": 52, "lip": 34,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "Open Food Facts, fiche 3168930003359 (Lay's Nature 145 g, PepsiCo France)",
+    "note": "Étiquette française : 2256 kJ / 541 kcal, sel 1,3 g pour 100 g."
+  },
+  {
+    "nom": "Chips La Classique nature (Vico)",
+    "kcal": 525, "prot": 5.9, "gluc": 47, "lip": 34,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "Open Food Facts, fiche 3336971209164 (Vico La Classique nature 135 g)",
+    "note": "Le sachet individuel fait 27,5 g, la poignée courante 30 g."
+  },
+  {
+    "nom": "Chips saveur Poulet braisé (Bret's)",
+    "kcal": 527, "prot": 6.4, "gluc": 51, "lip": 32,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "Site du fabricant brets.fr, fiche Chips ondulées saveur poulet braisé 125 g",
+    "note": "2198 kJ / 527 kcal, sel 1,0 g pour 100 g. Sachet de 125 g."
+  },
+  {
+    "nom": "Tuiles Original (Pringles)",
+    "kcal": 514, "prot": 4, "gluc": 51, "lip": 33,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "Open Food Facts, fiche 5053990156009 (Pringles Original 175 g) et fiche produit Super U",
+    "note": "Tube de 175 g, soit près de 6 portions de 30 g."
+  },
+  {
+    "nom": "Chips sel de mer et poivre noir (Tyrrells)",
+    "kcal": 442, "prot": 6.3, "gluc": 53.9, "lip": 22.7,
+    "cat": "sucre", "portion_g": 30, "portion_lib": "1 poignée",
+    "source": "Fiche produit Supermarchés Match (Tyrrells chips au sel de mer et poivre noir 150 g)",
+    "note": "Chips cuites en chaudron, moins grasses que les chips classiques."
+  }
+]
