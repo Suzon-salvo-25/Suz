@@ -352,7 +352,7 @@ La carte est masquée tant qu'aucune ligne d'exercice n'existe.
 cuisses », « PRESSE À CUISSES » et « Presse-à cuisse » faisaient trois
 entrées dans les progrès. Tout passe par `cleExo()` : accents, majuscules,
 ponctuation, espaces et tirets disparaissent, et chaque mot de plus de trois
-lettres perd son s ou son x final. **Sur les 82 noms de la liste, cette clé
+lettres perd son s ou son x final. **Sur les 85 noms de la liste, cette clé
 ne confond aucune paire** : la revérifier si on en ajoute. Trois effets.
 À l'enregistrement, `nomCanonique()` recale le nom tapé sur l'orthographe de
 la liste, ou de la fiche apprise, donc aucune variante nouvelle ne se crée.
@@ -379,6 +379,21 @@ raison d'être. Repère à 77 kg, 4 × 10 : dips 49 kcal, assistés à 20 kg 44,
 (kg) » et l'explique, la ligne dit « 25 kg d'aide », et **les progrès se
 lisent à l'envers** : la courbe trace l'aide, le record est la plus petite,
 et l'écart se dit « tu as retiré 15 kg d'aide ».
+
+**Un exercice fait d'un côté puis de l'autre se compte par côté.** « Et
+comment on fait quand c'est des fentes et que c'est sur chaque pied ? »
+« 3 × 12 fentes », c'est douze par jambe, vingt-quatre répétitions, chacune
+soulevant le corps : comptées douze, la moitié du travail disparaissait.
+Les exercices de `COTES_EXO` (fentes, fentes bulgares et marchées, montée
+sur banc, kickback fessier, rowing haltère, kickback triceps), et tout nom
+qui dit « unilatéral » ou « alterné », proposent sous les champs **« Par
+jambe » / « Au total »** (ou « par bras »), par côté d'office. La ligne
+garde alors `pc: 1`, et **`repsLigne()` double les répétitions partout**
+où elles comptent : travail, temps de séries, volume, progrès. Le champ
+dit « Répétitions par jambe », la ligne « 3 × 12 par jambe », et la note
+rappelle d'additionner les deux haltères. Le choix vit dans `exoSaisie.pc`
+(`null` tant qu'il n'est pas fait). Repère à 77 kg, fentes 3 × 12 avec
+20 kg : 67 kcal par jambe, 42 au total.
 
 **Une durée s'écrit comme on veut.** 90, 90 min, 110:00, 1:50:00, 1h50,
 2h passent tous par `parseDuree()`. « 110:00 » était refusé, les minutes
@@ -649,7 +664,8 @@ node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
                                   # déplacée, progrès par machine,
                                   # orthographes réunies, fiche apprise
                                   # puis oubliée, séances longues,
-                                  # machines assistées, 96 contrôles
+                                  # machines assistées, fentes par jambe,
+                                  # 109 contrôles
 ```
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la

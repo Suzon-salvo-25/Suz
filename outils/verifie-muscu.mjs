@@ -504,6 +504,70 @@ t('et redevient « Poids » pour une machine normale',
   (await pA.textContent('label[for="exoPoids"]')) === 'Poids (kg)', await pA.textContent('label[for="exoPoids"]'));
 await cA.close();
 
+console.log('=== des fentes, sur chaque jambe ===');
+// « Et comment on fait quand c'est des fentes et que c'est sur chaque pied ? »
+const fentes = async (choix) => {
+  const c2 = await b.newContext({ viewport: { width: 430, height: 1100 }, ignoreHTTPSErrors: true });
+  const p2 = await c2.newPage();
+  p2.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+  p2.on('dialog', d => { ko++; console.log('  ÉCHEC boîte native demandée'); d.dismiss(); });
+  await p2.addInitScript(([d]) => {
+    localStorage.setItem('suz-forme-onglet', 'sport');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:d,
+                fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+      jours: { [d]: { date:d, poids:77, heure:'07:30', eau:0,
+        sport:[{ n:'Musculation', m:60, met:0, k:0, ex:[] }],
+        repas:{ petitdej:[], dejeuner:[], diner:[], collation:[] } } } }));
+  }, [auj]);
+  await p2.goto('file:///home/user/Suz/perte-de-poids.html');
+  await p2.waitForTimeout(700);
+  await p2.click('[data-exo-seance="0"]');
+  await p2.waitForTimeout(200);
+  await p2.fill('#exoNom', 'Fentes');
+  await p2.waitForTimeout(200);
+  const r = { label: await p2.textContent('label[for="exoReps"]'),
+              choixVisible: await p2.isVisible('.exo-cote'),
+              parDefaut: await p2.getAttribute('[data-exo-pc="1"]', 'aria-pressed'),
+              focus: await p2.evaluate(() => document.activeElement && document.activeElement.id) };
+  if (choix === 0) { await p2.click('[data-exo-pc="0"]'); await p2.waitForTimeout(200); }
+  r.labelApres = await p2.textContent('label[for="exoReps"]');
+  await p2.fill('#exoSeries', '3');
+  await p2.fill('#exoReps', '12');
+  await p2.fill('#exoPoids', '20');
+  await p2.click('[data-exo-ok]');
+  await p2.waitForTimeout(400);
+  const se = await p2.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
+  r.ligne = se.ex[0]; r.k = se.k; r.texte = await p2.textContent('#sportListe');
+  await p2.click('[data-exo-annule]');
+  await p2.waitForTimeout(200);
+  await p2.click('[data-edit-exo="0"][data-i="0"]');
+  await p2.waitForTimeout(250);
+  r.rouvert = await p2.getAttribute('[data-exo-pc="1"]', 'aria-pressed');
+  await p2.fill('#exoNom', 'Développé couché');
+  await p2.waitForTimeout(200);
+  r.choixDev = await p2.isVisible('.exo-cote');
+  await c2.close();
+  return r;
+};
+const fJ = await fentes(1);
+t('les fentes proposent « par jambe » ou « au total »', fJ.choixVisible, '');
+t('par jambe d\'office', fJ.parDefaut === 'true', fJ.parDefaut);
+t('le champ dit « Répétitions par jambe »', fJ.label === 'Répétitions par jambe', fJ.label);
+t('taper le nom garde le curseur dans le champ', fJ.focus === 'exoNom', fJ.focus);
+t('la ligne garde le compte par côté', fJ.ligne.pc === 1 && fJ.ligne.r === 12, JSON.stringify(fJ.ligne));
+t('et le dit', fJ.texte.includes('3 × 12 par jambe'), fJ.texte.slice(0, 160));
+// 3 × 12 par jambe = 72 répétitions, 20 kg + 70 % du corps sur 0,45 m :
+// 34 kcal de travail, plus 7:21 de séries et de repos à 3,5 MET, 33 kcal.
+t('vingt-quatre répétitions par série, toutes comptées', fJ.k === 67, String(fJ.k));
+const fT = await fentes(0);
+t('« au total » se choisit', fT.labelApres === 'Répétitions', fT.labelApres);
+t('et compte douze répétitions, pas vingt-quatre', !fT.ligne.pc && fT.k === 42, JSON.stringify(fT.ligne) + ' ' + fT.k);
+t('par jambe vaut plus qu\'au total', fJ.k > fT.k, fJ.k + ' contre ' + fT.k);
+t('corriger la ligne rouvre sur « par jambe »', fJ.rouvert === 'true', fJ.rouvert);
+t('et « au total » reste « au total »', fT.rouvert === 'false', fT.rouvert);
+t('et disparaît pour un exercice des deux bras à la fois', !fJ.choixDev, '');
+
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');
 process.exit(ko ? 1 : 0);

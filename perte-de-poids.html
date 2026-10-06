@@ -7689,6 +7689,8 @@ var SPORTS = [
     ["Leg curl assis", "Jambes"], ["Leg curl allongé", "Jambes"],
     ["Hack squat", "Jambes"], ["Squat à la barre", "Jambes"],
     ["Squat guidé (Smith)", "Jambes"], ["Fentes", "Jambes"],
+    ["Fentes bulgares", "Jambes"], ["Fentes marchées", "Jambes"],
+    ["Montée sur banc", "Jambes"],
     ["Soulevé de terre", "Jambes"], ["Soulevé de terre roumain", "Jambes"],
     ["Adducteurs", "Jambes"], ["Abducteurs", "Jambes"],
     ["Mollets debout", "Jambes"], ["Mollets assis", "Jambes"],
@@ -7908,6 +7910,32 @@ var SPORTS = [
      prend le profil d'un mouvement au poids du corps, pas le neutre, qui
      ne compte que 10 % du corps. */
   var PROFIL_ASSISTE = [0.45, 0.90];
+
+  /* Un exercice qui se fait un côté après l'autre se compte d'habitude par
+     côté : « 3 × 12 fentes », c'est douze par jambe, donc vingt-quatre
+     répétitions, chacune soulevant le corps. Compté comme douze, la moitié
+     du travail disparaissait. Ces exercices proposent donc « par jambe » ou
+     « au total », par jambe d'office, et la ligne garde `pc: 1` quand les
+     répétitions sont par côté. Tout nom qui dit « unilatéral » ou « alterné »
+     suit la même règle. */
+  var COTES_EXO = {
+    "Fentes": "jambe", "Fentes bulgares": "jambe", "Fentes marchées": "jambe",
+    "Montée sur banc": "jambe", "Kickback fessier": "jambe",
+    "Rowing haltère": "bras", "Kickback triceps": "bras"
+  };
+  var COTES_CLE = null;
+  function coteExo(nom) {
+    if (!COTES_CLE) {
+      COTES_CLE = {};
+      Object.keys(COTES_EXO).forEach(function (n) { COTES_CLE[cleExo(n)] = COTES_EXO[n]; });
+    }
+    var k = cleExo(nom);
+    if (COTES_CLE[k]) return COTES_CLE[k];
+    if (/unilaterale?|alterne/.test(k)) return /jambe|fente|pied|mollet|cuisse/.test(k) ? "jambe" : "bras";
+    return null;
+  }
+  // Les répétitions réellement faites : par côté, il y en a deux fois plus.
+  function repsLigne(e) { return (e.r || 0) * (e.pc ? 2 : 1); }
   function estAssiste(nom) { return /assist/.test(cleExo(nom)); }
   function masseDeplacee(e, poids, pr) {
     var kg = e.kg || 0, corps = pr[1] * (poids || 0);
@@ -7918,6 +7946,8 @@ var SPORTS = [
   var PROFIL_EXO = {
     "Squat à la barre": [0.50, 0.75], "Squat guidé (Smith)": [0.50, 0.75],
     "Hack squat": [0.50, 0.70], "Fentes": [0.45, 0.70],
+    "Fentes bulgares": [0.45, 0.70], "Fentes marchées": [0.45, 0.70],
+    "Montée sur banc": [0.45, 0.90],
     "Soulevé de terre": [0.50, 0.50], "Soulevé de terre roumain": [0.40, 0.45],
     "Chaise romaine": [0.40, 0.60], "Hip thrust": [0.35, 0.55],
     "Presse à cuisses": [0.45, 0.15], "Leg extension": [0.45, 0.10],
@@ -8024,7 +8054,7 @@ var SPORTS = [
         if (!cardioSalle(e.n)) inconnues.push(e.n);
       } else {
         nFonte++;
-        var ser = e.s || 0, rep = e.r || 0, n = ser * rep;
+        var ser = e.s || 0, rep = repsLigne(e), n = ser * rep;
         reps += n;
         // L'aide d'une machine assistée n'est pas une charge soulevée.
         if (!estAssiste(e.n)) tonnage += n * (e.kg || 0);
@@ -8182,7 +8212,7 @@ var SPORTS = [
 
   function volumeExercices(ex) {
     return (ex || []).reduce(function (t, e) {
-      return t + (estAssiste(e.n) ? 0 : (e.s || 0) * (e.r || 0) * (e.kg || 0));
+      return t + (estAssiste(e.n) ? 0 : (e.s || 0) * repsLigne(e) * (e.kg || 0));
     }, 0);
   }
 
@@ -8195,8 +8225,9 @@ var SPORTS = [
         if (e.m > 0) bits.push(fmtAllure(e.m / e.d) + " /km");
       }
     } else {
-      if (e.s > 0 && e.r > 0) bits.push(e.s + " × " + e.r);
-      else if (e.r > 0) bits.push(e.r + (e.r > 1 ? " répétitions" : " répétition"));
+      var parCote = e.pc ? " par " + (coteExo(e.n) || "côté") : "";
+      if (e.s > 0 && e.r > 0) bits.push(e.s + " × " + e.r + parCote);
+      else if (e.r > 0) bits.push(e.r + (e.r > 1 ? " répétitions" : " répétition") + parCote);
       if (estAssiste(e.n)) bits.push(e.kg > 0 ? nf(e.kg, e.kg % 1 ? 1 : 0) + " kg d'aide" : "sans aide");
       else if (e.kg > 0) bits.push(nf(e.kg, e.kg % 1 ? 1 : 0) + " kg");
       else bits.push("poids du corps");
@@ -8316,7 +8347,7 @@ var SPORTS = [
 
   function exoVide(i) {
     return { i: i, edit: null, nom: "", series: "", reps: "", poids: "",
-             duree: "", dist: "", allure: "", mode: "fonte", force: 0 };
+             duree: "", dist: "", allure: "", mode: "fonte", force: 0, pc: null };
   }
 
   // Ouvrir une ligne existante : on garde son mode, et on ne laisse la
@@ -8333,8 +8364,15 @@ var SPORTS = [
       dist: cardio && e.d ? String(e.d).replace(".", ",") : "",
       allure: (cardio && e.m > 0 && e.d > 0) ? fmtAllure(e.m / e.d) : "",
       mode: cardio ? "cardio" : "fonte",
-      force: cardio === auto ? 0 : 1
+      force: cardio === auto ? 0 : 1,
+      pc: e.pc ? 1 : 0
     };
+  }
+  // Par côté ou au total : le choix fait, sinon par côté pour un exercice
+  // qui se fait un côté après l'autre.
+  function pcSaisie(e) {
+    if (!coteExo(e.nom)) return 0;
+    return e.pc === null || e.pc === undefined ? 1 : e.pc;
   }
 
   function focusFin(id) {
@@ -8365,6 +8403,17 @@ var SPORTS = [
     }
   }
 
+  function blocCote(e) {
+    var c = coteExo(e.nom), pc = pcSaisie(e);
+    return '<div class="seg-choice exo-cote" role="group" aria-label="Comment tu as compté" style="margin-top:9px">' +
+      '<button type="button" data-exo-pc="1" aria-pressed="' + (pc ? "true" : "false") + '">Par ' + c + '</button>' +
+      '<button type="button" data-exo-pc="0" aria-pressed="' + (pc ? "false" : "true") + '">Au total</button>' +
+      '</div><p class="sub-note edit-aide" style="margin-top:6px">' + (pc
+        ? "Douze par " + c + ", c'est vingt-quatre répétitions : chacune soulève le corps, elles comptent toutes."
+        : "Toutes les répétitions des deux côtés réunies.") +
+      (c === "jambe" ? " Un haltère dans chaque main : additionne-les, deux de 10 kg font 20." : "") + '</p>';
+  }
+
   function formulaireExercice(x) {
     var e = exoSaisie;
     var champ3 = function (id, lab, val, mode, ph) {
@@ -8384,9 +8433,10 @@ var SPORTS = [
             champ3("exoDist", "Distance (km)", e.dist, "decimal", "3,2") +
             champ3("exoAllure", "Allure (min/km)", e.allure, "numeric", "6:15")
           : champ3("exoSeries", "Séries", e.series, "numeric", "") +
-            champ3("exoReps", "Répétitions", e.reps, "numeric", "") +
+            champ3("exoReps", pcSaisie(e) ? "Répétitions par " + coteExo(e.nom) : "Répétitions",
+                   e.reps, "numeric", "") +
             champ3("exoPoids", estAssiste(e.nom) ? "Aide (kg)" : "Poids (kg)", e.poids, "decimal", "")) +
-      '</div>' +
+      '</div>' + (!cardio && coteExo(e.nom) ? blocCote(e) : '') +
       '<div class="row-inline" style="margin-top:11px">' +
         '<button type="button" class="btn go sm" data-exo-ok="1">' +
           (e.edit === null ? "Ajouter" : "Enregistrer") + '</button>' +
@@ -8806,7 +8856,7 @@ var SPORTS = [
             j.min += e.m || 0;
             j.km += e.d || 0;
           } else {
-            var n = (e.s || 0) * (e.r || 0);
+            var n = (e.s || 0) * repsLigne(e);
             j.series += e.s || 0;
             j.reps += n;
             j.volume += n * (e.kg || 0);
@@ -9776,6 +9826,13 @@ var SPORTS = [
     }
     if (e.target.closest("[data-exo-annule]")) { exoSaisie = null; renderSport(); return; }
 
+    var choixPc = e.target.closest("[data-exo-pc]");
+    if (choixPc && exoSaisie) {
+      exoSaisie.pc = +choixPc.dataset.exoPc;
+      renderSport();
+      return;
+    }
+
     var oub = e.target.closest("[data-oublie-machine]");
     if (oub) {
       var nomOub = oub.dataset.oublieMachine;
@@ -9846,6 +9903,7 @@ var SPORTS = [
         var kg = Math.round(lu(exoSaisie.poids, 500) * 10) / 10;
         if (!rep) { toast("Indique au moins un nombre de répétitions.", true); return; }
         ligne = { n: nom, s: ser || 1, r: rep, kg: kg };
+        if (coteExo(nom) && pcSaisie({ nom: nom, pc: exoSaisie.pc })) ligne.pc = 1;
         garde = { series: String(ser || ""), reps: "", poids: String(kg || "") };
       }
       var corrige = exoSaisie.edit !== null;
@@ -9903,6 +9961,9 @@ var SPORTS = [
         var voulu = cardioSalle(v.trim()) ? "cardio" : "fonte";
         if (voulu !== exoSaisie.mode) { exoSaisie.mode = voulu; renderSport(); focusFin("exoNom"); return; }
       }
+      // Le choix par côté apparaît ou disparaît avec le nom.
+      var aCote = !!document.querySelector(".exo-cote");
+      if (aCote !== !!coteExo(v) && exoSaisie.mode !== "cardio") { renderSport(); focusFin("exoNom"); return; }
       // Le libellé suit la frappe sans redessiner, sinon le champ perdrait le curseur.
       var labPoids = document.querySelector('label[for="exoPoids"]');
       if (labPoids) labPoids.textContent = estAssiste(v) ? "Aide (kg)" : "Poids (kg)";
