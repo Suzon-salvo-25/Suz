@@ -1462,7 +1462,9 @@
       cell("Entrées", list.length, "") +
       cell("Durée totale", hoursOnly(total), "heures") +
       cell("Moyenne / jour", hoursOnly(total / DAYS), "heures") +
-      cell("Jours de visionnage", Math.min(DAYS, list.length) + " / " + DAYS, "") +
+      // journées qui ont quelque chose à regarder, séance comprise ; le reste est du repos
+      cell("Jours de visionnage", plan.filter(function (d) { return d.items.length; }).length +
+        " / " + DAYS, "") +
       cell("Films", list.filter(function (i) { return i[1] === "🎬"; }).length, "") +
       cell("Séries & spéciaux", list.filter(function (i) { return i[1] !== "🎬" && i[1] !== "↩"; }).length, "");
 
