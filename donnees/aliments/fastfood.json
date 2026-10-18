@@ -1,0 +1,62 @@
+[
+  {
+    "nom": "Whopper (Burger King)",
+    "kcal": 242,
+    "prot": 10.5,
+    "gluc": 16.4,
+    "lip": 14.5,
+    "cat": "fastfood",
+    "portion_g": 273,
+    "portion_lib": "1 burger",
+    "source": "fr.openfoodfacts.org/produit/2000000028596/whopper-burger-king (fiche Burger King France, 273 g), recoupe avec plusieurs compteurs francais",
+    "note": "Conversion a partir d'une valeur par portion : 660 kcal, 28,8 g de proteines, 44,7 g de glucides et 39,7 g de lipides pour le burger de 273 g."
+  },
+  {
+    "nom": "Frites moyennes (Burger King)",
+    "kcal": 275,
+    "prot": 3.3,
+    "gluc": 36.2,
+    "lip": 12.8,
+    "cat": "fastfood",
+    "portion_g": 116,
+    "portion_lib": "1 portion moyenne",
+    "source": "fr.openfoodfacts.org/produit/2000000036031/frites-moyenne-burger-king (Frites moyenne Burger King, 116 g), recoupe avec les-calories.com",
+    "note": "Conversion a partir d'une valeur par portion : 319 kcal, 3,8 g de proteines, 42 g de glucides et 14,8 g de lipides pour la portion de 116 g. Recette francaise, differente des frites americaines."
+  },
+  {
+    "nom": "King Nuggets x6 (Burger King)",
+    "kcal": 240,
+    "prot": 12.9,
+    "gluc": 19.6,
+    "lip": 11.9,
+    "cat": "fastfood",
+    "portion_g": 114,
+    "portion_lib": "1 boite de 6",
+    "source": "perdre10kilosen1an.fr et fatsecret.fr, fiches King Nuggets (6) Burger King France",
+    "note": "Conversion a partir d'une valeur par portion : 273 kcal, 14,7 g de proteines, 22,3 g de glucides et 13,6 g de lipides pour la boite de 6 nuggets (114 g)."
+  },
+  {
+    "nom": "Tenders (KFC)",
+    "kcal": 291,
+    "prot": 22.9,
+    "gluc": 17.1,
+    "lip": 14.3,
+    "cat": "fastfood",
+    "portion_g": 35,
+    "portion_lib": "1 tender",
+    "source": "corps-sain.fr (tableau Tenders KFC France) et fitatu.com (Crispy Tenders KFC), valeurs concordantes",
+    "note": "Conversion a partir d'une valeur par portion : environ 102 kcal, 8 g de proteines, 6 g de glucides et 5 g de lipides pour un tender de 35 g."
+  },
+  {
+    "nom": "Burger Zinger (KFC)",
+    "kcal": 242,
+    "prot": 15.2,
+    "gluc": 19.5,
+    "lip": 11.5,
+    "cat": "fastfood",
+    "portion_g": 235,
+    "portion_lib": "1 burger",
+    "source": "compteurs nutritionnels francais reprenant les valeurs KFC France pour le Zinger (valeurs publiees pour 100 g)",
+    "note": "Valeurs deja donnees pour 100 g. Le burger entier pese environ 235 g, soit environ 570 kcal."
+  }
+]
