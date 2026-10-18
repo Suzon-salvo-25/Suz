@@ -124,6 +124,20 @@ fallu peser 80 kg en septembre. La courbe d'évolution trace donc la
 trajectoire visée à partir de son départ seulement, et la projection part
 du plus tardif des deux, début du graphique ou départ.
 
+**Et l'ancien rythme ne compte plus.** « Tant que je n'ai pas refait
+d'autres pesées, les semaines passées ne doivent plus être prises en
+compte. » `peseesDepuisDepart()` ne garde que les pesées faites depuis
+`profil.debut`, et c'est elle que lisent le rythme observé
+(`rythmeReel()`, toujours quatre pesées sur dix jours au moins),
+l'alerte de stagnation (`plateau()`) et le point de départ de la
+projection. Tant que le compte n'y est pas, « Où mène ton rythme actuel »
+disparaît de la projection et les cartes disent « disponible après dix
+jours de pesées depuis ton nouveau départ du 19 oct. ». Les courbes et la
+tuile « Moyenne 7 jours » gardent tout l'historique, la dépense réelle
+mesurée aussi : une semaine d'écarts est une vraie mesure du métabolisme.
+Le rythme observé se compare maintenant au rythme des réglages ; il disait
+« tu perds plus vite que prévu » dès qu'on perdait, quel que soit l'écart.
+
 **Une pente ne se prolonge jamais au-delà de l'objectif.** Prolongée
 bêtement, une bonne pente annonçait 49,9 kg en avril pour un objectif à 66 :
 faux, et malsain à afficher dans une application de perte de poids. La
@@ -663,7 +677,8 @@ node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').m
 node outils/verifie.mjs           # stockage, mise en page, lisibilité de
                                   # la recherche, courbe pesée par pesée,
                                   # parcours et verdict depuis la balance,
-                                  # nouveau départ, 45 contrôles
+                                  # nouveau départ et son rythme,
+                                  # 51 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres et étages du jour,
                                   # 34 contrôles

@@ -5943,7 +5943,7 @@ var SPORTS = [
   }
 
   function plateau() {
-    var l = pesees();
+    var l = peseesDepuisDepart();
     if (l.length < 8) return null;
     var fin = l[l.length - 1].date;
     if (diffJours(fin, AUJ) > 4) return null;
@@ -6015,8 +6015,27 @@ var SPORTS = [
     if (v < 40) return "Obésité sévère";
     return "Obésité morbide";
   }
-  function rythmeReel() {
+  /* Repartir de zéro, c'est aussi oublier l'ancien rythme. Après une
+     semaine d'écarts, Suzon a fixé un nouveau départ : « tant que je n'ai
+     pas refait d'autres pesées, les semaines passées ne doivent plus être
+     prises en compte ». Le rythme observé, l'alerte de stagnation et le
+     point de départ de la projection ne lisent donc que les pesées faites
+     depuis `profil.debut`. Les courbes, elles, gardent tout l'historique. */
+  function peseesDepuisDepart() {
+    var deb = P().debut;
     var l = pesees();
+    return deb ? l.filter(function (e) { return e.date >= deb; }) : l;
+  }
+  // Ce qu'il manque au rythme observé, dit en clair.
+  function attenteRythme() {
+    var deb = P().debut;
+    return deb && deb > (pesees()[0] || {}).date
+      ? "Disponible après dix jours de pesées depuis ton nouveau départ du " + dateCourte(deb) + "."
+      : "Disponible après une dizaine de jours de pesées.";
+  }
+
+  function rythmeReel() {
+    var l = peseesDepuisDepart();
     if (l.length < 4) return null;
     var span = diffJours(l[0].date, l[l.length - 1].date);
     if (span < 10) return null;
@@ -6145,8 +6164,15 @@ var SPORTS = [
     cartes.push(['Dépense réelle mesurée', dr ? ni(dr.tdee) : "—", dr ? "kcal" : "",
       dr ? "Calculée sur " + dr.jours + " jours à partir de tes apports et de ton poids. C'est la valeur à croire, pas la formule."
          : "Disponible après deux semaines de pesées et de repas notés."]);
+    // Le rythme se compare à celui des réglages : perdre, ce n'est pas
+    // forcément perdre plus vite que prévu.
     cartes.push(['Rythme réellement observé', reel === null ? "—" : nf(Math.abs(reel), 2), reel === null ? "" : "kg/sem",
-      reel === null ? "Disponible après une dizaine de jours de pesées." : (reel < 0 ? "Tu perds plus vite que prévu." : reel > 0.05 ? "Tu prends du poids sur la période." : "Le poids stagne.")]);
+      reel === null ? attenteRythme()
+        : reel > 0.05 ? "Tu prends du poids sur la période."
+        : reel > -0.05 ? "Le poids stagne."
+        : -reel > p.rythme + 0.05 ? "Tu perds plus vite que prévu."
+        : -reel < p.rythme - 0.05 ? "Tu perds, un peu moins vite que prévu."
+        : "Pile au rythme prévu."]);
 
     document.getElementById("profilStats").innerHTML = cartes.map(function (c) {
       return '<div class="stat ' + (c[4] || "") + '"><span class="lab">' + esc(c[0]) + '</span>' +
@@ -6200,7 +6226,7 @@ var SPORTS = [
       "<p><b>Métabolisme de base.</b> Formule de Mifflin-St Jeor : " + nomF + ". Avec tes valeurs, cela donne " + (mb ? ni(mb) + " kcal" : "un résultat indisponible") + ".</p>" +
       "<p><b>Dépense quotidienne.</b> Le métabolisme multiplié par " + nf(p.activite, 3) + ", le coefficient de ton niveau d'activité courante. Le sport n'y est pas inclus : chaque séance saisie augmente l'objectif du jour d'autant.</p>" +
       "<p><b>Déficit.</b> Un kilogramme de masse grasse représente environ 7 700 kcal. Pour " + nf(p.rythme, 2) + " kg par semaine, il faut " + ni(def) + " kcal de moins par jour.</p>" +
-      "<p><b>Rythme observé.</b> Droite de tendance calculée sur l'ensemble de tes pesées. Elle devient fiable après deux à trois semaines de relevés réguliers.</p>";
+      "<p><b>Rythme observé.</b> Droite de tendance calculée sur tes pesées depuis ton départ. Elle devient fiable après deux à trois semaines de relevés réguliers.</p>";
   }
 
   /* ==================== ONGLET ALIMENTATION ==================== */
@@ -7369,7 +7395,8 @@ var SPORTS = [
     var l = pesees();
     if (!p.objectif || !p.fin) return null;
     var reste = diffJours(AUJ, p.fin);
-    var actuel = valeurActuelle(l) || p.depart;
+    var depuis = peseesDepuisDepart();
+    var actuel = valeurActuelle(depuis) || p.depart;
     if (!actuel) return null;
     var aPerdre = actuel - p.objectif;
     var reel = rythmeReel();                       // négatif quand tu perds
@@ -7427,7 +7454,9 @@ var SPORTS = [
     var ecart = j.projete === null ? null : j.projete - j.objectif;
     box.innerHTML = [
       ['Jours restants', ni(j.reste), "", 'Jusqu\'au ' + dateCourte(j.fin) + '.'],
-      ['Reste à perdre', nf(Math.max(0, j.aPerdre), 1), "kg", 'Depuis ' + nf(j.actuel, 1) + ' kg, moyenne actuelle.'],
+      ['Reste à perdre', nf(Math.max(0, j.aPerdre), 1), "kg", 'Depuis ' + nf(j.actuel, 1) + ' kg, ' +
+        (serieMesuree(peseesDepuisDepart()).lissee ? 'moyenne actuelle.'
+          : peseesDepuisDepart().length ? 'ta dernière pesée.' : 'ton poids de départ.')],
       ['Rythme à tenir', j.requis === null ? "—" : nf(Math.max(0, j.requis), 2), "kg/sem",
         j.requis === null ? "" : (j.requis <= 0 ? 'Objectif déjà atteint.'
           : j.requis > 1 ? 'Au-delà de 1 kg par semaine, l\'échéance est trop serrée.'
@@ -7437,7 +7466,7 @@ var SPORTS = [
         ? ['Objectif atteint le', dateCourte(j.atteintLe), "",
            'Soit ' + ni(diffJours(j.atteintLe, j.fin)) + ' jours avant l\'échéance, à ton rythme actuel.']
         : ['Arrivée au rythme réel', j.projete === null ? "—" : nf(j.projete, 1), j.projete === null ? "" : "kg",
-           j.projete === null ? 'Disponible après une dizaine de jours de pesées.'
+           j.projete === null ? attenteRythme()
              : nf(ecart, 1) + ' kg au-dessus de l\'objectif à cette date.']
     ].map(function (c) {
       return '<div class="stat"><span class="lab">' + esc(c[0]) + '</span>' +

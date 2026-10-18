@@ -287,7 +287,8 @@ console.log('\n=== repartir d\'un nouveau départ ===');
     const brute = pts('#chartHolder .courbe-brute');
     return { brute: brute.length, debutVisee: v.length ? v[0][0] : null, finVisee: v.length ? v[v.length - 1][0] : null,
              hautVisee: v.length ? Math.min.apply(null, v.map((q) => q[1])) : null,
-             legendeProj: document.getElementById('projLegend').textContent };
+             legendeProj: document.getElementById('projLegend').textContent,
+             stats: document.getElementById('projStats').textContent.replace(/\s+/g, ' ') };
   });
   verifie('l\'historique d\'avant le nouveau départ reste tracé', r.brute === 31, String(r.brute));
   // 30 jours de graphique, départ il y a 7 jours : la droite commence aux trois quarts.
@@ -295,7 +296,49 @@ console.log('\n=== repartir d\'un nouveau départ ===');
           r.debutVisee !== null && r.debutVisee > 400, String(r.debutVisee));
   verifie('elle va jusqu\'à aujourd\'hui', r.finVisee !== null && r.finVisee > r.debutVisee, String(r.finVisee));
   verifie('la projection garde le rythme visé dans sa légende', r.legendeProj.includes('Le rythme visé'), r.legendeProj);
+  // « Tant que je n'ai pas refait d'autres pesées, les semaines passées ne
+  // doivent plus être prises en compte. » Sept jours depuis le départ : pas
+  // encore de rythme, et l'ancien ne revient pas par la bande.
+  verifie('pas de « rythme actuel » une semaine après le nouveau départ',
+          !r.legendeProj.includes('Où mène ton rythme actuel'), r.legendeProj);
+  verifie('et la carte dit ce qu\'il manque', r.stats.includes('depuis ton nouveau départ'), r.stats);
   verifie('aucune erreur au nouveau départ', !erreurs.length, erreurs.join(' | '));
+  await ctx.close();
+}
+{
+  // Deux semaines plus tard, le rythme revient, calculé sur les seules
+  // pesées d'après le départ : l'ancienne remontée n'y entre pas.
+  const ctx = await nav.newContext({ viewport: { width: 430, height: 1000 } });
+  const pg = await ctx.newPage();
+  const erreurs = [];
+  pg.on('pageerror', (e) => erreurs.push(e.message));
+  await pg.addInitScript(([auj]) => {
+    const jour = (k) => new Date(Date.parse(auj + 'T12:00:00Z') - k * 86400000).toISOString().slice(0, 10);
+    const jours = {};
+    for (let i = 0; i <= 35; i++) {
+      const d = jour(35 - i);
+      // vingt jours qui remontent, puis quinze qui descendent de 0,07 kg par jour
+      const kg = i <= 20 ? 76.0 + i * 0.04 : 76.8 - (i - 20) * 0.07;
+      jours[d] = { date: d, poids: +kg.toFixed(2), heure: '07:50', eau: 0, sport: [],
+                   repas: { petitdej: [], dejeuner: [], diner: [], collation: [] } };
+    }
+    localStorage.setItem('suz-forme-onglet', 'poids');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom: 'Suzon', sexe: 'f', age: 19, taille: 172, depart: 76.8, objectif: 60, debut: jour(15),
+                fin: '2027-06-12', activite: 1.2, rythme: 0.5, seances: 5, freq: {}, perso: {}, plats: {} },
+      jours }));
+  }, [AUJ]);
+  await pg.goto(PAGE);
+  await pg.waitForTimeout(900);
+  const leg = await pg.textContent('#projLegend');
+  verifie('le rythme actuel revient avec assez de pesées depuis le départ', leg.includes('Où mène ton rythme actuel'), leg);
+  await pg.click('#profilBtn');
+  await pg.waitForTimeout(300);
+  const stats = (await pg.textContent('#profilStats')).replace(/\s+/g, ' ');
+  // 0,07 kg par jour, c'est 0,49 kg par semaine : la remontée d'avant n'y entre pas.
+  verifie('il ne lit que les pesées d\'après le départ', /Rythme réellement observé\s*0,49/.test(stats), stats.slice(stats.indexOf('Rythme réellement'), stats.indexOf('Rythme réellement') + 80));
+  verifie('et se compare au rythme des réglages', stats.includes('Pile au rythme prévu'), stats.slice(stats.indexOf('Rythme réellement'), stats.indexOf('Rythme réellement') + 80));
+  verifie('aucune erreur deux semaines après', !erreurs.length, erreurs.join(' | '));
   await ctx.close();
 }
 
