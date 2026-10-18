@@ -255,6 +255,50 @@ console.log('\n=== mon parcours part de la balance ===');
   await ctx.close();
 }
 
+/* « On garde les semaines faites, mais on repart de 76,8 kg. » L'historique
+   reste, et la trajectoire visée part de son nouveau départ sans être
+   prolongée vers le passé, où elle remontait au-dessus de l'ancien départ. */
+console.log('\n=== repartir d\'un nouveau départ ===');
+{
+  const ctx = await nav.newContext({ viewport: { width: 430, height: 1000 } });
+  const pg = await ctx.newPage();
+  const erreurs = [];
+  pg.on('pageerror', (e) => erreurs.push(e.message));
+  await pg.addInitScript(([auj]) => {
+    const jour = (k) => new Date(Date.parse(auj + 'T12:00:00Z') - k * 86400000).toISOString().slice(0, 10);
+    const jours = {};
+    for (let i = 0; i <= 30; i++) {
+      const d = jour(30 - i);
+      jours[d] = { date: d, poids: +(77.4 - i * 0.03).toFixed(1), heure: '07:50', eau: 0, sport: [],
+                   repas: { petitdej: [], dejeuner: [], diner: [], collation: [] } };
+    }
+    localStorage.setItem('suz-forme-onglet', 'poids');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom: 'Suzon', sexe: 'f', age: 19, taille: 172, depart: 76.8, objectif: 60, debut: jour(7),
+                fin: '2027-05-08', activite: 1.2, rythme: 0.6, seances: 5, freq: {}, perso: {}, plats: {} },
+      jours }));
+  }, [AUJ]);
+  await pg.goto(PAGE);
+  await pg.waitForTimeout(900);
+  const r = await pg.evaluate(() => {
+    const pts = (sel) => { const e = document.querySelector(sel); return e ? e.getAttribute('points').trim().split(/\s+/) : []; };
+    const visee = [...document.querySelectorAll('#chartHolder polyline')].find((e) => e.getAttribute('stroke-dasharray'));
+    const v = visee ? visee.getAttribute('points').trim().split(/\s+/).map((q) => q.split(',').map(Number)) : [];
+    const brute = pts('#chartHolder .courbe-brute');
+    return { brute: brute.length, debutVisee: v.length ? v[0][0] : null, finVisee: v.length ? v[v.length - 1][0] : null,
+             hautVisee: v.length ? Math.min.apply(null, v.map((q) => q[1])) : null,
+             legendeProj: document.getElementById('projLegend').textContent };
+  });
+  verifie('l\'historique d\'avant le nouveau départ reste tracé', r.brute === 31, String(r.brute));
+  // 30 jours de graphique, départ il y a 7 jours : la droite commence aux trois quarts.
+  verifie('la trajectoire visée part de son départ, pas du début du graphique',
+          r.debutVisee !== null && r.debutVisee > 400, String(r.debutVisee));
+  verifie('elle va jusqu\'à aujourd\'hui', r.finVisee !== null && r.finVisee > r.debutVisee, String(r.finVisee));
+  verifie('la projection garde le rythme visé dans sa légende', r.legendeProj.includes('Le rythme visé'), r.legendeProj);
+  verifie('aucune erreur au nouveau départ', !erreurs.length, erreurs.join(' | '));
+  await ctx.close();
+}
+
 await nav.close();
 console.log('\n' + reussis + ' vérifications passées, ' + echecs + ' en échec');
 process.exit(echecs ? 1 : 0);

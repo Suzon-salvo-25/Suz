@@ -6029,9 +6029,15 @@ var SPORTS = [
     if (!d) return null;
     return ((n * sxy - sx * sy) / d) * 7;
   }
+  /* La trajectoire part du départ, à sa date, et n'existe pas avant. Quand
+     Suzon repart d'un nouveau poids après une semaine d'écarts, l'historique
+     reste, mais prolonger la nouvelle droite vers le passé dessinait une
+     ligne qui remontait au-dessus de son ancien départ, comme si elle avait
+     dû peser 80 kg en septembre. */
   function poidsPlanifie(date) {
     var p = P();
     if (!p.depart || !p.rythme || !p.debut) return null;
+    if (date < p.debut) return null;
     var v = p.depart - p.rythme * diffJours(p.debut, date) / 7;
     return p.objectif ? Math.max(p.objectif, v) : v;
   }
@@ -7481,7 +7487,10 @@ var SPORTS = [
     var vals = [j.objectif, j.actuel];
     l.forEach(function (e) { vals.push(e.kg); });
     if (j.projete !== null) vals.push(j.projete);
-    var pl0 = poidsPlanifie(d0), pl1 = poidsPlanifie(d1);
+    // La trajectoire visée commence à son propre départ, qui peut tomber
+    // après le début du graphique quand on est reparti d'un nouveau poids.
+    var debPlan = P().debut && P().debut > d0 ? P().debut : d0;
+    var pl0 = poidsPlanifie(debPlan), pl1 = poidsPlanifie(d1);
     if (pl0 !== null) vals.push(pl0);
     if (pl1 !== null) vals.push(pl1);
     var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
@@ -7567,7 +7576,7 @@ var SPORTS = [
       '<li><span class="key" style="border-top-color:var(--blue)"></span> Où j\'en suis, moyenne sur 7 jours</li>' +
       '<li><span class="key" style="border-top-color:var(--orange)"></span> Ce qu\'il faut tenir pour arriver à l\'heure</li>' +
       (j.projete !== null ? '<li><span class="key" style="border-top-color:var(--aqua);border-top-style:dotted"></span> Où mène ton rythme actuel</li>' : '') +
-      (poidsPlanifie(j.debut) !== null ? '<li><span class="key" style="border-top-color:var(--ink-faint);border-top-style:dashed"></span> Le rythme visé dans tes réglages</li>' : '') +
+      (poidsPlanifie(debPlan) !== null ? '<li><span class="key" style="border-top-color:var(--ink-faint);border-top-style:dashed"></span> Le rythme visé dans tes réglages</li>' : '') +
       '<li><span class="key" style="border-top-color:var(--ok);border-top-style:dashed"></span> Poids visé</li>';
   }
 

@@ -113,6 +113,17 @@ légende le nomme « Pesée par pesée ». **Tant que la courbe ne lisse pas, il
 n'est pas tracé** : elle passe déjà par chaque pesée, il serait caché
 dessous.
 
+**Repartir d'un nouveau départ garde l'historique.** Le 19 octobre, après
+une semaine d'écarts, Suzon est repartie de 76,8 kg pour 60 kg à 0,5 kg
+par semaine, soit le 12 juin 2027 (236 jours). Elle avait d'abord mis
+0,6 kg et le 8 mai « au hasard » ; la date se calcule : (départ − objectif)
+÷ rythme × 7 jours. Les pesées d'avant restent, et **`poidsPlanifie()`
+renvoie `null` avant `profil.debut`** : prolongée vers le passé, la
+nouvelle droite remontait au-dessus de l'ancien départ, comme s'il avait
+fallu peser 80 kg en septembre. La courbe d'évolution trace donc la
+trajectoire visée à partir de son départ seulement, et la projection part
+du plus tardif des deux, début du graphique ou départ.
+
 **Une pente ne se prolonge jamais au-delà de l'objectif.** Prolongée
 bêtement, une bonne pente annonçait 49,9 kg en avril pour un objectif à 66 :
 faux, et malsain à afficher dans une application de perte de poids. La
@@ -652,7 +663,7 @@ node -e "new Function(require('fs').readFileSync('perte-de-poids.html','utf8').m
 node outils/verifie.mjs           # stockage, mise en page, lisibilité de
                                   # la recherche, courbe pesée par pesée,
                                   # parcours et verdict depuis la balance,
-                                  # 40 contrôles
+                                  # nouveau départ, 45 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres et étages du jour,
                                   # 34 contrôles
