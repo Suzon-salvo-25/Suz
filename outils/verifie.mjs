@@ -17,7 +17,7 @@ import path from 'node:path';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PAGE = 'file://' + path.join(RACINE, 'perte-de-poids.html');
-const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROME = '/opt/pw-browsers/chromium';
 
 const ymd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
                    '-' + String(d.getDate()).padStart(2, '0');

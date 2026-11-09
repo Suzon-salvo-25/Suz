@@ -8,13 +8,15 @@
 import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
 import fs from 'node:fs';
 const S = '/tmp/claude-0/-home-user-Suz/6f3b596d-29a7-57f6-baff-3d0352d76890/scratchpad/';
-const b64 = fs.readFileSync(S + 'fraunces.woff2').toString('base64');
+// La fonte locale n'est qu'un confort d'affichage : le dossier de travail qui
+// la contenait disparaît d'une session à l'autre, son absence ne doit rien casser.
+const b64 = fs.existsSync(S + 'fraunces.woff2') ? fs.readFileSync(S + 'fraunces.woff2').toString('base64') : null;
 const auj = new Date().toISOString().slice(0, 10);
 let ok = 0, ko = 0;
 const t = (nom, cond, det) => { if (cond) { ok++; console.log('  ok   ' + nom); }
   else { ko++; console.log('  ÉCHEC ' + nom + (det ? ' — ' + det : '')); } };
 
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const ctx = await b.newContext({ viewport: { width: 1100, height: 900 }, ignoreHTTPSErrors: true });
 const p = await ctx.newPage();
 p.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
@@ -29,7 +31,7 @@ await p.addInitScript(([d]) => {
   }));
 }, [auj]);
 await p.goto('file:///home/user/Suz/perte-de-poids.html');
-await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
+if (b64) await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
 await p.waitForTimeout(800);
 
 const ouvreRepas = (k) => p.evaluate(x => {
@@ -153,6 +155,62 @@ await p.click('#marcheDel');
 await p.waitForTimeout(400);
 const s7 = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport, auj);
 t('elle s\'efface', s7.length === 0, JSON.stringify(s7));
+
+console.log('=== les compléments se comptent à l\'unité ===');
+// « Dès que je rentre de la créatine, du collagène ou du magnésium, je dois
+// pouvoir juste mettre le nombre de gélules. »
+await p.click('#tab-alim');
+await p.waitForTimeout(250);
+const ajouteComplement = async (recherche, nombre) => {
+  await p.selectOption('#foodRepas', 'petitdej');
+  await p.fill('#foodSearch', recherche);
+  await p.waitForTimeout(300);
+  const ligne = await p.textContent('#foodResults li:first-child');
+  await p.click('#foodResults li:first-child button');
+  await p.waitForTimeout(150);
+  const unites = await p.$$eval('#pickUnite option', (e) => e.map((o) => o.textContent));
+  await p.fill('#pickQte', nombre);
+  await p.waitForTimeout(100);
+  await p.click('#pickAdd');
+  await p.waitForTimeout(350);
+  return { ligne, unites };
+};
+const crea = await ajouteComplement('créatine', '5');
+t('la créatine est dans la base', crea.ligne.includes('Créatine Creapure en gélules (Nutripure)'), crea.ligne);
+t('elle s\'annonce par gélule', crea.ligne.includes('0 kcal par gélule'), crea.ligne);
+t('une seule unité proposée : les gélules, pas les grammes',
+  crea.unites.length === 1 && crea.unites[0] === 'gélules', JSON.stringify(crea.unites));
+const colla = await ajouteComplement('collagène prozis', '2');
+t('le collagène s\'annonce par comprimé', colla.ligne.includes('2,4 kcal par comprimé'), colla.ligne);
+const mag = await ajouteComplement('magnésium triple', '3');
+t('le magnésium Aroma-Zone aussi', mag.ligne.includes('Magnésium triple (Aroma-Zone)'), mag.ligne);
+const pd = await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].repas.petitdej, auj);
+const lCrea = pd.find((x) => x.n.startsWith('Créatine'));
+const lColla = pd.find((x) => x.n.startsWith('Collagène'));
+const lMag = pd.find((x) => x.n.startsWith('Magnésium'));
+t('la ligne dit « 5 gélules »', lCrea && lCrea.d === '5 gélules' && lCrea.k === 0, JSON.stringify(lCrea));
+// 2 comprimés = 1,2 g de collagène, une protéine : 4,8 kcal.
+t('deux comprimés de collagène : 1,2 g de protéines, 5 kcal',
+  lColla && lColla.d === '2 comprimés' && lColla.p === 1.2 && lColla.k === 5, JSON.stringify(lColla));
+t('trois gélules de magnésium', lMag && lMag.d === '3 gélules', JSON.stringify(lMag));
+const iColla = pd.indexOf(lColla);
+await ouvreRepas('petitdej');
+await p.click('[data-edit-repas="petitdej"][data-i="' + iColla + '"]');
+await p.waitForTimeout(200);
+t('corriger la ligne demande un nombre de comprimés',
+  (await p.textContent('label[for="editQte"]')) === 'Nombre de comprimés' && (await p.inputValue('#editQte')) === '2',
+  (await p.textContent('label[for="editQte"]')) + ' / ' + (await p.inputValue('#editQte')));
+await p.fill('#editQte', '4');
+await p.waitForTimeout(150);
+t('et recalcule depuis le nombre', (await p.inputValue('#editProt')) === '2,4', await p.inputValue('#editProt'));
+await p.click('[data-edit-ok]');
+await p.waitForTimeout(350);
+const lColla2 = (await p.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].repas.petitdej, auj))[iColla];
+t('la ligne corrigée dit « 4 comprimés »', lColla2.d === '4 comprimés' && lColla2.k === 10, JSON.stringify(lColla2));
+const whey = await (async () => { await p.fill('#foodSearch', 'clear whey peche'); await p.waitForTimeout(300);
+  return p.textContent('#foodResults li:first-child'); })();
+t('la clear whey pêche Prozis est trouvée', whey.includes('Clear Whey Isolate thé glacé à la pêche (Prozis)'), whey);
+await p.fill('#foodSearch', '');
 
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');

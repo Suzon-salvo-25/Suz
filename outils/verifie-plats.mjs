@@ -2,11 +2,13 @@
 import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
 import fs from 'node:fs';
 const S = '/tmp/claude-0/-home-user-Suz/6f3b596d-29a7-57f6-baff-3d0352d76890/scratchpad/';
-const b64 = fs.readFileSync(S + 'fraunces.woff2').toString('base64');
+// La fonte locale n'est qu'un confort d'affichage : le dossier de travail qui
+// la contenait disparaît d'une session à l'autre, son absence ne doit rien casser.
+const b64 = fs.existsSync(S + 'fraunces.woff2') ? fs.readFileSync(S + 'fraunces.woff2').toString('base64') : null;
 const auj = new Date().toISOString().slice(0, 10);
 let ok = 0, ko = 0;
 const t = (n, c, d) => { if (c) { ok++; console.log('  ok   ' + n); } else { ko++; console.log('  ÉCHEC ' + n + (d ? ' — ' + d : '')); } };
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const ctx = await b.newContext({ viewport: { width: 1100, height: 950 }, ignoreHTTPSErrors: true });
 const p = await ctx.newPage();
 p.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
@@ -26,7 +28,7 @@ await p.addInitScript(([d]) => {
   }));
 }, [auj]);
 await p.goto('file:///home/user/Suz/perte-de-poids.html');
-await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
+if (b64) await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
 await p.waitForTimeout(800);
 
 const ouvreRepas = (k) => p.evaluate(x => {

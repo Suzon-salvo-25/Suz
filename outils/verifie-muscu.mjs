@@ -6,11 +6,13 @@
 import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
 import fs from 'node:fs';
 const S = '/tmp/claude-0/-home-user-Suz/6f3b596d-29a7-57f6-baff-3d0352d76890/scratchpad/';
-const b64 = fs.readFileSync(S + 'fraunces.woff2').toString('base64');
+// La fonte locale n'est qu'un confort d'affichage : le dossier de travail qui
+// la contenait disparaît d'une session à l'autre, son absence ne doit rien casser.
+const b64 = fs.existsSync(S + 'fraunces.woff2') ? fs.readFileSync(S + 'fraunces.woff2').toString('base64') : null;
 const auj = new Date().toISOString().slice(0, 10);
 let ok = 0, ko = 0;
 const t = (n, c, d) => { if (c) { ok++; console.log('  ok   ' + n); } else { ko++; console.log('  ÉCHEC ' + n + (d ? ' — ' + d : '')); } };
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const ctx = await b.newContext({ viewport: { width: 1100, height: 950 }, ignoreHTTPSErrors: true });
 const p = await ctx.newPage();
 p.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
@@ -27,7 +29,7 @@ await p.addInitScript(([d]) => {
   }));
 }, [auj]);
 await p.goto('file:///home/user/Suz/perte-de-poids.html');
-await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
+if (b64) await p.addStyleTag({ content: "@font-face{font-family:'Fraunces';src:url(data:font/woff2;base64," + b64 + ") format('woff2')}" });
 await p.waitForTimeout(800);
 
 console.log('=== une seule musculation, plus de « modérée » ni « intense » ===');
@@ -567,6 +569,53 @@ t('par jambe vaut plus qu\'au total', fJ.k > fT.k, fJ.k + ' contre ' + fT.k);
 t('corriger la ligne rouvre sur « par jambe »', fJ.rouvert === 'true', fJ.rouvert);
 t('et « au total » reste « au total »', fT.rouvert === 'false', fT.rouvert);
 t('et disparaît pour un exercice des deux bras à la fois', !fJ.choixDev, '');
+
+console.log('=== la sous-partie Hyrox ===');
+{
+  const c2 = await b.newContext({ viewport: { width: 430, height: 1100 }, ignoreHTTPSErrors: true });
+  const p2 = await c2.newPage();
+  p2.on('pageerror', e => { ko++; console.log('  ÉCHEC erreur JavaScript — ' + e.message); });
+  await p2.addInitScript(([d]) => {
+    localStorage.setItem('suz-forme-onglet', 'sport');
+    localStorage.setItem('suz-forme-v1', JSON.stringify({
+      profil: { prenom:'Suzon', sexe:'f', age:29, taille:168, depart:77, objectif:66, debut:d,
+                fin:'2027-04-08', activite:1.375, rythme:0.5, seances:3, freq:{}, perso:{}, plats:{} },
+      jours: { [d]: { date:d, poids:77, heure:'07:30', eau:0,
+        sport:[{ n:'Musculation', m:90, met:0, k:0, ex:[] }],
+        repas:{ petitdej:[], dejeuner:[], diner:[], collation:[] } } } }));
+  }, [auj]);
+  await p2.goto('file:///home/user/Suz/perte-de-poids.html');
+  await p2.waitForTimeout(700);
+  await p2.click('[data-exo-seance="0"]');
+  await p2.waitForTimeout(200);
+  const stations = await p2.$$eval('[data-exo-hyrox]', (e) => e.map((x) => x.dataset.exoHyrox));
+  t('les neuf étapes d\'un Hyrox sont proposées', stations.join('|') ===
+    'Course|SkiErg|Sled push|Sled pull|Burpee broad jumps|Rameur|Farmers carry|Sandbag lunges|Wall balls', stations.join('|'));
+  t('avec leur repère de course', (await p2.textContent('.exo-hyrox')).includes('100 répétitions'), '');
+  await p2.click('[data-exo-hyrox="Sled push"]');
+  await p2.waitForTimeout(200);
+  t('une station remplit le nom et passe au chrono', (await p2.inputValue('#exoNom')) === 'Sled push' &&
+    await p2.isVisible('#exoDuree'), await p2.inputValue('#exoNom'));
+  t('et met le curseur sur la durée', (await p2.evaluate(() => document.activeElement.id)) === 'exoDuree', '');
+  await p2.fill('#exoDuree', '3:00');
+  await p2.click('[data-exo-ok]');
+  await p2.waitForTimeout(350);
+  await p2.click('[data-exo-hyrox="Course"]');
+  await p2.waitForTimeout(200);
+  t('la course préremplit son kilomètre', (await p2.inputValue('#exoDist')) === '1', await p2.inputValue('#exoDist'));
+  await p2.fill('#exoDuree', '5:30');
+  await p2.click('[data-exo-ok]');
+  await p2.waitForTimeout(350);
+  const se = await p2.evaluate(d => JSON.parse(localStorage.getItem('suz-forme-v1')).jours[d].sport[0], auj);
+  const sled = se.ex.find((x) => x.n === 'Sled push'), course = se.ex.find((x) => x.n === 'Course');
+  t('le sled push est noté au temps', sled && sled.t === 'cardio' && sled.m === 3, JSON.stringify(sled));
+  t('la course aussi, avec sa distance', course && course.t === 'cardio' && course.d === 1 && course.m === 5.5, JSON.stringify(course));
+  // 3 min à 8 MET, 77 kg : 31 kcal. 1 km en 5:30 par l'ACSM, plus.
+  t('la séance compte les deux stations', se.k > 31 + 60, String(se.k));
+  t('aucune station inconnue annoncée', !(await p2.textContent('.exo-vol')).includes('pas dans la liste'),
+    await p2.textContent('.exo-vol'));
+  await c2.close();
+}
 
 await b.close();
 console.log('\n' + ok + ' vérifications passées, ' + ko + ' en échec');

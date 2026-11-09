@@ -1,0 +1,58 @@
+[
+  {
+    "nom": "Créatine Creapure en gélules (Nutripure)",
+    "kcal": 0, "prot": 0, "gluc": 0, "lip": 0,
+    "cat": "complement", "portion_g": 0.68, "portion_lib": "1 gélule",
+    "source": "Nutripure, fiche Créatine Creapure : 5 gélules par jour, soit 3,4 g de monohydrate de créatine dont 3 g de créatine (repris par EDP Nutrition et Quentin Fitlife)",
+    "note": "0,68 g de monohydrate par gélule, déduit de la dose de cinq. La créatine ne compte pas comme une énergie sur l'étiquette."
+  },
+  {
+    "nom": "Collagène Cheveux, Peau et Ongles (Prozis)",
+    "kcal": 400, "prot": 100, "gluc": 0, "lip": 0,
+    "cat": "complement", "portion_g": 0.6, "portion_lib": "1 comprimé",
+    "source": "Prozis, fiche Collagène Cheveux, Peau et Ongles 90 comprimés : 1 200 mg de collagène pour une dose de 2 comprimés",
+    "note": "Les valeurs pour 100 g sont celles du collagène seul, une protéine : 0,6 g par comprimé, soit 2,4 kcal. Se compte en comprimés, jamais en grammes. La dose apporte aussi 61 mg de magnésium, 44 mg de calcium, de la vitamine C et D."
+  },
+  {
+    "nom": "Magnésium triple (Aroma-Zone)",
+    "kcal": 0, "prot": 0, "gluc": 0, "lip": 0,
+    "cat": "complement", "portion_g": 0.59, "portion_lib": "1 gélule",
+    "source": "Aroma-Zone, fiche technique Magnésium triple 120 gélules : par gélule 400 mg de bisglycinate, 120 mg d'hydroxyde marin, 65 mg d'extrait d'Ulva lactuca, soit 100 mg de magnésium ; 3 gélules par jour",
+    "note": "Poids actif par gélule, enveloppe non comptée. Aucun apport d'énergie notable."
+  },
+  {
+    "nom": "Whey Muscle Protein vanille (Nutripure)",
+    "kcal": 363, "prot": 81, "gluc": 6, "lip": 1.7,
+    "cat": "laitier", "portion_g": 30, "portion_lib": "1 dose",
+    "source": "fatsecret.fr, Nutripure Muscle Protein pour 100 g (saveur non précisée) ; étiquette officielle injoignable depuis la session",
+    "note": "À vérifier sur le pot. Dose comptée à 30 g, la mesure courante."
+  },
+  {
+    "nom": "Supreme Whey Protein chocolat au lait (Prozis)",
+    "kcal": 374, "prot": 77, "gluc": 7, "lip": 3.5,
+    "cat": "laitier", "portion_g": 30, "portion_lib": "1 dose",
+    "source": "fatsecret.it, Prozis Supreme Whey Protein pour 100 g (gamme, saveur non distinguée) ; étiquette officielle injoignable depuis la session",
+    "note": "Valeurs de la gamme : les saveurs varient de quelques kcal. À remplacer par l'étiquette du pot."
+  },
+  {
+    "nom": "Supreme Whey Protein chocolat blanc (Prozis)",
+    "kcal": 374, "prot": 77, "gluc": 7, "lip": 3.5,
+    "cat": "laitier", "portion_g": 30, "portion_lib": "1 dose",
+    "source": "fatsecret.it, Prozis Supreme Whey Protein pour 100 g (gamme, saveur non distinguée) ; étiquette officielle injoignable depuis la session",
+    "note": "Valeurs de la gamme : les saveurs varient de quelques kcal. À remplacer par l'étiquette du pot."
+  },
+  {
+    "nom": "Supreme Whey Protein biscuits et crème (Prozis)",
+    "kcal": 374, "prot": 77, "gluc": 7, "lip": 3.5,
+    "cat": "laitier", "portion_g": 30, "portion_lib": "1 dose",
+    "source": "fatsecret.it, Prozis Supreme Whey Protein pour 100 g (gamme, saveur non distinguée) ; étiquette officielle injoignable depuis la session",
+    "note": "Valeurs de la gamme : les saveurs varient de quelques kcal. À remplacer par l'étiquette du pot."
+  },
+  {
+    "nom": "Clear Whey Isolate thé glacé à la pêche (Prozis)",
+    "kcal": 365, "prot": 82, "gluc": 9.3, "lip": 0,
+    "cat": "laitier", "portion_g": 25, "portion_lib": "1 dose",
+    "source": "fatsecret.it, Prozis Clear Whey Isolate Peach Ice Tea pour 100 g ; concorde avec la fiche Prozis : 82 % de protéines, 91 kcal par dose de 25 g",
+    "note": "Se prépare à l'eau, sans lait."
+  }
+]

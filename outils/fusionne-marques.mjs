@@ -22,7 +22,7 @@ const DEBUT = '  // --- Marques — complément de recherche (généré) ---';
 const FIN = '  // --- fin du complément de recherche ---';
 
 const CATEGORIES = new Set(['fruit', 'legume', 'feculent', 'pain', 'viande', 'poisson',
-  'laitier', 'legumineuse', 'noix', 'gras', 'plat', 'sucre', 'boisson', 'fastfood']);
+  'laitier', 'legumineuse', 'noix', 'gras', 'plat', 'sucre', 'boisson', 'fastfood', 'complement']);
 
 /* Les marqueurs portent le nom du domaine, pour que le rapport dise
    d'où vient une fiche refusée sans avoir à fouiller les fichiers. */
@@ -35,6 +35,7 @@ const TITRES = {
   'aperitif-sale': 'apéritif salé',
   'sauces': 'sauces et condiments',
   'oeufs': 'œufs',
+  'complements': 'compléments alimentaires',
   'ciqual': 'table Ciqual de l\'Anses'
 };
 
@@ -106,7 +107,8 @@ function controle(fiche, domaine, deja, vus) {
 function ligne(f) {
   const n = (v) => String(nf(v));
   return '  ["' + f.nom.replace(/"/g, '\\"') + '", ' + n(f.kcal) + ', ' + n(f.prot) + ', ' +
-    n(f.gluc) + ', ' + n(f.lip) + ', "' + f.cat + '", ' + Math.round(f.portion_g) +
+    n(f.gluc) + ', ' + n(f.lip) + ', "' + f.cat + '", ' +
+    (f.portion_g < 10 ? Math.round(f.portion_g * 100) / 100 : Math.round(f.portion_g)) +
     ', "' + f.portion_lib.replace(/"/g, '\\"') + '"],';
 }
 

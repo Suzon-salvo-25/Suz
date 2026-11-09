@@ -1355,6 +1355,14 @@ details.meal[open] > summary.meal-head .chev { transform: rotate(180deg); }
   font-variant-numeric: tabular-nums;
 }
 .exo-duree { margin-bottom: 11px; }
+/* La sous-partie Hyrox : les neuf étapes d'une course, en pilules. */
+.exo-hyrox { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.exo-hyrox-titre {
+  width: 100%; font-size: 10px; letter-spacing: .11em; text-transform: uppercase;
+  color: var(--ink-faint); font-weight: 600;
+}
+.exo-hyrox .lien-edit { min-height: 32px; padding: 5px 11px; }
+.exo-hyrox small { font-weight: 500; color: var(--ink-faint); margin-left: 4px; }
 /* Une fiche apprise se dit, et se retire. */
 .exo-appris {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
@@ -2399,6 +2407,16 @@ var ALIMENTS = [
   ["Vodka 40 % vol", 227, 0, 0, 0, "boisson", 30, "1 dose (3 cl)"],
   ["Whisky 40 % vol", 227, 0, 0, 0, "boisson", 30, "1 dose (3 cl)"],
 
+  // --- Compléments alimentaires ---
+  ["Clear Whey Isolate thé glacé à la pêche (Prozis)", 365, 82, 9.3, 0, "laitier", 25, "1 dose"],
+  ["Collagène Cheveux, Peau et Ongles (Prozis)", 400, 100, 0, 0, "complement", 0.6, "1 comprimé"],
+  ["Créatine Creapure en gélules (Nutripure)", 0, 0, 0, 0, "complement", 0.68, "1 gélule"],
+  ["Magnésium triple (Aroma-Zone)", 0, 0, 0, 0, "complement", 0.59, "1 gélule"],
+  ["Supreme Whey Protein biscuits et crème (Prozis)", 374, 77, 7, 3.5, "laitier", 30, "1 dose"],
+  ["Supreme Whey Protein chocolat au lait (Prozis)", 374, 77, 7, 3.5, "laitier", 30, "1 dose"],
+  ["Supreme Whey Protein chocolat blanc (Prozis)", 374, 77, 7, 3.5, "laitier", 30, "1 dose"],
+  ["Whey Muscle Protein vanille (Nutripure)", 363, 81, 6, 1.7, "laitier", 30, "1 dose"],
+
   // --- Confiseries et chocolats ---
   ["Barre biscuit caramel (Twix)", 493, 4.4, 65, 24, "sucre", 50, "1 sachet de 2 barres"],
   ["Barre chocolatée cacahuètes (Snickers)", 481, 8.7, 60, 23, "sucre", 50, "1 barre"],
@@ -2422,7 +2440,7 @@ var ALIMENTS = [
   ["Kit Kat 4 doigts chocolat au lait (Nestlé)", 512, 6.7, 60.5, 26.4, "sucre", 42, "1 barre 4 doigts"],
   ["M&M's Peanut cacahuète (M&M's)", 495, 7, 65, 22, "sucre", 45, "1 sachet"],
   ["Michoko caramel enrobé de chocolat (Michoko)", 461, 3.6, 63, 21, "sucre", 30, "1 poignée"],
-  ["Mon Chéri (Ferrero)", 455, 3, 52.8, 20.3, "sucre", 9, "1 bouchée"],
+  ["Mon Chéri (Ferrero)", 455, 3, 52.8, 20.3, "sucre", 8.8, "1 bouchée"],
   ["Nocciolata pâte à tartiner cacao noisettes (Rigoni di Asiago)", 544, 8.1, 54, 32, "sucre", 15, "1 cuillère à soupe"],
   ["Pâte à tartiner noisettes et cacao (Bonne Maman)", 551, 6.7, 53, 34, "sucre", 15, "1 cuillère à soupe"],
   ["Régal'ad bonbons aux fruits (Krema)", 407, 1.2, 83, 7.4, "sucre", 30, "1 poignée"],
@@ -6458,7 +6476,12 @@ var SPORTS = [
         '<select id="editRepas">' + Object.keys(REPAS_NOMS).map(function (r) {
           return '<option value="' + r + '"' + (r === e.cible ? ' selected' : '') + '>' + REPAS_NOMS[r] + '</option>';
         }).join("") + '</select></div>' +
-        (e.base !== -1
+        (e.base !== -1 && estComplement(ALIMENTS[e.base])
+          ? '<div class="field" style="flex:1 1 110px"><label for="editQte">Nombre de ' +
+            esc(uniteComplement(ALIMENTS[e.base], 2)) + '</label>' +
+            '<input type="text" id="editQte" inputmode="decimal" autocomplete="off" value="' +
+            esc(e.gr === null ? "" : nbUnites(e.gr, ALIMENTS[e.base])) + '"></div>'
+          : e.base !== -1
           ? '<div class="field" style="flex:1 1 110px"><label for="editQte">Quantité (g)</label>' +
             '<input type="text" id="editQte" inputmode="decimal" autocomplete="off" value="' +
             esc(e.gr === null ? "" : String(e.gr)) + '"></div>'
@@ -6832,11 +6855,17 @@ var SPORTS = [
     }
     document.getElementById("foodResults").innerHTML = res.map(function (r) {
       var a = ALIMENTS[r.i];
-      var part = a[7] && a[7] !== "100 g" ? a[7] + ", " + ni(a[6]) + " g" : "";
+      var comp = estComplement(a);
+      var part = comp ? "Complément, à l'unité"
+        : a[7] && a[7] !== "100 g" ? a[7] + ", " + ni(a[6]) + " g" : "";
+      // Un complément s'annonce par unité : « 0 kcal / 100 g » ne dit rien
+      // de ce qu'apporte un comprimé.
+      var kc = comp ? nf(a[1] * a[6] / 100, 1) + " kcal par " + uniteComplement(a, 1)
+                    : a[1] + " kcal / 100 g";
       return '<li><button type="button" data-food="' + r.i + '">' +
         '<span class="rn"><i>' + esc(a[0]) + '</i></span>' +
         '<span class="rq">' + badge(a[0]) + (part ? esc(part) : "") + '</span>' +
-        '<span class="rk">' + a[1] + ' kcal / 100 g</span></button></li>';
+        '<span class="rk">' + esc(kc) + '</span></button></li>';
     }).join("");
   }
 
@@ -7020,12 +7049,30 @@ var SPORTS = [
     return totalPlat(pl);
   }
 
+  /* Un complément se compte à l'unité : « 3 gélules », pas « 2,04 g ». Le
+     choix des grammes n'est pas proposé, il n'aurait aucun sens pour une
+     gélule et fausserait le collagène, dont la fiche ne porte que la
+     protéine. */
+  function estComplement(a) { return a && a[5] === "complement"; }
+  function uniteComplement(a, q) {
+    var mot = String(a[7]).replace(/^1\s+/, "");
+    return q > 1 ? mot.replace(/(\S+)/, "$1s") : mot;
+  }
+
+  // Combien de gélules font ces grammes : « 2 », pas « 2,0 ».
+  function nbUnites(gr, a) {
+    var n = Math.round(gr / a[6] * 10) / 10;
+    return nf(n, n % 1 ? 1 : 0);
+  }
+
   function ouvrePicker(idx) {
     var a = ALIMENTS[idx];
     selection = idx;
     document.getElementById("pickNom").textContent = a[0];
     var sel = document.getElementById("pickUnite");
-    sel.innerHTML = '<option value="p">' + esc(a[7]) + ' (' + a[6] + ' g)</option><option value="g">grammes</option>';
+    sel.innerHTML = estComplement(a)
+      ? '<option value="p">' + esc(uniteComplement(a, 2)) + '</option>'
+      : '<option value="p">' + esc(a[7]) + ' (' + nf(a[6], a[6] % 1 ? 1 : 0) + ' g)</option><option value="g">grammes</option>';
     sel.value = "p";
     document.getElementById("pickQte").value = 1;
     document.getElementById("foodPick").hidden = false;
@@ -7784,7 +7831,39 @@ var SPORTS = [
     ["Air bike", 8.0, null],
     ["Stepper", 7.0, null],
     ["Escalier mécanique", 9.0, null],
-    ["Corde à sauter", 11.8, null]
+    ["Corde à sauter", 11.8, null],
+
+    /* Les stations d'un Hyrox. Elles se notent au temps, comme le cardio :
+       c'est ce que donne la montre ou le chronométrage de la course. Les
+       courses passent par l'équation de l'ACSM avec leur distance. Pour le
+       reste, aucun MET propre à ces mouvements n'a pu être consulté (le
+       Compendium était injoignable depuis la session) : chaque station prend
+       celui de la catégorie la plus proche du Compendium de 2011, 8,0 pour
+       un circuit soutenu à charge (traîneau, portés, fentes lestées) comme
+       pour la gymnastique soutenue (burpees, wall balls). C'est une
+       estimation par famille, pas une mesure de la station. */
+    ["Course", 9.8, "course", "hyrox"],
+    ["Sled push", 8.0, null, "hyrox"],
+    ["Sled pull", 8.0, null, "hyrox"],
+    ["Burpee broad jumps", 8.0, null, "hyrox"],
+    ["Farmers carry", 8.0, null, "hyrox"],
+    ["Sandbag lunges", 8.0, null, "hyrox"],
+    ["Wall balls", 8.0, null, "hyrox"]
+  ];
+
+  /* Le déroulé d'un Hyrox, dans l'ordre de la course : huit fois un kilomètre
+     de course, chacun suivi d'une station. [nom, repère de la course, km] ;
+     la distance n'est préremplie que là où elle sert au calcul. */
+  var HYROX = [
+    ["Course", "1 km", 1],
+    ["SkiErg", "1 000 m", 1],
+    ["Sled push", "50 m", 0],
+    ["Sled pull", "50 m", 0],
+    ["Burpee broad jumps", "80 m", 0],
+    ["Rameur", "1 000 m", 1],
+    ["Farmers carry", "200 m", 0],
+    ["Sandbag lunges", "100 m", 0],
+    ["Wall balls", "100 répétitions", 0]
   ];
 
   /* ==================== UNE MACHINE, UN SEUL NOM ====================
@@ -8282,7 +8361,7 @@ var SPORTS = [
   // par zone du corps.
   var LISTE_EXOS_FIXE = (function () {
     var h = CARDIO_SALLE.map(function (c) {
-      return '<option value="' + esc(c[0]) + '" label="Cardio"></option>';
+      return '<option value="' + esc(c[0]) + '" label="' + (c[3] === "hyrox" ? "Hyrox" : "Cardio") + '"></option>';
     }).join("");
     var zones = {};
     EXERCICES.forEach(function (e) { (zones[e[1]] = zones[e[1]] || []).push(e[0]); });
@@ -8452,6 +8531,15 @@ var SPORTS = [
       (c === "jambe" ? " Un haltère dans chaque main : additionne-les, deux de 10 kg font 20." : "") + '</p>';
   }
 
+  // La sous-partie Hyrox : chaque station d'une pression, avec son repère.
+  function blocHyrox() {
+    return '<div class="exo-hyrox"><span class="exo-hyrox-titre">Hyrox</span>' +
+      HYROX.map(function (h) {
+        return '<button type="button" class="lien-edit" data-exo-hyrox="' + esc(h[0]) + '">' +
+          esc(h[0]) + ' <small>' + esc(h[1]) + '</small></button>';
+      }).join("") + '</div>';
+  }
+
   function formulaireExercice(x) {
     var e = exoSaisie;
     var champ3 = function (id, lab, val, mode, ph) {
@@ -8464,7 +8552,7 @@ var SPORTS = [
       '<div class="row-inline">' +
         '<div class="field" style="flex:3 1 170px"><label for="exoNom">Machine ou exercice</label>' +
         '<input type="text" id="exoNom" list="exoListe" autocomplete="off" placeholder="Presse à cuisses" value="' + esc(e.nom) + '"></div>' +
-      '</div>' +
+      '</div>' + (estSeanceSalle(x) ? blocHyrox() : '') +
       '<div class="row-inline" style="margin-top:9px">' +
         (cardio
           ? champ3("exoDuree", "Durée", e.duree, "numeric", "20:00") +
@@ -9360,9 +9448,10 @@ var SPORTS = [
     var repas = document.getElementById("foodRepas").value;
     J().repas[repas].push({
       n: a[0],
-      d: unite === "p" ? nf(q, q % 1 ? 1 : 0) + " × " + a[7] + " (" + ni(g) + " g)" : ni(g) + " g",
+      d: estComplement(a) ? nf(q, q % 1 ? 1 : 0) + " " + uniteComplement(a, q)
+        : unite === "p" ? nf(q, q % 1 ? 1 : 0) + " × " + a[7] + " (" + ni(g) + " g)" : ni(g) + " g",
       k: Math.round(a[1] * f), p: +(a[2] * f).toFixed(1), g: +(a[3] * f).toFixed(1), l: +(a[4] * f).toFixed(1),
-      gr: Math.round(g)
+      gr: estComplement(a) ? +g.toFixed(2) : Math.round(g)
     });
     noteUsage(a[0]);
     Store.sauveJour(dateCourante);
@@ -9671,7 +9760,11 @@ var SPORTS = [
     var q = document.getElementById("editQte");
     if (q) {
       var v = nombre(q.value);
-      if (isFinite(v) && v > 0) { it.gr = Math.round(v); it.d = ni(it.gr) + " g"; }
+      var aq = edition.base !== -1 ? ALIMENTS[edition.base] : null;
+      if (isFinite(v) && v > 0 && estComplement(aq)) {
+        it.gr = +(v * aq[6]).toFixed(2);
+        it.d = nf(v, v % 1 ? 1 : 0) + " " + uniteComplement(aq, v);
+      } else if (isFinite(v) && v > 0) { it.gr = Math.round(v); it.d = ni(it.gr) + " g"; }
     }
     // Les valeurs viennent d'être revues à la main : elles ne sont plus estimées.
     delete it.ia;
@@ -9702,6 +9795,10 @@ var SPORTS = [
     if (id === "editQte") {
       var v = nombre(e.target.value);
       edition.gr = (isFinite(v) && v > 0) ? v : null;
+      // Pour un complément, le champ compte des gélules : on repasse en grammes.
+      if (edition.gr !== null && edition.base !== -1 && estComplement(ALIMENTS[edition.base])) {
+        edition.gr = v * ALIMENTS[edition.base][6];
+      }
       if (edition.gr === null || edition.base === -1) return;
       editDepuisQuantite();
       var maj = { editKcal: edition.kcal, editProt: edition.p, editGluc: edition.g, editLip: edition.l };
@@ -9863,6 +9960,21 @@ var SPORTS = [
       return;
     }
     if (e.target.closest("[data-exo-annule]")) { exoSaisie = null; renderSport(); return; }
+
+    var hyrox = e.target.closest("[data-exo-hyrox]");
+    if (hyrox && exoSaisie) {
+      var st = HYROX.filter(function (h) { return h[0] === hyrox.dataset.exoHyrox; })[0];
+      exoSaisie.nom = st[0];
+      exoSaisie.mode = "cardio";
+      exoSaisie.force = 0;
+      exoSaisie.duree = "";
+      exoSaisie.allure = "";
+      exoSaisie.dist = st[2] ? String(st[2]) : "";
+      renderSport();
+      var champDuree = document.getElementById("exoDuree");
+      if (champDuree) champDuree.focus();
+      return;
+    }
 
     var choixPc = e.target.closest("[data-exo-pc]");
     if (choixPc && exoSaisie) {

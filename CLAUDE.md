@@ -212,6 +212,29 @@ qui attend : on note ce qu'on a mangé, pas ce qu'il y avait dans le paquet.
 pas** : des pâtes sèches cuites sont des pâtes normales, et les inclure
 faisait tomber toute la famille d'un coup.
 
+**Les compléments se comptent à l'unité.** « Dès que je rentre de la
+créatine, du collagène ou du magnésium, je dois pouvoir juste mettre le
+nombre de gélules. » Ils vivent dans `donnees/aliments/complements.json`,
+catégorie `complement`, avec une `portion_g` inférieure au gramme (la fusion
+garde deux décimales sous 10 g ; elle arrondissait à l'entier et mettait
+une gélule à zéro). Pour cette catégorie (`estComplement()`), le choix de
+quantité ne propose que « gélules » ou « comprimés », jamais les grammes,
+la ligne dit « 5 gélules », la recherche annonce « 2,4 kcal par comprimé »
+au lieu d'un chiffre pour 100 g qui ne dit rien, et la correction d'une
+ligne demande un « Nombre de comprimés ». **La fiche du collagène ne porte
+que la protéine** (1 200 mg pour 2 comprimés, soit 100 g de protéines pour
+100 g de collagène sur une portion de 0,6 g) : comptée en grammes elle serait
+fausse, d'où l'unité imposée. Créatine et magnésium valent 0 kcal.
+
+Les whey de Suzon sont entrées aussi, **mais leurs valeurs ne viennent pas
+de l'étiquette** : les sites Prozis, Nutripure et Open Food Facts étaient
+injoignables depuis la session, et les chiffres sont ceux de FatSecret,
+cohérents avec Atwater. La Supreme Whey Prozis porte les valeurs de la gamme
+pour ses trois saveurs ; la Clear Whey pêche concorde avec l'annonce Prozis
+de 91 kcal par dose de 25 g. **À remplacer par l'étiquette des pots dès que
+Suzon en envoie une photo.** Non entrés, faute de source : la Clear Whey
+fruit de la passion et le spray d'huile d'olive.
+
 **Le filtre « Type de produit » a été retiré.** Quatre boutons Tout / Maison
 / Marques / Industriel, jamais utilisés, qui prenaient une rangée entière.
 La recherche cherche dans tout.
@@ -377,7 +400,7 @@ La carte est masquée tant qu'aucune ligne d'exercice n'existe.
 cuisses », « PRESSE À CUISSES » et « Presse-à cuisse » faisaient trois
 entrées dans les progrès. Tout passe par `cleExo()` : accents, majuscules,
 ponctuation, espaces et tirets disparaissent, et chaque mot de plus de trois
-lettres perd son s ou son x final. **Sur les 85 noms de la liste, cette clé
+lettres perd son s ou son x final. **Sur les 92 noms de la liste, cette clé
 ne confond aucune paire** : la revérifier si on en ajoute. Trois effets.
 À l'enregistrement, `nomCanonique()` recale le nom tapé sur l'orthographe de
 la liste, ou de la fiche apprise, donc aucune variante nouvelle ne se crée.
@@ -419,6 +442,21 @@ dit « Répétitions par jambe », la ligne « 3 × 12 par jambe », et la note
 rappelle d'additionner les deux haltères. Le choix vit dans `exoSaisie.pc`
 (`null` tant qu'il n'est pas fait). Repère à 77 kg, fentes 3 × 12 avec
 20 kg : 67 kcal par jambe, 42 au total.
+
+**Une sous-partie Hyrox, dans le carnet de musculation.** Sous le champ
+du nom, les neuf étapes d'une course, dans l'ordre et avec leur repère :
+course 1 km, SkiErg 1 000 m, sled push 50 m, sled pull 50 m, burpee broad
+jumps 80 m, rameur 1 000 m, farmers carry 200 m, sandbag lunges 100 m, wall
+balls 100 répétitions (`HYROX`). Une pression remplit le nom, passe le
+formulaire au chronomètre et met le curseur sur la durée ; la distance
+n'est préremplie (1 km) que là où elle sert au calcul. Toutes se notent
+**au temps**, c'est ce que donnent la montre et le chronométrage. La course
+passe par l'ACSM. Les autres sont dans `CARDIO_SALLE` avec le drapeau
+`"hyrox"` et **8,0 MET, une estimation par famille** : le Compendium était
+injoignable, on a pris la catégorie de 2011 la plus proche, circuit soutenu
+à charge pour le traîneau, les portés et les fentes lestées, gymnastique
+soutenue pour les burpees et les wall balls. Si une mesure propre à ces
+stations devient consultable, la remplacer.
 
 **Une durée s'écrit comme on veut.** 90, 90 min, 110:00, 1:50:00, 1h50,
 2h passent tous par `parseDuree()`. « 110:00 » était refusé, les minutes
@@ -681,7 +719,7 @@ node outils/verifie.mjs           # stockage, mise en page, lisibilité de
                                   # 51 contrôles
 node outils/verifie-edition.mjs   # correction d'une ligne, changement de
                                   # repas, kilomètres et étages du jour,
-                                  # 34 contrôles
+                                  # compléments à l'unité, 46 contrôles
 node outils/verifie-plats.mjs     # plats, raccourcis, repli des repas,
                                   # modification et suppression,
                                   # 59 contrôles
@@ -691,8 +729,13 @@ node outils/verifie-muscu.mjs     # séance de salle : carnet, cardio
                                   # orthographes réunies, fiche apprise
                                   # puis oubliée, séances longues,
                                   # machines assistées, fentes par jambe,
-                                  # 109 contrôles
+                                  # Hyrox, 118 contrôles
 ```
+
+Les harnais lancent le Chromium de `/opt/pw-browsers/chromium`, un lien que
+la machine tient à jour : le chemin versionné (`chromium-1194`) a disparu
+d'une session à l'autre et les quatre harnais ne démarraient plus. La fonte
+locale du dossier de travail est facultative pour la même raison.
 
 Le harnais simule un serveur **gelé, lent et bavard**, celui qui a révélé la
 plupart des bugs ci-dessus. Un test qui passe sans lui ne prouve rien : les
